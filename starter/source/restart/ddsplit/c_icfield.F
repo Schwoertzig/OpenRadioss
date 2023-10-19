@@ -27,7 +27,7 @@ Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
 Chd|-- calls ---------------
 Chd|        NLOCAL                        source/spmd/node/ddtools.F    
 Chd|====================================================================
-      SUBROUTINE C_ICFIELD(ICFIELD,LCFIELD,LLCFIELD_L,PROC)
+      SUBROUTINE C_ICFIELD(ICFIELD,LCFIELD,LLCFIELD_L,PROC,NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------  
@@ -45,6 +45,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER PROC, LLCFIELD_L,
      .        ICFIELD(SIZFIELD,*), LCFIELD(*)
+      INTEGER,INTENT(IN)::NUM_LOAD_CENTRI
 C-----------------------------------------------
 C   F u n c t i o n
 C-----------------------------------------------
@@ -56,7 +57,7 @@ C-----------------------------------------------
       INTEGER I, J, IAD, NL, N, ILP
 C
       ILP = 0
-      DO I = 1, NLOADC
+      DO I = 1, NUM_LOAD_CENTRI
         NL = ICFIELD(1,I)
         IAD= ICFIELD(4,I)
         DO J = 1, NL

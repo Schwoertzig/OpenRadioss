@@ -526,8 +526,8 @@ C
 		 IF (N1>0.AND.N2>0.AND.N3>0.AND.N4/=-1) NSKIN = NSKIN + 1
        END DO 
 C----------load_pressure
-       SHIFT = 	NLOADP_F+NLOADP_B
-       DO NL=1+SHIFT,NLOADP_HYD+SHIFT
+       SHIFT = 	LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+       DO NL=1+SHIFT,LOADS%NUM_PRESSURE+SHIFT
            IAD = ILOADP(4,NL)
            DO N=1, ILOADP(1,NL)/4
               N1 = LLOADP(IAD+4*(N-1))
@@ -538,7 +538,7 @@ C----------load_pressure
            ENDDO
        END DO 
 C---------pfluid+pblast	   
-       DO NL=1,NLOADP_F+NLOADP_B
+       DO NL=1,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
          IAD = ILOADP(4,NL)
            DO N=1, ILOADP(1,NL)/4
               N1 = LLOADP(IAD+4*(N-1))
@@ -549,7 +549,7 @@ C---------pfluid+pblast
            ENDDO
        END DO 
 C       
-       DO NL = 1,LOADS%NLOAD_CYL
+       DO NL = 1,LOADS%NUM_PCYL
          DO N = 1,LOADS%LOAD_CYL(NL)%NSEG
            N1   = LOADS%LOAD_CYL(NL)%SEGNOD(N,1)
            N2   = LOADS%LOAD_CYL(NL)%SEGNOD(N,2)
@@ -582,8 +582,8 @@ C
            IRECT(1:4,NP) = IB(1:4,NL)
          END DO 
 C----add only not existing           
-           SHIFT = 	NLOADP_F+NLOADP_B
-           DO NL=1+SHIFT,NLOADP_HYD+SHIFT
+           SHIFT = 	LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+           DO NL=1+SHIFT,LOADS%NUM_PRESSURE+SHIFT
               IAD = ILOADP(4,NL)
               DO N=1, ILOADP(1,NL)/4
                 N1 = LLOADP(IAD+4*(N-1))
@@ -627,7 +627,7 @@ C----add only not existing
                 END IF 
               ENDDO
            END DO 
-           DO  NL=1,NLOADP_F + NLOADP_B
+           DO  NL=1,LOADS%NUM_PFLUID + LOADS%NUM_PBLAST
               IAD = ILOADP(4,NL)
               DO N=1, ILOADP(1,NL)/4
                 N1 = LLOADP(IAD+4*(N-1))
@@ -671,7 +671,7 @@ C----add only not existing
                 END IF 
               ENDDO
            END DO 
-           DO NL = 1,LOADS%NLOAD_CYL
+           DO NL = 1,LOADS%NUM_PCYL
              DO N = 1,LOADS%LOAD_CYL(NL)%NSEG
                N1   = LOADS%LOAD_CYL(NL)%SEGNOD(N,1)
                N2   = LOADS%LOAD_CYL(NL)%SEGNOD(N,2)
@@ -790,8 +790,8 @@ C
        END DO 
        NSKIN1 = NSKIN
 C----------load_pressure	   
-       SHIFT = 	NLOADP_F+NLOADP_B
-       DO NL=1+SHIFT,NLOADP_HYD+SHIFT
+       SHIFT = 	LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+       DO NL=1+SHIFT,LOADS%NUM_PRESSURE+SHIFT
          IAD = ILOADP(4,NL)
          DO N=1, ILOADP(1,NL)/4
            N1 = LLOADP(IAD+4*(N-1))
@@ -814,10 +814,10 @@ C
 		   IXSKIN(1,NSKIN)=NODAL_IPART(N1)
 		   IXSKIN(6,NSKIN)=NSKIN1+NL
          ENDDO
-       END DO !NP=1,NLOADP_HYD
+       END DO !NP=1,LOADS%NUM_PRESSURE
 C---------pfluid	   
        NSKIN1 = NSKIN
-       DO NL=1,NLOADP_F
+       DO NL=1,LOADS%NUM_PFLUID
          IAD = ILOADP(4,NL)
          DO I = 1,ILOADP(1,NL)/4
            N1=LLOADP(IAD+4*(I-1))
@@ -843,7 +843,7 @@ C
        END DO 
 C---------pblast	   
        NSKIN1 = NSKIN
-       DO NL=1+NLOADP_F,NLOADP_F+NLOADP_B
+       DO NL=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
          IAD = ILOADP(4,NL)
          DO I = 1,ILOADP(1,NL)/4
            N1=LLOADP(IAD+4*(I-1))
@@ -869,7 +869,7 @@ C
        END DO 
 C---------/LOAD/PCYL	   
        NSKIN1 = NSKIN
-       DO NL=1,LOADS%NLOAD_CYL
+       DO NL=1,LOADS%NUM_PCYL
          DO I = 1,LOADS%LOAD_CYL(NL)%NSEG
            N1 = LOADS%LOAD_CYL(NL)%SEGNOD(I,1)
            N2 = LOADS%LOAD_CYL(NL)%SEGNOD(I,2)

@@ -89,14 +89,13 @@ C-----------------------------------------------
      .   IAD_ELEM(*),FR_ELEM(*), WEIGHT(*),TAG_SKINS6(*),NPF(*)
       INTEGER LLOADP(*)
       INTEGER ILOADP(SIZLOADP,*),IBCL(NIBCLD,*),NODAL_IPART(*)
-      INTEGER TAGNCONT(NLOADP_HYD_INTER,NUMNOD),LOADP_HYD_INTER(NLOADP_HYD)
-      my_real
-     .   FAC(LFACLOAD,NLOADP),XFRAME(NXFRAME,*),FORC(*)
+      TYPE (LOADS_)   , INTENT(IN) :: LOADS
+      INTEGER TAGNCONT(NLOADP_HYD_INTER,NUMNOD),LOADP_HYD_INTER(LOADS%NUM_PRESSURE)
+      my_real FAC(LFACLOAD,NLOADP),XFRAME(NXFRAME,*),FORC(*)
       TYPE (ELBUF_STRUCT_), DIMENSION(NGROUP), TARGET :: ELBUF_TAB
       CHARACTER*ncharline KEYWORD
       TYPE (SENSOR_STR_) ,DIMENSION(NSENSOR) ,INTENT(IN) :: SENSOR_TAB
       TYPE (H3D_DATABASE) :: H3D_DATA
-      TYPE (LOADS_)   , INTENT(IN) :: LOADS
       INTEGER ,       DIMENSION(LISKN,NUMFRAM+1)  ,INTENT(IN) :: IFRAME
       TYPE (TTABLE)  ,DIMENSION(NTABLE)   ,INTENT(IN) :: TABLE
 C-----------------------------------------------
@@ -570,12 +569,10 @@ C-----------------------------------------------
      .   H3D_PART(*),IS_WRITTEN_SKIN(*),INFO1,NPC(*)
       INTEGER LLOADP(SLLOADP),NSKIN
       INTEGER ILOADP(SIZLOADP,*),IB(NIBCLD,*)
-      INTEGER TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .        LOADP_HYD_INTER(NLOADP_HYD),NODAL_IPART(*)
-      my_real
-     .   FAC(LFACLOAD,NLOADP),XFRAME(NXFRAME,*),FORC(LFACCLD,*)
-      TYPE (SENSOR_STR_) ,DIMENSION(NSENSOR) ,INTENT(IN) :: SENSOR_TAB
       TYPE (LOADS_)   , INTENT(IN) :: LOADS
+      INTEGER TAGNCONT(NLOADP_HYD_INTER,NUMNOD),LOADP_HYD_INTER(LOADS%NUM_PRESSURE),NODAL_IPART(*)
+      my_real FAC(LFACLOAD,NLOADP),XFRAME(NXFRAME,*),FORC(LFACCLD,*)
+      TYPE (SENSOR_STR_) ,DIMENSION(NSENSOR) ,INTENT(IN) :: SENSOR_TAB
       INTEGER ,       DIMENSION(LISKN,NUMFRAM+1)  ,INTENT(IN) :: IFRAME
       TYPE (TTABLE)  ,DIMENSION(NTABLE)   ,INTENT(IN) :: TABLE
 C-----------------------------------------------
@@ -659,8 +656,8 @@ C--------default zero
          SKIN_SCALAR(NSKIN)=AA
        END DO 
 C----------load_pressure
-       SHIFT = 	NLOADP_F+NLOADP_B
-       DO NP=1+SHIFT,NLOADP_HYD+SHIFT
+       SHIFT = 	LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+       DO NP=1+SHIFT,LOADS%NUM_PRESSURE+SHIFT
          ISIZ_SEG = ILOADP(1,NP)/4 
          IFUNC = ILOADP(3,NP)
          IAD = ILOADP(4,NP)
@@ -737,9 +734,9 @@ c                IF (FP==ZERO) FP = ONE
              IF (SEGCONT==1) AA = ZERO
              SKIN_SCALAR(NSKIN)=SKIN_SCALAR(NSKIN)+AA*FP
          END DO !N=1, NPRES/4
-       END DO !NP=1,NLOADP_HYD
+       END DO !NP=1,LOADS%NUM_PRESSURE
 C---------pfluid
-       DO NL=1,NLOADP_F
+       DO NL=1,LOADS%NUM_PFLUID
 C--------default zero        
          ISIZ_SEG = ILOADP(1,NL)/4 
          IAD = ILOADP(4,NL)
@@ -909,7 +906,7 @@ C
          END DO 
        END DO 
 C---------pblast	   
-       DO NL=1+NLOADP_F,NLOADP_F+NLOADP_B
+       DO NL=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
 C--------default zero        
          ISIZ_SEG  = ILOADP(1,NL)/4 
          IAD = ILOADP(4,NL)
@@ -924,7 +921,7 @@ C--------default zero
 		     IF (H3D_PART(NODAL_IPART(N1))==1) IS_WRITTEN_SKIN(NSKIN)=1
            END IF
          ENDDO
-         IL             = NL-NLOADP_F
+         IL             = NL-LOADS%NUM_PFLUID
          TDET           = FAC(01,NL)
          ID             = ILOADP(08,NL) !user_id
          DO I = 1,ISIZ_SEG
@@ -936,7 +933,7 @@ C--------default zero
          ENDDO!next I
        END DO 
 C---------/LOAD/PCYL	
-       DO NL=1,LOADS%NLOAD_CYL
+       DO NL=1,LOADS%NUM_PCYL
 C--------default zero        
          ISIZ_SEG  = LOADS%LOAD_CYL(NL)%NSEG 
          DO N=1, ISIZ_SEG

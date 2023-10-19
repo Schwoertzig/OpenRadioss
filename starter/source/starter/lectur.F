@@ -517,7 +517,7 @@ Chd|        XFEM2DEF_MOD                  ../common_source/modules/xfem2def_mod.
 Chd|====================================================================
       SUBROUTINE LECTUR(MULTI_FVM                   ,LSUBMODEL          ,IS_DYNA         ,DETONATORS   ,EBCS_TAB,
      .                  SEATBELT_CONVERTED_ELEMENTS ,NB_SEATBELT_SHELLS ,NB_DYNA_INCLUDE ,USER_WINDOWS ,OUTPUT  ,
-     .                  MAT_ELEM)
+     .                  MAT_ELEM                    ,LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -613,6 +613,7 @@ C-----------------------------------------------
       INTEGER,INTENT(IN)                 ::NB_DYNA_INCLUDE
       TYPE(USER_WINDOWS_), INTENT(INOUT) :: USER_WINDOWS
       TYPE(OUTPUT_),  INTENT(INOUT)      :: OUTPUT
+      TYPE (LOADS_)                      :: LOADS ! global structure for /LOAD
 c      TYPE(SENSORS_), INTENT(INOUT)      :: SENSORS! declared as global in USER_SENSOR_MOD
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -1114,7 +1115,6 @@ c For /RANDOM --------------------------------------------------
       TYPE(MAPPING_STRUCT_) :: MAP_TABLES
       ! -------------
       ! Load structure
-      TYPE (LOADS_) :: LOADS ! global structure for /LOAD
       TYPE (LOADS_), DIMENSION(NSPMD) :: LOADS_PER_PROC ! local structure for each processor --> used for the restart operation
       ! -------------
 C MERGE NODES
@@ -4626,18 +4626,18 @@ C--------------------------------------------
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
 C
 C     CENTRIFUGAL LOADS
-      CALL HM_PREREAD_LOAD_CENTRI(NUMCFIELD,IGRNOD,IGRSURF,LSUBMODEL)
-      SCFIELD      = LFACLOAD*NLOADC
-      SICFIELD     = SIZFIELD*NLOADC
+      CALL HM_PREREAD_LOAD_CENTRI(NUMCFIELD,IGRNOD,IGRSURF,LSUBMODEL,LOADS%NUM_CENTRI)
+      SCFIELD      = LFACLOAD*LOADS%NUM_CENTRI
+      SICFIELD     = SIZFIELD*LOADS%NUM_CENTRI
       SLCFIELD     = NUMCFIELD
 C
 C     PFLUID & PBLAST
       NUMLOADP=0
       NINTLOADP=0
-      CALL HM_PREREAD_PFLUID(NUMLOADP,IGRNOD,IGRSURF,LSUBMODEL)
-      CALL HM_PREREAD_PBLAST(NUMLOADP,IGRSURF,LSUBMODEL)
-      CALL HM_PREREAD_LOAD_PRESSURE(NUMLOADP,IGRSURF,LSUBMODEL)
-      NLOADP       = NLOADP_F+NLOADP_B+NLOADP_HYD
+      CALL HM_PREREAD_PFLUID(NUMLOADP,IGRNOD,IGRSURF,LSUBMODEL,LOADS%NUM_PFLUID)
+      CALL HM_PREREAD_PBLAST(NUMLOADP,IGRSURF,LSUBMODEL,LOADS%NUM_PBLAST)
+      CALL HM_PREREAD_LOAD_PRESSURE(NUMLOADP,IGRSURF,LSUBMODEL,LOADS%NUM_PRESSURE)
+      NLOADP       = LOADS%NUM_PFLUID + LOADS%NUM_PBLAST + LOADS%NUM_PRESSURE
       SLOADP       = LFACLOAD*NLOADP
       SILOADP      = SIZLOADP*NLOADP
       SLLOADP      = NUMLOADP
@@ -6729,7 +6729,7 @@ C        Centrifugal Loads
          IF(ALLOCATED(LCFIELD)) LCFIELD(:) = 0
          IF(ALLOCATED(CFIELD )) CFIELD(:)  = ZERO
 !READING CARDS & STORING DATA
-         IF(NLOADC/=0)THEN
+         IF(LOADS%NUM_CENTRI /= 0)THEN
            CALL HM_READ_LOAD_CENTRI(ICFIELD ,LCFIELD ,CFIELD    ,ITAB    ,ITABM1  ,
      .                              IGRNOD  ,NPC     ,SENSORS   ,UNITAB  ,IFRAME  ,
      .                              LSUBMODEL)
@@ -6749,7 +6749,7 @@ C        PFLUID & PBLAST & LOAD PRESSURE
 
          S_LOADPINTER = 0
          IF(NINTLOADP > 0) THEN
-            S_LOADPINTER = NINTER*NLOADP_HYD            
+            S_LOADPINTER = NINTER*LOADS%NUM_PRESSURE
             ALLOCATE(KLOADPINTER(NINTER + 1)    ,STAT=stat)
             IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='KLOADPINTER')
             ALLOCATE(LOADPINTER(S_LOADPINTER)    ,STAT=stat)
@@ -6779,23 +6779,27 @@ C        PFLUID & PBLAST & LOAD PRESSURE
          NUMLOADP=0
          NINTLOADP = 0
          NINTLOADP21 = 0
-         IF(NLOADP_F/=0)THEN
+         IF(LOADS%NUM_PFLUID/=0)THEN
            CALL HM_READ_PFLUID(NUMLOADP ,ILOADP  ,LLOADP  ,LOADP   ,NPC      ,
-     .                        SENSORS   ,IGRSURF ,UNITAB  ,IFRAME  ,LSUBMODEL)
+     .                        SENSORS   ,IGRSURF ,UNITAB  ,IFRAME  ,LSUBMODEL,
+     .                        LOADS)
          END IF
-         IF(NLOADP_B/=0)THEN
+         IF(LOADS%NUM_PBLAST/=0)THEN
            CALL HM_READ_PBLAST(ITAB    ,ITABM1  ,UNITAB  ,IGRSURF,  NUMLOADP,
      .                        ILOADP   ,LLOADP  ,LOADP   ,X      , BUFSF    ,
-     .                        LSUBMODEL,RTRANS)
+     .                        LSUBMODEL,RTRANS  ,LOADS)
          ENDIF
-         IF(NLOADP_HYD/=0)THEN
+         IF(LOADS%NUM_PRESSURE/=0)THEN
            CALL HM_READ_LOAD_PRESSURE(
-     .                       NUMLOADP   ,ILOADP     ,LLOADP       ,INTERLOADP ,LOADP      ,
-     .                       KLOADPINTER,LOADPINTER ,NPC          ,SENSORS    ,IGRSURF    ,
-     .                       UNITAB     ,ISKWN      ,LSUBMODEL    ,DGAPINT    ,INTGAPLOADP,
-     .                       DGAPLOADINT,S_LOADPINTER)
+     .                       NUMLOADP   ,ILOADP      ,LLOADP       ,INTERLOADP ,LOADP      ,
+     .                       KLOADPINTER,LOADPINTER  ,NPC          ,SENSORS    ,IGRSURF    ,
+     .                       UNITAB     ,ISKWN       ,LSUBMODEL    ,DGAPINT    ,INTGAPLOADP,
+     .                       DGAPLOADINT,S_LOADPINTER,LOADS)
 
          END IF
+         IF(LOADS%NUM_HISTORY /= 0)THEN
+           CALL HM_READ_LOAD_HISTORY(LSUBMODEL,LOADS,UNITAB,N2D,IGRNOD,NGRNOD,IGRBRIC,NGRBRIC,IGRQUAD,NGRQUAD)
+         ENDIF
 
          DEALLOCATE( INTERLOADP,INTGAPLOADP )
       ENDIF
@@ -6809,14 +6813,12 @@ C--------------------------------------------
       CALL HM_PREREAD_RBE2(SIRBE2,SLRBE2,IGRNOD,LSUBMODEL)
        IF(IDDLEVEL==0)THEN
         ALLOCATE(IRBE2(SIRBE2)    ,STAT=stat)
-        IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
-     .                             MSGTYPE=MSGERROR,
+        IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,
      .                         C1='IRBE2')
        END IF
        IF(IDDLEVEL==0)THEN
         ALLOCATE(LRBE2(SLRBE2)  ,STAT=stat)
-        IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
-     .                             MSGTYPE=MSGERROR,
+        IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,
      .                         C1='LRBE2')
        END IF
        IF(SIRBE2 > 0) THEN
@@ -7637,7 +7639,7 @@ C
      3       SENSORS   ,IMERGE  ,UNITAB  ,ISKWN   ,NOM_OPT   ,
      4       SLRBODY   ,KNOD2ELS,KNOD2ELC,KNOD2ELTG,KNOD2EL1D,
      5       KNOD2ELQ  ,ITAGND  ,ICNDS10 ,LSUBMODEL,ICFIELD  ,
-     6       LCFIELD   )
+     6       LCFIELD   ,LOADS%NUM_CENTRI)
         ENDIF
 C--------------------------------------------
 C     LECTURE DES FUSIONS DE RIGID BODY
@@ -10355,7 +10357,8 @@ C----------------------------------------------
      J        NSIGSH      ,SIGSH      ,NSIGI           ,SIGSP         ,NSIGS            ,
      K        SIGI        ,NSIGBEAM   ,SIGBEAM         ,NSIGTRUSS     ,SIGTRUSS         ,
      L        NSIGRS      ,SIGRS      ,MERGE_NODE_TAB  ,MERGE_NODE_TOL,
-     M        IMERGE      ,NMERGE_TOT ,IEXLNK ,DRAPEG  ,USER_WINDOWS  ,OUTPUT )
+     M        IMERGE      ,NMERGE_TOT ,IEXLNK ,DRAPEG  ,USER_WINDOWS  ,OUTPUT           ,
+     N        LOADS)
 !
       DEALLOCATE(SIGI)
       DEALLOCATE(SIGSH)
@@ -10607,7 +10610,7 @@ c         start CPU timer for ddsplit
 
           ! -----------------------------------------
           ! split the LOADS structure on the different processors
-            CALL SPLIT_PCYL(LOADS%NLOAD_CYL,LOADS,LOADS_PER_PROC)
+            CALL SPLIT_PCYL(LOADS%NUM_PCYL,LOADS,LOADS_PER_PROC)
           ! -----------------------------------------
 C Parallel
 

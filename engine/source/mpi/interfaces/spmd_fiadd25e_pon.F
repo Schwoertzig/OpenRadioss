@@ -39,7 +39,7 @@ Chd|====================================================================
      3       ICODT  ,SECFCUM,NSTRF  ,ICONTACT,FCONT,
      4       INACTI ,IADM   ,INTTH  ,FTHESKYI,CONDNSKYI,
      5       H3D_DATA,LEDGE ,SEDGE  ,NEDGE   ,NIN  ,
-     6       TAGNCONT,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER)
+     6       TAGNCONT,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -66,11 +66,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER NB, LEN, IBC  ,ISECIN  ,IBAG , NOINT, INACTI,
      .        NSV(*), ISKY(*), ICODT(*), NSTRF(*),ICONTACT(*),
      .        TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NLOADP_HYD),
-     .        LOADP_HYD_INTER(NLOADP_HYD),
+     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NUM_LOAD_PRESSURE),
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE),
      .        IADM,INTTH,NIN
       INTEGER :: SEDGE,NEDGE
       INTEGER :: LEDGE(SEDGE,NEDGE)

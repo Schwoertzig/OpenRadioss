@@ -40,7 +40,8 @@ Chd|        SENSOR_MOD                    share/modules1/sensor_mod.F
 Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
 Chd|====================================================================
       SUBROUTINE HM_READ_PFLUID(NUMLOADP ,ILOADP  ,LLOADP ,FACLOADP ,NPC      ,
-     .                          SENSORS  ,IGRSURF ,UNITAB ,IFRAME   ,LSUBMODEL)
+     .                          SENSORS  ,IGRSURF ,UNITAB ,IFRAME   ,LSUBMODEL,
+     .                          LOADS)
 C
 C-----------------------------------------------
 C   M o d u l e s
@@ -52,6 +53,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
       USE SENSOR_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -77,6 +79,7 @@ C-----------------------------------------------
       TYPE (SURF_)   ,TARGET, DIMENSION(NSURF)   :: IGRSURF
       TYPE(SUBMODEL_DATA),INTENT(IN)::LSUBMODEL(NSUBMOD)
       TYPE (SENSORS_) ,INTENT(IN) :: SENSORS
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -104,17 +107,17 @@ C   C o m m e n t s
 C----------------------------------------------------------------------------------   
 C                         /LOAD/PFLUID     /LOAD/PBLAST    
 C
-C     LLOADP(1,K)   :    K=1,NLOADP_F     K=1+NLOADP_F,NLOADP_F+NLOADP_B  :    . . .  SEGMENT STORAGE (surface)
-C     ILOADP(1,K)   :    K=1,NLOADP_F     K=1+NLOADP_F,NLOADP_F+NLOADP_B  :    . . .  INTEGER STORAGE (option parameters)
-C     FACLOADP(1,K) :    K=1,NLOADP_F     K=1+NLOADP_F,NLOADP_F+NLOADP_B  :    . . .  REAL STORAGE    (option parameters)     
+C     LLOADP(1,K)   :    K=1,LOADS%NUM_PFLUID     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST  :    . . .  SEGMENT STORAGE (surface)
+C     ILOADP(1,K)   :    K=1,LOADS%NUM_PFLUID     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST  :    . . .  INTEGER STORAGE (option parameters)
+C     FACLOADP(1,K) :    K=1,LOADS%NUM_PFLUID     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST  :    . . .  REAL STORAGE    (option parameters)     
 C
 C----------------------------------------------------------------------------------   
 C                     /LOAD/PFLUID                                     /LOAD/PBLAST  
-C                       K=1,NLOADP_F                                     K=1+NLOADP_F,NLOADP_F+NLOADP_B  
+C                       K=1,LOADS%NUM_PFLUID                                     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST  
 C----------------------------------------------------------------------------------        
 C     ILOADP(1:SIZLOADP,K) : INTEGER STORAGE (option parameters)
 C----------------------------------------------------------------------------------      
-C                     K=1,NLOADP_F                                    K=1+NLOADP_F,NLOADP_F+NLOADP_B 
+C                     K=1,LOADS%NUM_PFLUID                                    K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST 
 C
 C     ILOADP(1,K) :   4*NN (4 * Nb of segments)                       4*NN 
 C     ILOADP(2,K) :   ID                                              IS
@@ -131,11 +134,11 @@ C     ILOADP(12,K):   Dir_vel (1, 2, 3)                               -
 C     ILOADP(13,K):   fravel id                                       -
 C----------------------------------------------------------------------------------   
 C                     /LOAD/PFLUID                                     /LOAD/PBLAST  
-C                       K=1,NLOADP_F                                     K=1+NLOADP_F,NLOADP_F+NLOADP_B   
+C                       K=1,LOADS%NUM_PFLUID                                     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST   
 C----------------------------------------------------------------------------------   
 C     LLOADP(1:SLLOADP,K) : SEGMENT STORAGE (surface)
 C----------------------------------------------------------------------------------      
-C                     K=1,NLOADP_F                                    K=1+NLOADP_F,NLOADP_F+NLOADP_B 
+C                     K=1,LOADS%NUM_PFLUID                                    K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST 
 C    
 C     LLOADP(1,K) :   NODE1                                           NODE1            
 C     LLOADP(2,K) :   NODE2                                           NODE2            
@@ -143,7 +146,7 @@ C     LLOADP(3,K) :   NODE3                                           NODE3
 C     LLOADP(4,K) :   NODE4                                           NODE4             
 C----------------------------------------------------------------------------------   
 C                     /LOAD/PFLUID                                     /LOAD/PBLAST  
-C                       K=1,NLOADP_F                                     K=1+NLOADP_F,NLOADP_F+NLOADP_B   
+C                       K=1,LOADS%NUM_PFLUID                                     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST   
 C----------------------------------------------------------------------------------        
 C     FACLOADP(LFACLOAD,K) : REAL STORAGE    (option parameters) 
 C----------------------------------------------------------------------------------      
@@ -170,9 +173,9 @@ C START BROWSING MODEL /LOAD/PFLUID
 C--------------------------------------------------
       CALL HM_OPTION_START('/LOAD/PFLUID')
 C--------------------------------------------------
-C BROWSING MODEL 1..NLOADP_F
+C BROWSING MODEL 1..LOADS%NUM_PFLUID
 C--------------------------------------------------
-      DO K=1,NLOADP_F
+      DO K=1,LOADS%NUM_PFLUID
 C--------------------------------------------------
 C EXTRACT DATAS OF /LOAD/PFLUID... LINE
 C--------------------------------------------------

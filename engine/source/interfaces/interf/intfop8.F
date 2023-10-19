@@ -41,7 +41,7 @@ Chd|====================================================================
      6       FTCONT,ICONTACT,RCONTACT,NUM_IMP,NS_IMP,
      7       NE_IMP ,NT_IMP  ,SENSOR_TAB,INTBUF_TAB    ,
      8       H3D_DATA,PSKIDS,TAGNCONT,KLOADPINTER,LOADPINTER,
-     9       LOADP_HYD_INTER)
+     9       LOADP_HYD_INTER,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
@@ -66,14 +66,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER ,INTENT(IN) :: NSENSOR
       INTEGER NELTST,ITYPTST 
       INTEGER NUM_IMP(*),NS_IMP(*),NE_IMP(*),NT_IMP
       INTEGER IPARI(NPARI,*), ICODT(*),ITAB(*), 
      .        NPC(*), ISKY(*), 
      .        ICONTACT(*),TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NLOADP_HYD),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
+     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NUM_LOAD_PRESSURE),
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
 
 C     REAL
       my_real DT2T, 

@@ -469,7 +469,7 @@ C-----
       LWAMP  =TABVINT(328)
       LWANMP =TABVINT(329)
       NISX   =TABVINT(330)
-      LIGRN1  =TABVINT(331)
+      LIGRN1 =TABVINT(331)
       LISUB1 =TABVINT(332)
       NIMV   =TABVINT(333)
       NNPBY  =TABVINT(334)
@@ -489,7 +489,7 @@ C-----
       KVOISPH =TABVINT(387)
       NSPBUF  =TABVINT(388)
       NISPCOND=TABVINT(389)
-      INTBAG=TABVINT(425)
+      INTBAG  =TABVINT(425)
       IBAGSURF=TABVINT(426)
       NRVOLU  =TABVINT(427)
       IF(NRVOLU==0)NRVOLU=24
@@ -509,8 +509,7 @@ C-----
       NUMELS16  =TABVINT(436)
       NUMELS8   =TABVINT(437)
 C test pour compatibilite avec anciens restarts
-      IF(NUMELS8==0)NUMELS8 =
-     .             NUMELS - (NUMELS10+NUMELS20+NUMELS16)
+      IF(NUMELS8==0)NUMELS8 = NUMELS - (NUMELS10+NUMELS20+NUMELS16)
       NRIVF = TABVINT(438)
       IF (NRIVF==0) NRIVF = 1
       NXFRAME=TABVINT(439)
@@ -1239,13 +1238,13 @@ C
       LFXVELR = TABVINT(NEXT)
 C
       NEXT = NEXT + 1
-      NLOADC = TABVINT(NEXT)
+      LOADS%NUM_CENTRI = TABVINT(NEXT)
       NEXT = NEXT + 1
       SLLOADP = TABVINT(NEXT)
       NEXT = NEXT + 1
       NLOADP = TABVINT(NEXT)
       NEXT = NEXT + 1
-      NLOADP_HYD = TABVINT(NEXT)
+      LOADS%NUM_PRESSURE = TABVINT(NEXT)
       NEXT = NEXT + 1
       NINTLOADP = TABVINT(NEXT)
       NEXT = NEXT + 1
@@ -1434,13 +1433,18 @@ C MUSCL keyword, compression parameter beta
 C ITETRA=3
       NEXT=NEXT+1
       ISFEM =TABVINT(NEXT)
-C /LOAD/PBLAST
-      NEXT       = NEXT + 1
-      NLOADP_F   = TABVINT(NEXT)
-      NEXT       = NEXT + 1
-      NLOADP_B   = TABVINT(NEXT)      
-      NEXT       = NEXT + 1
-      LOADS%NLOAD_CYL  = TABVINT(NEXT)      
+C /LOAD/PFLUID
+      NEXT             = NEXT + 1
+      LOADS%NUM_PFLUID = TABVINT(NEXT)
+C /LOAD/PBLAST      
+      NEXT             = NEXT + 1
+      LOADS%NUM_PBLAST = TABVINT(NEXT)
+C /LOAD/PCYL           
+      NEXT             = NEXT + 1
+      LOADS%NUM_PCYL   = TABVINT(NEXT) 
+C /LOAD/HISTORY        
+      NEXT             = NEXT + 1
+      LOADS%NUM_HISTORY= TABVINT(NEXT)          
 C
       NEXT     = NEXT + 1
       IF(MCHECK/=0) IDTMIN(51)= TABVINT(NEXT)

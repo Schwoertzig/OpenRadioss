@@ -30,7 +30,7 @@ Chd|        HM_GET_INTV                   source/devtools/hm_reader/hm_get_intv.
 Chd|        HM_OPTION_IS_ENCRYPTED        source/devtools/hm_reader/hm_option_is_encrypted.F
 Chd|        HM_OPTION_READ_MOD            share/modules1/hm_option_read_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
+Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F
 Chd|====================================================================
        SUBROUTINE HM_READ_FAIL_ORTHENERG(
      .            UPARAM   ,MAXUPARAM,NUPARAM  ,NUVAR    ,NFUNC    ,

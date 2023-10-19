@@ -74,7 +74,7 @@ Chd|====================================================================
      Y    F_PFIT      ,TAGNCONT  ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,
      Z    TYPSUB      ,INFLG_SUBS,INFLG_SUBM ,NINLOADP  ,DGAPLOADINT,
      1    S_LOADPINTER,DIST      ,IXX        ,INTEREFRIC,INTCAREA,
-     2    PARAMETERS  ,PENREF    ,KMAX       )
+     2    PARAMETERS  ,PENREF    ,KMAX       ,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -113,6 +113,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER, INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,JLT,IBCC,IBCM,IBCS,IVIS2,INACTI,IBAG,NIN,
      .        INTNITSCHE,IORTHFRIC,NFORTH ,NFISOT,
      .        NSN,ICODT(*), ITAB(*), ISKY(*), KINET(*),IRTLM(2,NSN),
@@ -131,7 +132,7 @@ C-----------------------------------------------
      .        INDEXORTH(MVSIZ)  ,INDEXISOT(MVSIZ),INFLG_SUBS(*), INFLG_SUBM(*)
       INTEGER  , INTENT(IN) :: NINLOADP,S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: IXX(MVSIZ,13)
       INTEGER  , INTENT(IN) :: INTEREFRIC, INTCAREA
       my_real

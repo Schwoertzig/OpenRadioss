@@ -42,10 +42,10 @@ Chd|        SENSOR_MOD                    share/modules1/sensor_mod.F
 Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
 Chd|====================================================================
       SUBROUTINE HM_READ_LOAD_PRESSURE(
-     .           NUMLOADP   ,ILOADP     ,LLOADP    ,INTERLOADP ,FACLOADP   ,
-     .           KLOADPINTER,LOADPINTER ,NPC       ,SENSORS    ,IGRSURF    ,
-     .           UNITAB     ,ISKN      ,LSUBMODEL  ,DGAPINT    ,INTGAPLOADP,
-     .           DGAPLOADINT,S_LOADPINTER )
+     .           NUMLOADP   ,ILOADP      ,LLOADP    ,INTERLOADP ,FACLOADP   ,
+     .           KLOADPINTER,LOADPINTER  ,NPC       ,SENSORS    ,IGRSURF    ,
+     .           UNITAB     ,ISKN        ,LSUBMODEL  ,DGAPINT    ,INTGAPLOADP,
+     .           DGAPLOADINT,S_LOADPINTER,LOADS )
 C
 C-----------------------------------------------
 C   M o d u l e s
@@ -57,6 +57,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
       USE SENSOR_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -85,7 +86,8 @@ C-----------------------------------------------
      .         INTERLOADP(NINTLOADP)
       my_real FACLOADP(LFACLOAD,*)
       my_real , INTENT(INOUT) :: DGAPINT(NINTER),
-     .        INTGAPLOADP(NINTLOADP),DGAPLOADINT(S_LOADPINTER ) 
+     .        INTGAPLOADP(NINTLOADP),DGAPLOADINT(S_LOADPINTER )
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
       TYPE (SURF_)   ,TARGET, DIMENSION(NSURF)   :: IGRSURF
       TYPE(SUBMODEL_DATA),INTENT(IN)::LSUBMODEL(*)
@@ -186,17 +188,17 @@ C--------------------------------------------------
 C--------------------------------------------------
 C BROWSING MODEL 1..NLOADP_F
 C--------------------------------------------------
-      NIDXLOAD = NLOADP_F+NLOADP_B
-      DO K=1,NLOADP_HYD
+      NIDXLOAD = LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+      DO K=1,LOADS%NUM_PRESSURE
 C--------------------------------------------------
 C EXTRACT DATAS OF /LOAD/PFLUID... LINE
 C--------------------------------------------------
         CALL HM_OPTION_READ_KEY(LSUBMODEL,
-     .                       OPTION_ID = ID,
-     .                       UNIT_ID = UID,
-     .                       SUBMODEL_ID = SUB_ID,
-     .                       SUBMODEL_INDEX = SUB_INDEX,
-     .                       OPTION_TITR = TITR)
+     .                          OPTION_ID = ID,
+     .                          UNIT_ID = UID,
+     .                          SUBMODEL_ID = SUB_ID,
+     .                          SUBMODEL_INDEX = SUB_INDEX,
+     .                          OPTION_TITR = TITR)
 
         IFLAGUNIT = 0
 
@@ -207,9 +209,7 @@ C--------------------------------------------------
           ENDIF
         ENDDO
         IF (UID/=0.AND.IFLAGUNIT==0) THEN
-          CALL ANCMSG(MSGID   = 659,
-     .                ANMODE  = ANINFO,
-     .                MSGTYPE = MSGERROR,
+          CALL ANCMSG(MSGID   = 659,ANMODE  = ANINFO,MSGTYPE = MSGERROR,
      .                I2      = UID,
      .                I1      = ID,
      .                C1      = 'PRESSURE LOAD',
@@ -412,7 +412,7 @@ C--------------
 
       IF(NINTLOADP > 0) THEN
          NIK = 0
-         DO K=1,NLOADP_HYD
+         DO K=1,LOADS%NUM_PRESSURE
             NINTERP = ILOADP(5,K+NIDXLOAD)
             DO N=1,NINTERP
                NI = INTERLOADP(NIK + N) 
@@ -431,7 +431,7 @@ C--------------
          KLOADPINTER(1)=0
 
         NIK = 0
-         DO K=1,NLOADP_HYD
+         DO K=1,LOADS%NUM_PRESSURE
             NINTERP = ILOADP(5,K+NIDXLOAD)
             DO N=1,NINTERP
                NI = INTERLOADP(NIK + N) 

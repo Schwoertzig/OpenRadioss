@@ -46,7 +46,7 @@ Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F
 Chd|====================================================================
       SUBROUTINE HM_READ_PBLAST(ITAB      ,ITABM1 ,UNITAB   ,IGRSURF ,NUMLOADP,
      .                          ILOADP    ,LLOADP ,FACLOADP ,X       ,BUFSF   ,
-     .                          LSUBMODEL ,RTRANS)
+     .                          LSUBMODEL ,RTRANS ,LOADS)
 C
 C-----------------------------------------------
 C READER SUBROUTINE FOR OPTION /LOAD/PBLAST
@@ -71,6 +71,7 @@ C-----------------------------------------------
       USE GROUPDEF_MOD
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -96,6 +97,7 @@ C-----------------------------------------------
       TYPE (SURF_),TARGET, DIMENSION(NSURF)   :: IGRSURF
       TYPE (UNIT_TYPE_),INTENT(IN) ::UNITAB
       TYPE(SUBMODEL_DATA), DIMENSION(NSUBMOD), INTENT(IN) :: LSUBMODEL
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -156,17 +158,17 @@ C   C o m m e n t s
 C----------------------------------------------------------------------------------
 C                         /LOAD/PFLUID     /LOAD/PBLAST
 C
-C     LLOADP(1,K)   :    K=1,NLOADP_F     K=1+NLOADP_F,NLOADP_F+NLOADP_B  :    . . .  SEGMENT STORAGE (surface)
-C     ILOADP(1,K)   :    K=1,NLOADP_F     K=1+NLOADP_F,NLOADP_F+NLOADP_B  :    . . .  INTEGER STORAGE (option parameters)
-C     FACLOADP(1,K) :    K=1,NLOADP_F     K=1+NLOADP_F,NLOADP_F+NLOADP_B  :    . . .  REAL STORAGE    (option parameters)
+C     LLOADP(1,K)   :    K=1,LOADS%NUM_PFLUID     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST  :    . . .  SEGMENT STORAGE (surface)
+C     ILOADP(1,K)   :    K=1,LOADS%NUM_PFLUID     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST  :    . . .  INTEGER STORAGE (option parameters)
+C     FACLOADP(1,K) :    K=1,LOADS%NUM_PFLUID     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST  :    . . .  REAL STORAGE    (option parameters)
 C
 C----------------------------------------------------------------------------------
 C                     /LOAD/PFLUID                                     /LOAD/PBLAST
-C                       K=1,NLOADP_F                                     K=1+NLOADP_F,NLOADP_F+NLOADP_B
+C                       K=1,LOADS%NUM_PFLUID                                     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
 C----------------------------------------------------------------------------------
 C     ILOADP(1:SIZLOADP,K) : INTEGER STORAGE (option parameters)
 C----------------------------------------------------------------------------------
-C                     K=1,NLOADP_F                                    K=1+NLOADP_F,NLOADP_F+NLOADP_B
+C                     K=1,LOADS%NUM_PFLUID                                    K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
 C
 C     ILOADP(1,K) :   4*NUMSEG (4 * Nb of segments)                   4*NUMSEG
 C     ILOADP(2,K) :   ID                                              IS
@@ -183,11 +185,11 @@ C     ILOADP(12,K):   Dir_vel (1, 2, 3)                               -
 C     ILOADP(13,K):   fravel id                                       -
 C----------------------------------------------------------------------------------
 C                     /LOAD/PFLUID                                     /LOAD/PBLAST
-C                       K=1,NLOADP_F                                     K=1+NLOADP_F,NLOADP_F+NLOADP_B
+C                       K=1,LOADS%NUM_PFLUID                                     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
 C----------------------------------------------------------------------------------
 C     LLOADP(1:SLLOADP,K) : SEGMENT STORAGE (surface)
 C----------------------------------------------------------------------------------
-C                     K=1,NLOADP_F                                    K=1+NLOADP_F,NLOADP_F+NLOADP_B
+C                     K=1,LOADS%NUM_PFLUID                                    K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
 C
 C     LLOADP(1,K) :   NODE1                                           NODE1
 C     LLOADP(2,K) :   NODE2                                           NODE2
@@ -195,7 +197,7 @@ C     LLOADP(3,K) :   NODE3                                           NODE3
 C     LLOADP(4,K) :   NODE4                                           NODE4
 C----------------------------------------------------------------------------------
 C                     /LOAD/PFLUID                                     /LOAD/PBLAST
-C                       K=1,NLOADP_F                                     K=1+NLOADP_F,NLOADP_F+NLOADP_B
+C                       K=1,LOADS%NUM_PFLUID                                     K=1+LOADS%NUM_PFLUID,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
 C----------------------------------------------------------------------------------
 C     FACLOADP(LFACLOAD,K) : REAL STORAGE    (option parameters)
 C----------------------------------------------------------------------------------
@@ -230,12 +232,12 @@ C-----------------------------------------------
       BOOL_SKIP_CALC = .FALSE.
       IS_ITA_SHIFT = .FALSE.
 
-      ALLOCATE( OUTPUT_USER_PARAMS(6,NLOADP_B))
+      ALLOCATE( OUTPUT_USER_PARAMS(6,LOADS%NUM_PBLAST))
 
       CALL HM_OPTION_START('/LOAD/PBLAST')
 
-      DO K = 1+NLOADP_F, NLOADP_F+NLOADP_B
-        K_BLAST = K-NLOADP_F
+      DO K = 1+LOADS%NUM_PFLUID, LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+        K_BLAST = K-LOADS%NUM_PFLUID
         CALL HM_OPTION_READ_KEY(LSUBMODEL, OPTION_TITR = TITR, OPTION_ID = ID, SUBMODEL_ID = SUB_ID)
         IAD = NUMLOADP + 1
         SURF_ID = 0 !target surface id
@@ -1058,8 +1060,8 @@ C-----------
       IF(.NOT.IS_ITA_SHIFT)THEN
         PBLAST_DT%TA_INF = ZERO
       ELSE
-        DO K = 1+NLOADP_F, NLOADP_F+NLOADP_B
-          K_BLAST = K-NLOADP_F
+        DO K = 1+LOADS%NUM_PFLUID, LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+          K_BLAST = K-LOADS%NUM_PFLUID
           ILOADP(9,K) = 2
           TA_PBLAST = FACLOADP(7,K)
           !shifting trigger time
@@ -1074,8 +1076,8 @@ C-----------
 C-----------OUTPUT IN LISTING FILE
 C---------------------------------
       !this output is made once all /LOAD/PBLAST options are read in order to display global parameters (min values)
-      DO K = 1+NLOADP_F, NLOADP_F+NLOADP_B
-        K_BLAST = K-NLOADP_F
+      DO K = 1+LOADS%NUM_PFLUID, LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+        K_BLAST = K-LOADS%NUM_PFLUID
         IZ_UPDATE = ILOADP(6,K)
         IABAC = ILOADP(7,K)
         ID = ILOADP(8,K)
@@ -1133,7 +1135,7 @@ C---------------------------------
            WRITE (IOUT,2013)TA_PBLAST
         ENDIF
         !DISPLAY MINIMUM VALUE WITHIN ALL PBLAST OPTIONS
-        IF(NLOADP_B>=2)THEN
+        IF(LOADS%NUM_PBLAST>=2)THEN
           WRITE(IOUT,2035)PBLAST_DT%TA_INF
         ENDIF
 

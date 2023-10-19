@@ -100,7 +100,7 @@ Chd|====================================================================
      I                   WIGE           ,KNOT        ,IGEO           ,MULTI_FVM        ,H3D_DATA   ,
      J                   INTBUF_FRIC_TAB,KNOTLOCPC   ,KNOTLOCEL      ,ITASK            ,TAGNCONT   ,
      K                   KLOADPINTER    ,LOADPINTER  ,LOADP_HYD_INTER,DGAPLOADINT      ,S_LOADPINTER,
-     L                   INTEREFRIC     )
+     L                   INTEREFRIC     ,NUM_LOAD_PRESSURE)
 C======================================================================
 C-----------------------------------------------
 C   M o d u l e s
@@ -144,6 +144,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECTIVITY
       TYPE (ELBUF_STRUCT_), DIMENSION(NGROUP) :: ELBUF_TAB
+      INTEGER,INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,NIN,NEWFRONT,NSTRF(*),
      .        NRTMDIM, IAD17, ISENSINT(*),DIMFB,IGROUPS(NUMELS)
       INTEGER IPARI(NPARI,NINTER), ICODT(*),ICONTACT(*),
@@ -158,7 +159,7 @@ C-----------------------------------------------
      .        KXIG3D(NIXIG3D,*),IXIG3D(*),IGEO(NPROPGI,*)
       INTEGER  , INTENT(IN) :: S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .         LOADP_HYD_INTER(NLOADP_HYD)
+     .         LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: INTEREFRIC
       my_real  , INTENT(IN) :: DGAPLOADINT(S_LOADPINTER)
       my_real  EMINX(*), XCELL(3,SXCELL)
@@ -803,7 +804,7 @@ C
      9  KLOADPINTER  ,LOADPINTER ,LOADP_HYD_INTER,INTBUF_TAB%TYPSUB    ,  
      .                                            INTBUF_TAB%INFLG_SUBS,
      A  INTBUF_TAB%INFLG_SUBM,NINLOADP,DGAPLOADINT,S_LOADPINTER,DGAPLOADP,
-     B  INTEREFRIC   )
+     B  INTEREFRIC   ,NUM_LOAD_PRESSURE )
 
 
               IF( INTTH > 0 ) THEN 

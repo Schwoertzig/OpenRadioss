@@ -88,8 +88,8 @@ C
          END DO
          NP0 = NP         
 C----add only not existing           
-           SHIFT = 	NLOADP_F+NLOADP_B
-           DO NL=1+SHIFT,NLOADP_HYD+SHIFT
+           SHIFT = 	LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+           DO NL=1+SHIFT,LOADS%NUM_PRESSURE+SHIFT
               IAD = ILOADP(4,NL)
               DO N=1, ILOADP(1,NL)/4
                 N1 = LLOADP(IAD+4*(N-1))
@@ -138,7 +138,7 @@ C----add only not existing
               ENDDO
            END DO 
 C           
-           DO  NL=1,NLOADP_F+NLOADP_B
+           DO  NL=1,LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
               IAD = ILOADP(4,NL)
               DO N=1, ILOADP(1,NL)/4
                 N1 = LLOADP(IAD+4*(N-1))
@@ -187,7 +187,7 @@ C
               ENDDO
            END DO 
 C           
-           DO  NL=1,LOADS%NLOAD_CYL
+           DO  NL=1,LOADS%NUM_PCYL
               DO N=1, LOADS%LOAD_CYL(NL)%NSEG
                 N1 = LOADS%LOAD_CYL(NL)%SEGNOD(N,1)
                 N2 = LOADS%LOAD_CYL(NL)%SEGNOD(N,2)

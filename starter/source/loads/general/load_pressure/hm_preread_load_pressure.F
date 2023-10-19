@@ -35,7 +35,7 @@ Chd|        HM_OPTION_READ_MOD            share/modules1/hm_option_read_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
 Chd|====================================================================
-      SUBROUTINE HM_PREREAD_LOAD_PRESSURE(NUMLOADP ,IGRSURF,LSUBMODEL)
+      SUBROUTINE HM_PREREAD_LOAD_PRESSURE(NUMLOADP,IGRSURF,LSUBMODEL,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -55,7 +55,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER,INTENT(INOUT) :: NUMLOADP
+      INTEGER,INTENT(INOUT) :: NUMLOADP,NUM_LOAD_PRESSURE
 C-----------------------------------------------
       TYPE (SURF_)   ,TARGET, DIMENSION(NSURF)   :: IGRSURF
       TYPE(SUBMODEL_DATA),INTENT(IN)::LSUBMODEL(*)
@@ -75,13 +75,11 @@ C START BROWSING MODEL /LOAD/PRESSURE
 C--------------------------------------------------
       CALL HM_OPTION_START('/LOAD/PRESSURE')
 C-----------------------------------------------
-      DO I=1,NLOADP_HYD
+      DO I=1,NUM_LOAD_PRESSURE
 C--------------------------------------------------
 C EXTRACT DATAS OF /LOAD/PRESSURE... LINE
 C--------------------------------------------------
-        CALL HM_OPTION_READ_KEY(LSUBMODEL,
-     .                       OPTION_ID = ID,
-     .                       OPTION_TITR = TITR)
+        CALL HM_OPTION_READ_KEY(LSUBMODEL, OPTION_ID = ID, OPTION_TITR = TITR)
 C--------------------------------------------------
 C EXTRACT DATAS (INTEGER VALUES)
 C--------------------------------------------------
@@ -106,12 +104,7 @@ C-------
           IF(ISU==IGRSURF(J)%ID)IS=J
         ENDDO 
         IF(IS == 0)THEN
-          CALL ANCMSG(MSGID=931,
-     .                MSGTYPE=MSGERROR,
-     .                ANMODE=ANINFO_BLIND_1,
-     .                I1=ID,
-     .                C1=TITR,
-     .                I2=ISU)
+          CALL ANCMSG(MSGID=931,MSGTYPE=MSGERROR,ANMODE=ANINFO_BLIND_1,I1=ID,C1=TITR,I2=ISU)
         ENDIF   
 C-----------                                      
         NUMLOADP = NUMLOADP + 4*IGRSURF(IS)%NSEG

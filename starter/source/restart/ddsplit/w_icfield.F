@@ -27,8 +27,7 @@ Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
 Chd|-- calls ---------------
 Chd|        WRITE_I_C                     source/output/tools/write_routines.c
 Chd|====================================================================
-      SUBROUTINE W_ICFIELD(
-     .  ICFIELD,LCFIELD,NODLOCAL,PROC,LLCFIELD_L,LEN_IA,P,NUMNOD_L)
+      SUBROUTINE W_ICFIELD(ICFIELD,LCFIELD,NODLOCAL,PROC,LLCFIELD_L,LEN_IA,P,NUMNOD_L,NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------  
@@ -46,6 +45,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER PROC, LEN_IA, LLCFIELD_L,P,NUMNOD_L,
      .        ICFIELD(SIZFIELD,*),LCFIELD(*),NODLOCAL(*)
+      INTEGER,INTENT(IN) :: NUM_LOAD_CENTRI
 C-----------------------------------------------
 C   F u n c t i o n
 C-----------------------------------------------
@@ -54,11 +54,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, IAD, IADL, NL, N, NLL, NN, IGRTMP(SIZFIELD,NLOADC),
-     .        LGRTMP(LLCFIELD_L)
+      INTEGER I, J, IAD, IADL, NL, N, NLL, NN, IGRTMP(SIZFIELD,NUM_LOAD_CENTRI),LGRTMP(LLCFIELD_L)
 C
       IADL = 1
-      DO I = 1, NLOADC
+      DO I = 1, NUM_LOAD_CENTRI
         NL = ICFIELD(1,I)
         IAD= ICFIELD(4,I)
         DO J = 1, SIZFIELD
@@ -85,9 +84,9 @@ C
         IADL = IADL+NLL
       ENDDO
 C
-      CALL WRITE_I_C(IGRTMP,SIZFIELD*NLOADC)
+      CALL WRITE_I_C(IGRTMP,SIZFIELD*NUM_LOAD_CENTRI)
       CALL WRITE_I_C(LGRTMP,LLCFIELD_L)
-      LEN_IA = LEN_IA + SIZFIELD*NLOADC + IADL-1
+      LEN_IA = LEN_IA + SIZFIELD*NUM_LOAD_CENTRI + IADL-1
 C
       RETURN
       END

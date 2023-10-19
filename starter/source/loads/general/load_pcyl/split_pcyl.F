@@ -91,8 +91,8 @@ C-----------------------------------------------
             LOCAL_NUMBER_CYL = 0
             ! ------------
             ! loop over the /LOAD/PCYL to count the number of load/pcyl on the processor J
-            ALLOCATE( LOADS_PER_PROC(J)%INDEX_LOAD( LOADS%NLOAD_CYL,2 ) )
-            DO I=1,LOADS%NLOAD_CYL
+            ALLOCATE( LOADS_PER_PROC(J)%INDEX_LOAD( LOADS%NUM_PCYL,2 ) )
+            DO I=1,LOADS%NUM_PCYL
                 LOCAL_SEGMENT_NUMBER = LOADS%CYL_RESTART(I)%PROC(J)%LOCAL_SEGMENT_NUMBER
                 IF(LOCAL_SEGMENT_NUMBER>0) THEN
                     LOCAL_NUMBER_CYL = LOCAL_NUMBER_CYL + 1
@@ -104,7 +104,7 @@ C-----------------------------------------------
             ENDDO
             ! ------------
 
-            LOADS_PER_PROC(J)%NLOAD_CYL = LOCAL_NUMBER_CYL ! save the number of /oad/pcyl on the current proc
+            LOADS_PER_PROC(J)%NUM_PCYL = LOCAL_NUMBER_CYL ! save the number of /oad/pcyl on the current proc
             ALLOCATE( LOADS_PER_PROC(J)%LOAD_CYL( LOCAL_NUMBER_CYL ) ) 
             ! ------------
             IF(LOCAL_NUMBER_CYL>0) THEN

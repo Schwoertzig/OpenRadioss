@@ -37,7 +37,7 @@ Chd|====================================================================
       SUBROUTINE PBLAST_1(ILOADP  ,FAC      ,A       ,V         ,X       ,
      1                    IADC    ,FSKY     ,LLOADP  ,FEXT      ,
      2                    ITAB    ,H3D_DATA ,NL      ,DTMIN_LOC ,TFEXT_LOC,
-     3                    TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL)
+     3                    TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL  ,LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
@@ -46,6 +46,7 @@ C-----------------------------------------------
       USE GROUPDEF_MOD      
       USE H3D_INC_MOD 
       USE TH_SURF_MOD , ONLY : TH_SURF_
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -80,6 +81,7 @@ C-----------------------------------------------
       my_real, INTENT(INOUT) :: FSAVSURF(5,NSURF)
       INTEGER, INTENT(INOUT) :: NSEG_LOADP(NSURF) , NSEGPL
       TYPE(FRIEDLANDER_PARAMS_) :: FRIEDLANDER_PARAMS
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -116,11 +118,11 @@ C-----------------------------------------------
 C   P r e - C o n d i t i o n
 C-----------------------------------------------
       !--- subroutine not relevant if no /LOAD/PBLAST option
-      IF(NLOADP_B==0)RETURN
+      IF(LOADS%NUM_PBLAST == 0)RETURN
 
       !--- time step
       TA_FIRST = FAC(07,NL) ! arrival time for first segment to be loaded
-      IL= NL-NLOADP_F
+      IL= NL-LOADS%NUM_PFLUID
       TT_STAR = TT + PBLAST_DT%TA_INF
       IZ_UPDATE = ILOADP(06,NL)
       TDET = FAC(01,NL)
@@ -160,7 +162,7 @@ C-----------------------------------------------
       !-----------------------------------------------,                                                 
       !   FREE AIR BURST                                                                                
       !-----------------------------------------------                                                  
-      IL         = NL-NLOADP_F
+      IL         = NL-LOADS%NUM_PFLUID
       TDET       = FAC(01,NL)
       XDET       = FAC(02,NL)
       YDET       = FAC(03,NL)

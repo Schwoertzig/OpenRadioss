@@ -48,7 +48,8 @@ Chd|====================================================================
      D                  MSRL     ,ITAB     ,H3D_DATA ,NINSKID  ,PRATIO  ,
      E                  NINTERSKID,PSKIDS  ,IFLAGLOADP,TAGNCONT ,KLOADPINTER,
      F                  LOADPINTER,LOADP_HYD_INTER,DGAPLOADINT,DIST,GAPV,  
-     G                  S_LOADPINTER,EFRIC_L,FHEAT   ,EFRICT   ,INTEREFRIC)
+     G                  S_LOADPINTER,EFRIC_L,FHEAT   ,EFRICT   ,INTEREFRIC,
+     H                  NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -82,6 +83,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER JLT, NIN, NOINT, ISKY(*), ISECIN, NSTRF(*),NCONT,IFORM,NISKYFI,
      .        NINSKID,NINTERSKID,IFLAGLOADP
       INTEGER IX1(MVSIZ), IX2(MVSIZ), IX3(MVSIZ), IX4(MVSIZ),
@@ -90,7 +92,7 @@ C-----------------------------------------------
      .        TAGNCONT(NLOADP_HYD_INTER,NUMNOD)
       INTEGER  , INTENT(IN) :: S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .         LOADP_HYD_INTER(NLOADP_HYD)
+     .         LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: INTEREFRIC
       my_real  , INTENT(IN) :: FHEAT
       my_real  , INTENT(IN) :: DGAPLOADINT(S_LOADPINTER),DIST(MVSIZ),GAPV(MVSIZ)

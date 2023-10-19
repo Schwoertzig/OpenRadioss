@@ -124,7 +124,8 @@ Chd|====================================================================
      J                             NSIGSH      ,SIGSH      ,NSIGI           ,SIGSP          ,NSIGS            ,
      K                             SIGI        ,NSIGBEAM   ,SIGBEAM         ,NSIGTRUSS      ,SIGTRUSS         ,
      L                             NSIGRS      ,SIGRS      ,MERGE_NODE_TAB  ,MERGE_NODE_TOL ,
-     M                             IMERGE      ,NMERGE_TOT ,IEXLNK          ,DRAPEG         ,USER_WINDOWS,OUTPUT)
+     M                             IMERGE      ,NMERGE_TOT ,IEXLNK          ,DRAPEG         ,USER_WINDOWS,OUTPUT,
+     N                             LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -151,6 +152,7 @@ C-----------------------------------------------
       USE USER_WINDOWS_MOD
       USE OUTPUT_MOD
       USE MAT_ELEM_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -220,9 +222,10 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: IMERGE(*),MERGE_NODE_TAB(*),NMERGE_TOT
       my_real, INTENT(IN) :: MERGE_NODE_TOL(*)
       INTEGER,INTENT(IN) :: IPARG(NPARG,NGROUP)
-      TYPE(USER_WINDOWS_),INTENT(IN)      :: USER_WINDOWS
-      TYPE(OUTPUT_)      ,INTENT(IN)      :: OUTPUT
-      TYPE(MAT_ELEM_)    ,INTENT(IN)      :: MAT_ELEM
+      TYPE(USER_WINDOWS_),INTENT(IN) :: USER_WINDOWS
+      TYPE(OUTPUT_)      ,INTENT(IN) :: OUTPUT
+      TYPE(MAT_ELEM_)    ,INTENT(IN) :: MAT_ELEM
+      TYPE(LOADS_)       ,INTENT(IN) :: LOADS
 C-----------------------------------------------
 C      NOM_OPT(LNOPT1,SNOM_OPT1) 
 C         * Possibly, NOM_OPT(1) = ID
@@ -275,7 +278,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: NIMPDISP,NIMPVEL,NIMPACC
       INTEGER, INTENT(IN) :: IGEO(NPROPGI,NUMGEO),IPM(NPROPMI,NUMMAT)
       INTEGER, INTENT(IN) :: NUMLOADP, ILOADP(SIZLOADP,NLOADP), LLOADP(NUMLOADP)
-      INTEGER, INTENT(IN) :: ICFIELD(SIZFIELD,NLOADC), LCFIELD(SLCFIELD)
+      INTEGER, INTENT(IN) :: ICFIELD(SIZFIELD,LOADS%NUM_CENTRI), LCFIELD(SLCFIELD)
       INTEGER, INTENT(IN) :: IBCL(NIBCLD,NCONLD-NPRELD), IPRES(NIBCLD,NPRELD)
       INTEGER, INTENT(IN) :: IGRV(NIGRV,NGRAV), LGRV(*)
       INTEGER, INTENT(IN) :: NPBY(NNPBY,NRBYKIN), NPBYL(NNPBY,NRBYLAG), LPBY(*), LPBYL(*)
@@ -309,7 +312,7 @@ C-----------------------------------------------
       my_real, INTENT(IN) ::
      .                        GEO(NPROPG,NUMGEO), BUFGEO(*), PM(NPROPM,NUMMAT), BUFMAT(*)
       my_real, INTENT(IN) ::
-     .                        LOADP(LFACLOAD,NLOADP), CFIELD(LFACLOAD,NLOADC),
+     .                        LOADP(LFACLOAD,NLOADP), CFIELD(LFACLOAD,LOADS%NUM_CENTRI),
      .                        FORC(LFACCLD,NCONLD-NPRELD), PRES(LFACCLD,NPRELD),
      .                        AGRV(LFACGRV,NGRAV),PRELOAD(6,*)  
       my_real, INTENT(IN) ::
@@ -417,7 +420,8 @@ C-----------------------------------------------
      3                      IBCR      ,FRADIA    ,IBCV      ,FCONV     ,IGRV      ,
      4                      LGRV      ,AGRV      ,ICFIELD   ,LCFIELD   ,CFIELD    ,
      5                      IPRELOAD  ,PRELOAD   ,IFLAG_BPRELOAD,
-     6                      LIFLOW, LRFLOW, IFLOW,RFLOW     ,ISPHIO    ,VSPHIO    )
+     6                      LIFLOW, LRFLOW, IFLOW,RFLOW     ,ISPHIO    ,VSPHIO   ,
+     7                      LOADS)
 
       CALL ST_QAPRINT_GENERAL_CONTROLS(NOM_OPT   ,INOM_OPT  ,DAMPR, IRAND, ALEA, 
      1                                 XSEED     ,UNITAB    ,QP_IPERTURB       ,

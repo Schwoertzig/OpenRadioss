@@ -34,7 +34,7 @@ Chd|        HM_OPTION_READ_MOD            share/modules1/hm_option_read_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
 Chd|====================================================================
-      SUBROUTINE HM_PREREAD_PFLUID(NUMLOADP , IGRNOD ,IGRSURF,LSUBMODEL)
+      SUBROUTINE HM_PREREAD_PFLUID(NUMLOADP , IGRNOD ,IGRSURF,LSUBMODEL,NUM_LOAD_PFLUID)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -55,7 +55,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER,INTENT(INOUT) :: NUMLOADP
+      INTEGER,INTENT(INOUT) :: NUMLOADP,NUM_LOAD_PFLUID
 C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
       TYPE (SURF_)   ,TARGET, DIMENSION(NSURF)   :: IGRSURF
@@ -63,9 +63,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER               :: I, ID
-      INTEGER               :: ISU, IS, J
-      CHARACTER             :: TITR*nchartitle
+      INTEGER :: I, ID
+      INTEGER :: ISU, IS, J
+      CHARACTER :: TITR*nchartitle
       LOGICAL IS_AVAILABLE
 C-----------------------------------------------
 C   S o u r c e   L i n e s
@@ -76,13 +76,11 @@ C START BROWSING MODEL /LOAD/PFLUID
 C--------------------------------------------------
       CALL HM_OPTION_START('/LOAD/PFLUID')
 C-----------------------------------------------
-      DO I=1,NLOADP_F
+      DO I=1,NUM_LOAD_PFLUID
 C--------------------------------------------------
 C EXTRACT DATAS OF /LOAD/CENTRI... LINE
 C--------------------------------------------------
-        CALL HM_OPTION_READ_KEY(LSUBMODEL,
-     .                       OPTION_ID = ID,
-     .                       OPTION_TITR = TITR)
+        CALL HM_OPTION_READ_KEY(LSUBMODEL,OPTION_ID = ID,OPTION_TITR = TITR)
 C--------------------------------------------------
 C EXTRACT DATAS (INTEGER VALUES)
 C--------------------------------------------------
@@ -93,12 +91,7 @@ C-------
           IF(ISU == IGRSURF(J)%ID)IS=J
         ENDDO 
         IF(IS == 0)THEN
-          CALL ANCMSG(MSGID=931,
-     .                MSGTYPE=MSGERROR,
-     .                ANMODE=ANINFO_BLIND_1,
-     .                I1=ID,
-     .                C1=TITR,
-     .                I2=ISU)
+          CALL ANCMSG(MSGID=931,MSGTYPE=MSGERROR,ANMODE=ANINFO_BLIND_1,I1=ID,C1=TITR,I2=ISU)
         ENDIF                                         
         NUMLOADP = NUMLOADP + IGRSURF(IS)%NSEG*4
       ENDDO

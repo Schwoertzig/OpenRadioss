@@ -36,7 +36,8 @@ Chd|====================================================================
      4                  NPBY    ,ONOF   ,NRBYNF,ITAG   ,LPBY   ,
      5                  RBY     ,X      ,V     ,VR     ,IXTG   ,
      6                  IGRV    ,IBGR   ,WEIGHT,FR_RBY2,PARTSAV,
-     7                  IPART   ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY)
+     7                  IPART   ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY,
+     8                  NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -63,11 +64,11 @@ C-----------------------------------------------
      .   ISKWN(LISKN,*), NPBY(NNPBY,*),ITAG(*),LPBY(*), IXTG(NIXTG,*),
      .   WEIGHT(*), FR_RBY2(*), ICFIELD(SIZFIELD,*), LCFIELD(*), TAGSLV_RBY(*)
       INTEGER ONOF,NRBYNF,PRI_OFF
-C     REAL
       my_real
      .   SKEW(LSKEW,*),MS(*),IN(*),RBY(NRBY,*),X(3,*),
      .   V(3,*),VR(3,*),PARTSAV(*)
       TYPE(ELBUF_STRUCT_), DIMENSION(NGROUP) :: ELBUF_TAB
+      INTEGER,INTENT(IN) :: NUM_LOAD_CENTRI
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -203,7 +204,7 @@ C
         ENDDO
       ENDDO
 C
-      DO K=1,NLOADC
+      DO K=1,NUM_LOAD_CENTRI
 	NN   = ICFIELD(1,K) 
         IAD  = ICFIELD(4,K)
         DO I=1,NN
@@ -231,7 +232,8 @@ Chd|====================================================================
      6                  IGRV ,IBGR ,SENSOR_TAB,A     ,AR   ,
      7                  FSAV,STIFN,STIFR  ,FANI  ,WEIGHT,
      8                  DMAST,DINERT,BUFSF,FR_RBY2,PARTSAV,
-     9                  IPART  ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY)
+     9                  IPART  ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY,
+     +                  NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -261,6 +263,7 @@ C-----------------------------------------------
      .   ITAB(*), ITABM1(*),IGRV(NIGRV,*),IBGR(*),
      .   ISKWN(LISKN,*), NPBY(NNPBY,*),ITAG(*),LPBY(*), IXTG(NIXTG,*),
      .   WEIGHT(*), IPART(*), FR_RBY2(3,*), ICFIELD(SIZFIELD,*), LCFIELD(*), TAGSLV_RBY(*)
+      INTEGER,INTENT(IN) :: NUM_LOAD_CENTRI
 C     REAL
       my_real
      .   SKEW(LSKEW,*),MS(*),IN(*),RBY(NRBY,*),X(3,*),
@@ -614,8 +617,8 @@ C
        ENDDO
       ENDDO
 C
-      DO K=1,NLOADC
-	NN   = ICFIELD(1,K) 
+      DO K=1,NUM_LOAD_CENTRI
+        NN   = ICFIELD(1,K)
         IAD  = ICFIELD(4,K)
         DO I=1,NN
          N=LCFIELD(IAD+I-1)

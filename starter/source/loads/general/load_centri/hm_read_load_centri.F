@@ -42,7 +42,7 @@ Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F
 Chd|====================================================================
       SUBROUTINE HM_READ_LOAD_CENTRI(ICFIELD,LCFIELD  ,CFIELD  ,ITAB     ,ITABM1 ,
      .                               IGRNOD ,NPC      ,SENSORS ,UNITAB   ,IFRAME ,
-     .                               LSUBMODEL)
+     .                               LSUBMODEL,NUM_LOAD_CENTRI)
 C
 C-----------------------------------------------
 C FAC_M FACL FAC_T : enable to convert (custom) input unit to working unit system
@@ -76,6 +76,7 @@ C-----------------------------------------------
       INTEGER ICFIELD(SIZFIELD,*), LCFIELD(*), ITAB(*), ITABM1(*), 
      .  NPC(*),IFRAME(LISKN,*)
       my_real CFIELD(LFACLOAD,*)
+      INTEGER,INTENT(IN)::NUM_LOAD_CENTRI
 C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
       TYPE (SUBMODEL_DATA),INTENT(IN)::LSUBMODEL(*)
@@ -112,7 +113,7 @@ C-----------------------------------------------
 C
 C                         /LOAD/CENTRI              
 C
-C     ICFIELD(SIZFIELD,NLOADC)
+C     ICFIELD(SIZFIELD,NUM_LOAD_CENTRI)
 C     ICFIELD(1,K) :   NN           Nb of nodes                                            
 C     ICFIELD(2,K) :   IDIR         Direction of the load               
 C     ICFIELD(3,K) :   NCURS        Velocity function internal number                              
@@ -129,7 +130,7 @@ C     ICFIELD(13,K):
 C-----------------------------------------------
 C     LCFIELD(SLCFIELD) skyline vector of nodes vs all /LOAD/CENTRI
 C-----------------------------------------------
-C     CFIELD(LFACLOAD,NLOADC)
+C     CFIELD(LFACLOAD,NUM_LOAD_CENTRI)
 C     CFIELD(1,K) : FCY
 C     CFIELD(2,K) : ONE/FCX
 C-----------------------------------------------
@@ -145,9 +146,9 @@ C START BROWSING MODEL CLOAD
 C--------------------------------------------------
       CALL HM_OPTION_START('/LOAD/CENTRI')
 C--------------------------------------------------
-C BROWSING MODEL 1..NLOADC
+C BROWSING MODEL 1..NUM_LOAD_CENTRI
 C--------------------------------------------------
-      DO K=1,NLOADC
+      DO K=1,NUM_LOAD_CENTRI
 C--------------------------------------------------
 C EXTRACT DATAS OF /LOAD/CENTRI... LINE
 C--------------------------------------------------

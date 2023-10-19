@@ -38,7 +38,7 @@ c         -> XSCALE_R
 c         -> XSCALE_T
 c         -> YSCALE_P
 c=======================================================================
-      NLOAD_CYL = LOADS%NLOAD_CYL
+      NLOAD_CYL = LOADS%NUM_PCYL
       DO I=1,NLOAD_CYL
         NSEG = LOADS%LOAD_CYL(I)%NSEG
         LINT = 5 + NSEG*4

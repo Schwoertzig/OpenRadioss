@@ -53,7 +53,7 @@ Chd|====================================================================
      6   ISLEN7T ,IRLEN20 ,ISLEN20 ,IRLEN20T,ISLEN20T,
      7   IRLEN20E,ISLEN20E,CONDN   ,IFLAG   ,INTBUF_TAB, 
      8   H3D_DATA, MULTI_FVM,TAGNCONT,KLOADPINTER,LOADPINTER,
-     9   LOADP_HYD_INTER  ,FSAV    ,INTERFACES)
+     9   LOADP_HYD_INTER  ,FSAV    ,INTERFACES, NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -87,15 +87,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER IFLAG, NBINTC,ISLEN7, IRLEN7, ISLEN11, IRLEN11,
      .        ISLEN17, IRLEN17,IRLEN7T,ISLEN7T,
      .        IRLEN20, ISLEN20, IRLEN20T, ISLEN20T, IRLEN20E, ISLEN20E,
      .        IPARI(NPARI,*), INTLIST(*), IXS(*), IXS16(*),
      .        ICODT(*), ICONTACT(*), NSTRF(*),TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NLOADP_HYD),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
-      my_real
-     .        A(*), STIFN(*), VISCN(*),
+     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NUM_LOAD_PRESSURE),
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
+      my_real A(*), STIFN(*), VISCN(*),
      .        SECFCUM(7,NUMNOD,NSECT), FCONT(3,*), FTHE(*),CONDN(*)
       my_real, INTENT(INOUT) :: FSAV(NTHVKI,*) 
 
@@ -1254,7 +1254,7 @@ C
      3              IBAG    ,ICODT   ,SECFCUM , NSTRF       ,ICONTACT,
      4              FCONT   ,INACTI  ,IADM    ,INTTH , FTHE ,CONDN   ,
      5              H3D_DATA, MULTI_FVM,INTBUF_TAB(NIN)%LEDGE,NEDGE  ,
-     6              NIN     ,TAGNCONT,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER)
+     6              NIN     ,TAGNCONT,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,NUM_LOAD_PRESSURE)
                     L = L + NB*LEN25E
                 ENDIF ! NSNSIE
               ENDIF ! NTY + IEDGE

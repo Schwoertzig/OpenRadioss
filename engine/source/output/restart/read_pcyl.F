@@ -45,7 +45,7 @@ c         -> XSCALE_R
 c         -> XSCALE_T
 c         -> YSCALE_P
 c=======================================================================
-      NLOAD_CYL = LOADS%NLOAD_CYL
+      NLOAD_CYL = LOADS%NUM_PCYL
       ALLOCATE(LOADS%LOAD_CYL(NLOAD_CYL))
 c      
       DO I=1,NLOAD_CYL

@@ -60,7 +60,7 @@ Chd|        SPH_MOD                       share/modules/sph_mod.F
 Chd|        STACK_MOD                     share/modules/stack_mod.F     
 Chd|        TRIMAT_MOD                    share/modules/trimat.F        
 Chd|====================================================================
-      SUBROUTINE RESTALLOC(MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR,INTERFACES)
+      SUBROUTINE RESTALLOC(MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR,INTERFACES,LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -93,6 +93,7 @@ C-----------------------------------------------
       USE OUTPUTS_MOD
       USE ALE_MOD
       USE INTERFACES_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -131,7 +132,7 @@ C-----------------------------------------------
       TYPE(t_ale_connectivity), INTENT(INOUT) :: ALE_CONNECTIVITY
       TYPE(t_SEGVAR) :: SEGVAR
       TYPE(INTERFACES_) :: INTERFACES
-
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -929,7 +930,7 @@ C
         IF (IERR/=0) GOTO 1000
         ITHVAR = 0      
 
-        ALLOCATE (ICFIELD(SIZFIELD*NLOADC),STAT=IERR)
+        ALLOCATE (ICFIELD(SIZFIELD*LOADS%NUM_CENTRI),STAT=IERR)
         IF (IERR/=0) GOTO 1000
         ICFIELD = 0  
 
@@ -1799,7 +1800,7 @@ c
            ENDIF
          END IF
 C
-        ALLOCATE (CFIELD(LFACLOAD*NLOADC),STAT=IERR)
+        ALLOCATE (CFIELD(LFACLOAD*LOADS%NUM_CENTRI),STAT=IERR)
         IF (IERR/=0) GOTO 1000
         CFIELD = 0  
 
@@ -1813,11 +1814,11 @@ C
            IF (IERR/=0) GOTO 1000
            KLOADPINTER = 0  
 
-           ALLOCATE (LOADPINTER(NINTER*NLOADP_HYD),STAT=IERR)
+           ALLOCATE (LOADPINTER(NINTER*LOADS%NUM_PRESSURE),STAT=IERR)
            IF (IERR/=0) GOTO 1000
            LOADPINTER = 0  
 
-           ALLOCATE (DGAPLOADINT(NINTER*NLOADP_HYD),STAT=IERR)
+           ALLOCATE (DGAPLOADINT(NINTER*LOADS%NUM_PRESSURE),STAT=IERR)
            IF (IERR/=0) GOTO 1000
            DGAPLOADINT = ZERO 
         ELSE

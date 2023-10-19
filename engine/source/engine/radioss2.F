@@ -329,7 +329,7 @@ C
       TYPE (INTERFACES_)  :: INTERFACES
 c      TYPE (SENSORS_)  :: SENSORS    ! defined as global in user_interface_mod
       TYPE (DT_)       :: DT
-      TYPE (LOADS_)    :: LOADS
+      TYPE (LOADS_)    :: LOADS       ! /LOAD/PCYL, /LOAD/PBLAST, /LOAD/PFLUID, /LOAD/PRESSURE, ...
       TYPE (MAT_ELEM_) :: MAT_ELEM
 C----------------------------------------------------------------------------------
 C MDS Table
@@ -958,7 +958,7 @@ C------------------------------------------------
 C     .rst file reading 2
 C------------------------------------------------
       CALL TRACE_IN(17,2,ZERO)
-      CALL RESTALLOC(MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR,INTERFACES)
+      CALL RESTALLOC(MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR,INTERFACES,LOADS)
       ALLOCATE(T_MONVOL(NVOLU))
       IGEO = 0
       IPM = 0
@@ -1292,13 +1292,13 @@ C   thermal bc
       ENDIF
       CALL  PLYXFEM_RRESTANIM()
       IF(IPLYXFEM > 0) CALL  PLYXFEM_RAVUPLY()
-      IF(NLOADC   > 0) CALL CFIELDREST(CFIELD)
+      IF(LOADS%NUM_CENTRI > 0) CALL CFIELDREST(CFIELD,LOADS%NUM_CENTRI)
       IF(NLOADP   > 0) CALL LOADPREST(LOADP)
 C--------------------------------------------
 C LOAD/PRESSURE interfaces : Gaps
 C--------------------------------------------
       IF (NINTLOADP>0) THEN
-         CALL READ_DB(DGAPLOADINT, NINTER*NLOADP_HYD )
+         CALL READ_DB(DGAPLOADINT, NINTER*LOADS%NUM_PRESSURE )
       ENDIF
       IF(ICRACK3D > 0) CALL CRKXFEM_RREST(INOD_CRKXFEM,IEL_CRKXFEM,NODLEVXF)
       CALL CRKXFEM_RRESTANIM()

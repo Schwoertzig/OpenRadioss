@@ -2500,7 +2500,8 @@ C-------------------------------------------
      4                  NPBY ,0    ,NRBYOF,WA     ,LPBY   ,
      5                  RBY  ,X    ,V     ,VR     ,IXTG   ,
      6                  IGRV ,IBGR ,WEIGHT,FR_RBY2,PARTSAV,
-     7                  IPART,ELBUF_STR,ICFIELD,LCFIELD,TAGSLV_RBY)
+     7                  IPART,ELBUF_STR,ICFIELD,LCFIELD,TAGSLV_RBY,
+     8                  LOADS%NUM_CENTRI)
 C
       IF(NRBYON /= 0)
      1    CALL   RBYONF(IPARG,IPARI       ,MS     ,IN     ,
@@ -2509,7 +2510,8 @@ C
      4                  NPBY ,1    ,NRBYON,WA     ,LPBY   ,
      5                  RBY  ,X    ,V     ,VR     ,IXTG   ,
      6                  IGRV ,IBGR ,WEIGHT,FR_RBY2,PARTSAV,
-     7                  IPART,ELBUF_STR,ICFIELD,LCFIELD,TAGSLV_RBY)
+     7                  IPART,ELBUF_STR,ICFIELD,LCFIELD,TAGSLV_RBY,
+     8                  LOADS%NUM_CENTRI)
 C---------------------------------------------------------
 C     READING DATA FOR FLUX & ROTATION
 C---------------------------------------------------------

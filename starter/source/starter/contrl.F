@@ -88,7 +88,7 @@ Chd|        SETDEF_MOD                    ../common_source/modules/setdef_mod.F
 Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
 Chd|        USER_WINDOWS_MOD              ../common_source/modules/user_windows_mod.F
 Chd|====================================================================
-      SUBROUTINE CONTRL(MULTI_FVM,LSUBMODEL,IS_DYNA,DETONATORS,USER_WINDOWS,MAT_ELEM)
+      SUBROUTINE CONTRL(MULTI_FVM,LSUBMODEL,IS_DYNA,DETONATORS,USER_WINDOWS,MAT_ELEM,LOADS)
 C----------------------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -113,6 +113,7 @@ C-----------------------------------------------
       USE USER_WINDOWS_MOD
       USE ALE_MOD
       USE MAT_ELEM_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -176,6 +177,7 @@ C-----------------------------------------------
       TYPE(DETONATOR_STRUCT_) :: DETONATORS
       TYPE(USER_WINDOWS_), INTENT(INOUT) :: USER_WINDOWS
       TYPE(MAT_ELEM_), INTENT(INOUT)     :: MAT_ELEM
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -220,8 +222,8 @@ C
 C-----------------------------------------------
 C   E x t e r n a l  F u n c t i o n
 C-----------------------------------------------
-      INTEGER  NBCS_LAGM
-      EXTERNAL NBCS_LAGM
+      INTEGER,EXTERNAL :: NBCS_LAGM
+
 C-----------------------------------------------
 C   data
 C-----------------------------------------------
@@ -760,10 +762,11 @@ C     LOADS
 C---------------------------------------------------
       CALL HM_OPTION_COUNT('/CLOAD',NCONLD)
       CALL HM_OPTION_COUNT('/PLOAD',NPRELD)
-      CALL HM_OPTION_COUNT('/LOAD/CENTRI',NLOADC)
-      CALL HM_OPTION_COUNT('/LOAD/PFLUID',NLOADP_F)
-      CALL HM_OPTION_COUNT('/LOAD/PBLAST',NLOADP_B)
-      CALL HM_OPTION_COUNT('/LOAD/PRESSURE',NLOADP_HYD)
+      CALL HM_OPTION_COUNT('/LOAD/CENTRI',LOADS%NUM_CENTRI)
+      CALL HM_OPTION_COUNT('/LOAD/PFLUID',LOADS%NUM_PFLUID)
+      CALL HM_OPTION_COUNT('/LOAD/PBLAST',LOADS%NUM_PBLAST)
+      CALL HM_OPTION_COUNT('/LOAD/PRESSURE',LOADS%NUM_PRESSURE)
+      CALL HM_OPTION_COUNT('/LOAD/HISTORY',LOADS%NUM_HISTORY)
 C---------------------------------------------------
 C     GRAVITY
 C---------------------------------------------------

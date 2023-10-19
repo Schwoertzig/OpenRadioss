@@ -77,8 +77,8 @@ Chd|====================================================================
      H                   DIMFB     ,H3D_DATA,INTBUF_FRIC_TAB  ,NISKYFIE,
      I                   APINCH    ,STIFPINCH,NPC   ,TF       ,CONDN   ,
      J                   CONDNSKYI ,QFRICINT,TAGNCONT,KLOADPINTER,LOADPINTER,
-     K                   LOADP_HYD_INTER,DGAPLOADINT,S_LOADPINTER,INTEREFRIC,
-     .                                                            INTERFACES)
+     K                   LOADP_HYD_INTER,DGAPLOADINT,S_LOADPINTER,INTEREFRIC,INTERFACES,
+     L                   NUM_LOAD_PRESSURE)
 C=======================================================================
 C-----------------------------------------------
 C   M o d u l e s
@@ -116,6 +116,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,NIN,NEWFRONT,
      .        NSTRF(*),
      .        NRTMDIM, IAD17, IPARSENS
@@ -130,7 +131,7 @@ C-----------------------------------------------
      .        ISKYI_SMS(*), NODNX_SMS(*), ISENSINT(*),DIMFB
       INTEGER  , INTENT(IN) :: S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .         LOADP_HYD_INTER(NLOADP_HYD)
+     .         LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: INTEREFRIC
       my_real  , INTENT(IN) :: DGAPLOADINT(S_LOADPINTER)
       my_real 
@@ -722,7 +723,8 @@ C-------------------------------------------------------------------------------
      C  INTTH       ,DRAD       ,FHEATS       ,FHEATM     ,QFRICINT(NIN),
      D  EFRICT      ,TAGNCONT   ,KLOADPINTER  ,LOADPINTER ,LOADP_HYD_INTER,
      E  INTBUF_TAB%TYPSUB,IPARI(40,NIN),NINLOADP,DGAPLOADINT,S_LOADPINTER,
-     F  DIST        ,DGAPLOADPMAX,INTEREFRIC  ,INTCAREA   ,INTERFACES%PARAMETERS)
+     F  DIST        ,DGAPLOADPMAX,INTEREFRIC  ,INTCAREA   ,INTERFACES%PARAMETERS,
+     G  NUM_LOAD_PRESSURE)
 C
           IF (IMONM > 0 .AND. JTASK == 1) CALL STOPTIME(20,1)
 
@@ -950,7 +952,7 @@ C-------------------------------------------------------------------------------
      I INTBUF_TAB%FTSAVX_E,INTBUF_TAB%FTSAVY_E, INTBUF_TAB%FTSAVZ_E   ,
      .                                          INTBUF_TAB%IFPEN_E    ,
      J TAGNCONT   ,KLOADPINTER  ,LOADPINTER ,LOADP_HYD_INTER, INTBUF_TAB%TYPSUB,
-     K STARTT     ,NINLOADP,DGAPLOADINT,S_LOADPINTER)
+     K STARTT     ,NINLOADP,DGAPLOADINT,S_LOADPINTER,NUM_LOAD_PRESSURE)
 
             IF (IMONM > 0 .AND. JTASK == 1) CALL STOPTIME(20,1)
 
@@ -1130,7 +1132,7 @@ C-------------------------------------------------------------------------------
      J IFQ          ,INTBUF_TAB%FTSAVX_E2S,INTBUF_TAB%FTSAVY_E2S, INTBUF_TAB%FTSAVZ_E2S ,
      .                                            INTBUF_TAB%IFPEN_E2S    ,
      K TAGNCONT   ,KLOADPINTER  ,LOADPINTER ,LOADP_HYD_INTER,INTBUF_TAB%TYPSUB,
-     O STARTT     ,NINLOADP,DGAPLOADINT,S_LOADPINTER)
+     O STARTT     ,NINLOADP,DGAPLOADINT,S_LOADPINTER,NUM_LOAD_PRESSURE)
 
             IF (IMONM > 0 .AND. JTASK == 1) CALL STOPTIME(20,1)
           ENDIF

@@ -728,6 +728,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE (LOADS_) ,INTENT(INOUT) :: LOADS
       INTEGER ITASK
       INTEGER  ICODE(*), ISKEW(*), ISKWN(LISKN,*), NETH(*),
      .   IPART(*),NOM_OPT(LNOPT1,*),IXS(*),
@@ -780,7 +781,7 @@ C-----------------------------------------------
      .   NODGLOBXFE(*),ELCUTC(2,*),NODENR(*),KXFENOD2ELC(*),
      .   ENRTAG(NUMNOD,*),KXIG3D(*),IXIG3D(*),
      .   NATIV0_SMS(*), SEGQUADFR(*), TAGSLV_RBY(*),
-     .   KLOADPINTER(NINTER+1)  ,LOADPINTER(NINTER*NLOADP_HYD) 
+     .   KLOADPINTER(NINTER+1)  ,LOADPINTER(NINTER*LOADS%NUM_PRESSURE)
       INTEGER IDATA(*), IBFTEMP(*), IBCV(*), IBFFLUX(*), WEIGHT_RM(*),
      .        ICODT_PLY(*), ISKEW_PLY(*),INOD_PXFEM(*),IEL_PXFEM(*),
      .        IADC_PXFEM(*),ADSKY_PXFEM(*),ICODE_PLY(*),MADCLNOD(*),
@@ -828,7 +829,7 @@ C-----------------------------------------------
      .   FRADIA(*), RES_SMS(*), PHIE(*),MSF(*),
      .   CFIELD(*),MSZ2(*), DIAG_SMS(*),LOADP(*), DMINT2(*),POR(*),
      .   GAUGE(LLGAUGE,*),WAGAP(2,*),RTHBUF(*),FORNEQS(3,*),IN0(*)
-      my_real , INTENT(IN) :: DGAPLOADINT(NINTER*NLOADP_HYD)
+      my_real , INTENT(IN) :: DGAPLOADINT(NINTER*LOADS%NUM_PRESSURE)
       my_real, DIMENSION(2) :: XX
       my_real yy
       TYPE (CLUSTER_) ,DIMENSION(*) :: CLUSTER
@@ -884,7 +885,6 @@ c
       TYPE(t_segvar)                                     :: SEGVAR
       TYPE(inter_struct_type), DIMENSION(:), ALLOCATABLE :: INTER_STRUCT   !   structure for interface
       TYPE(sorting_comm_type), DIMENSION(:), ALLOCATABLE :: SORT_COMM   ! structure for interface sorting comm
-      TYPE (LOADS_) ,INTENT(INOUT) :: LOADS
       TYPE (DYNAIN_DATABASE), INTENT(INOUT)              :: DYNAIN_DATA
       TYPE(USER_WINDOWS_),INTENT(INOUT)                  :: USER_WINDOWS
       TYPE(OUTPUT_),INTENT(INOUT)                        :: OUTPUT
@@ -1343,9 +1343,9 @@ C-----------------------------------------------------------
         NLOADP_HYD_INTER = 0  
         IERROR = 0
         IF(NINTLOADP > 0 ) THEN
-           ALLOCATE(LOADP_HYD_INTER(NLOADP_HYD),STAT=IERROR2)
+           ALLOCATE(LOADP_HYD_INTER(LOADS%NUM_PRESSURE),STAT=IERROR2)
            IERROR = IERROR + IERROR2
-           DO K=1,NLOADP_HYD
+           DO K=1,LOADS%NUM_PRESSURE
               IF(ILOADP(SIZLOADP*(K-1)+5) > 0 ) THEN
                  NLOADP_HYD_INTER = NLOADP_HYD_INTER + 1
                  LOADP_HYD_INTER(K) = NLOADP_HYD_INTER
@@ -1366,11 +1366,11 @@ C-----------------------------------------------------------
              ALLOCATE(TAGNCONT(0,0))
         ENDIF
 C
-        S_LOADPINTER = NINTER*NLOADP_HYD
+        S_LOADPINTER = NINTER*LOADS%NUM_PRESSURE
 C
         NPRESLOAD = 0 
-        IF(NLOADP_HYD > 0 ) THEN
-           DO  K=1,NLOADP_HYD
+        IF(LOADS%NUM_PRESSURE > 0 ) THEN
+           DO  K=1,LOADS%NUM_PRESSURE
               NPRESLOAD = NPRESLOAD + ILOADP(SIZLOADP*(K-1)+1)/4 
            ENDDO
            ALLOCATE(LOADP_TAGDEL(NPRESLOAD),STAT=IERROR2)  
@@ -1400,15 +1400,15 @@ C
         IF(OUTPUT%TH%TH_SURF%IOK > 0 ) THEN
            IF(OUTPUT%TH%TH_SURF%LOADP_FLAG > 0 ) THEN
              OUTPUT%TH%TH_SURF%NSEGLOADPF = 0
-             DO K=1,NLOADP_F
+             DO K=1,LOADS%NUM_PFLUID
                 OUTPUT%TH%TH_SURF%NSEGLOADPF = OUTPUT%TH%TH_SURF%NSEGLOADPF + ILOADP(SIZLOADP*(K-1)+1)/4 
              ENDDO
              OUTPUT%TH%TH_SURF%NSEGLOADPB = 0
-             DO K=NLOADP_F+1,NLOADP_B
+             DO K=LOADS%NUM_PFLUID+1,LOADS%NUM_PFLUID
                 OUTPUT%TH%TH_SURF%NSEGLOADPB = OUTPUT%TH%TH_SURF%NSEGLOADPB + ILOADP(SIZLOADP*(K-1)+1)/4 
              ENDDO
              OUTPUT%TH%TH_SURF%NSEGLOADP = 0
-             DO K=NLOADP_F+NLOADP_B+1,NLOADP
+             DO K=LOADS%NUM_PFLUID+LOADS%NUM_PBLAST+1,NLOADP
                 OUTPUT%TH%TH_SURF%NSEGLOADP = OUTPUT%TH%TH_SURF%NSEGLOADP + ILOADP(SIZLOADP*(K-1)+1)/4 
              ENDDO
            ENDIF
@@ -2059,7 +2059,7 @@ C
      3   IGRBRIC ,IGRQUAD  ,IGRSH4N  ,IGRSH3N  ,IGRTRUSS   ,
      4   IGRBEAM ,IGRSPRING,IGRPART  ,FORNEQS  ,INT7ITIED,
      5   FXVEL_FGEO,FAILWAVE,NLOC_DMG,PINCH_DATA ,SLLOADP,
-     6   TAGSLV_RBY,NFNCA2  ,NFTCA2  ,IN0 ,SORT_COMM,STACK,OUTPUT )
+     6   TAGSLV_RBY,NFNCA2  ,NFTCA2  ,IN0 ,SORT_COMM,STACK,OUTPUT ,LOADS%NUM_PBLAST)
 
 
 !$OMP END PARALLEL
@@ -3279,7 +3279,7 @@ C
 C-------------------------------------------------------------------
 C       LOAD PFLUID
 C-------------------------------------------------------------------
-        IF(NLOADP_F/=0.AND.IMPL_S/=1) THEN
+        IF(LOADS%NUM_PFLUID/=0.AND.IMPL_S/=1) THEN
           CALL TRACE_IN(10,0,ZERO)
         IF (IMON>0) CALL STARTIME(4,1)
         IF (IMONM > 0) CALL STARTIME(41,1)
@@ -3288,7 +3288,7 @@ C-------------------------------------------------------------------
      2                V       ,X       ,XFRAME     ,
      3                NSENSOR,SENSORS%SENSOR_TAB,TFEXC,IADS(I87M) ,
      4                FSKY    ,FSKY    ,LLOADP     ,FEXT     ,H3D_DATA   ,
-     5                OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP)
+     5                OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP, LOADS%NUM_PFLUID)
 !$OMP END PARALLEL
         IF (IMONM > 0) CALL STOPTIME(41,1)
         IF (IMON>0) CALL STOPTIME(4,1)
@@ -3298,7 +3298,7 @@ C-------------------------------------------------------------------
 C-------------------------------------------------------------------
 C       LOAD PBLAST
 C----------------------------------
-        IF(NLOADP_B/=0.AND.IMPL_S/=1) THEN
+        IF(LOADS%NUM_PBLAST/=0.AND.IMPL_S/=1) THEN
           CALL TRACE_IN(10,0,ZERO)
           IF (IMON>0) CALL STARTIME(4,1)
           IF (IMONM > 0) CALL STARTIME(41,1)
@@ -3319,12 +3319,21 @@ C----------------------------------
 C-------------------------------------------------------------------
 C       LOAD PCYL
 C----------------------------------
-        IF (LOADS%NLOAD_CYL > 0) THEN
+        IF (LOADS%NUM_PCYL > 0) THEN
           CALL PRESSURE_CYL(
      .         LOADS     ,TABLE     ,SENSORS%NSENSOR,SENSORS%SENSOR_TAB,IFRAME    ,
      .         DT1       ,X         ,V         ,A         ,FEXT      ,
      .         H3D_DATA  ,CPTREAC   ,FTHREAC   ,NODREAC   ,FSKY      )
-        ENDIF  
+        ENDIF
+C-------------------------------------------------------------------
+C       LOAD HISTORY
+C----------------------------------
+        IF (LOADS%NUM_HISTORY > 0) THEN
+          CALL PRESSURE_CYL(
+     .         LOADS     ,TABLE     ,SENSORS%NSENSOR,SENSORS%SENSOR_TAB,IFRAME    ,
+     .         DT1       ,X         ,V         ,A         ,FEXT      ,
+     .         H3D_DATA  ,CPTREAC   ,FTHREAC   ,NODREAC   ,FSKY      )
+        ENDIF
 c
         IF( NUMCONV + NUMRADIA > 0 .AND. ITHERM_FE > 0 )THEN
 
@@ -3921,9 +3930,9 @@ C----------------------------------------
      4      NPC    ,TF      ,FSKYI     ,ISKY      ,VR              ,
      5      FANI   ,IN      ,BUFSF     ,FANI(1,NFNCA+1) ,NSENSOR,
      6      FANI(1,NFTCA+1) ,ICONTACT  ,RCONTACT  ,NUM_IMPL(1,1),
-     7      NS_IMP(IADISK),NE_IMP(IADISK),NT_IMP  ,SENSORS%SENSOR_TAB,INTBUF_TAB ,
-     8      H3D_DATA      ,PSKIDS      ,TAGNCONT,KLOADPINTER,LOADPINTER,
-     9      LOADP_HYD_INTER)
+     7      NS_IMP(IADISK)  ,NE_IMP(IADISK),NT_IMP  ,SENSORS%SENSOR_TAB,INTBUF_TAB ,
+     8      H3D_DATA        ,PSKIDS      ,TAGNCONT,KLOADPINTER,LOADPINTER,
+     9      LOADP_HYD_INTER ,LOADS%NUM_PRESSURE)
 
         IF(DT2TT<DT2T)THEN
           DT2T = DT2TT
@@ -4078,7 +4087,7 @@ C Init var parallel SMP
      P     PSKIDS            ,T2MAIN_SMS   ,FORNEQS        ,KNOTLOCPC       ,KNOTLOCEL      ,
      Q     PINCH_DATA%APINCH(1,IDX_PINCH),PINCH_DATA%STIFPINCH(IDX_PINCH),T2FAC_SMS,TAGNCONT   ,
      R     KLOADPINTER       ,LOADPINTER     ,LOADP_HYD_INTER ,DGAPLOADINT    ,S_LOADPINTER    ,
-     S     INTERFACES        )
+     S     INTERFACES        ,LOADS%NUM_PRESSURE)
 
          IF(NINTSTAMP/=0.AND.(ANIM_V(12)+OUTP_V(12)+H3D_DATA%N_VECT_PCONT >0.OR.
      .          ANIM_V(4)+OUTP_V(4)+H3D_DATA%N_VECT_CONT >0))THEN
@@ -4161,7 +4170,7 @@ C
      6         ISLEN7T   ,IRLEN20 ,ISLEN20,IRLEN20T,ISLEN20T,
      7         IRLEN20E  ,ISLEN20E,CONDN  ,1, INTBUF_TAB    ,
      8         H3D_DATA, MULTI_FVM,TAGNCONT,KLOADPINTER,LOADPINTER,
-     9         LOADP_HYD_INTER,FSAV    ,INTERFACES)
+     9         LOADP_HYD_INTER,FSAV    ,INTERFACES, LOADS%NUM_PRESSURE)
            ELSE
 
              CALL SPMD_I7FCOM_PON(
@@ -4170,7 +4179,7 @@ C
      3         IXS       ,IXS(L3)  ,NISKYFIE  ,NBINT20   ,1       , 
      4         INTBUF_TAB,SFSKYI   ,SISKY     ,H3D_DATA  ,MULTI_FVM ,
      5         TAGNCONT  ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,FSAV,
-     6         INTERFACES)
+     6         INTERFACES,LOADS%NUM_PRESSURE)
 
              IF(MULTI_FVM%IS_INT18_LAW151) THEN
               IF(NTHREAD>1) CALL INT18_LAW151_OMP_ACCUMULATION( MULTI_FVM )
@@ -4767,7 +4776,7 @@ C
      3         IXS       ,IXS(L3)  ,NISKYFIE  ,NBINT20   ,2       , 
      4         INTBUF_TAB,SFSKYI   ,SISKY     ,H3D_DATA  ,MULTI_FVM ,
      5         TAGNCONT  ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,FSAV,
-     6         INTERFACES)
+     6         INTERFACES,LOADS%NUM_PRESSURE)
           END IF
 
 C
@@ -4790,7 +4799,7 @@ C
        ENDIF
 !   ----------------------------------
 
-       IF(NLOADP_HYD/=0.AND.IMPL_S/=1) THEN
+       IF(LOADS%NUM_PRESSURE/=0.AND.IMPL_S/=1) THEN
           FEXT = ZERO
           CALL TRACE_IN(10,0,ZERO)
           IF (IMON>0) CALL STARTIME(4,1)
@@ -4800,7 +4809,7 @@ C
      3                          IADS(I87M),FSKY      ,FANI(1,1+NFEA),TAGNCONT ,NSENSOR   ,
      4                          LOADP_HYD_INTER,H3D_DATA ,
      5                          NPRESLOAD ,LOADP_TAGDEL,OUTPUT%TH%TH_SURF,FSAVSURF,
-     6                          NSEG_LOADP )
+     6                          NSEG_LOADP,LOADS )
 
           IF (IMONM > 0) CALL STOPTIME(41,1)
            IF (IMON>0) CALL STOPTIME(4,1)
@@ -5489,11 +5498,11 @@ C WA local  : utilise de 1 a NUMNOD
    
         IF (PDEL>0.AND.IDEL7NOK==1) THEN
           CALL CHKLOAD(
-     1       IBCL    ,IXS     ,IXQ         ,IXC    ,IXT        ,IXP     ,
-     2       IXR     ,IXTG    ,WA(NUMNOD+1),ITSK   ,WA(NWAFTSK),ITAB    ,
-     3       ITABM1  ,ADDCNEL ,CNEL        ,TAGEL  ,IPARG      ,GEO     ,
-     4       IBUFPDEL,NINDEXPDEL,NINDEXP   ,NPRESLOAD,LOADP_TAGDEL      ,
-     5       ILOADP  ,LLOADP  ,IAD_ELEM)
+     1       IBCL    ,IXS       ,IXQ         ,IXC         ,IXT        ,IXP     ,
+     2       IXR     ,IXTG      ,WA(NUMNOD+1),ITSK        ,WA(NWAFTSK),ITAB    ,
+     3       ITABM1  ,ADDCNEL   ,CNEL        ,TAGEL       ,IPARG      ,GEO     ,
+     4       IBUFPDEL,NINDEXPDEL,NINDEXP     ,NPRESLOAD   ,LOADP_TAGDEL      ,
+     5       ILOADP  ,LLOADP    ,IAD_ELEM    ,LOADS%NUM_PRESSURE)
 
         ENDIF
 
@@ -5765,7 +5774,8 @@ C===============================================================================
      6     IGRV ,LGRAV,SENSORS%SENSOR_TAB,A     ,AR   ,
      7     FSAV  ,STIFN ,STIFR,FANI(1,1+NFOA),WEIGHT,
      8     DMAS  ,DINER ,BUFSF,FR_RBY2,PARTSAV ,
-     9     IPART ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY)
+     9     IPART ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY,
+     +     LOADS%NUM_CENTRI)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -7235,7 +7245,7 @@ C----------------------
 C----------------------
 C         CENTRIFUGAL FORCES
 C----------------------
-         IF (NLOADC>0) THEN
+         IF (LOADS%NUM_CENTRI>0) THEN
           IF (IMON>0) CALL STARTIME(4,1)
           
 C========================================================================================
@@ -7246,7 +7256,7 @@ C===============================================================================
           ITSK = OMP_GET_THREAD_NUM()
           CALL CFIELD_1(ICFIELD  ,CFIELD,NPC   ,TF    ,A,
      2                    V     ,X     ,XFRAME  ,MS,SENSORS%SENSOR_TAB,
-     3                    WEIGHT,LCFIELD,ITSK ,IFRAME,NSENSOR)
+     3                    WEIGHT,LCFIELD,ITSK ,IFRAME,NSENSOR,LOADS%NUM_CENTRI)
 !$OMP END PARALLEL
 
           IF (IMON>0) CALL STOPTIME(4,1)
@@ -8681,7 +8691,7 @@ C===============================================================================
      O  FRWL6  ,IRBE2  ,LRBE2 ,ICFIELD,LCFIELD,CFIELD,ELBUF_TAB,
      P  WEIGHT_MD, STACK,SENSORS%SFSAV,SENSORS%FSAV,SENSORS%STABSEN,SENSORS%TABSENSOR,DRAPE_SH4N  , 
      Q  DRAPE_SH3N,H3D_DATA ,NDDL0,NNZK0,IMPBUF_TAB,CPTREAC,FTHREAC,NODREAC,
-     R  DRAPEG ,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP)
+     R  DRAPEG ,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP,LOADS%NUM_CENTRI)
          MSTOP=2
 #else
         WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
@@ -8722,7 +8732,7 @@ C----       10,11,12:ELBUF_C,BUFMAT_C,X_C,13,14:DD,DDR,15,16:X_ac,V_zero,23,24:A
      Y  SENSORS%SFSAV,SENSORS%FSAV,SENSORS%STABSEN,SENSORS%TABSENSOR,DRAPE_SH4N  , DRAPE_SH3N,
      Z  H3D_DATA,MULTI_FVM,IGRBRIC,IGRSH4N,IGRSH3N,IGRBEAM,FORNEQS,MAXDGAP,
      A  NDDL0   ,NNZK0 ,IT_T   ,IMPBUF_TAB,CPTREAC,FTHREAC,NODREAC, DRAPEG,
-     B  INTERFACES,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP)
+     B  INTERFACES,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP,LOADS%NUM_CENTRI)
 #else 
         WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
         CALL FLUSH(6)
@@ -9365,9 +9375,9 @@ C thermal boundary
               CALL PLYXFEM_WRESTANIM()
               CALL PLYXFEM_WRAVUPLY()
             ENDIF
-            IF (NLOADC > 0) CALL WRITE_DB(CFIELD,LFACLOAD*NLOADC)
+            IF (LOADS%NUM_CENTRI > 0) CALL WRITE_DB(CFIELD,LFACLOAD*LOADS%NUM_CENTRI)
             IF (NLOADP > 0) CALL WRITE_DB(LOADP,LFACLOAD*NLOADP)
-            IF (NINTLOADP > 0) CALL WRITE_DB(DGAPLOADINT,NINTER*NLOADP_HYD)
+            IF (NINTLOADP > 0) CALL WRITE_DB(DGAPLOADINT,NINTER*LOADS%NUM_PRESSURE)
 
 c-------------------------------
 C xfem for layerd shell (cracks)
@@ -9637,9 +9647,9 @@ C
             CALL PLYXFEM_WRESTANIM()
             CALL PLYXFEM_WRAVUPLY()
           ENDIF  
-          IF (NLOADC > 0) CALL WRITE_DB(CFIELD,LFACLOAD*NLOADC)
+          IF (LOADS%NUM_CENTRI > 0) CALL WRITE_DB(CFIELD,LFACLOAD*LOADS%NUM_CENTRI)
           IF (NLOADP > 0) CALL WRITE_DB(LOADP,LFACLOAD*NLOADP)
-          IF (NINTLOADP > 0) CALL WRITE_DB(DGAPLOADINT,NINTER*NLOADP_HYD)
+          IF (NINTLOADP > 0) CALL WRITE_DB(DGAPLOADINT,NINTER*LOADS%NUM_PRESSURE)
 c-------------------------------
 C xfem for layerd shell (cracks)
 c-------------------------------
@@ -9774,9 +9784,9 @@ C ply xfem (composites)
               CALL PLYXFEM_WRESTANIM()
               CALL PLYXFEM_WRAVUPLY()
              ENDIF 
-          IF (NLOADC > 0) CALL WRITE_DB(CFIELD,LFACLOAD*NLOADC)
+          IF (LOADS%NUM_CENTRI > 0) CALL WRITE_DB(CFIELD,LFACLOAD*LOADS%NUM_CENTRI)
           IF (NLOADP > 0) CALL WRITE_DB(LOADP,LFACLOAD*NLOADP)
-          IF (NINTLOADP > 0) CALL WRITE_DB(DGAPLOADINT,NINTER*NLOADP_HYD)
+          IF (NINTLOADP > 0) CALL WRITE_DB(DGAPLOADINT,NINTER*LOADS%NUM_PRESSURE)
 c-------------------------------
 C xfem for layerd shell (cracks)
           IF (ICRACK3D > 0) THEN
@@ -9929,7 +9939,7 @@ C
         IF(ALLOCATED(ALEFVM_Buffer%F_FACE))           DEALLOCATE (ALEFVM_Buffer%F_FACE)
 
         !/LOAD/PBLAST
-        CALL PBLAST_DEALLOCATE(PBLAST_TAB)
+        CALL PBLAST_DEALLOCATE(PBLAST_TAB,LOADS)
 
 C--     Rad2rad deallocation
         IF(ALLOCATED(IADD_NL))          DEALLOCATE (IADD_NL)

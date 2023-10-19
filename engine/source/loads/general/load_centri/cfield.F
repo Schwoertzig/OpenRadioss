@@ -32,7 +32,7 @@ Chd|        SENSOR_MOD                    share/modules/sensor_mod.F
 Chd|====================================================================
       SUBROUTINE CFIELD_1(ICFIELD  ,FAC   ,NPC   ,TF    ,A ,
      2                  V     ,X     ,XFRAME  ,MS,SENSOR_TAB,
-     3                  WEIGHT,IB,ITASK,IFRAME,NSENSOR)
+     3                  WEIGHT,IB,ITASK,IFRAME,NSENSOR,NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------  
@@ -62,6 +62,7 @@ C     REAL
      .   FAC(LFACLOAD,*), TF(*), A(3,*), V(3,*), MS(*),
      .   X(3,*), XFRAME(NXFRAME,*)
       TYPE (SENSOR_STR_) ,DIMENSION(NSENSOR) ,INTENT(IN) :: SENSOR_TAB
+      INTEGER,INTENT(IN)::NUM_LOAD_CENTRI
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -80,7 +81,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C
       TFEXTT = ZERO
-      DO NL=1,NLOADC
+      DO NL=1,NUM_LOAD_CENTRI
       NN   = ICFIELD(1,NL)
       IDIR = ICFIELD(2,NL)
       IFUNC= ICFIELD(3,NL)

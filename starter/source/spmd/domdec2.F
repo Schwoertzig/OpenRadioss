@@ -1586,7 +1586,7 @@ C--------------------------------------
 !   /LOAD/PCYL : add 1 contribution per node per segment
 !   ------------
     ! loop over the /LOAD/PCYL
-      DO I=1,LOADS%NLOAD_CYL
+      DO I=1,LOADS%NUM_PCYL
             NUMBER_SEGMENT = LOADS%LOAD_CYL(I)%NSEG ! number of segment for the PCYL I
             ! ------------
             DO J=1,NUMBER_SEGMENT ! loop over the segments of the surface
@@ -2773,7 +2773,7 @@ C-----------------------------------------------
 !   ------------
     ! loop over the /LOAD/PCYL
       LOCAL_SEGMENT = 0
-      DO I=1,LOADS%NLOAD_CYL
+      DO I=1,LOADS%NUM_PCYL
             NUMBER_SEGMENT = LOADS%LOAD_CYL(I)%NSEG ! number of segment for the PCYL I
             ! ------------
             ! loop over the segments of the surface to find where the node are defined 

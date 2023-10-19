@@ -69,7 +69,8 @@ Chd|====================================================================
      C    INTTH       ,DRAD     ,FHEATS    ,FHEATM     ,QFRIC     ,
      D    EFRICT      ,TAGNCONT ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,
      E    TYPSUB      ,NCFIT    ,NINLOADP  ,DGAPLOADINT,S_LOADPINTER,
-     F    DIST        ,DGAPLOADPMAX,INTEREFRIC,INTCAREA,PARAMETERS)
+     F    DIST        ,DGAPLOADPMAX,INTEREFRIC,INTCAREA,PARAMETERS,
+     G    NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -108,6 +109,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,JLT,IBCC,IBCM,IBCS,IVIS2,INACTI,IBAG,NIN,
      .        NSN,IORTHFRIC,NFORTH ,NFISOT,
      .        ICODT(*), ITAB(*), KINET(*),IRTLM(4,NSN),
@@ -125,7 +127,7 @@ C-----------------------------------------------
      .        INDEXORTH(MVSIZ)  ,INDEXISOT(MVSIZ),TYPSUB(*),NCFIT
       INTEGER  , INTENT(IN) :: NINLOADP,S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: INTEREFRIC, INTCAREA
       my_real
      .   STIGLO, X(3,*),

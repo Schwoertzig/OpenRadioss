@@ -1621,8 +1621,9 @@ C counts LLCFIELD
 C--------------------------------------
       LLCFIELD_L=0
       LLLOADP_L=0
-      IF (NLOADC>0)
-     .  CALL C_ICFIELD(ICFIELD,LCFIELD,LLCFIELD_L,P-1)
+      IF (LOADS%NUM_CENTRI > 0)THEN
+        CALL C_ICFIELD(ICFIELD,LCFIELD,LLCFIELD_L,P-1,LOADS%NUM_CENTRI)
+      ENDIF
       IF (NLOADP>0) THEN
         CALL C_ILOADP(ILOADP,LLOADP,LLLOADP_L,P-1)
         NISKY0_L=NISKY0_L+4*LLLOADP_L
@@ -1753,7 +1754,7 @@ C--------------------------------------------
      2   NE_NSVOIS, NE_NQVOIS, NE_NTGVOIS,NBCSCYC_L,LLBCSCYC_L,
      3   ALE_CONNECTIVITY,N_SLIPRING_L,N_RETRACTOR_L,N_ANCHOR_REMOTE_L,
      4   N_ANCHOR_REMOTE_SEND_L,N_SEATBELT_L,N_SEATBELT_2D_L,DYNAIN_DATA,
-     5   NUMSH4N_L,NUMSH3N_L,INTERFACES%PARAMETERS,SENSORS,LOADS_PER_PROC%NLOAD_CYL)
+     5   NUMSH4N_L,NUMSH3N_L,INTERFACES%PARAMETERS,SENSORS,LOADS_PER_PROC%NUM_PCYL ,LOADS)
      
 
       CALL WRCOMR(LMXVREA,LVARREA,TABVREA,MSNDP(P),P,INTERFACES%PARAMETERS)
@@ -2598,20 +2599,27 @@ C-------------------------------------------
 C--------------------------------------
 C ICFIELD
 C--------------------------------------
-      IF (NLOADC>0)CALL W_ICFIELD(ICFIELD,LCFIELD,NODLOCAL,P-1,LLCFIELD_L,LEN_IA,P,NUMNOD_L)
+      IF (LOADS%NUM_CENTRI>0)CALL W_ICFIELD(ICFIELD,LCFIELD,NODLOCAL,P-1,LLCFIELD_L,LEN_IA,P,NUMNOD_L,LOADS%NUM_CENTRI)
       IF (NLOADP>0)CALL W_ILOADP(ILOADP,LLOADP,NODLOCAL,P-1,LLLOADP_L,LEN_IA,P,CEP,ITAB)
 C--------------------------------------------
 C LOAD/PBLAST
 C--------------------------------------------
-      IF(NLOADP_B>0)THEN
-        CALL PBLAST_WRITE_STARTER(PBLAST_TAB,P-1,CEP)
+      IF(LOADS%NUM_PBLAST>0)THEN
+        CALL PBLAST_WRITE_STARTER(PBLAST_TAB,P-1,CEP,LOADS)
       ENDIF
 C
 C--------------------------------------------
 C LOAD/PCYL
 C--------------------------------------------
-      IF (LOADS_PER_PROC%NLOAD_CYL > 0) THEN
-        CALL WRITE_PCYL(LOADS_PER_PROC%LOAD_CYL,LOADS_PER_PROC%NLOAD_CYL,NODLOCAL)
+      IF (LOADS_PER_PROC%NUM_PCYL > 0) THEN
+        CALL WRITE_PCYL(LOADS_PER_PROC%LOAD_CYL,LOADS_PER_PROC%NUM_PCYL,NODLOCAL)
+      ENDIF
+
+C--------------------------------------------
+C LOAD/HISTORY
+C--------------------------------------------
+      IF (LOADS%NUM_HISTORY > 0) THEN
+        CALL WRITE_RESTART_LOAD_HISTORY(LOADS,0)
       ENDIF
 C
 C--------------------------------------
@@ -3356,16 +3364,14 @@ C plyxfem velocity, displacement
          CALL W_AVUPLY(NUMNODPXFE_L,LEN_AM)
        ENDIF
 C--------------------------------------------
-C LOAD/C
+C LOAD/CENTRI
 C--------------------------------------------
-      IF(NLOADC>0)
-     .  CALL WRITE_DB(CFIELD,LFACLOAD*NLOADC)
-      LEN_AM = LEN_AM + LFACLOAD*NLOADC
+      IF(LOADS%NUM_CENTRI > 0)CALL WRITE_DB(CFIELD,LFACLOAD*LOADS%NUM_CENTRI)
+      LEN_AM = LEN_AM + LFACLOAD*LOADS%NUM_CENTRI
 C--------------------------------------------
 C LOAD/PFLUID
 C--------------------------------------------
-      IF(NLOADP>0)
-     .  CALL WRITE_DB(LOADP,LFACLOAD*NLOADP)
+      IF(NLOADP>0)CALL WRITE_DB(LOADP,LFACLOAD*NLOADP)
       LEN_AM = LEN_AM + LFACLOAD*NLOADP
 C--------------------------------------------
 C LOAD/PRESSURE interfaces : Gaps

@@ -32,11 +32,13 @@ Chd|====================================================================
      3                            IBCR      ,FRADIA    ,IBCV      ,FCONV     , IGRV     ,
      4                            LGRV      ,AGRV      ,ICFIELD   ,LCFIELD   ,CFIELD    ,
      5                            IPRELOAD  ,PRELOAD   ,IFLAG_BPRELOAD, 
-     6                            LIFLOW, LRFLOW, IFLOW,RFLOW     ,ISPHIO    ,VSPHIO    )
+     6                            LIFLOW    ,LRFLOW    ,IFLOW     ,RFLOW     ,ISPHIO    ,
+     7                            VSPHIO    ,LOADS    )
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE QA_OUT_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -56,6 +58,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER, INTENT(IN) :: NOM_OPT(LNOPT1,SNOM_OPT1), INOM_OPT(SINOM_OPT)
+      TYPE(LOADS_), INTENT(IN) :: LOADS
 C-----------------------------------------------
 C      NOM_OPT(LNOPT1,SNOM_OPT1) 
 C         * Possibly, NOM_OPT(1) = ID
@@ -106,14 +109,14 @@ C      INOM_OPT(31)= INOM_OPT(30)+ NRBMERGE
 C      .. TO BE MAINTAINED (cf doc/inom_opt.txt) ..
 C-----------------------------------------------
       INTEGER, INTENT(IN) :: NUMLOADP, ILOADP(SIZLOADP,NLOADP), LLOADP(NUMLOADP)
-      INTEGER, INTENT(IN) :: ICFIELD(SIZFIELD,NLOADC), LCFIELD(SLCFIELD)
+      INTEGER, INTENT(IN) :: ICFIELD(SIZFIELD,LOADS%NUM_CENTRI), LCFIELD(SLCFIELD)
       INTEGER, INTENT(IN) :: IBCL(NIBCLD,NCONLD-NPRELD), IPRES(NIBCLD,NPRELD)
       INTEGER, INTENT(IN) :: IBCR(NIRADIA,NUMRADIA)
       INTEGER, INTENT(IN) :: IBCV(NICONV,NUMCONV)
       INTEGER, INTENT(IN) :: IGRV(NIGRV,NGRAV), LGRV(*)
       INTEGER, INTENT(IN) :: IPRELOAD(3,*), IFLAG_BPRELOAD(NUMELS)
       my_real, INTENT(IN) ::
-     .                       LOADP(LFACLOAD,NLOADP), CFIELD(LFACLOAD,NLOADC),
+     .                       LOADP(LFACLOAD,NLOADP), CFIELD(LFACLOAD,LOADS%NUM_CENTRI),
      .                       FORC(LFACCLD,NCONLD-NPRELD), PRES(LFACCLD,NPRELD),
      .                       AGRV(LFACGRV,NGRAV),PRELOAD(6,*) 
       my_real, INTENT(IN) ::  
@@ -141,7 +144,7 @@ C-----------------------------------------------
 C     /LOAD/CENTRI
 C-----------------------------------------------
       IF (MYQAKEY('/LOAD/CENTRI')) THEN
-        DO MY_LOAD=1,NLOADC
+        DO MY_LOAD=1,LOADS%NUM_CENTRI
 C
 C         Title of the option was not stored in NOM_OPT ... TBD
           TITR(1:nchartitle)=''
@@ -177,7 +180,7 @@ C             VARNAME: variable name in ref.extract (without blanks)
             END IF
           END DO
 C
-        END DO ! MY_LOAD=1,NLOADC
+        END DO ! MY_LOAD=1,LOADS%NUM_CENTRI
       END IF
 C-----------------------------------------------
 C     /LOAD/PFLUID & /LOAD/PBLAST  & /LOAD/PRESSURE
@@ -189,15 +192,15 @@ C-----------------------------------------------
         IF(MYQAKEY('/LOAD/PFLUID'))THEN
           !output pfluid only
           IOPT_FIRST = 1
-          IOPT_LAST = NLOADP_F
+          IOPT_LAST = LOADS%NUM_PFLUID
         ELSEIF(MYQAKEY('/LOAD/PBLAST'))THEN
           !output pblast only
-          IOPT_FIRST = 1+NLOADP_F
-          IOPT_LAST = NLOADP_F+NLOADP_B
+          IOPT_FIRST = 1+LOADS%NUM_PFLUID
+          IOPT_LAST = LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
         ELSEIF(MYQAKEY('/LOAD/PRESSURE'))THEN
           !output pressure only
-          IOPT_FIRST = 1+NLOADP_F+NLOADP_B
-          IOPT_LAST = NLOADP_F+NLOADP_B+NLOADP_HYD
+          IOPT_FIRST = 1+LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
+          IOPT_LAST = LOADS%NUM_PFLUID+LOADS%NUM_PBLAST+LOADS%NUM_PRESSURE
         ENDIF
             
         !common procedure for /LOAD/PFLUID, /LOAD/PBLAST, /LOAD/PRESSURE options.

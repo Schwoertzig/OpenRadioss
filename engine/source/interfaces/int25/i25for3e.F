@@ -56,7 +56,7 @@ Chd|====================================================================
      H                  ILEV   ,EBINFLG ,EDGE_ID,FRICC  ,IFQ    ,
      I                  CAND_FX  ,CAND_FY,CAND_FZ ,IFPEN,
      J                  TAGNCONT ,KLOADPINTER,LOADPINTER ,LOADP_HYD_INTER,
-     K                  TYPSUB   ,STARTT ,NINLOADP  ,DGAPLOADINT,S_LOADPINTER)
+     K                  TYPSUB   ,STARTT ,NINLOADP  ,DGAPLOADINT,S_LOADPINTER,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -92,6 +92,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,JLT,IBC,IVIS2,INACTI,NEDGE,NISKYFIE,NIN,ILEV,
      .        IFQ
       INTEGER ICODT(*), ITAB(*), ISKY(*),
@@ -105,7 +106,7 @@ C-----------------------------------------------
       INTEGER :: EDGE_ID(2,MVSIZ)
       INTEGER  , INTENT(IN) :: NINLOADP,S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       my_real
      .   STIGLO,
      .   A(3,*), MS(*), V(3,*), FSAV(*),FCONT(3,*),

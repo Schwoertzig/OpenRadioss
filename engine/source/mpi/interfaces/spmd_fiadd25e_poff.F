@@ -38,7 +38,7 @@ Chd|====================================================================
      4       FCONT ,INACTI  ,IADM   ,INTTH  ,FTHE    ,
      5       CONDN ,H3D_DATA, MULTI_FVM,LEDGE,NEDGE  ,
      6       NIN   ,TAGNCONT,KLOADPINTER,LOADPINTER  ,
-     7       LOADP_HYD_INTER)
+     7       LOADP_HYD_INTER,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -66,11 +66,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER NB, LEN, IBC  ,ISECIN  ,IBAG , NOINT, INACTI,NIN,
      .        NSV(*), ICODT(*), NSTRF(*),ICONTACT(*),
      .        TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NLOADP_HYD),
-     .        LOADP_HYD_INTER(NLOADP_HYD),
+     .        KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NUM_LOAD_PRESSURE),
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE),
      .        IADM,INTTH
       my_real
      .        BUFR(LEN,*), A(3,*), STIFN(*), VISCN(*),

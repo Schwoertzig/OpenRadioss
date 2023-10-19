@@ -520,7 +520,7 @@ C--------------------------------------
 
         IF (NINTLOADP>0) THEN
             CALL WRITE_I_C(KLOADPINTER, NINTER+1)
-            CALL WRITE_I_C(LOADPINTER,NINTER*NLOADP_HYD)
+            CALL WRITE_I_C(LOADPINTER,NINTER*LOADS%NUM_PRESSURE)
         ENDIF
 
         CALL WRITE_I_C(IBFV,SIBFV)
@@ -907,21 +907,28 @@ C--------------------------------------
 C--------------------------------------
       CALL WRITE_I_C(ITHVAR,SITHVAR)
 C--------------------------------------
-      IF (NLOADC>0)THEN
-        CALL WRITE_I_C(ICFIELD,SIZFIELD*NLOADC)
+      ! /LOAD/CENTRI
+      IF (LOADS%NUM_CENTRI>0)THEN
+        CALL WRITE_I_C(ICFIELD,SIZFIELD*LOADS%NUM_CENTRI)
         CALL WRITE_I_C(LCFIELD,SLCFIELD)
       ENDIF
+      ! /PLOAD      
       IF (NLOADP>0)THEN
         CALL WRITE_I_C(ILOADP,SIZLOADP*NLOADP)
         CALL WRITE_I_C(LLOADP,SLLOADP)
       ENDIF
-      IF (NLOADP_B>0)THEN
-        CALL PBLAST_WRITE_ENGINE(PBLAST_TAB)
+      ! /LOAD/PBLAST      
+      IF (LOADS%NUM_PBLAST>0)THEN
+        CALL PBLAST_WRITE_ENGINE(PBLAST_TAB,LOADS)
       ENDIF
-C--------------------------------------
-      IF (LOADS%NLOAD_CYL > 0) THEN
+      ! /LOAD/PCYL
+      IF (LOADS%NUM_PCYL > 0) THEN
         CALL WRITE_PCYL(LOADS)
       ENDIF
+      ! /LOAD/HISTORY
+      IF (LOADS%NUM_HISTORY > 0) THEN
+        CALL WRITE_RESTART_LOAD_HISTORY(LOADS,ISPMD)
+      ENDIF      
 C--------------------------------------
       IF(ICRACK3D > 0)THEN
         CALL WRITE_I_C(IBORDNODE,SIBORDNODE)

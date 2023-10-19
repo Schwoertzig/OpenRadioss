@@ -50,7 +50,7 @@ Chd|====================================================================
      K                LISUBM   ,LISUB   ,FSAVSUB   ,FRICC   ,VISCFFRIC,
      L                TAGNCONT ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,
      M                TYPSUB   ,INFLG_SUBS  ,INFLG_SUBM,NINLOADP     ,
-     N                DGAPLOADINT,S_LOADPINTER )
+     N                DGAPLOADINT,S_LOADPINTER,NUM_LOAD_PRESSURE )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -82,6 +82,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,JLT,IBC,IVIS2,INACTI,NRTS,NIN,INTTH
       INTEGER ITAB(*),
      .        NOINT,NEWFRONT,NISUB,NFT
@@ -92,8 +93,7 @@ C-----------------------------------------------
      .        TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
      .        TYPSUB(*),INFLG_SUBS(*), INFLG_SUBM(*)
       INTEGER  , INTENT(IN) :: NINLOADP,S_LOADPINTER
-      INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
+      INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       my_real
      .    MS(*), FSAV(*),
      .   STFS(*),GAPV(*),

@@ -165,7 +165,7 @@ Chd|====================================================================
      Y  DIMFB  ,FBSAV6 ,STABSEN,TABSENSOR,DRAPE_SH4N, DRAPE_SH3N,
      Z  H3D_DATA,MULTI_FVM,IGRBRIC,IGRSH4N,IGRSH3N,IGRBEAM,FORNEQS,MAXDGAP,
      A  NDDL0   ,NNZK0 ,IT_T    ,IMPBUF_TAB,CPTREAC,FTHREAC,NODREAC, DRAPEG,
-     B  INTERFACES,TH_SURF ,FSAVSURF,NSEG_LOADP) 
+     B  INTERFACES,TH_SURF ,FSAVSURF,NSEG_LOADP,NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -246,6 +246,7 @@ C-----------------------------------------------
      .        ISLEN17,IRLEN17,IRLEN7T,ISLEN7T,
      .        IRLEN20,ISLEN20,IRLEN20T,ISLEN20T,IRLEN20E,ISLEN20E,
      .        KINET(*),NUM_IMP1(*),IRBE3(*),LRBE3(*),IRBE2(*),LRBE2(*)
+      INTEGE,INTENT(IN) :: NUM_LOAD_CENTRI
 C     REAL
       my_real
      .  DT2PREV,VOLMON(*) ,TEMP(*),
@@ -578,7 +579,7 @@ C---------no //SMP for the moment, add it after----
      2                    V     ,X     ,XFRAME  ,MS,TFEXC,
      3                    NSENSOR,SENSOR_TAB,WEIGHT,IFRAME,
      4                    LCFIELD ,ITASK,
-     5                    NRBYAC,IRBYAC,NPBY  ,RBY,ISKEW    )
+     5                    NRBYAC,IRBYAC,NPBY  ,RBY,ISKEW ,NUM_LOAD_CENTRI   )
           IF (IMON>0) CALL STOPTIME(4,1)
          ENDIF
 
@@ -3135,7 +3136,7 @@ c     K  IND_IMP,NDOFI  ,IDDLI  ,NKUD   ,IKUD   ,BKUD   ,I_IMP  ,R_IMP  ,
      N  FRWL6  ,IRBE2  ,LRBE2  ,ICFIELD,LCFIELD,CFIELD,ELBUF_TAB,WEIGHT_MD,
      O  STACK  ,DIMFB  ,FBSAV6 ,STABSEN,TABSENSOR,DRAPE_SH4N,DRAPE_SH3N,H3D_DATA,
      P  NDDL0  ,NNZK0  ,IMPBUF_TAB,CPTREAC,FTHREAC,NODREAC,DRAPEG,TH_SURF ,
-     Q  FSAVSURF,NSEG_LOADP) 
+     Q  FSAVSURF,NSEG_LOADP,NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -3184,6 +3185,8 @@ C-----------------------------------------------
      .   DIMFB,STABSEN,TABSENSOR(*),CPTREAC,NODREAC(*)
       INTEGER LPRW(*), FR_WALL(NSPMD+2,*), FR_ELEM(*),
      .   IAD_ELEM(2,*),NBINTC ,INTLIST(*),DIRUL(*)
+
+      INTEGER,INTENT(IN) :: NUM_LOAD_CENTRI
 C     REAL
       my_real
      .   X(3,*)    ,D(3,*)      ,V(3,*)   ,VR(3,*),DAMP(*),
@@ -3373,7 +3376,7 @@ c          CALL MY_BARRIER
      2                    V     ,X     ,XFRAME  ,MS,TFEXC,
      3                    NSENSOR,SENSOR_TAB,WEIGHT,IFRAME,
      4                    LCFIELD ,ITASK,
-     5                    NRBYAC,IRBYAC,NPBY  ,RBY,ISKWN    )
+     5                    NRBYAC,IRBYAC,NPBY  ,RBY,ISKWN ,NUM_LOAD_CENTRI    )
          ENDIF
 C-------------dU_d---------------------------------
          IF(NFXVEL/=0.AND.IMCONV==1) THEN

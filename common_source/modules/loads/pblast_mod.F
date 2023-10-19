@@ -133,11 +133,12 @@ Chd|        READ_I_C                      engine/source/output/tools/sortie_c.c
 Chd|        MESSAGE_MOD                   starter/share/message_module/message_mod.F
 Chd|        MESSAGE_MOD                   engine/share/message_module/message_mod.F
 Chd|====================================================================
-      SUBROUTINE PBLAST_LOAD(PBLAST_TAB)
+      SUBROUTINE PBLAST_LOAD(PBLAST_TAB, LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -151,6 +152,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(PBLAST_STRUCT_),INTENT(INOUT), ALLOCATABLE,DIMENSION(:) :: PBLAST_TAB
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -161,31 +163,31 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   P r e - C o n d i t i o n
 C-----------------------------------------------
-      IF(NLOADP_B<=0)RETURN
+      IF(LOADS%NUM_PBLAST <= 0)RETURN
 C-----------------------------------------------
 C   S o u r c e   C o d e
 C-----------------------------------------------
-      ALLOCATE (PBLAST_TAB(NLOADP_B),STAT=IERR1); IF (IERR1/=0) GOTO 1000
+      ALLOCATE (PBLAST_TAB(LOADS%NUM_PBLAST),STAT=IERR1); IF (IERR1/=0) GOTO 1000
       CALL READ_DB(TMP,1)
       PBLAST_DT%TA_INF = TMP(1)
       !--------------------------------------
       !     READING NUMBER OF LOCAL SEGMENTS
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         CALL READ_I_C(PBLAST_TAB(I)%SIZ,1)
         PBLAST_TAB(I)%IS_RESET = .FALSE.
       ENDDO
       !--------------------------------------
       !     READING MINIMUM TIME STEP
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         CALL READ_DB(TMP,1)
         PBLAST_TAB(I)%DTMIN = TMP(1)
       ENDDO
       !--------------------------------------
       !     READING REAL BUFFER (local segments only)
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         SIZ = PBLAST_TAB(I)%SIZ
         ALLOCATE ( PBLAST_TAB(I)%cos_theta(SIZ),STAT=IERR1); IF (IERR1/=0) GOTO 1000
         ALLOCATE ( PBLAST_TAB(I)%P_inci(SIZ),STAT=IERR1); IF (IERR1/=0) GOTO 1000
@@ -234,11 +236,12 @@ Chd|-- calls ---------------
 Chd|        MESSAGE_MOD                   starter/share/message_module/message_mod.F
 Chd|        MESSAGE_MOD                   engine/share/message_module/message_mod.F
 Chd|====================================================================
-      SUBROUTINE PBLAST_DEALLOCATE(PBLAST_TAB)
+      SUBROUTINE PBLAST_DEALLOCATE(PBLAST_TAB, LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -252,6 +255,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(PBLAST_STRUCT_),INTENT(INOUT), ALLOCATABLE,DIMENSION(:) :: PBLAST_TAB
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -259,11 +263,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   P r e - C o n d i t i o n
 C-----------------------------------------------
-      IF(NLOADP_B<=0)RETURN
+      IF(LOADS%NUM_PBLAST <= 0)RETURN
 C-----------------------------------------------
 C   S o u r c e   C o d e
 C-----------------------------------------------
-      DO II=1,NLOADP_B
+      DO II=1,LOADS%NUM_PBLAST
         IF(ALLOCATED( PBLAST_TAB(II)%cos_theta ))  DEALLOCATE ( PBLAST_TAB(II)%cos_theta )
         IF(ALLOCATED( PBLAST_TAB(II)%P_inci ))     DEALLOCATE ( PBLAST_TAB(II)%P_inci )
         IF(ALLOCATED( PBLAST_TAB(II)%P_refl ))     DEALLOCATE ( PBLAST_TAB(II)%P_refl )
@@ -297,11 +301,12 @@ Chd|        WRITE_I_C                     engine/source/output/tools/sortie_c.c
 Chd|        MESSAGE_MOD                   starter/share/message_module/message_mod.F
 Chd|        MESSAGE_MOD                   engine/share/message_module/message_mod.F
 Chd|====================================================================
-      SUBROUTINE PBLAST_WRITE_STARTER(PBLAST_TAB,PROC,CEP)
+      SUBROUTINE PBLAST_WRITE_STARTER(PBLAST_TAB,PROC,CEP,LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -318,6 +323,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(PBLAST_STRUCT_),INTENT(INOUT), ALLOCATABLE,DIMENSION(:) :: PBLAST_TAB
       INTEGER,INTENT(IN)::PROC,CEP(SCEP)
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -328,7 +334,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   P r e - C o n d i t i o n
 C-----------------------------------------------
-      IF(NLOADP_B<=0)RETURN
+      IF(LOADS%NUM_PBLAST<=0)RETURN
 C-----------------------------------------------
 C   S o u r c e   C o d e
 C-----------------------------------------------
@@ -336,11 +342,11 @@ C-----------------------------------------------
       CALL WRITE_DB(TMP,1)
       !--------------------------------------
       OFF = NUMELC+NUMELTG+NUMELS+NUMELQ+NUMELT+NUMELP+NUMELR+NUMELX+NCONLD+NUMCONV+NUMRADIA+NFXFLUX
-      ALLOCATE(NSEGL(NLOADP_B))
+      ALLOCATE(NSEGL(LOADS%NUM_PBLAST))
       !--------------------------------------
       !     WRITING LOCAL SIZE (number of local segments)
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         NSEG_LOC=0
         DO JJ=1,PBLAST_TAB(I)%SIZ
           IF(CEP(JJ+OFF)==PROC)THEN  !check if segment is on local domain
@@ -355,7 +361,7 @@ C-----------------------------------------------
       !--------------------------------------
       !     WRITING MINIMUM TIME STEP
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         TMP(1) = PBLAST_TAB(I)%DTMIN
         CALL WRITE_DB(TMP,1)
       ENDDO
@@ -364,7 +370,7 @@ C-----------------------------------------------
       !     WRITING REAL BUFFER (for local segments only)
       !--------------------------------------
       OFF = NUMELC+NUMELTG+NUMELS+NUMELQ+NUMELT+NUMELP+NUMELR+NUMELX+NCONLD+NUMCONV+NUMRADIA+NFXFLUX
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         SIZ = NSEGL(I)
         ALLOCATE(RTMP(7*NSEGL(I)))
         IAD=0
@@ -402,11 +408,12 @@ Chd|        WRITE_I_C                     engine/source/output/tools/sortie_c.c
 Chd|        MESSAGE_MOD                   starter/share/message_module/message_mod.F
 Chd|        MESSAGE_MOD                   engine/share/message_module/message_mod.F
 Chd|====================================================================
-      SUBROUTINE PBLAST_WRITE_ENGINE(PBLAST_TAB)
+      SUBROUTINE PBLAST_WRITE_ENGINE(PBLAST_TAB,LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -421,6 +428,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(PBLAST_STRUCT_),INTENT(INOUT), ALLOCATABLE,DIMENSION(:) :: PBLAST_TAB
+      TYPE(LOADS_),INTENT(IN) :: LOADS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -430,7 +438,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   P r e - C o n d i t i o n
 C-----------------------------------------------
-      IF(NLOADP_B<=0)RETURN
+      IF(LOADS%NUM_PBLAST <= 0)RETURN
 C-----------------------------------------------
 C   S o u r c e   C o d e
 C-----------------------------------------------
@@ -439,20 +447,20 @@ C-----------------------------------------------
       !--------------------------------------
       !     WRITING LOCAL SIZE (number of local segments)
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         CALL WRITE_I_C(PBLAST_TAB(I)%SIZ,1)
       ENDDO
       !--------------------------------------
       !     WRITING MINIMUM TIME STEP
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         TMP(1) = PBLAST_TAB(I)%DTMIN
         CALL WRITE_DB(TMP,1)
       ENDDO
       !--------------------------------------
       !     WRITING REAL BUFFER (for local segments only)
       !--------------------------------------
-      DO I=1,NLOADP_B
+      DO I=1,LOADS%NUM_PBLAST
         SIZ = PBLAST_TAB(I)%SIZ
         IAD=0
         ALLOCATE(RTMP(7*SIZ))

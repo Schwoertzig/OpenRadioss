@@ -31,11 +31,11 @@ Chd|        SPMD_EXCHSEG_IDEL             source/mpi/kinematic_conditions/spmd_e
 Chd|        SPMD_INIT_IDEL                source/mpi/interfaces/spmd_init_idel.F
 Chd|====================================================================
       SUBROUTINE CHKLOAD(
-     1    IB     ,IXS     ,IXQ     ,IXC    ,IXT     ,IXP     ,
-     2    IXR    ,IXTG    ,ITAG   ,ITASK   ,ITAGL   ,ITAB    ,
-     3    ITABM1 ,ADDCNEL ,CNEL   ,TAGEL   ,IPARG   ,GEO     ,
-     4    IBUFS  ,NINDEX  ,NINDG  ,NPRESLOAD,LOADP_TAGDEL    ,
-     5    ILOADP ,LLOADP  ,IAD_ELEM)
+     1    IB     ,IXS     ,IXQ      ,IXC     ,IXT     ,IXP     ,
+     2    IXR    ,IXTG    ,ITAG     ,ITASK   ,ITAGL   ,ITAB    ,
+     3    ITABM1 ,ADDCNEL ,CNEL     ,TAGEL   ,IPARG   ,GEO     ,
+     4    IBUFS  ,NINDEX  ,NINDG    ,NPRESLOAD,LOADP_TAGDEL    ,
+     5    ILOADP ,LLOADP  ,IAD_ELEM ,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -53,7 +53,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER ITASK, NINDG 
-      INTEGER, INTENT(IN) :: NPRESLOAD
+      INTEGER, INTENT(IN) :: NPRESLOAD,NUM_LOAD_PRESSURE
       INTEGER IB(NIBCLD,*), ITAG(*),
      .        IXS(NIXS,*),IXQ(NIXQ,*),IXC(NIXC,*), IXT(NIXT,*), IXP(NIXP,*),
      .        IXR(NIXR,*), IXTG(NIXTG,*),IPARG(NPARG,*), ITAGL(*), ITAB(*),
@@ -61,8 +61,7 @@ C-----------------------------------------------
       INTEGER, INTENT(INOUT) :: LOADP_TAGDEL(NPRESLOAD)
       INTEGER, INTENT(IN) :: LLOADP(SLLOADP), ILOADP(SIZLOADP,NLOADP)
       INTEGER, DIMENSION(2,NSPMD+1), INTENT(in) :: IAD_ELEM
-      my_real
-     .        GEO(NPROPG,*)
+      my_real  GEO(NPROPG,*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -117,7 +116,7 @@ C--------------------------------------------------------
 
        NUMPRESLOAD = 0
 
-       DO  NP=1,NLOADP_HYD
+       DO  NP=1,NUM_LOAD_PRESSURE
 
            NPRES = ILOADP(1,NP)  
            IAD = ILOADP(4,NP)

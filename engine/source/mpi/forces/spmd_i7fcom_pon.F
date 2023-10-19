@@ -66,7 +66,7 @@ Chd|====================================================================
      3                       IXS     ,IXS16  ,NISKYFIE,NBINT20,IFLAG   ,                        
      4                       INTBUF_TAB,SFSKYI,SISKY  ,H3D_DATA,MULTI_FVM  ,                                         
      5                       TAGNCONT  ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,FSAV,
-     6                       INTERFACES)
+     6                       INTERFACES,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -105,6 +105,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGEr,INTENt(IN)::NUM_LOAD_PRESSURE
       INTEGER IFLAG, NBINTC, NBINT20,
      .        IPARI(NPARI,*),  INTLIST(*), NISKYFI(*),
      .        ICODT(*), ICONTACT(*), NSTRF(*),
@@ -1264,7 +1265,7 @@ C type int20 (non edge)
      3                     ICODT   ,SECFCUM,NSTRF   ,ICONTACT     ,FCONT  ,
      4                     INACTI  ,IADM   ,INTTH   , FTHESKYI    ,CONDNSKYI,
      5                     H3D_DATA,INTBUF_TAB(NIN)%LEDGE,NLEDGE,IPARI(68,NIN),
-     6                     NIN     ,TAGNCONT,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER)
+     6                     NIN     ,TAGNCONT,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,NUM_LOAD_PRESSURE)
                            L = L + NB*LENI
                         ENDIF
                       ENDIF

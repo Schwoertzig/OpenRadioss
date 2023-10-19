@@ -47,7 +47,7 @@ Chd|====================================================================
      4                  ICONTACT,RCONTACT,
      5                  STIFN,ITAB,INTBUF_TAB, T8, H3D_DATA ,
      6                  NIN  , PSKIDS,TAGNCONT,KLOADPINTER,LOADPINTER,
-     7                  LOADP_HYD_INTER)
+     7                  LOADP_HYD_INTER,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
@@ -68,12 +68,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER IPARI(*), ICODT(*), ISKY(*),
      .        ICONTACT(*) ,NIN
       INTEGER ITAB(*),
      .   TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .   KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NLOADP_HYD),
-     .   LOADP_HYD_INTER(NLOADP_HYD)
+     .   KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NUM_LOAD_PRESSURE),
+     .   LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
 C     REAL
       my_real
      .   X(*), A(3,*), FSAV(*), V(3,*), MS(*),
@@ -127,14 +128,14 @@ C     REAL
       INTEGER :: LFT, LLT, NFT
 C-----------------------------------------------
 
-      NSN    = IPARI(5)
-      NMN    = IPARI(6)
-      NTY   = IPARI(7)
-      IBC   =IPARI(11)
-      NCIMP =IPARI(13)
-      NRTM4 =IPARI(14)
-      NOINT =IPARI(15)
-      MFROT =IPARI(30)
+      NSN  = IPARI(5)
+      NMN  = IPARI(6)
+      NTY  = IPARI(7)
+      IBC  =IPARI(11)
+      NCIMP=IPARI(13)
+      NRTM4=IPARI(14)
+      NOINT=IPARI(15)
+      MFROT=IPARI(30)
       IBAG =IPARI(32)
       IADM =IPARI(44)
       IFORM=IPARI(48)
@@ -352,7 +353,7 @@ C
      L           THK    ,H3D_DATA  , NINSKID,
      M           H3D_DATA%N_SCAL_SKID, PSKIDS,INTBUF_TAB%IRECTM,NIN,
      N           TAGNCONT ,KLOADPINTER,LOADPINTER ,LOADP_HYD_INTER,
-     O           IFLINEAR ,FRIC_LAST,FNOR_LAST,DISTLIN)
+     O           IFLINEAR ,FRIC_LAST,FNOR_LAST,DISTLIN,NUM_LOAD_PRESSURE)
 
       
       

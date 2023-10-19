@@ -64,7 +64,7 @@ c=======================================================================
      .       + ANIM_V(6) + OUTP_V(6) + H3D_DATA%N_VECT_FEXT
 
 c
-      DO I = 1,LOADS%NLOAD_CYL
+      DO I = 1,LOADS%NUM_PCYL
         ISENS = LOADS%LOAD_CYL(I)%ISENS
         IF (ISENS > 0) THEN
           IF (SENSOR_TAB(ISENS)%STATUS == 0) CYCLE
@@ -244,7 +244,7 @@ c
           ENDIF
 c
         END DO     ! NSEG
-      END DO       ! 1,NLOAD_CYL
+      END DO       ! 1,LOADS%NUM_PCYL
 c--------------------
 c     external forces
 c--------------------

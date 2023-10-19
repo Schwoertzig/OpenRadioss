@@ -36,7 +36,8 @@ Chd|        TH_SURF_MOD                   ../common_source/modules/interfaces/th
 Chd|====================================================================
       SUBROUTINE PBLAST (ILOADP  ,FAC     ,A       , V       ,X       ,
      1                   IADC    ,FSKY    ,FSKYV   ,LLOADP   ,FEXT    ,
-     2                   ITAB    ,H3D_DATA,TH_SURF,FSAVSURF  ,NSEG_LOADP)
+     2                   ITAB    ,H3D_DATA,TH_SURF,FSAVSURF  ,NSEG_LOADP,
+     3                   LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
@@ -44,6 +45,7 @@ C-----------------------------------------------
       USE PBLAST_MOD
       USE GROUPDEF_MOD  
       USE TH_SURF_MOD , ONLY : TH_SURF_
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -61,6 +63,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(LOADS_),INTENT(IN) :: LOADS
       INTEGER,INTENT(IN) :: LLOADP(SLLOADP)
       INTEGER,INTENT(IN) :: ILOADP(SIZLOADP,NLOADP)
       INTEGER,INTENT(IN) :: IADC(*)
@@ -94,7 +97,7 @@ C-----------------------------------------------
        PBLAST_DT%DT = EP20
        PBLAST_DT%IDT = 0
 
-       IF(NLOADP_B==0)THEN
+       IF(LOADS%NUM_PBLAST == 0)THEN
          RETURN
        ENDIF     
        NSEGPL = TH_SURF%NSEGLOADPF
@@ -110,13 +113,13 @@ C-----------------------------------------------
        !   LOOP OVER all /LOAD/PBLAST options
        !-----------------------------------------------
 
-       DO NL=NLOADP_F+1, NLOADP_F+NLOADP_B
+       DO NL=LOADS%NUM_PFLUID+1, LOADS%NUM_PFLUID+LOADS%NUM_PBLAST
 
          ABAC_ID  = ILOADP(07,NL)
          ID       = ILOADP(08,NL) !user_id
          TA_FIRST = FAC(07,NL)
          T_STOP   = FAC(13,NL)
-         IL       = NL-NLOADP_F
+         IL       = NL-LOADS%NUM_PFLUID
          IS_RESET = PBLAST_TAB(IL)%IS_RESET
          TFEXT_LOC = ZERO
          DTMIN_LOC = EP20
@@ -129,7 +132,7 @@ C-----------------------------------------------
      1                       ILOADP  ,FAC      ,A        ,V         ,X        ,
      2                       IADC    ,FSKY     ,LLOADP   ,FEXT      ,
      3                       ITAB    ,H3D_DATA ,NL       ,DTMIN_LOC ,TFEXT_LOC,
-     4                       TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL   )
+     4                       TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL   ,LOADS)
      
              CASE(2)
                !--- LOADING MODEL : GROUND REFLECTION, HEMISPHERICAL CHARGE
@@ -137,14 +140,14 @@ C-----------------------------------------------
      1                       ILOADP  ,FAC      ,A        ,V         ,X        ,
      2                       IADC    ,FSKY     ,LLOADP   ,FEXT      ,
      3                       ITAB    ,H3D_DATA ,NL       ,DTMIN_LOC ,TFEXT_LOC,
-     4                       TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL   )        
+     4                       TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL   ,LOADS)
              CASE(3)
                !--- LOADING MODEL : SURFACE BURST, SPHERICAL CHARGE
                CALL PBLAST_3(
      1                       ILOADP  ,FAC      ,A        ,V         ,X        ,
      2                       IADC    ,FSKY     ,LLOADP   ,FEXT      ,
      3                       ITAB    ,H3D_DATA ,NL       ,DTMIN_LOC ,TFEXT_LOC,
-     4                       TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL   )
+     4                       TH_SURF ,FSAVSURF ,NSEG_LOADP,NSEGPL   ,LOADS)
      
              END SELECT 
              

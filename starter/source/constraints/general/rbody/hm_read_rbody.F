@@ -53,7 +53,7 @@ Chd|====================================================================
      3                         SENSORS   ,IMERGE  ,UNITAB  ,ISKN     ,NOM_OPT  ,
      4                         NUMSL     ,KNOD2ELS,KNOD2ELC,KNOD2ELTG,KNOD2EL1D,
      5                         KNOD2ELQ  ,ITAGND  ,ICDNS10 ,LSUBMODEL,ICFIELD  ,
-     6                         LCFIELD   )
+     6                         LCFIELD   ,NUM_LOAD_CENTRI)
 C-------------------------------------
 C     LECTURE STRUCTURE RIGIDES 
 C-----------------------------------------------
@@ -91,6 +91,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENt(IN) :: NUM_LOAD_CENTRI
       TYPE (UNIT_TYPE_),INTENT(IN) ::UNITAB 
       INTEGER NPBY(NNPBY,*), LPBY(*), ITAB(*), ITABM1(*)
       INTEGER IBFV(NIFV,*)
@@ -98,9 +99,7 @@ C-----------------------------------------------
      .        ISKN(LISKN,*),NUMSL,
      .        KNOD2ELS(*),KNOD2ELC(*),KNOD2ELTG(*),KNOD2EL1D(*),KNOD2ELQ(*),
      .        ITAGND(*),ICDNS10(*), ICFIELD(SIZFIELD,*), LCFIELD(*)
-C     REAL
-      my_real
-     .   RBY(NRBY,*)
+      my_real RBY(NRBY,*)
       INTEGER NOM_OPT(LNOPT1,*)
 C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
@@ -485,7 +484,7 @@ C
         ENDDO
       ENDDO
 C
-      DO K=1,NLOADC
+      DO K=1,NUM_LOAD_CENTRI
 	NN   = ICFIELD(1,K) 
         IAD  = ICFIELD(4,K)
         DO I=1,NN

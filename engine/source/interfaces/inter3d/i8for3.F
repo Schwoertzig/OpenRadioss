@@ -52,7 +52,7 @@ Chd|====================================================================
      K                  THK   ,H3D_DATA,NINSKID,
      L                  NINTERSKID,PSKIDS,IRECT,NIN,
      M                  TAGNCONT ,KLOADPINTER,LOADPINTER ,LOADP_HYD_INTER,
-     O                  IFLINEAR ,FRIC_LAST,FNOR_LAST,DISTLIN)
+     O                  IFLINEAR ,FRIC_LAST,FNOR_LAST,DISTLIN,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -78,14 +78,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER IBC, IGIMP, NSN,LFT, LLT, NFT, IFORM,IFT0,NINSKID ,NINTERSKID,NIN
       INTEGER MSR(*), NSV(*), IRTL(*), ICODT(*), ISKY(*),ITAB(*)
       INTEGER NSVGLO(*),NSV2(*),ILOC(*),IRECT(4,*)
 C     REAL
       INTEGER IX1(*), IX2(*), IX3(*), IX4(*),
      .  TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .  KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NLOADP_HYD),
-     .  LOADP_HYD_INTER(NLOADP_HYD)
+     .  KLOADPINTER(NINTER+1),LOADPINTER(NINTER*NUM_LOAD_PRESSURE),
+     .  LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: IFLINEAR
       my_real 
      .  E(*), STF(*), STFN(*), FSAV(*), X(3,*),V(3,*),MS(*),

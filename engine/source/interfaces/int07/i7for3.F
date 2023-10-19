@@ -73,8 +73,8 @@ Chd|====================================================================
      7                  FRIC_COEFS2,FRICC2    ,VISCFFRIC2,NFORTH    ,NFISOT   ,
      8                  INDEXORTH  ,INDEXISOT ,DIR1      ,DIR2      ,TAGNCONT ,
      9                  KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,TYPSUB,INFLG_SUBS,
-     A                  INFLG_SUBM,NINLOADP   ,DGAPLOADINT,S_LOADPINTER,DGAPLOADP,
-     B                  INTEREFRIC )
+     A                  INFLG_SUBM ,NINLOADP   ,DGAPLOADINT,S_LOADPINTER,DGAPLOADP,
+     B                  INTEREFRIC ,NUM_LOAD_PRESSURE)
 
 C-----------------------------------------------
 C   M o d u l e s
@@ -127,9 +127,9 @@ C-----------------------------------------------
      .        NISUB, LISUB(*), ADDSUBS(*), ADDSUBM(*), LISUBS(*),
      .        LISUBM(*),ILAGM,ICURV(3), ISENSINT(*),SYM_FLAG_TYPE19,
      .        INDEXORTH(MVSIZ)  ,INDEXISOT(MVSIZ),INFLG_SUBS(*), INFLG_SUBM(*)
-      INTEGER  , INTENT(IN) :: NINLOADP,S_LOADPINTER
+      INTEGER  , INTENT(IN) :: NINLOADP,S_LOADPINTER,NUM_LOAD_PRESSURE
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
+     .        LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: INTEREFRIC
       my_real
      .   STIGLO,CAND_P(*), X(3,*),

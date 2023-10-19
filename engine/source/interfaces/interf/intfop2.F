@@ -77,7 +77,7 @@ Chd|====================================================================
      P       PSKIDS    ,T2MAIN_SMS ,FORNEQS    ,KNOTLOCPC,KNOTLOCEL,
      Q       APINCH    ,STIFPINCH   ,T2FAC_SMS ,TAGNCONT ,
      R       KLOADPINTER,LOADPINTER ,LOADP_HYD_INTER,DGAPLOADINT,S_LOADPINTER,
-     S       INTERFACES)
+     S       INTERFACES,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -115,7 +115,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------     
-      INTEGER ,INTENT(IN) :: NSENSOR
+      INTEGER ,INTENT(IN) :: NSENSOR,NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,NEWFRONT(*),NSTRF(*),
      .        IRLEN20, ISLEN20, IRLEN20T, ISLEN20T,
      .        IRLEN20E, ISLEN20E,INT18ADD(*),NCONT,NV46,SFBSAV6,IGROUPS(NUMELS)
@@ -137,7 +137,7 @@ C-----------------------------------------------
       INTEGER KXIG3D(NIXIG3D,*),IXIG3D(*),IGEO(NPROPGI,*),T2MAIN_SMS(6,*)
       INTEGER  , INTENT(IN) :: S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .         LOADP_HYD_INTER(NLOADP_HYD)
+     .         LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       my_real  , INTENT(IN) :: DGAPLOADINT(S_LOADPINTER)
       my_real 
      .        EMINX(*)
@@ -303,11 +303,11 @@ C
      E  PM             ,IPARG          ,IAD17            ,MSKYI_SMS       ,ISKYI_SMS   ,
      F  NODNX_SMS      ,MS0            ,QFRICINT         ,NPC             ,TF          ,
      G  CONDN          ,CONDNSKYI      ,INTBUF_TAB(N)    ,
-     H  FBSAV6         ,ISENSINT(1,N)  ,SFBSAV6            ,IXIG3D          ,
+     H  FBSAV6         ,ISENSINT(1,N)  ,SFBSAV6          ,IXIG3D          ,
      I  KXIG3D         ,WIGE           ,KNOT             ,IGEO            ,MULTI_FVM   , 
-     J  H3D_DATA       ,INTBUF_FRIC_TAB,KNOTLOCPC      ,KNOTLOCEL        ,JTASK        ,
+     J  H3D_DATA       ,INTBUF_FRIC_TAB,KNOTLOCPC        ,KNOTLOCEL       ,JTASK        ,
      K  TAGNCONT       ,KLOADPINTER    ,LOADPINTER       ,LOADP_HYD_INTER ,DGAPLOADINT ,
-     L  S_LOADPINTER   ,INTEREFRIC     )
+     L  S_LOADPINTER   ,INTEREFRIC     ,NUM_LOAD_PRESSURE)
           ELSE
            NULLIFY(ptr_FR_I18)
            IF(NI18>0) ptr_FR_I18 => FR_I18(1,NI18)           
@@ -396,9 +396,9 @@ C
      7  IDUM       ,MSKYI_SMS    ,ISKYI_SMS    ,NODNX_SMS,ICONTACT    ,
      8  INTBUF_TAB(N),PM         ,TEMP         , FTHE        ,FTHESKYI,
      9  NPC        , TF          ,CONDN        ,CONDNSKYI ,FBSAV6     ,
-     A  ISENSINT(1,N),SFBSAV6      ,FSAV(1,NN1)  ,H3D_DATA  ,INTBUF_FRIC_TAB,
-     B  JTASK      ,TAGNCONT      ,KLOADPINTER ,LOADPINTER,LOADP_HYD_INTER,
-     C  DGAPLOADINT,S_LOADPINTER )
+     A  ISENSINT(1,N),SFBSAV6    ,FSAV(1,NN1)  ,H3D_DATA  ,INTBUF_FRIC_TAB,
+     B  JTASK      ,TAGNCONT     ,KLOADPINTER  ,LOADPINTER,LOADP_HYD_INTER,
+     C  DGAPLOADINT,S_LOADPINTER ,NUM_LOAD_PRESSURE)
           ELSE
            CALL I11MAINF(
      1  IPARI(1,N) ,X            ,A          ,
@@ -478,7 +478,7 @@ C
      B  CONDNSKYI ,DT2T         ,NELTST     ,ITYPTST      ,KINET       ,
      C  FBSAV6    ,ISENSINT(1,N),SFBSAV6      ,NISKYFI(N)   ,H3D_DATA    ,
      D  PSKIDS    ,TAGNCONT     ,KLOADPINTER,LOADPINTER   ,LOADP_HYD_INTER,
-     E  DGAPLOADINT,S_LOADPINTER,INTEREFRIC )
+     E  DGAPLOADINT,S_LOADPINTER,INTEREFRIC ,NUM_LOAD_PRESSURE)
 C-----------------------------------------------------------------------
 C
 C-----------------------------------------------------------------------
@@ -559,7 +559,7 @@ C
      H  SFBSAV6      ,H3D_DATA    ,INTBUF_FRIC_TAB  ,T2MAIN_SMS,FORNEQS ,
      I  T2FAC_SMS  ,NPC         ,TF          ,TAGNCONT    ,KLOADPINTER ,
      J  LOADPINTER ,LOADP_HYD_INTER,DGAPLOADINT,S_LOADPINTER,INTEREFRIC,
-     K  INTERFACES)
+     K  INTERFACES ,NUM_LOAD_PRESSURE)
 
           ELSE
            CALL I24MAINF(

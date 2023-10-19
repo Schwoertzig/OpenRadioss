@@ -53,7 +53,7 @@ Chd|====================================================================
      9      NPC     ,TF        ,CONDN    ,CONDNSKYI,FBSAV6,
      A      ISENSINT,DIMFB     ,FSAVSUB  ,H3D_DATA ,INTBUF_FRIC_TAB,
      B      ITASK   ,TAGNCONT  ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,
-     C      DGAPLOADINT,S_LOADPINTER)
+     C      DGAPLOADINT,S_LOADPINTER,NUM_LOAD_PRESSURE)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -84,18 +84,18 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,NIN,NEWFRONT,NSTRF(*)
       INTEGER IPARI(*), ICODT(*),
      .        ITAB(*), ISKY(*),ICONTACT(*),TAGNCONT(NLOADP_HYD_INTER,NUMNOD)
       INTEGER  , INTENT(IN) :: S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .         LOADP_HYD_INTER(NLOADP_HYD)
+     .         LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
 C statistique interface
       INTEGER NB_JLT,NB_JLT_NEW,NB_STOK_N,JTASK,
      .        NISKYFI, LINDMAX,ITASK
       INTEGER NUM_IMP,NS_IMP(*),NE_IMP(*), 
      .        ISKYI_SMS(*), NODNX_SMS(*),NPC(*), ISENSINT(*),DIMFB
-C     REAL
       my_real  , INTENT(IN) :: DGAPLOADINT(S_LOADPINTER)
       my_real DT2T,
      .   X(*), A(3,*), FSAV(*), V(3,*),
@@ -377,7 +377,7 @@ C-------------------------------------------------------------------------------
      L  VISCFFRIC    ,TAGNCONT ,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER  ,
      M  INTBUF_TAB%TYPSUB,INTBUF_TAB%INFLG_SUBS,INTBUF_TAB%INFLG_SUBM   ,
      .                                           NINLOADP   ,DGAPLOADINT,
-     N  S_LOADPINTER )
+     N  S_LOADPINTER, NUM_LOAD_PRESSURE )
 
 C
         IF( INTTH > 0 ) THEN 

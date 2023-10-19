@@ -79,7 +79,7 @@ C-----------------------------------------------
       TYPE (SENSOR_STR_)   ,DIMENSION(NSENSOR),INTENT(IN) :: SENSOR_TAB
       TYPE (SUBMODEL_DATA) ,DIMENSION(*)      ,INTENT(IN) :: LSUBMODEL
       TYPE (UNIT_TYPE_)    ,INTENT(IN)  :: UNITAB 
-      TYPE (LOADS_)        ,INTENT(OUT) :: LOADS
+      TYPE (LOADS_)        ,INTENT(INOUT) :: LOADS
       INTEGER, INTENT(INOUT) :: NUMBER_LOAD_CYL ! total number of contribution (1 per node per segment) of /LOAD/CYL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -119,7 +119,7 @@ C--------------------------------------------------
 C     START BROWSING MODEL /PCYL
 C--------------------------------------------------
       CALL HM_OPTION_COUNT('/LOAD/PCYL',NLOAD_CYL)
-      LOADS%NLOAD_CYL = NLOAD_CYL
+      LOADS%NUM_PCYL = NLOAD_CYL
       ALLOCATE(LOADS%LOAD_CYL(NLOAD_CYL))
 
       CALL HM_OPTION_START('/LOAD/PCYL')

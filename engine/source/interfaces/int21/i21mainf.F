@@ -57,7 +57,7 @@ Chd|====================================================================
      B                   CONDNSKYI,DT2T   ,NELTST   ,ITYPTST ,KINET    ,
      C                   FBSAV6  ,ISENSINT,DIMFB    ,NISKYFI ,H3D_DATA ,
      D                   PSKIDS  ,TAGNCONT,KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,
-     E                   DGAPLOADINT,S_LOADPINTER,INTEREFRIC )                   
+     E                   DGAPLOADINT,S_LOADPINTER,INTEREFRIC,NUM_LOAD_PRESSURE )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -90,6 +90,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NUM_LOAD_PRESSURE
       INTEGER NELTST, ITYPTST, NIN, NSTRF(*), NRTMDIM
       INTEGER IPARI(NPARI,NINTER), ICODT(*),ICONTACT(*),
      .        ITAB(*), ISKY(*), ISKYI_SMS(*), NODNX_SMS(*),
@@ -101,10 +102,8 @@ C-----------------------------------------------
       INTEGER NUM_IMP,NS_IMP(*),NE_IMP(*),IND_IMP(*), WEIGHT(*), 
      .        ISENSINT(*),DIMFB
       INTEGER  , INTENT(IN) :: S_LOADPINTER
-      INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .         LOADP_HYD_INTER(NLOADP_HYD)
+      INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER  , INTENT(IN) :: INTEREFRIC
-C     REAL
       my_real  , INTENT(IN) :: DGAPLOADINT(S_LOADPINTER)
       my_real 
      .   X(*), A(3,*), FSAV(*), V(3,*),
@@ -427,7 +426,7 @@ C
      E                  PRATIO   ,H3D_DATA%N_SCAL_SKID,PSKIDS ,IPARI(95,NIN),
      F                  TAGNCONT ,KLOADPINTER,LOADPINTER ,LOADP_HYD_INTER,
      G                  DGAPLOADINT,DIST,GAPV,S_LOADPINTER    ,EFRIC_L  ,
-     H                  FHEAT     ,EFRICT ,INTEREFRIC )  
+     H                  FHEAT     ,EFRICT ,INTEREFRIC ,NUM_LOAD_PRESSURE)
 C
           IF (IMONM > 0 .AND. JTASK == 1) CALL STOPTIME(20,1)
 C

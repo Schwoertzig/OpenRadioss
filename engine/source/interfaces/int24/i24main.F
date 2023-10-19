@@ -71,7 +71,7 @@ Chd|====================================================================
      I                   FORNEQS  ,T2FAC_SMS,NPC    ,TF       ,TAGNCONT,
      J                   KLOADPINTER,LOADPINTER,LOADP_HYD_INTER,DGAPLOADINT,
      .                                                         S_LOADPINTER,
-     K                   INTEREFRIC,INTERFACES)
+     K                   INTEREFRIC,INTERFACES,NUM_LOAD_PRESSURE)
 C========================================================================
 C-----------------------------------------------
 C   M o d u l e s
@@ -110,6 +110,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN)::NUM_LOAD_PRESSURE
       INTEGER NELTST,ITYPTST,NIN,NEWFRONT,
      .        NSTRF(*),
      .        NRTMDIM, IAD17, IPARSENS
@@ -118,7 +119,7 @@ C-----------------------------------------------
      .        IPARG(NPARG,*),INOD_PXFEM(*),NPC(*),TAGNCONT(NLOADP_HYD_INTER,NUMNOD)
       INTEGER  , INTENT(IN) :: S_LOADPINTER
       INTEGER  , INTENT(IN) :: KLOADPINTER(NINTER+1),LOADPINTER(S_LOADPINTER),
-     .         LOADP_HYD_INTER(NLOADP_HYD)
+     .         LOADP_HYD_INTER(NUM_LOAD_PRESSURE)
       INTEGER NB_JLT,NB_JLT_NEW,NB_STOK_N,JTASK,
      .        NISKYFI, LINDMAX
       INTEGER NUM_IMP,NS_IMP(*),NE_IMP(*),IND_IMP(*)
@@ -606,7 +607,7 @@ C-------------------------------------------------------------------------------
      Z  INTBUF_TAB%TYPSUB,INTBUF_TAB%INFLG_SUBS,INTBUF_TAB%INFLG_SUBM,
      .                                      NINLOADP,DGAPLOADINT,
      1  S_LOADPINTER, DIST       ,IXX         ,INTEREFRIC ,INTCAREA ,
-     2  INTERFACES%PARAMETERS ,PENREF ,KMAX   ) 
+     2  INTERFACES%PARAMETERS ,PENREF ,KMAX   ,NUM_LOAD_PRESSURE)
 C
           IF(IMPL_S > 0 ) 
      +     CALL IMPL_SAV1(

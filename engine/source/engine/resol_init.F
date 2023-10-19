@@ -152,7 +152,7 @@ Chd|====================================================================
      3  IGRBRIC ,IGRQUAD  ,IGRSH4N  ,IGRSH3N  ,IGRTRUSS   ,
      4  IGRBEAM ,IGRSPRING,IGRPART  ,FORNEQS  ,INT7ITIED ,
      5  FXVEL_FGEO,FAILWAVE,NLOC_DMG,PINCH_DATA,SLLOADP  ,
-     6  TAGSLV_RBY,NFNCA2 ,NFTCA2  ,IN0  ,SORT_COMM,STACK,OUTPUT)
+     6  TAGSLV_RBY,NFNCA2 ,NFTCA2  ,IN0  ,SORT_COMM,STACK,OUTPUT,NUM_LOAD_PBLAST)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -272,6 +272,7 @@ C-----------------------------------------------
 !                 INT7ITIED = 0 type 7 + ITIED/=0 not used
 !                 INT7ITIED = 1 type 7 + ITIED/=0 used
       INTEGER, INTENT(INOUT) :: INT7ITIED
+      INTEGER,INTENT(IN) :: NUM_LOAD_PBLAST
       my_real
      .   X(3,*), D(3,*), V(3,*), VR(3,*),
      .   MS(*), IN(*),  WA(*),  A(3,*), AR(3,*),
@@ -1142,7 +1143,7 @@ C-----------------------
          CALL SPMD_SUB_BOUNDARIES(NLOC_DMG,IAD_ELEM,FR_ELEM)
        ENDIF
 C       
-       DO I=1,NLOADP_B
+       DO I=1,NUM_LOAD_PBLAST
          NBS = PBLAST_TAB(I)%SIZ
          ALLOCATE (PBLAST_TAB(I)%PRES(NBS))
          PBLAST_TAB(I)%PRES(1:NBS)=ZERO

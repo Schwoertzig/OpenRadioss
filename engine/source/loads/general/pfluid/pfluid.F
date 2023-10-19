@@ -34,7 +34,7 @@ Chd|====================================================================
      2                  V          ,X       ,XFRAME ,       
      3                  NSENSOR    ,SENSOR_TAB ,TFEXC,IADC       ,
      4                  FSKY       ,FSKYV   ,LLOADP ,FEXT   ,H3D_DATA   ,
-     5                  TH_SURF    ,FSAVSURF,NSEG_LOADP)
+     5                  TH_SURF    ,FSAVSURF,NSEG_LOADP,NUM_LOAD_PFLUID)
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C----------------------------------------------- 
@@ -101,7 +101,7 @@ C-----------------------------------------------
 C-----------------------------------------------,
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER ,INTENT(IN) :: NSENSOR
+      INTEGER ,INTENT(IN) :: NSENSOR,NUM_LOAD_PFLUID
       INTEGER NPC(SNPC),LLOADP(SLLOADP)
       INTEGER ILOADP(SIZLOADP,NLOADP)
       INTEGER IADC(DSNCOL)
@@ -143,7 +143,7 @@ C---------------------------------------
 
       IF(IPARIT == 0) THEN
       
-        DO NL=1,NLOADP_F  !loop over /LOAD/PFLUID options
+        DO NL=1,NUM_LOAD_PFLUID  !loop over /LOAD/PFLUID options
         
           !user parameters (Defined in Starter while reading input file hm_read_pblast.F, and transmitted to Engine with Restart file)                                                                    
           FUN_HSP = ILOADP(7,NL)                                                                     
@@ -439,7 +439,7 @@ C---------------------------------------
        IF(IVECTOR == 0) THEN
 
          
-         DO NL=1,NLOADP_F !loop over /LOAD/PFLUID options
+         DO NL=1,NUM_LOAD_PFLUID !loop over /LOAD/PFLUID options
          
            !user parameters (Defined in Starter while reading input file hm_read_pblast.F, and transmitted to Engine with Restart file) 
            FUN_HSP = ILOADP(7,NL)
@@ -764,7 +764,7 @@ C-----------------------------------
 C PART-3. PARITH/ON, vectorial code
 C-----------------------------------
 
-         DO NL=1,NLOADP_F !loop over /LOAD/PFLUID options
+         DO NL=1,NUM_LOAD_PFLUID !loop over /LOAD/PFLUID options
          
            !user parameters (Defined in Starter while reading input file hm_read_pblast.F, and transmitted to Engine with Restart file) 
            FUN_HSP = ILOADP(7,NL)

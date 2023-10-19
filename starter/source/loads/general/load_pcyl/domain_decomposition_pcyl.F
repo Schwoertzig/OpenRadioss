@@ -95,10 +95,10 @@ C-----------------------------------------------
         ALLOCATE( LOCAL_ARRAY(NUMNOD) )
         LOCAL_ARRAY(1:NUMNOD)%SIZE_INT_ARRAY_1D = 0
 
-        IF(.NOT.ALLOCATED(LOADS%CYL_RESTART)) ALLOCATE( LOADS%CYL_RESTART(LOADS%NLOAD_CYL) )
+        IF(.NOT.ALLOCATED(LOADS%CYL_RESTART)) ALLOCATE( LOADS%CYL_RESTART(LOADS%NUM_PCYL) )
         ! -------------------
         ! loop over the /LOAD/PCYL
-        DO I=1,LOADS%NLOAD_CYL
+        DO I=1,LOADS%NUM_PCYL
             NUMBER_SEGMENT = LOADS%LOAD_CYL(I)%NSEG ! number of segment for the PCYL I
             ! ------------
             ! loop over the segments of the surface to find where the node id are defined 

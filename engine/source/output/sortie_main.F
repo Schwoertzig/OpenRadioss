@@ -248,9 +248,9 @@ C-----------------------------------------------
      .   NODREAC(*),IAD_RBE2(4,*),INDEXCONT(*),NCONT,ITY
       INTEGER NPC(*),MDS_MATID(*)
       INTEGER LLOADP(*),ILOADP(SIZLOADP,*),IBCL(NIBCLD,*)
-      INTEGER TAGNCONT(NLOADP_HYD_INTER,NUMNOD),LOADP_HYD_INTER(NLOADP_HYD)
-      my_real
-     .       LOADP(LFACCLD,*),FORC(*)
+      TYPE (LOADS_),INTENT(IN) :: LOADS
+      INTEGER TAGNCONT(NLOADP_HYD_INTER,NUMNOD),LOADP_HYD_INTER(LOADS%NUM_PRESSURE)
+      my_real LOADP(LFACCLD,*),FORC(*)
 
       INTEGER, DIMENSION(*), INTENT(IN) :: ISKWP
       my_real, INTENT(INOUT) :: FSAVSURF(5,NSURF)
@@ -275,8 +275,7 @@ C-----------------------------------------------
       TYPE (t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
       TYPE (DYNAIN_DATABASE), INTENT(INOUT) :: DYNAIN_DATA
       TYPE(USER_WINDOWS_),INTENT(IN)        :: USER_WINDOWS     
-      TYPE(DT_),        INTENT(INOUT)       :: DT     
-      TYPE (LOADS_)   , INTENT(IN)          :: LOADS
+      TYPE(DT_),        INTENT(INOUT)       :: DT
       TYPE (TTABLE),DIMENSION(NTABLE)  ,INTENT(IN) :: TABLE
       TYPE (MATPARAM_STRUCT_) ,DIMENSION(NUMMAT) ,INTENT(IN) :: MATPARAM_TAB
 C-----------------------------------------------

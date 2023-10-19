@@ -34,7 +34,7 @@ Chd|====================================================================
      2                  V     ,X     ,XFRAME  ,MS,TFEXTT,
      3                  NSENSOR,SENSOR_TAB,WEIGHT,IFRAME,
      4                  IB,ITASK,
-     5                  NRBYAC,IRBYAC,NPBY  ,RBY,ISKN   )
+     5                  NRBYAC,IRBYAC,NPBY  ,RBY,ISKN,NUM_LOAD_CENTRI   )
 C-----------------------------------------------  
 C   M o d u l e s
 C-----------------------------------------------  
@@ -58,6 +58,7 @@ C-----------------------------------------------
       INTEGER ICFIELD(SIZFIELD,*),IB(*)
       INTEGER WEIGHT(*),ITASK,NRBYAC,IRBYAC(*),NPBY(NNPBY,*),
      .        IFRAME(LISKN,*),ISKN(LISKN,*)
+      INTEGER,INTENT(IN) :: NUM_LOAD_CENTRI
 C     REAL
       my_real
      .   FAC(LFACLOAD,*), TF(*), A(3,*), V(3,*), MS(*),
@@ -79,7 +80,7 @@ C-----------------------------------------------
       DATA IUN/1/
 C-----------------------------------------------
 C
-      DO NL=1,NLOADC
+      DO NL=1,NUM_LOAD_CENTRI
       NN=ICFIELD(1,NL)
       IDIR=ICFIELD(2,NL)
       IFUNC=ICFIELD(3,NL)

@@ -34,7 +34,7 @@ Chd|        HM_OPTION_READ_MOD            share/modules1/hm_option_read_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
 Chd|====================================================================
-      SUBROUTINE HM_PREREAD_LOAD_CENTRI(NUMCENTRI, IGRNOD ,IGRSURF,LSUBMODEL)
+      SUBROUTINE HM_PREREAD_LOAD_CENTRI(NUMCENTRI, IGRNOD ,IGRSURF,LSUBMODEL, NUM_LOAD_CENTRI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -59,6 +59,7 @@ C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
       TYPE (SURF_)   ,TARGET, DIMENSION(NSURF)   :: IGRSURF
       TYPE(SUBMODEL_DATA),INTENT(IN)::LSUBMODEL(*)
+      INTEGER,INTENT(IN) :: NUM_LOAD_CENTRI
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -81,15 +82,12 @@ C--------------------------------------------------
       CALL HM_OPTION_START('/LOAD/CENTRI')
 C-----------------------------------------------
       NUMCENTRI  = 0
-      DO I=1,NLOADC
-
+      DO I=1,NUM_LOAD_CENTRI
         TITR = ''
 C--------------------------------------------------
 C EXTRACT DATAS OF /LOAD/CENTRI... LINE
 C--------------------------------------------------
-        CALL HM_OPTION_READ_KEY(LSUBMODEL,
-     .                       OPTION_ID = ID,
-     .                       OPTION_TITR = TITR)
+        CALL HM_OPTION_READ_KEY(LSUBMODEL,OPTION_ID = ID,OPTION_TITR = TITR)
 C--------------------------------------------------
 C EXTRACT DATAS (INTEGER VALUES)
 C--------------------------------------------------

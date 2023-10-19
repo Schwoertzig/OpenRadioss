@@ -34,13 +34,15 @@ Chd|====================================================================
      2                          A         ,V         ,X       ,SKEW     ,SENSOR_TAB,
      3                          IADC      ,FSKY      ,FEXT    ,TAGNCONT ,NSENSOR   ,
      4                          LOADP_HYD_INTER  , H3D_DATA ,
-     5                          NPRESLOAD  ,LOADP_TAGDEL,TH_SURF,FSAVSURF,NSEG_LOADP)
+     5                          NPRESLOAD  ,LOADP_TAGDEL,TH_SURF,FSAVSURF,NSEG_LOADP,
+     6                          LOADS)
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
       USE H3D_MOD
       USE SENSOR_MOD
       USE TH_SURF_MOD , ONLY : TH_SURF_
+      USE LOADS_MOD , ONLY : LOADS_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -61,22 +63,19 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   E x t e r n a l  F u n c t i o n s
 C-----------------------------------------------
-      INTEGER  GET_U_NUMSENS,GET_U_SENS_FPAR,GET_U_SENS_IPAR,
-     .         GET_U_SENS_VALUE,SET_U_SENS_VALUE
-      EXTERNAL GET_U_NUMSENS,GET_U_SENS_FPAR,GET_U_SENS_IPAR,
-     .         GET_U_SENS_VALUE,SET_U_SENS_VALUE
+      INTEGER,EXTERNAL ::  GET_U_NUMSENS,GET_U_SENS_FPAR,GET_U_SENS_IPAR,GET_U_SENS_VALUE,SET_U_SENS_VALUE
 C-----------------------------------------------,
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(LOADS_),INTENT(IN) :: LOADS
       INTEGER, INTENT(IN) :: NPRESLOAD,NSENSOR
       INTEGER NPC(*),LLOADP(SLLOADP)
       INTEGER ILOADP(SIZLOADP,*),
      .        TAGNCONT(NLOADP_HYD_INTER,NUMNOD),
-     .        LOADP_HYD_INTER(NLOADP_HYD)
-      INTEGER  IADC(*) 
-      my_real
-     .   LOADP(SLOADP,*), TF(*), A(3,*), V(3,*), 
-     .   X(3,*), SKEW(LSKEW,*),FSKY(8,LSKY), FEXT(3,*)
+     .        LOADP_HYD_INTER(LOADS%NUM_PBLAST)
+      INTEGER IADC(*)
+      my_real LOADP(SLOADP,*), TF(*), A(3,*), V(3,*),
+     .        X(3,*), SKEW(LSKEW,*),FSKY(8,LSKY), FEXT(3,*)
       TYPE(H3D_DATABASE) :: H3D_DATA
       INTEGER, INTENT(IN) :: LOADP_TAGDEL(NPRESLOAD)
       TYPE (SENSOR_STR_) ,DIMENSION(NSENSOR) ,INTENT(IN) :: SENSOR_TAB
@@ -109,10 +108,10 @@ C---------------------------------------------------------------------
 C
       NUMPRESLOAD = 0
       NSEGPL = TH_SURF%NSEGLOADPF+TH_SURF%NSEGLOADPB
-      NIDXLOAD = NLOADP_F+NLOADP_B
+      NIDXLOAD = LOADS%NUM_PFLUID + LOADS%NUM_PBLAST
       IF(IPARIT==0) THEN
 C code SPMD Parith/OFF or SMP 
-       DO  NP= 1,NLOADP_HYD
+       DO  NP= 1,LOADS%NUM_PRESSURE
 
            NPRES = ILOADP(1,NIDXLOAD+NP)
            IFUNC = ILOADP(3,NIDXLOAD+NP)
@@ -456,7 +455,7 @@ C-------------------------
 C code SPMD Parith/ON
 C-------------------------
 
-       DO  NP= 1,NLOADP_HYD
+       DO  NP= 1,LOADS%NUM_PRESSURE
 
            NPRES = ILOADP(1,NIDXLOAD+NP)
            IFUNC = ILOADP(3,NIDXLOAD+NP)
