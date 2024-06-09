@@ -25,9 +25,9 @@ Chd|  EBCS_MOD                      modules/boundary_conditions/ebcs_mod.F
 Chd|-- called by -----------
 Chd|        C_IEBCS                       starter/source/restart/ddsplit/c_iebcs.F
 Chd|        DDSPLIT                       starter/source/restart/ddsplit/ddsplit.F
-Chd|        DOMDEC2                       starter/source/spmd/domdec2.F 
+Chd|        DOMDEC2                       starter/source/spmd/domdec2.F
 Chd|        EBCS_SET_TCARP                starter/source/boundary_conditions/ebcs/iniebcs_nrf_tcar.F
-Chd|        FILLCNE                       starter/source/spmd/domdec2.F 
+Chd|        FILLCNE                       starter/source/spmd/domdec2.F
 Chd|        HM_READ_EBCS_FLUXOUT          starter/source/boundary_conditions/ebcs/hm_read_ebcs_fluxout.F
 Chd|        HM_READ_EBCS_GRADP0           starter/source/boundary_conditions/ebcs/hm_read_ebcs_gradp0.F
 Chd|        HM_READ_EBCS_INIP             starter/source/boundary_conditions/ebcs/hm_read_ebcs_inip.F
@@ -53,7 +53,7 @@ Chd|        STARTER0                      starter/source/starter/starter0.F
 Chd|        ST_QAPRINT_DRIVER             starter/source/output/qaprint/st_qaprint_driver.F
 Chd|        ST_QAPRINT_EBCS               starter/source/output/qaprint/st_qaprint_ebcs.F
 Chd|        W_PON                         starter/source/restart/ddsplit/w_pon.F
-Chd|        ALEMAIN                       engine/source/ale/alemain.F   
+Chd|        ALEMAIN                       engine/source/ale/alemain.F
 Chd|        EBCCLAP                       engine/source/boundary_conditions/ebcs/ebcclap.F
 Chd|        EBCS0                         engine/source/boundary_conditions/ebcs/ebcs0.F
 Chd|        EBCS1                         engine/source/boundary_conditions/ebcs/ebcs1.F
@@ -73,19 +73,19 @@ Chd|        MULTI_NRF_EBCS                engine/source/multifluid/multi_nrf_ebc
 Chd|        MULTI_TIMEEVOLUTION           engine/source/multifluid/multi_timeevolution.F
 Chd|        RADIOSS2                      engine/source/engine/radioss2.F
 Chd|        RDRESB                        engine/source/output/restart/rdresb.F
-Chd|        RESOL                         engine/source/engine/resol.F  
+Chd|        RESOL                         engine/source/engine/resol.F
 Chd|        RESOL_HEAD                    engine/source/engine/resol_head.F
 Chd|        SORTIE_MAIN                   engine/source/output/sortie_main.F
 Chd|        SPMD_INIT_EBCS                engine/source/mpi/fluid/spmd_cfd.F
 Chd|        WRRESTP                       engine/source/output/restart/wrrestp.F
 Chd|-- calls ---------------
-Chd|        MULTI_FVM_MOD                 modules/ale/multi_fvm_mod.F   
+Chd|        MULTI_FVM_MOD                 modules/ale/multi_fvm_mod.F
 Chd|====================================================================
       MODULE EBCS_MOD
       USE MULTI_FVM_MOD
 #include "my_real.inc"
 
-      
+
 !     -----------------
 !     parith/on structure
 !     -----------------
@@ -116,9 +116,9 @@ Chd|====================================================================
       integer, dimension(:), allocatable :: global_ielem
 !     type of the attached element
       integer, dimension(:), allocatable :: itype
-!     iseg 
+!     iseg
       integer, dimension(:), allocatable :: iseg
-!     Local id of the face of ielem 
+!     Local id of the face of ielem
       logical :: has_iface = .false.
       integer, dimension(:), allocatable :: iface
 !     debug print
@@ -159,11 +159,11 @@ Chd|====================================================================
 !     -------------------
       type, public, extends(t_ebcs) :: t_ebcs_pres
       integer :: ipres = 0, irho = 0, iener = 0, ivx = 0, ivy = 0, ivz = 0
-      my_real :: c = 0, pres = 0, rho = 0, lcar = 0, r1 = 0, r2 = 0, 
+      my_real :: c = 0, pres = 0, rho = 0, lcar = 0, r1 = 0, r2 = 0,
      .     ener = 0, vx = 0, vy = 0, vz = 0
-      
+
       contains
-      
+
       procedure, pass :: write_data => write_data_pres
       procedure, pass :: read_data => read_data_pres
       end type t_ebcs_pres
@@ -174,9 +174,9 @@ Chd|====================================================================
       integer :: ipres = 0, irho = 0, iener = 0
       my_real :: c = 0, ener = 0, rho = 0, pres = 0
       my_real :: lcar = 0, r1 = 0, r2 = 0
-      
+
       contains
-      
+
       procedure, pass :: write_data => write_data_valvin
       procedure, pass :: read_data => read_data_valvin
       end type t_ebcs_valvin
@@ -187,9 +187,9 @@ Chd|====================================================================
       integer :: ipres = 0, irho = 0, iener = 0
       my_real :: c = 0, ener = 0, rho = 0, pres = 0
       my_real :: lcar = 0, r1 = 0, r2 = 0
-     
+
       contains
-      
+
       procedure, pass :: write_data => write_data_valvout
       procedure, pass :: read_data => read_data_valvout
       end type t_ebcs_valvout
@@ -202,7 +202,7 @@ Chd|====================================================================
       my_real :: lcar = 0, r1 = 0, r2 = 0
 
       contains
-      
+
       procedure, pass :: write_data => write_data_gradp0
       procedure, pass :: read_data => read_data_gradp0
       end type t_ebcs_gradp0
@@ -213,9 +213,9 @@ Chd|====================================================================
       integer :: ivx = 0, ivy = 0, ivz = 0, irho = 0, iener = 0
       my_real :: c = 0, ener = 0, rho = 0, vx = 0, vy = 0, vz = 0
       my_real :: lcar = 0, r1 = 0, r2 = 0
-      
+
       contains
-      
+
       procedure, pass :: write_data => write_data_vel
       procedure, pass :: read_data => read_data_vel
       end type t_ebcs_vel
@@ -226,9 +226,9 @@ Chd|====================================================================
       integer :: ivimp = 0, irho = 0, iener = 0
       my_real :: c = 0, ener = 0, rho = 0, vimp = 0
       my_real :: lcar = 0, r1 = 0, r2 = 0
-      
+
       contains
-      
+
       procedure, pass :: write_data => write_data_normv
       procedure, pass :: read_data => read_data_normv
       end type t_ebcs_normv
@@ -239,7 +239,7 @@ Chd|====================================================================
       my_real :: rho = 0, c = 0, lcar = 0
 
       contains
-      
+
       procedure, pass :: write_data => write_data_inip
       procedure, pass :: read_data => read_data_inip
       end type t_ebcs_inip
@@ -247,10 +247,10 @@ Chd|====================================================================
 !     type = 7 /EBCS/INIV
 !     -------------------
       type, public, extends(t_ebcs) :: t_ebcs_iniv
-      my_real :: rho = 0, c = 0, lcar = 0      
+      my_real :: rho = 0, c = 0, lcar = 0
 
       contains
-      
+
       procedure, pass :: write_data => write_data_iniv
       procedure, pass :: read_data => read_data_iniv
       end type t_ebcs_iniv
@@ -259,9 +259,9 @@ Chd|====================================================================
 !     -----------------------
       type, public, extends(t_ebcs) :: t_ebcs_monvol
       integer :: sensor_id = 0, monvol_id = 0
-      
+
       contains
-      
+
       procedure, pass :: write_data => write_data_monvol
       procedure, pass :: read_data => read_data_monvol
       end type t_ebcs_monvol
@@ -270,9 +270,9 @@ Chd|====================================================================
 !     --------------------
       type, public, extends(t_ebcs) :: t_ebcs_inlet
       type(fvm_inlet_data_struct) :: fvm_inlet_data
-      
+
       contains
-      
+
       procedure, pass :: write_data => write_data_inlet
       procedure, pass :: read_data => read_data_inlet
       end type t_ebcs_inlet
@@ -281,26 +281,37 @@ Chd|====================================================================
 !     ----------------------
       type, public, extends(t_ebcs) :: t_ebcs_fluxout
       type(fvm_inlet_data_struct) :: fvm_inlet_data
-      
+
       contains
-      
+
       procedure, pass :: write_data => write_data_fluxout
       procedure, pass :: read_data => read_data_fluxout
       end type t_ebcs_fluxout
-      
+
 !     type = 10 /EBCS/NRF
 !     ----------------------
       type, public, extends(t_ebcs) :: t_ebcs_nrf
       integer :: nbmat=21
       my_real :: tcar_p = 0., tcar_vf = 1E20
-      !my_real, dimension(:,:), allocatable :: phase_alpha      
-      type(fvm_inlet_data_struct) :: fvm_inlet_data    
-      
+      !my_real, dimension(:,:), allocatable :: phase_alpha
+      type(fvm_inlet_data_struct) :: fvm_inlet_data
+
       contains
-      
+
       procedure, pass :: write_data => write_data_nrf
       procedure, pass :: read_data => read_data_nrf
-      end type t_ebcs_nrf      
+      end type t_ebcs_nrf
+
+
+!     type = 11 /EBCS/PROPERGOL
+!     ----------------------
+      type, public, extends(t_ebcs) :: t_ebcs_propergol
+      my_real :: a = 1., n = 0., q = 0., rho0s=1.
+      type(fvm_inlet_data_struct) :: fvm_inlet_data
+      contains
+      procedure, pass :: write_data => write_data_propergol
+      procedure, pass :: read_data => read_data_propergol
+      end type t_ebcs_propergol
 
       
 !     ----------------------
@@ -318,7 +329,7 @@ Chd|====================================================================
       integer, dimension(:), allocatable :: my_typ
       logical, dimension(:), allocatable :: need_to_compute
       logical :: is_created = .false.
-      integer :: nebcs_loc = 0, nebcs_fvm = 0, nebcs_nrf = 0
+      integer :: nebcs_loc = 0, nebcs_fvm = 0, nebcs_parallel = 0, nebcs_propergol = 0
       contains
       procedure, pass :: create, destroy, write_type_data, create_from_types
       procedure, nopass :: read_type_data
@@ -422,7 +433,10 @@ Chd|====================================================================
                   this%tab(ii)%poly%type = 9
               case (10) ! /EBCS/NRF
                   allocate (t_ebcs_nrf :: this%tab(ii)%poly)
-                  this%tab(ii)%poly%type = 10                  
+                  this%tab(ii)%poly%type = 10
+              case (11) ! /EBCS/PROPERGOL
+                  allocate (t_ebcs_propergol :: this%tab(ii)%poly)
+                  this%tab(ii)%poly%type = 11
                case default
                   print*, "EBCS type ", type, " unrecognized"
             end select
@@ -1427,8 +1441,6 @@ C All allocatable subobjects are deallocated here:
 
       my_real, dimension(2) :: real_data
 
-      call write_i_c(this%nbmat, 1)
-      leni = leni + 1
       real_data(1) = this%tcar_p
       real_data(2) = this%tcar_vf
       call write_db(real_data, 2)
@@ -1463,9 +1475,7 @@ C All allocatable subobjects are deallocated here:
       subroutine read_data_nrf(this)
       implicit none
       class (t_ebcs_nrf), intent(inout) :: this
-      integer :: itmp
 
-      call read_i_c(this%nbmat, 1)
       call read_db(this%tcar_p, 1)
       call read_db(this%tcar_vf, 1)      
       !if(this%nbmat > 0)then
@@ -1486,5 +1496,68 @@ C All allocatable subobjects are deallocated here:
         call read_db(this%fvm_inlet_data%val_pres, 21)
       endif      
       end subroutine read_data_nrf    
+
+!     /EBCS/PROPERGOL
+!     -------------
+
+      subroutine write_data_propergol(this, leni, lenr)
+      implicit none
+      class (t_ebcs_propergol), intent(inout) :: this
+      integer, intent(inout) :: leni, lenr
+      my_real, dimension(4) :: real_data
+      real_data(1) = this%a
+      real_data(2) = this%n
+      real_data(3) = this%q
+      real_data(4) = this%rho0s
+      call write_db(real_data, 4)
+      lenr = lenr + 4
+      if(this%is_multifluid)then
+        call write_i_c(this%fvm_inlet_data%vector_velocity, 1)
+        leni = leni + 1
+        call write_i_c(this%fvm_inlet_data%formulation, 1)
+        leni = leni + 1
+        call write_i_c(this%fvm_inlet_data%func_vel, 3)
+        leni = leni + 3
+        call write_i_c(this%fvm_inlet_data%func_alpha, 21)
+        leni = leni + 21
+        call write_i_c(this%fvm_inlet_data%func_rho, 21)
+        leni = leni + 21
+        call write_i_c(this%fvm_inlet_data%func_pres, 21)
+        leni = leni + 21
+
+        call write_db(this%fvm_inlet_data%val_vel, 3)
+        lenr = lenr + 3
+        call write_db(this%fvm_inlet_data%val_alpha, 21)
+        lenr = lenr + 21
+        call write_db(this%fvm_inlet_data%val_rho, 21)
+        lenr = lenr + 21
+        call write_db(this%fvm_inlet_data%val_pres, 21)
+        lenr = lenr + 21
+      endif
+      end subroutine write_data_propergol
+
+      subroutine read_data_propergol(this)
+      implicit none
+      class (t_ebcs_propergol), intent(inout) :: this
+
+      call read_db(this%a, 1)
+      call read_db(this%n, 1)
+      call read_db(this%q, 1)
+      call read_db(this%rho0s, 1)
+      if(this%is_multifluid)then
+        call read_i_c(this%fvm_inlet_data%vector_velocity, 1)
+        call read_i_c(this%fvm_inlet_data%formulation, 1)
+        call read_i_c(this%fvm_inlet_data%func_vel, 3)
+        call read_i_c(this%fvm_inlet_data%func_alpha, 21)
+        call read_i_c(this%fvm_inlet_data%func_rho, 21)
+        call read_i_c(this%fvm_inlet_data%func_pres, 21)
+
+        call read_db(this%fvm_inlet_data%val_vel, 3)
+        call read_db(this%fvm_inlet_data%val_alpha, 21)
+        call read_db(this%fvm_inlet_data%val_rho, 21)
+        call read_db(this%fvm_inlet_data%val_pres, 21)
+      endif
+      end subroutine read_data_propergol
+
 
       end module ebcs_mod

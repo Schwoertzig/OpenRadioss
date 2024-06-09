@@ -96,7 +96,7 @@ C-----------------------------------------------
       INTEGER :: II, SURF_ID, JJ
       CHARACTER*nchartitle :: TITR    
       CHARACTER*ncharkey :: KEY, KEY2
-      LOGICAL :: IS_AVAILABLE
+      LOGICAL :: IS_AVAILABLE, IS_EBCS_PARALLEL
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
@@ -220,6 +220,15 @@ C-----------------------------------------------
               CALL HM_READ_EBCS_NRF(IGRSURF, MULTI_FVM, UNITAB, ID, TITR, UID, LSUBMODEL, twf)
             end select
 
+         CASE ('PROPERGOL')
+
+            TYP = 11
+            allocate (t_ebcs_propergol :: EBCS_TAB%tab(ii)%poly)
+            select type (twf => EBCS_TAB%tab(ii)%poly)
+            type is (t_ebcs_propergol)
+              CALL HM_READ_EBCS_PROPERGOL(IGRSURF, MULTI_FVM, UNITAB, ID, TITR, UID, LSUBMODEL, twf)
+            end select
+
          CASE ('MONVOL')
 
             TYP = 100
@@ -249,10 +258,22 @@ C-----------------------------------------------
          IF (EBCS_TAB%tab(II)%poly%surf_id > 0) THEN
             CALL EBCS_TAB%tab(II)%poly%set_nodes_elems(IGRSURF(JJ)%NSEG, NUMNOD, IGRSURF(JJ)%NODES)         
             IF (IMACH == 3) THEN
-             DO JJ = 1, EBCS_TAB%tab(II)%poly%nb_node    
-                IF(EBCS_TAB%tab(II)%poly%type/=10) CALL IFRONTPLUS(EBCS_TAB%tab(II)%poly%node_list(jj), 1)  
-                FLAGKIN(EBCS_TAB%tab(II)%poly%node_list(jj)) = 1         
-             ENDDO                                                                    
+
+              IS_EBCS_PARALLEL = .FALSE.
+              IF(EBCS_TAB%tab(II)%poly%type == 10 .OR. EBCS_TAB%tab(II)%poly%type == 11)THEN
+                IS_EBCS_PARALLEL = .TRUE.
+              ENDIF
+
+              IF(.NOT. IS_EBCS_PARALLEL) THEN
+                DO JJ = 1, EBCS_TAB%tab(II)%poly%nb_node
+                  CALL IFRONTPLUS(EBCS_TAB%tab(II)%poly%node_list(jj), 1)
+                ENDDO
+              ENDIF
+
+              DO JJ = 1, EBCS_TAB%tab(II)%poly%nb_node
+                FLAGKIN(EBCS_TAB%tab(II)%poly%node_list(jj)) = 1
+              ENDDO
+
             ENDIF
          ELSE
 !     error
