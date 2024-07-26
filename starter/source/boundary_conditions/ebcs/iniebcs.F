@@ -262,7 +262,6 @@ C=======================================================================
              ELSE
                 SIZ = EBCS%nb_node
              ENDIF
-
              !     iface
              EBCS%has_iface = .TRUE.
              IF(IFLAG==0)ALLOCATE(EBCS%iface(NSEG))
@@ -283,6 +282,33 @@ C=======================================================================
              EBCS%has_dp0 = .true.
              IF(IFLAG==0)ALLOCATE(EBCS%dp0(NSEG))
              EBCS%dp0(1:NSEG) = ZERO
+             
+           TYPE IS (t_ebcs_propergol)
+             IF(EBCS%is_multifluid) THEN
+                SIZ = EBCS%nb_elem
+             ELSE
+                SIZ = EBCS%nb_node
+             ENDIF
+             !     iface
+             EBCS%has_iface = .TRUE.
+             IF(IFLAG==0)ALLOCATE(EBCS%iface(NSEG))
+             EBCS%iface(1:NSEG) = 0 
+             !     vold
+             EBCS%has_vold = .TRUE.
+             IF(IFLAG==0)ALLOCATE(EBCS%vold(SIZ))
+             EBCS%vold(1:SIZ) = 0   
+             !     Pold
+             EBCS%has_Pold = .TRUE.
+             IF(IFLAG==0) ALLOCATE(EBCS%Pold(SIZ))
+             EBCS%Pold(1:SIZ) = 0 
+             !     la
+             EBCS%has_la = .true.
+             IF(IFLAG==0)ALLOCATE(EBCS%la(3, EBCS%nb_node))
+             EBCS%la(1:3, 1:EBCS%nb_node) = ZERO  
+             !     dp0
+             EBCS%has_dp0 = .true.
+             IF(IFLAG==0)ALLOCATE(EBCS%dp0(NSEG))
+             EBCS%dp0(1:NSEG) = ZERO             
                                                           
         END SELECT
       
@@ -302,7 +328,7 @@ C=======================================================================
      .            IGRSURF(ISU)%NODES,MWA,MWA(1+(2+NUMNOD)),PM,X,TYP,IGEO)                  
           ENDIF
           
-          IF(.NOT.EBCS%is_multifluid .AND. (TYP == 0 .OR. TYP == 10))THEN                                           
+          IF(.NOT.EBCS%is_multifluid .AND. (TYP == 0 .OR. TYP == 10 .OR. TYP == 11))THEN
             !2D quads & trias EBCS : all on domain 1 (ispmd=0)  --> TAG with  EBCS_TAG_CELL_SPMD
             !-------------------------------------------------                      
             DO KK=1,EBCS%nb_elem              

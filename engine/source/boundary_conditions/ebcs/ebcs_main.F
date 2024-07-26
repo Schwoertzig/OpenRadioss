@@ -86,7 +86,7 @@ C-----------------------------------------------
 
       !/TH/SURF (RESET)
       DO I = 1, NEBCS
-         IF(.NOT.EBCS_TAB%need_to_compute(I)) CYCLE
+         IF(.NOT.EBCS_TAB%need_to_compute(I)) CYCLE     !EBCS may be on domain 0 only depending on ebcs type
          EBCS => EBCS_TAB%tab(i)%poly
          HAS_TH = EBCS%has_th
          IF(HAS_TH)THEN
@@ -163,6 +163,15 @@ C-----------------------------------------------
      .             twf%ro0,twf%en0,
      .             twf%la,MS,STIFN,twf,IPARG,ELBUF_TAB,MULTI_FVM,IXQ,IXS,IXTG,
      .             ITAB, NALE, EBCS_PARITHON(I)%ELEM_ADRESS,FSKY,FSAVSURF)
+             end select
+         ELSE IF (TYP == 11) THEN
+            select type (twf => EBCS)
+             type is (t_ebcs_propergol)
+              CALL EBCS11(NSEG,twf%iseg,SEGVAR,
+     .             V,W,X,
+     .             twf%node_list,NOD,twf%elem_list,twf%ielem,twf%iface,
+     .             twf%la,MS,STIFN,twf,IPARG,ELBUF_TAB,IXQ,IXS,IXTG,
+     .              FSAVSURF)
             end select  
          ELSE IF (TYP == 100) THEN
             SELECT TYPE(EBCS)
