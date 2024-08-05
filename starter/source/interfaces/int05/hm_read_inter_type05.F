@@ -18,7 +18,7 @@ Copyright>
 Copyright>        Commercial Alternative: Altair Radioss Software
 Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
-Copyright>        software under a commercial license.  Contact Altair to discuss further if the
+Copyright>        software under a commercial license.  Contact Altair to dfriiscuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
       !||====================================================================
       !||    hm_read_inter_type05   ../starter/source/interfaces/int05/hm_read_inter_type05.F
@@ -64,10 +64,8 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER ISU1,ISU2,ILAGM,NI,NOINT
       INTEGER NOM_OPT(LNOPT1,*),IPARI(*)
-      my_real
-     .   STFAC,XFILTR
-      my_real
-     .   FRIGAP(*),FRIC_P(*)
+      my_real STFAC,XFILTR
+      my_real FRIGAP(*),FRIC_P(10)
       CHARACTER(LEN=NCHARTITLE) :: TITR,TITR1
 C-----------------------------------------------
       TYPE (GROUP_)  ,TARGET, DIMENSION(NGRNOD)  :: IGRNOD

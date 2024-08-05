@@ -44,10 +44,11 @@ C=======================================================================
       !||--- uses       -----------------------------------------------------
       !||    message_mod            ../starter/share/message_module/message_mod.F
       !||====================================================================
-      SUBROUTINE ININT2(INTBUF_TAB ,INSCR    ,X         ,IXQ    ,
-     .                  PM         ,GEO      ,IPARI     ,NINT   ,ITAB     ,
-     .                  ITABM1     ,NUMNOD   ,IKINE     ,MWA    ,IPM      ,
-     .                  ID         ,TITR     ,KNOD2ELQ ,NOD2ELQ ,SEGQUADFR)
+      SUBROUTINE ININT2(INTBUF_TAB ,INSCR    ,X         ,IXQ     ,SINSCR   ,
+     .                  PM         ,GEO      ,IPARI     ,NINT    ,ITAB     ,
+     .                  ITABM1     ,NUMNOD   ,IKINE     ,MWA     ,IPM      ,
+     .                  ID         ,TITR     ,KNOD2ELQ  ,NOD2ELQ ,SEGQUADFR,
+     .                  NUMMAT     ,NINTER   ,SITAB     ,SITABM1)
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
@@ -68,16 +69,14 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NUMMAT,NINTER,SITAB,SITABM1,SINSCR !< array sizes
       INTEGER NINT, NUMNOD
-      INTEGER INSCR(*), IXQ(*), IPARI(*), ITAB(*),
-     .        ITABM1(*), IKINE(*), MWA(*),IPM(NPROPMI,*),
+      INTEGER INSCR(*), IXQ(*), IPARI(NPARI), ITAB(SITAB),
+     .        ITABM1(SITABM1), IKINE(*), MWA(*),IPM(NPROPMI,NUMMAT),
      .        KNOD2ELQ(*),NOD2ELQ(*),SEGQUADFR(2,*)
-C     REAL
-      my_real
-     .   X(*), PM(*), GEO(*)
+      my_real X(*), PM(NPROPM, NUMMAT), GEO(*)
       INTEGER ID
       CHARACTER(LEN=NCHARTITLE) :: TITR
-
       TYPE(INTBUF_STRUCT_) INTBUF_TAB
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -91,16 +90,16 @@ C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
       IWPENE = 0
-      NRTS  =IPARI(3)
-      NRTM  =IPARI(4)
-      NSN   =IPARI(5)
-      NMN   =IPARI(6)
-      NTY   =IPARI(7)
-      NST   =IPARI(8)
-      NMT   =IPARI(9)
-      NOINT =IPARI(15)
+      NRTS  = IPARI(3)
+      NRTM  = IPARI(4)
+      NSN   = IPARI(5)
+      NMN   = IPARI(6)
+      NTY   = IPARI(7)
+      NST   = IPARI(8)
+      NMT   = IPARI(9)
+      NOINT = IPARI(15)
 C
-      IF(INVERS<18) NOINT=NINT
+      NOINT=NINT
       WRITE(IOUT,2100)NOINT,NTY,NRTS,NRTM,NSN,NMN
       K10=1
       K11=K10+4*NRTS
@@ -123,7 +122,7 @@ C
       L22=L20+1+NSN
 C
        CALL ININT0(X,INTBUF_TAB%IRECTM,INTBUF_TAB%NSEGM,INTBUF_TAB%NRT,INTBUF_TAB%MSR,
-     1         INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM)
+     1         INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM,INTBUF_TAB%S_IRECTM, INTBUF_TAB%S_NRT)
        CALL I1CHK2(X,INTBUF_TAB%IRECTS,IXQ,NRTS, NINT,
      1       NSN,INTBUF_TAB%NSV,NOINT,ID,TITR)
        CALL I1CHK2(X,INTBUF_TAB%IRECTM,IXQ,NRTM,-NINT,
@@ -145,7 +144,7 @@ C
       L23=L22+NST
       K48 = KFI
        CALL ININT0(X,INTBUF_TAB%IRECTM,INSCR(L21),INSCR(L23),INTBUF_TAB%MSR,
-     1         INTBUF_TAB%NSV,INSCR(L16),NSN,NMN,NRTM)
+     1         INTBUF_TAB%NSV,INSCR(L16),NSN,NMN,NRTM,INTBUF_TAB%S_IRECTM,  SINSCR-L23+1)
        CALL I1CHK2(X,INTBUF_TAB%IRECTS,IXQ,NRTS, NINT,
      1       NSN,INTBUF_TAB%NSV,NOINT,ID,TITR)
        CALL I1CHK2(X,INTBUF_TAB%IRECTM,IXQ,NRTM,-NINT,
@@ -191,9 +190,9 @@ C
       INTBUF_TAB%STFNM(1:NMN) = 0      
 
        CALL ININT0(X,INTBUF_TAB%IRECTS,INTBUF_TAB%NSEGS,INTBUF_TAB%LNSV,INTBUF_TAB%NSV,
-     1         INTBUF_TAB%MSR,INTBUF_TAB%ILOCM,NMN,NSN,NRTS)
+     1         INTBUF_TAB%MSR,INTBUF_TAB%ILOCM,NMN,NSN,NRTS,INTBUF_TAB%S_IRECTS,INTBUF_TAB%S_LNSV)
        CALL ININT0(X,INTBUF_TAB%IRECTM,INTBUF_TAB%NSEGM,INTBUF_TAB%LMSR,INTBUF_TAB%MSR,
-     1         INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM)
+     1         INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM,INTBUF_TAB%S_IRECTM,INTBUF_TAB%S_LMSR)
        CALL I3STI2(
      1 X   ,INTBUF_TAB%IRECTS,INTBUF_TAB%STFS,IXQ    ,PM       ,
      2 NRTS   ,INTBUF_TAB%STFNS,INTBUF_TAB%NSEGS,INTBUF_TAB%LNSV,NINT      ,
@@ -249,7 +248,7 @@ C
       INTBUF_TAB%STFNM(1:NMN) = 0
 
        CALL ININT0(X,INTBUF_TAB%IRECTM,INTBUF_TAB%NSEGM,INTBUF_TAB%LMSR,INTBUF_TAB%MSR,
-     1         INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM)
+     1         INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM,INTBUF_TAB%S_IRECTM, INTBUF_TAB%S_LMSR)
        CALL I3STI2(
      1 X   ,INTBUF_TAB%IRECTM,INTBUF_TAB%STFM,IXQ    ,PM       ,
      2 NRTM   ,INTBUF_TAB%STFNM,INTBUF_TAB%NSEGM,INTBUF_TAB%LMSR,-NINT      ,
@@ -291,9 +290,9 @@ C
       INTBUF_TAB%STFNM(1:NMN)= 0
 
        CALL ININT0(X,INTBUF_TAB%IRECTS,INTBUF_TAB%NSEGS,INTBUF_TAB%LNSV,INTBUF_TAB%NSV,
-     1               INTBUF_TAB%MSR,INTBUF_TAB%ILOCM,NMN,NSN,NRTS)
+     1               INTBUF_TAB%MSR,INTBUF_TAB%ILOCM,NMN,NSN,NRTS,INTBUF_TAB%S_IRECTS ,INTBUF_TAB%S_LNSV)
        CALL ININT0(X,INTBUF_TAB%IRECTM,INTBUF_TAB%NSEGM,INTBUF_TAB%LMSR,INTBUF_TAB%MSR,
-     1               INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM)
+     1               INTBUF_TAB%NSV,INTBUF_TAB%ILOCS,NSN,NMN,NRTM,INTBUF_TAB%S_IRECTM ,INTBUF_TAB%S_LMSR)
        CALL I9STI2(
      1 X         ,INTBUF_TAB%IRECTS,INTBUF_TAB%STFS,IXQ       ,PM        ,
      2 NRTS      ,INTBUF_TAB%STFNS,INTBUF_TAB%NSEGS,INTBUF_TAB%LNSV,NINT      ,

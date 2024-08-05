@@ -119,26 +119,25 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    inter_cand_mod                   ../starter/share/modules1/inter_cand_mod.F
       !||    message_mod                      ../starter/share/message_module/message_mod.F
       !||====================================================================
-      SUBROUTINE ININT3(INSCR     ,X            ,IXS        ,IXC       ,PM      ,
-     1                  GEO       ,IPARI        ,NIN        ,ITAB      ,MS      ,
-     2                  MWA       ,RWA          ,IXTG       ,IWRN      ,IKINE   ,
-     3                  IXT       ,IXP          ,IXR        ,NELEMINT  ,IDDLEVEL,
-     4                  IFIEND    ,ALE_CONNECTIVITY,NSNET      ,NMNET     ,IGRBRIC ,
-     5                  IWCONT    ,NSNT         ,NMNT       ,NSN2T     ,NMN2T   ,
-     6                  IWCIN2    ,KNOD2ELS     ,KNOD2ELC   ,KNOD2ELTG ,NOD2ELS ,
-     7                  NOD2ELC    ,NOD2ELTG    ,IGRSURF    ,IKINE1    ,IELEM21 ,
-     8                  SH4TREE    ,SH3TREE     ,IPART      ,IPARTC    ,IPARTTG ,
-     9                  THK        ,THK_PART    ,NOD2EL1D   ,KNOD2EL1D ,IXS10   ,
-     A                  I_MEM      ,RESORT      ,INTER_CAND ,IXS16     ,IXS20   ,   
-     B                  ID         ,TITR        ,IREMNODE   ,NREMNODE  ,IPARTS  ,
-     C                  KXX        ,IXX         ,IGEO       ,INTERCEP  ,LELX    ,
-     D                  INTBUF_TAB ,FILLSOL     ,PM_STACK   ,IWORKSH   ,KXIG3D  ,
-     E                  IXIG3D     ,TAGPRT_FRIC ,INTBUF_FRIC_TAB,IPARTT,IPARTP  ,
-     F                  IPARTX     ,IPARTR      ,NSN_MULTI_CONNEC,T2_ADD_CONNEC,T2_NB_CONNEC,
-     G                  T2_CONNEC  ,NOM_OPT     ,ICODE     ,ISKEW      ,IREMNODE_EDG,
-     H                  S_APPEND_ARRAY,X_APPEND,MASS_APPEND,N2D,FLAG_REMOVED_NODE,
-     I                  NSPMD,INTER_TYPE2_NUMBER,ELEM_LINKED_TO_SEGMENT)
-C============================================================================
+      SUBROUTINE ININT3(INSCR         ,X                   ,IXS                   ,IXC          ,PM      ,
+     1                  GEO           ,IPARI               ,NIN                   ,ITAB         ,MS      ,
+     2                  MWA           ,RWA                 ,IXTG                  ,IWRN         ,IKINE   ,
+     3                  IXT           ,IXP                 ,IXR                   ,NELEMINT     ,IDDLEVEL,
+     4                  IFIEND        ,ALE_CONNECTIVITY    ,NSNET                 ,NMNET        ,IGRBRIC ,
+     5                  IWCONT        ,NSNT                ,NMNT                  ,NSN2T        ,NMN2T   ,
+     6                  IWCIN2        ,KNOD2ELS            ,KNOD2ELC              ,KNOD2ELTG    ,NOD2ELS ,
+     7                  NOD2ELC       ,NOD2ELTG            ,IGRSURF               ,IKINE1       ,IELEM21 ,
+     8                  SH4TREE       ,SH3TREE             ,IPART                 ,IPARTC       ,IPARTTG ,
+     9                  THK           ,THK_PART            ,NOD2EL1D              ,KNOD2EL1D    ,IXS10   ,
+     A                  I_MEM         ,RESORT              ,INTER_CAND            ,IXS16        ,IXS20   ,
+     B                  ID            ,TITR                ,IREMNODE              ,NREMNODE     ,IPARTS  ,
+     C                  KXX           ,IXX                 ,IGEO                  ,INTERCEP     ,LELX    ,
+     D                  INTBUF_TAB    ,FILLSOL             ,PM_STACK              ,IWORKSH      ,KXIG3D  ,
+     E                  IXIG3D        ,TAGPRT_FRIC         ,INTBUF_FRIC_TAB       ,IPARTT       ,IPARTP  ,
+     F                  IPARTX        ,IPARTR              ,NSN_MULTI_CONNEC      ,T2_ADD_CONNEC,T2_NB_CONNEC,
+     G                  T2_CONNEC     ,NOM_OPT             ,ICODE                 ,ISKEW        ,IREMNODE_EDG,
+     H                  S_APPEND_ARRAY,X_APPEND            ,MASS_APPEND           ,N2D          ,FLAG_REMOVED_NODE,
+     I                  NSPMD         ,INTER_TYPE2_NUMBER  ,ELEM_LINKED_TO_SEGMENT,SINSCR)
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
@@ -171,11 +170,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: SINSCR !< array size
       INTEGER NIN, IWRN, NSNT, NMNT, NSN2T, NMN2T,
      .   NSNET  ,NMNET ,RESORT
       INTEGER, INTENT(in) :: N2D !< flag for 2D/3D, 0-->3D, 1-->2D
       INTEGER, DIMENSION(NPARI,NINTER), INTENT(inout) :: IPARI !< interface data
-      INTEGER INSCR(*), IXS(NIXS,NUMELS), IXC(NIXC,NUMELC),
+      INTEGER INSCR(SINSCR), IXS(NIXS,NUMELS), IXC(NIXC,NUMELC),
      .   IXT(NIXT,NUMELT) ,IXP(NIXP,NUMELP) ,IXR(NIXR,NUMELR),
      .   ITAB(NUMNOD), MWA(*), IXTG(NIXTG,NUMELTG), IKINE(*),
      .   NELEMINT,  IDDLEVEL,IFIEND,
@@ -350,8 +350,9 @@ C-----------------------------------------------------------------------
       INTBUF_TAB(NIN)%NRT(1:NMT) = 0
 C
        CALL ININT0(
-     1    X                ,INTBUF_TAB(NIN)%IRECTM  ,INTBUF_TAB(NIN)%NSEGM ,INTBUF_TAB(NIN)%NRT ,INTBUF_TAB(NIN)%MSR,
-     2    INTBUF_TAB(NIN)%NSV   ,INTBUF_TAB(NIN)%ILOCS   ,NSN              ,NMN            ,NRTM   )
+     1    X                ,INTBUF_TAB(NIN)%IRECTM  ,INTBUF_TAB(NIN)%NSEGM ,INTBUF_TAB(NIN)%NRT  ,INTBUF_TAB(NIN)%MSR,
+     2    INTBUF_TAB(NIN)%NSV   ,INTBUF_TAB(NIN)%ILOCS   ,NSN              ,NMN            ,NRTM ,INTBUF_TAB(NIN)%S_IRECTM,
+     3    INTBUF_TAB(NIN)%S_NRT  )
        CALL I1CHK3(
      1    X                ,INTBUF_TAB(NIN)%IRECTS  ,IXS              ,NRTS           ,IXC           ,
      2    NIN           ,NSN                ,INTBUF_TAB(NIN)%NSV   ,NOINT          ,IXTG          ,
@@ -388,7 +389,8 @@ C-----------------------------------------------------------------------
        L23 = L22+NST
        CALL ININT0(
      1    X                ,INTBUF_TAB(NIN)%IRECTM  ,INSCR(L21)       ,INSCR(L23)     ,INTBUF_TAB(NIN)%MSR,
-     2    INTBUF_TAB(NIN)%NSV   ,INSCR(L16)         ,NSN              ,NMN            ,NRTM          )
+     2    INTBUF_TAB(NIN)%NSV   ,INSCR(L16)         ,NSN              ,NMN            ,NRTM ,INTBUF_TAB(NIN)%S_IRECTM,
+     3    SINSCR-L23+1 )
 
        CALL I1CHK3(
      1    X               ,INTBUF_TAB(NIN)%IRECTM   ,IXS              ,NRTM           ,IXC           ,
@@ -547,10 +549,10 @@ C-----------------------------------------------------------------------
 
        CALL ININT0(
      1    X,INTBUF_TAB(NIN)%IRECTS,INTBUF_TAB(NIN)%NSEGS,INTBUF_TAB(NIN)%LNSV,INTBUF_TAB(NIN)%NSV,
-     2    INTBUF_TAB(NIN)%MSR,INTBUF_TAB(NIN)%ILOCM,NMN ,NSN   ,NRTS   )
+     2    INTBUF_TAB(NIN)%MSR,INTBUF_TAB(NIN)%ILOCM,NMN ,NSN   ,NRTS ,INTBUF_TAB(NIN)%S_IRECTS ,INTBUF_TAB(NIN)%S_LNSV)
        CALL ININT0(
      1    X,INTBUF_TAB(NIN)%IRECTM,INTBUF_TAB(NIN)%NSEGM,INTBUF_TAB(NIN)%LMSR,INTBUF_TAB(NIN)%MSR,
-     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN,NMN   ,NRTM   )
+     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN,NMN   ,NRTM ,INTBUF_TAB(NIN)%S_IRECTM ,INTBUF_TAB(NIN)%S_LMSR )
        CALL I3STI3(
      1 X         ,INTBUF_TAB(NIN)%IRECTS,INTBUF_TAB(NIN)%STFS,IXS,PM   ,
      2 GEO       ,NRTS      ,IXC       ,INTBUF_TAB(NIN)%STFNS,INTBUF_TAB(NIN)%NSEGS,
@@ -607,7 +609,7 @@ C-----------------------------------------------------------------------
 
        CALL ININT0(
      1    X,INTBUF_TAB(NIN)%IRECTM,INTBUF_TAB(NIN)%NSEGM,INTBUF_TAB(NIN)%LMSR,INTBUF_TAB(NIN)%MSR,
-     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN ,NMN   ,NRTM   )
+     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN ,NMN   ,NRTM ,INTBUF_TAB(NIN)%S_IRECTM ,INTBUF_TAB(NIN)%S_LMSR)
        CALL I3STI3(
      1 X         ,INTBUF_TAB(NIN)%IRECTM,INTBUF_TAB(NIN)%STFM,IXS       ,PM          ,
      2 GEO       ,NRTM      ,IXC       ,INTBUF_TAB(NIN)%STFNM, INTBUF_TAB(NIN)%NSEGM  ,
@@ -870,10 +872,12 @@ C-----------------------------------------------------------------------
 
        CALL ININT0(
      1    X,INTBUF_TAB(NIN)%IRECTS,INTBUF_TAB(NIN)%NSEGS,INTBUF_TAB(NIN)%LNSV,INTBUF_TAB(NIN)%NSV,
-     2    INTBUF_TAB(NIN)%MSR,INTBUF_TAB(NIN)%ILOCM,NMN ,NSN            ,NRTS   )
+     2    INTBUF_TAB(NIN)%MSR,INTBUF_TAB(NIN)%ILOCM,NMN ,NSN            ,NRTS  ,INTBUF_TAB(NIN)%S_IRECTS ,
+     3    INTBUF_TAB(NIN)%S_LNSV)
        CALL ININT0(
      1    X,INTBUF_TAB(NIN)%IRECTM,INTBUF_TAB(NIN)%NSEGM,INTBUF_TAB(NIN)%LMSR,INTBUF_TAB(NIN)%MSR,
-     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN ,NMN            ,NRTM   )
+     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN ,NMN            ,NRTM  ,INTBUF_TAB(NIN)%S_IRECTM ,
+     3    INTBUF_TAB(NIN)%S_LMSR )
 
        CALL I9STI3(
      1   X         ,INTBUF_TAB(NIN)%IRECTS,INTBUF_TAB(NIN)%STFS,IXS ,PM ,
@@ -1192,8 +1196,9 @@ C-----------------------------------------------------------------------
         !flushed between 2 domain decomposition
         INTBUF_TAB(NIN)%LMSR(1:NMT) = 0
         CALL ININT0(
-     1    X,INTBUF_TAB(NIN)%IRECTM,INTBUF_TAB(NIN)%NSEGM,INTBUF_TAB(NIN)%LMSR ,INTBUF_TAB(NIN)%MSR,
-     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN       ,NMN        ,NRTM   )
+     1    X,INTBUF_TAB(NIN)%IRECTM, INTBUF_TAB(NIN)%NSEGM,INTBUF_TAB(NIN)%LMSR ,INTBUF_TAB(NIN)%MSR,
+     2    INTBUF_TAB(NIN)%NSV,INTBUF_TAB(NIN)%ILOCS,NSN       ,NMN        ,NRTM ,INTBUF_TAB(NIN)%S_IRECTM  ,
+     3    INTBUF_TAB(NIN)%S_LMSR)
        IPARI(30,NIN)=-1
       CALL I12CHK3(X,INTBUF_TAB(NIN)%IRECTM,IXS       ,NRTM     ,IXC        ,
      1          -NIN,NMN    ,INTBUF_TAB(NIN)%MSR,NOINT     ,MWA        ,

@@ -45,33 +45,30 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER NRT, NINT, NSN, NOINT
       INTEGER IRECT(4,*), IXQ(*), NSV(*)
-C     REAL
-      my_real
-     .   X(3,*)
+      my_real X(3,*)
       INTEGER ID
       CHARACTER(LEN=NCHARTITLE)::TITR
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, II, NEL, IG, IL
-      my_real
-     . YM1, YM2, ZM1, ZM2, YE(4) ,ZE(4)
+      my_real YM1, YM2, ZM1, ZM2, YE(4) ,ZE(4)
 C-----------------------------------------------
-C   E x t e r n a l   F u n c t i o n s
+C   S o u r c e   L i n e s
 C-----------------------------------------------
 C
       DO I=1,NRT
         II=I
-        CALL INRCH2(X, IRECT, IXQ, II, NEL,
-     .              NINT, NOINT, YM1, YM2, ZM1,
-     .              ZM2 ,YE   ,ZE, ID, TITR)
-        CALL INORI2(X,IRECT,II,NEL,NINT,
-     .              NOINT, YM1, YM2, ZM1, ZM2 ,
+        CALL INRCH2(X    , IRECT, IXQ, II ,  NEL,
+     .              NINT , NOINT, YM1, YM2,  ZM1,
+     .              ZM2  , YE   , ZE , ID ,  TITR)
+        CALL INORI2(X    , IRECT, II , NEL,  NINT,
+     .              NOINT, YM1  , YM2, ZM1,  ZM2 ,
      .              YE   , ZE )
       ENDDO
-C-----------------------------------------------------
-C     MISE DANS IRECT DU NUMERO LOCAL DU NOEUD
-C-----------------------------------------------------
+C-----------------------------------------------
+C     IRECT <- INTERNAL NODE IDENTIFIERS
+C-----------------------------------------------
       DO I=1,NRT
         IG=IRECT(1,I)
         CALL LOCAL_INDEX(IL,IG,NSV,NSN)
@@ -80,6 +77,6 @@ C-----------------------------------------------------
         CALL LOCAL_INDEX(IL,IG,NSV,NSN)
         IRECT(2,I)=IL
       ENDDO
-C
+C-----------------------------------------------
       RETURN
       END

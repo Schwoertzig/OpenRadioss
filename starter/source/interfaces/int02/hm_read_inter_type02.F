@@ -37,9 +37,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    submodel_mod             ../starter/share/modules1/submodel_mod.F
       !||====================================================================
       SUBROUTINE HM_READ_INTER_TYPE02(
-     1        IPARI      ,STFAC      ,FRIGAP    ,NOINT    ,IGRNOD      ,
-     2        IGRSURF    ,I2RUPT     ,AREASL    ,DEF_INTER,NPC1       ,
-     3        TITR       ,UNITAB     ,LSUBMODEL)
+     1        IPARI      ,STFAC      ,FRIGAP    ,NOINT    ,IGRNOD    ,
+     2        IGRSURF    ,I2RUPT     ,AREASL    ,DEF_INTER,NPC1      ,
+     3        TITR       ,UNITAB     ,LSUBMODEL ,NPARI    ,NPARIR    ,
+     4        SNPC1      )
 C============================================================================
 C     
 C-----------------------------------------------
@@ -47,7 +48,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE GROUPDEF_MOD
-      USE SUBMODEL_MOD
+      USE SUBMODEL_MOD , ONLY : SUBMODEL_DATA, NSUBMOD
       USE ALE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY
 C-----------------------------------------------
@@ -57,29 +58,24 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
-#include      "scr17_c.inc"
-C-----------------------------------------------
-C   D u m m y   A r g u m e n t s
-C-----------------------------------------------
-      INTEGER NOINT
-      INTEGER IPARI(*),DEF_INTER(*),NPC1(*)
-      my_real
-     .   STFAC,AREASL,UNITAB(*)
-      my_real
-     .   FRIGAP(*),I2RUPT(*)
-      CHARACTER(LEN=NCHARTITLE)::TITR
-C-----------------------------------------------
-      TYPE (GROUP_)  ,TARGET, DIMENSION(NGRNOD)  :: IGRNOD
-      TYPE (SURF_)   ,TARGET , DIMENSION(NSURF)  :: IGRSURF
-      TYPE(SUBMODEL_DATA),INTENT(IN)             :: LSUBMODEL(*)
-C-----------------------------------------------
-C   C o m m o n   B l o c k s
-C-----------------------------------------------
 #include      "com01_c.inc"
 #include      "com04_c.inc"
 #include      "com09_c.inc"
 #include      "units_c.inc"
 #include      "scr12_c.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NPARI,NPARIR,SNPC1 !< array sizes
+      INTEGER NOINT
+      INTEGER IPARI(NPARI),DEF_INTER(100),NPC1(SNPC1)
+      my_real STFAC,AREASL,UNITAB(*)
+      my_real FRIGAP(NPARIR),I2RUPT(6)
+      CHARACTER(LEN=NCHARTITLE) :: TITR
+C-----------------------------------------------
+      TYPE (GROUP_)  ,TARGET, DIMENSION(NGRNOD)  :: IGRNOD
+      TYPE (SURF_)   ,TARGET , DIMENSION(NSURF)  :: IGRSURF
+      TYPE(SUBMODEL_DATA),INTENT(IN)             :: LSUBMODEL(NSUBMOD)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -90,14 +86,14 @@ C-----------------------------------------------
       my_real
      .   STARTT,STOPT,KTHE,VISC,DNMAX,DTMAX,SCAL_F,
      .   SCAL_SR,SCAL_D,ALPHA,AREA,F_UNIT,SR_UNIT,D_UNIT
-      CHARACTER(LEN=NCHARKEY) ::  KEY1
+      CHARACTER(LEN=NCHARKEY) :: KEY1
 !
       INTEGER, DIMENSION(:), POINTER :: INGR2USR
       LOGICAL IS_AVAILABLE, IS_ENCRYPTED
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER NGR2USR
+      INTEGER,EXTERNAL :: NGR2USR
 C-----------------------------------------------
       DATA INT2DEF/5/
 C=======================================================================
@@ -162,20 +158,16 @@ C.....* Default values definition *........
       IPRINT = 0
 C
       KEY1='IGNORE'
-      CALL DEFINTER(KEY1     ,IGNORE    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+      CALL DEFINTER(KEY1  ,IGNORE  ,IASSIGN   ,IPRINT   ,NTYP   ,DEF_INTER)
 C
       KEY1='ILEV'
-      CALL DEFINTER(KEY1     ,ILEV    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+      CALL DEFINTER(KEY1  ,ILEV    ,IASSIGN   ,IPRINT   ,NTYP   ,DEF_INTER)
 C
       KEY1='IBUC'
-      CALL DEFINTER(KEY1     ,IBUC    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+      CALL DEFINTER(KEY1  ,IBUC    ,IASSIGN   ,IPRINT   ,NTYP   ,DEF_INTER)
 C
       KEY1='IDEL2'
-      CALL DEFINTER(KEY1     ,IDEL2    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+      CALL DEFINTER(KEY1  ,IDEL2   ,IASSIGN   ,IPRINT   ,NTYP   ,DEF_INTER)
 
 C....* CHECKS AND Storage IPARI FRIGAP *.............
 C
