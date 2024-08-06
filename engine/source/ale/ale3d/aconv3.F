@@ -107,6 +107,11 @@ C-----------------------------------------------
         DELTA(I)         = HALF * DT1 *(-VALEL(I)*FLU1(I) - VL(1,I)-VL(2,I)-VL(3,I)-VL(4,I)-VL(5,I)-VL(6,I))
       ENDDO
 
+      print *, "NVAR   =", NVAR
+      print *, "VALVOIS=",VALVOIS(1:6,1)
+      print *, "FLUX   =",FLUX(1:6,1)
+      print *, "DELTA  = ",DELTA(1)
+
       IF(ALEFVM_Param%IEnabled/=0)THEN
         IF(NVAR==2)THEN
           DO I=LFT,LLT

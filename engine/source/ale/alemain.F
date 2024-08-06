@@ -434,7 +434,7 @@ C
      .                          A,V,W,X,FSAV(1,I),FV,
      .                          WA,MS,STIFN,IPARG,
      .                          ELBUF_TAB,EBCS_TAB,MULTI_FVM,IXQ,IXS,IXTG,
-     .                          ITAB,ALE_CONNECTIVITY%NALE,FSKY,FSAVSURF)
+     .                          ITAB,ALE_CONNECTIVITY%NALE,FSKY,FSAVSURF,TT,DT1)
                ENDIF
                CALL MY_BARRIER
             ENDIF

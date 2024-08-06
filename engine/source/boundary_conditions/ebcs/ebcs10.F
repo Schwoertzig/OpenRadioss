@@ -79,7 +79,7 @@ C-----------------------------------------------
       TYPE(G_BUFEL_), POINTER :: GBUF
       TYPE(L_BUFEL_)  ,POINTER :: LBUF     
       INTEGER II,IS,KK,K1,LL,KSEG,NN(4),NNG(4),NUM,KTY,KLT,MFT,NGRP,ILOC,NPT,IVOI,IDX(6),IX(4)
-      INTEGER ICF_2d(2,4), ICF_3d(4,6), JJ, ISUBMAT, IPOS, NBMAT, MTN
+      INTEGER ICF_2d(2,4), ICF_3d(4,6), JJ, ISUBMAT, IPOS, MTN
       my_real
      .       ORIENT,RHO,C,FC,ROC,ALP,FAC1,FAC2,VOL,MASS,
      .       X13,Y13,Z13,X24,Y24,Z24,NX,NY,Z,S,
@@ -281,7 +281,6 @@ C-----------------------------------------------
               PHASE_EINT(ISUBMAT) = MULTI_FVM%PHASE_EINT(ISUBMAT,ILOC+1+KLT)                            
             ENDDO
           ENDIF
-          NBMAT=EBCS%NBMAT
 
           !segment data for flux of volumes ( upwind/ACONVE() )
           SEGVAR%RHO(KSEG)=RHO
@@ -337,27 +336,27 @@ C              PP    = Pold + (ROC*(Vnew-Vold)) !+ALPHA*(Pvois+DP0)/(ALPHA + ONE
 
            ! -------------
            ! for parith/on option : need to update with FSKY array 
-           IF(IPARIT>0) THEN
-                DO KK=1,NPT
-                    ADRESS = ELEM_ADRESS(KK,IS) ! adress of FSKY array for element IS and node KK
-                    FSKY(1,ADRESS) = -PP*SURF*XN*FAC1
-                    FSKY(2,ADRESS) = -PP*SURF*YN*FAC1
-                    FSKY(3,ADRESS) = -PP*SURF*ZN*FAC1
-                    FSKY(4:8,ADRESS) = ZERO
-                ENDDO
+           IF(IPARIT > 0) THEN
+             DO KK=1,NPT
+               ADRESS = ELEM_ADRESS(KK,IS) ! adress of FSKY array for element IS and node KK
+               FSKY(1,ADRESS) = -PP*SURF*XN*FAC1
+               FSKY(2,ADRESS) = -PP*SURF*YN*FAC1
+               FSKY(3,ADRESS) = -PP*SURF*ZN*FAC1
+               FSKY(4:8,ADRESS) = ZERO
+             ENDDO
            ENDIF      
            ! -------------          
         ENDDO      
         
         ! -------------
         ! for parith/off option : update directly the acceleration array A()
-        IF(IPARIT==0) THEN
-            DO II=1,NOD
-                NUM=LISTE(II)
-                A(1,NUM)=A(1,NUM)+LA(1,II)
-                A(2,NUM)=A(2,NUM)+LA(2,II)
-                A(3,NUM)=A(3,NUM)+LA(3,II)
-            ENDDO
+        IF(IPARIT == 0) THEN
+          DO II=1,NOD
+            NUM=LISTE(II)
+            A(1,NUM)=A(1,NUM)+LA(1,II)
+            A(2,NUM)=A(2,NUM)+LA(2,II)
+            A(3,NUM)=A(3,NUM)+LA(3,II)
+          ENDDO
         ENDIF
         ! -------------
 

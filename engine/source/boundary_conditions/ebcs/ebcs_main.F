@@ -42,7 +42,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE EBCS_MAIN(IGRSURF,SEGVAR,VOLMON,A,V,W,X,
      .                     FSAV,FV,WA,MS,STIFN,IPARG,ELBUF_TAB,EBCS_TAB,MULTI_FVM,IXQ,IXS,IXTG,
-     .                     ITAB,NALE,FSKY,FSAVSURF)
+     .                     ITAB,NALE,FSKY,FSAVSURF,TIME,DT1)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -65,6 +65,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      my_real,INTENT(IN) :: DT1 !time step
+      my_real,INTENT(IN) :: TIME !simulation time
       my_real,INTENT(INOUT) :: FSAVSURF(TH_SURF_NUM_CHANNEL,NSURF)
       INTEGER IPARG(NPARG,NGROUP)
       INTEGER,INTENT(IN) :: IXQ(NIXQ,NUMELQ),IXS(NIXS,NUMELS),IXTG(NIXTG,NUMELTG),ITAB(NUMNOD),NALE(NUMNOD)
@@ -87,7 +89,7 @@ C-----------------------------------------------
 
       !/TH/SURF (RESET)
       DO I = 1, NEBCS
-         IF(.NOT.EBCS_TAB%need_to_compute(I)) CYCLE
+         IF(.NOT.EBCS_TAB%need_to_compute(I)) CYCLE     !EBCS may be on domain 0 only depending on ebcs type
          EBCS => EBCS_TAB%tab(i)%poly
          HAS_TH = EBCS%has_th
          IF(HAS_TH)THEN
@@ -164,13 +166,21 @@ C-----------------------------------------------
      .             twf%ro0,twf%en0,
      .             twf%la,MS,STIFN,twf,IPARG,ELBUF_TAB,MULTI_FVM,IXQ,IXS,IXTG,
      .             ITAB, NALE, EBCS_PARITHON(I)%ELEM_ADRESS,FSKY,FSAVSURF)
+             end select
+         ELSE IF (TYP == 11) THEN
+            select type (twf => EBCS)
+             type is (t_ebcs_propergol)
+              CALL EBCS11(NSEG,twf%iseg,SEGVAR,
+     .             A,V,W,X,
+     .             twf%node_list,NOD,twf%elem_list,twf%ielem,twf%iface,
+     .             twf%la,MS,STIFN,twf,IPARG,ELBUF_TAB,IXQ,IXS,IXTG,
+     .              FSAVSURF,LSKY, FSKY, EBCS_PARITHON(I)%ELEM_ADRESS,TIME,IPARIT,DT1)
             end select  
          ELSE IF (TYP == 100) THEN
             SELECT TYPE(EBCS)
             TYPE IS (t_ebcs_monvol)
               VOLU = EBCS%monvol_id
-              CALL EBCS_VOL2SEG(NSEG,IGRSURF(ISU)%NODES,EBCS%iseg,SEGVAR,
-     .             A,V,X,VOLMON(NRVOLU*(VOLU-1)+1),FSAV(1,VOLU))
+              CALL EBCS_VOL2SEG(NSEG,IGRSURF(ISU)%NODES,EBCS%iseg,SEGVAR,A,V,X,VOLMON(NRVOLU*(VOLU-1)+1),FSAV(1,VOLU))
               END SELECT
          ENDIF
       ENDDO
