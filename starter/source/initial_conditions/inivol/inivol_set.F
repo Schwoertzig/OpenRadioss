@@ -139,7 +139,7 @@ C-----------------------------------------------
         ENDIF
       ENDDO
 
-      !---set initial volumetric fraction using KVOL array
+      !---set initial volumetric fraction result (KVOL) in material buffer (+ posteriori checks)
       IF(MLW == 51)THEN
         DO IMAT=1,4
           KK = N0PHAS + (IMAT-1)*NVPHAS
