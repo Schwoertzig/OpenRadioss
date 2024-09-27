@@ -438,7 +438,7 @@ C
      .                          A,V,W,X,FSAV(1,I),FV,
      .                          WA,MS,STIFN,IPARG,
      .                          ELBUF_TAB,EBCS_TAB,MULTI_FVM,IXQ,IXS,IXTG,
-     .                          ITAB,ALE_CONNECTIVITY%NALE,FSKY,FSAVSURF)
+     .                          ITAB,ALE_CONNECTIVITY%NALE,FSKY,FSAVSURF,TT,DT1)
                ENDIF
                CALL MY_BARRIER
             ENDIF
@@ -1108,6 +1108,22 @@ c
             ENDDO!next NG
             
           ENDIF!IF (ILAW11 /= 0) THEN
+
+            !------------------------------------------------!
+            ! ELEMENTARY BCS (/EBCS)                         !
+            !------------------------------------------------!
+            IF(NEBCS > 0)THEN
+               IF(ITASK == 0)THEN
+                 I=1+NINTER+NRWALL+NRBODY+NSECT+NJOINT+NRBAG
+                 CALL EBCS_MAIN_POST(SEGVAR,A,V,W,X,MS,STIFN,IPARG,
+     .                               ELBUF_TAB,EBCS_TAB,IXQ,IXS,IXTG,
+     .                               FSKY,FSAVSURF,TT,DT1,NUMNOD,NPARG,NGROUP,
+     .                               NIXQ, NIXS, NIXTG, NUMELS, NUMELQ, NUMELTG,
+     .                               LSKY,NSURF,IPARIT, IALE, N2D)
+               ENDIF
+               CALL MY_BARRIER
+            ENDIF
+
 
         ENDIF!IF(IALE+IEULER+ITHERM /= 0)THEN
         IF(ITASK==0) CALL STOPTIME(MACRO_TIMER_IFSUB0,1)

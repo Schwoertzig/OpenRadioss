@@ -8832,9 +8832,7 @@ C===============================================================================
 C-----------------
 C         VITESSES
 C-----------------
-          CALL VITESSE(
-     1                 A      , AR     , V   , VR   , FZERO,
-     2                  ITAB,ALE_CONNECTIVITY%NALE             )
+          CALL VITESSE( A, AR, V, VR, FZERO, ITAB, ALE_CONNECTIVITY%NALE, EBCS_TAB)
 c        
         IF (NLOC_DMG%IMOD > 0) THEN
 c

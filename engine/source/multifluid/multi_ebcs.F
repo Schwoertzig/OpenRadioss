@@ -33,7 +33,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    th_surf_mod           ../common_source/modules/interfaces/th_surf_mod.F
       !||====================================================================
       SUBROUTINE MULTI_EBCS(ITASK, MULTI_FVM, IXS, IXQ, IXTG, XGRID, WGRID, IPM, PM,
-     .     FUNC_VALUE, EBCS_TAB,NPF,TF,FSAVSURF,NSURF,TIMESTEP)
+     .     FUNC_VALUE, EBCS_TAB,NPF,TF,FSAVSURF,NSURF,TIMESTEP,
+     .     NUMELS, NUMELQ, NUMELTG, NUMNOD, NCYCLE, NUMMAT)
 C-----------------------------------------------
 C     M o d u l e s
 C-----------------------------------------------
@@ -56,7 +57,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C     D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER,INTENT(IN) :: NCYCLE
       INTEGER,INTENT(IN) :: NSURF
+      INTEGER,INTENT(IN) :: NUMELS, NUMELQ, NUMELTG, NUMNOD, NUMMAT
       my_real,INTENT(INOUT) :: FSAVSURF(TH_SURF_NUM_CHANNEL,NSURF)
       TYPE(MULTI_FVM_STRUCT), INTENT(INOUT) :: MULTI_FVM
       INTEGER, INTENT(IN) :: ITASK
@@ -97,6 +100,12 @@ C     Inlet, outlet boundary condition
      .           twf%ielem, twf%iface, twf%fvm_inlet_data,
      .           IXS, IXQ, IXTG, XGRID, WGRID, IPM, PM, FUNC_VALUE,
      .           twf,NPF,TF,FSAVSURF,TIMESTEP)
+            TYPE IS(t_ebcs_propergol)
+              CALL MULTI_PROPERGOL_EBCS(ITASK, I, MULTI_FVM, NELEM,
+     .           twf%ielem, twf%iface, twf%fvm_inlet_data,
+     .           IXS, IXQ, IXTG, XGRID, WGRID, IPM, PM, FUNC_VALUE,
+     .           twf,NPF,TF,FSAVSURF,TIMESTEP,NIXS, NIXQ, NIXTG, NPROPMI, NPROPM, NSURF, STF, SNPC,
+     .           NUMELS, NUMELQ, NUMELTG, NUMNOD, NCYCLE, NUMMAT )
             CLASS DEFAULT
          END SELECT
       ENDDO
