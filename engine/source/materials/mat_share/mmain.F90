@@ -749,7 +749,7 @@
             &dvol    ,df       ,voln    ,mat       ,psh      ,&
             &pnew    ,dpdm     ,dpde    ,lbuf%temp ,ecold    ,&
             &bufmat  ,lbuf%sig ,lbuf%mu ,mtn       ,pold     ,&
-            &npf     ,tf       ,ebuf%var,nvareos)
+            &npf     ,tf       ,ebuf%var,nvareos , mat_elem%mat_param(imat))
           endif
 !-----------------------------------
 !     stresses deviatoric/total
@@ -1340,7 +1340,8 @@
             &df,         psh,        pnew,       dpdm,&
             &dpde,       lbuf%rho,   lbuf%temp,  ecold,&
             &bufmat,     npf,        tf,         lbuf%tsaiwu,&
-            &ebuf%var,   nvareos,    jcvt,       jsph)
+            &ebuf%var,   nvareos,    jcvt,       jsph,&
+            &mat_elem%mat_param(imat))
             if (jsph == 0) then
               call mqviscb(&
               &pm,       off,      lbuf%rho, lbuf%rk,&
@@ -1887,7 +1888,7 @@
             &dvol    ,df       ,voln    ,mat      ,psh      ,&
             &pnew    ,dpdm     ,dpde    ,lbuf%temp,ecold    ,&
             &bufmat  ,lbuf%sig ,lbuf%mu ,mtn      ,pold     ,&
-            &npf     ,tf       ,ebuf%var,nvareos)
+            &npf     ,tf       ,ebuf%var,nvareos , mat_elem%mat_param(imat))
 !
             call eosupda(off  ,lbuf%sig ,lbuf%eint, lbuf%vol ,pnew,nel)
 !

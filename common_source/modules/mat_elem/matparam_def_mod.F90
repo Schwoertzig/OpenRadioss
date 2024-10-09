@@ -288,6 +288,7 @@
       use fail_param_mod
       use names_and_titles_mod
       use multimat_param_mod
+      use eos_param_mod
 ! ----------------------------------------------------------------------------------------------------------------------
 !     included files
 !----------------------------------------------------------------------- 
@@ -357,7 +358,7 @@
 
         type (multimat_param_) :: multimat                       !< buffer scpecific to multimaterial laws (51,151) : vfrac and mat internal identifiers
 
-!        type (eos_param_)    :: eos                             !< eos model data structure (to be defined)
+         type (eos_param_)    :: eos                             !< eos model data structure (to be defined)
 !        type (therm_param_)  :: therm                           !< thermal model data structure (to be defined)           
 !        type (submat_)  ,dimension(:) ,allocatable :: submat    !< multi material data structure (to be defined) 
 

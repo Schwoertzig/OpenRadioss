@@ -155,7 +155,7 @@ C IMAT : relevant for multifluid eos. imat=0 => monomaterial law
      .                DVOL  , DF     , VOL      , MAT    , PSH  , 
      .                PRES  , DPDM   , DPDE     , THETA  , ECOLD, 
      .                BUFMAT, SIG    , MU       , MLW    , POLD ,
-     .                NPF   , TF     , EBUF%VAR , NVAREOS)
+     .                NPF   , TF     , EBUF%VAR , NVAREOS, MAT_PARAM(MATID))
           DO K=1,NEL
             EINT(K)=EINT(K)*DF(K) ! set back to Eint/V
           ENDDO

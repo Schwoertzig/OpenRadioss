@@ -26,14 +26,18 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    eosmain       ../common_source/eos/eosmain.F
       !||====================================================================
       SUBROUTINE POWDER_BURN    (
-     1                            IFLAG,NEL  ,PM   ,OFF  ,EINT ,MU   ,MU2 , 
-     2                            ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH  ,
-     3                            PNEW ,DPDM ,DPDE ,THETA,ECOLD)
+     1                            IFLAG, NEL  ,PM   ,OFF  , EINT  ,MU          ,MU2 ,
+     2                            ESPE , DVOL ,DF   ,VNEW , MAT   ,PSH         ,IPM ,
+     3                            PNEW , DPDM ,DPDE ,THETA, ECOLD ,MAT_PARAM)
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
 C This subroutine contains numerical solving
 C of Deflagration EoS (experimental)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -53,67 +57,56 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER MAT(NEL), IFLAG, NEL
-      my_real PM(NPROPM,NUMMAT), 
-     .        OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
-     .        MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
-     .        VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL),
-     .        DPDE(NEL) ,THETA(NEL),ECOLD(NEL)
+      my_real,INTENT(IN) :: PM(NPROPM,NUMMAT),OFF(NEL),MU(NEL),MU2(NEL),ESPE(NEL),DVOL(NEL),DF(NEL),VNEW(NEL)
+      my_real,INTENT(INOUT) :: THETA(NEL),ECOLD(NEL),PNEW(NEL),DPDM(NEL),DPDE(NEL),EINT(NEL)
+      INTEGER,INTENT(IN) :: IPM(NPROPMI, NUMMAT)
+      TYPE(MATPARAM_STRUCT_), INTENT(IN) :: MAT_PARAM !< material data structure
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, MX
-      my_real :: P0,PSH(MVSIZ),GAMMA,T0,E0,SPH,AA, BB,TFEXTT, DVV, PP, AR0B, B
+      my_real :: bulk,P0,PSH,DD,EG,Gr,CC,ALPHA,FSCALE_B,FSCALE_P,FSCALE_G,FSCALE_RHO, C1,C2
+      my_real :: SPH, TFEXTT
+      INTEGER :: funcb,funcg
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
       IF(IFLAG == 0) THEN
-C-----------------------------------------
-C     COMPUTE BULK MODULUS FOR SOUND SPEED
-C     COMPUTE COLD COMPRESSION ENERGY
-C-----------------------------------------
-       MX         = MAT(1)
-       E0         = PM(23,MX)         
-       GAMMA      = PM(34,MX)
-       P0         = PM(32,MX)
-       PSH(1:NEL) = PM(88,MX)
-       AR0B       = PM(35,MX)
-       B          = PM(36,MX)
-       SPH        = PM(69,MX)
+
+      BULK       = MAT_PARAM%EOS%UPARAM(01)
+      P0         = MAT_PARAM%EOS%UPARAM(02)
+      PSH        = MAT_PARAM%EOS%UPARAM(03)
+      DD         = MAT_PARAM%EOS%UPARAM(04)
+      EG         = MAT_PARAM%EOS%UPARAM(05)
+      Gr         = MAT_PARAM%EOS%UPARAM(06)
+      CC         = MAT_PARAM%EOS%UPARAM(07)
+      ALPHA      = MAT_PARAM%EOS%UPARAM(08)
+      FSCALE_B   = MAT_PARAM%EOS%UPARAM(09)
+      FSCALE_P   = MAT_PARAM%EOS%UPARAM(10)
+      FSCALE_G   = MAT_PARAM%EOS%UPARAM(11)
+      FSCALE_RHO = MAT_PARAM%EOS%UPARAM(12)
+      C1         = MAT_PARAM%EOS%UPARAM(13)
+      C2         = MAT_PARAM%EOS%UPARAM(14)
+      funcb      = MAT_PARAM%EOS%FUNC(1)
+      funcg      = MAT_PARAM%EOS%FUNC(2)
 
        DO I=1,NEL
-         PP      = (GAMMA-ONE)*(ONE+MU(I))*ESPE(I) + AR0B*EXP(B*LOG(1+MU(I)))
-         DPDM(I) = (GAMMA-ONE)*ESPE(I)+AR0B*B/(ONE+MU(I))*EXP(B*LOG(1+MU(I)))+(GAMMA-1)*DF(I)*(PP+PSH(I))   !total derivative
-         DPDE(I) = (GAMMA-ONE)*(ONE+MU(I))                                                                  !partial derivative
+         DPDM(I) = zero   !total derivative
+         DPDE(I) = zero   !partial derivative
        ENDDO
 
        DO I=1,NEL
          ECOLD(I)=-THREE100*SPH
-         !IF(MU(I)>ZERO) ECOLD(I)=
        ENDDO
 
       ELSEIF(IFLAG == 1) THEN
-C----------------------------------------
-C     UPDATE PRESSURE AND INTERNAL ENERGY
-C----------------------------------------
-       TFEXTT     = ZERO
-       MX         = MAT(1)
-       E0         = PM(23,MX)         
-       GAMMA      = PM(34,MX)
-       P0         = PM(32,MX)
-       PSH(1:NEL) = PM(88,MX)
-       AR0B       = PM(35,MX)
-       B          = PM(36,MX)
-       SPH        = PM(69,MX)
 
+       TFEXTT = ZERO
        DO I=1,NEL
-         AA      = (GAMMA-ONE)*(ONE+MU(I))
-         BB      = AR0B*EXP(B*LOG(1+MU(I)))
-         DVV     = HALF*DVOL(I)*DF(I) / MAX(EM15,VNEW(I))
-         PNEW(I) = (BB + AA*(ESPE(I)-PSH(I)*DVV) ) / (ONE+AA*DVV)         
-         PNEW(I) = MAX(PNEW(I),ZERO)*OFF(I)
-         EINT(I) = EINT(I) - HALF*DVOL(I)*(PNEW(I)+PSH(I) )
-         PNEW(I) = PNEW(I) + PSH(I)
-         TFEXTT  = TFEXTT-DVOL(I)*PSH(I)
+         PNEW(I) = ZERO*OFF(I)
+         EINT(I) = ZERO
+         PNEW(I) = PNEW(I) + PSH
+         TFEXTT  = TFEXTT-DVOL(I)*PSH
        ENDDO
        
 #include "atomic.inc"
@@ -124,30 +117,20 @@ C------------------------
 C     COMPUTE TEMPERATURE
 C------------------------
 
-         MX = MAT(1)
-         SPH = PM(69,MX)
+       SPH = PM(69,MAT(1))
 
        DO I=1,NEL
-         IF(OFF(I)<1..OR.SPH<=0.) CYCLE
+         IF(OFF(I) < ONE .OR. SPH <= ZERO) CYCLE
          THETA(I) = (DF(I)*EINT(I)/VNEW(I)-ECOLD(I))/SPH
          THETA(I) = MAX(ZERO,THETA(I))
        ENDDO
       ELSEIF (IFLAG == 2) THEN
-         MX         = MAT(1)
-         E0         = PM(23,MX)         
-         GAMMA      = PM(34,MX)
-         P0         = PM(32,MX)
-         PSH(1:NEL) = PM(88,MX)
-         AR0B       = PM(35,MX)
-         B          = PM(36,MX)
-         SPH        = PM(69,MX)
-         
+
          DO I=1, NEL
             IF (VNEW(I) > ZERO) THEN
-               PNEW(I) = (GAMMA-ONE)*(ONE+MU(I))*ESPE(I) + AR0B*EXP(B*LOG(1+MU(I)))
-               DPDM(I) = (GAMMA-ONE)*ESPE(I)+AR0B*B/(ONE+MU(I))*EXP(B*LOG(1+MU(I)))+
-     .                   (GAMMA-1)*DF(I)*(PNEW(I)+PSH(I)) !total derivative
-               DPDE(I) = (GAMMA-ONE)*(ONE+MU(I)) !partial derivative
+               PNEW(I) = zero
+               DPDM(I) = zero !total derivative
+               DPDE(I) = zero !partial derivative
             ENDIF
          ENDDO
       ENDIF

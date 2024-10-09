@@ -50,12 +50,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    tabulated         ../common_source/eos/tabulated.F
       !||    tillotson         ../common_source/eos/tillotson.F
       !||====================================================================
-      SUBROUTINE EOSMAIN(IFLAG ,NEL   ,EOSTYP ,PM    ,OFF   ,EINT  ,
-     2                   RHO   ,RHO0  ,MU     ,MU2   ,ESPE  ,
-     3                   DVOL  ,DF    ,VNEW   ,MAT   ,PSH   ,
-     4                   PNEW  ,DPDM  ,DPDE   ,THETA ,ECOLD ,
-     5                   BUFMAT,SIG   ,MU_OLD ,MLW   ,POLD  ,
-     6                   NPF   ,TF    ,VAREOS ,NVAREOS)
+      SUBROUTINE EOSMAIN(IFLAG ,NEL   ,EOSTYP ,PM      ,OFF      ,EINT  ,
+     2                   RHO   ,RHO0  ,MU     ,MU2     ,ESPE     ,
+     3                   DVOL  ,DF    ,VNEW   ,MAT     ,PSH      ,
+     4                   PNEW  ,DPDM  ,DPDE   ,THETA   ,ECOLD    ,
+     5                   BUFMAT,SIG   ,MU_OLD ,MLW     ,POLD     ,
+     6                   NPF   ,TF    ,VAREOS ,NVAREOS ,MAT_PARAM)
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -89,7 +89,11 @@ C depending on EOSTYP(INTEGER) value.
 !                     rho.e.V (other laws, unit J)
 !
 ! output   EPSE(:) :  rho0.e (=E)   (all laws, used such as P_eos:=P(mu,E) )
-!     
+!
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE MATPARAM_DEF_MOD , ONLY : MATPARAM_STRUCT_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -118,6 +122,7 @@ C-----------------------------------------------
      .        SIG(NEL,6),VAREOS(NVAREOS*NEL)
       INTEGER,INTENT(IN)::NPF(SNPC)
       my_real,INTENT(IN)::TF(STF)
+      TYPE(MATPARAM_STRUCT_), INTENT(INOUT) :: MAT_PARAM !material data structure
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -256,7 +261,7 @@ C-----------------------------------------------
           CALL POWDER_BURN(
      1                  IFLAG ,NEL  ,PM   ,OFF  ,EINT ,MU  ,MU2, 
      2                  ESPE  ,DVOL ,DF   ,VNEW ,MAT  ,PSH ,
-     3                  PNEW  ,DPDM ,DPDE ,THETA,ECOLD) 
+     3                  PNEW  ,DPDM ,DPDE ,THETA,ECOLD,MAT_PARAM)
 
        CASE(13)
          !--------------------------------------------------!
