@@ -6934,7 +6934,7 @@ C-----------------------------------------------
         
         CALL ACCELE(A       ,AR      ,V    ,MS     ,IN     ,
      2              ALE%GLOBAL%SNALE ,ALE_CONNECTIVITY%NALE   ,MS_2D  ,
-     3              SIZE_NPBY,NPBY   )
+     3              SIZE_NPBY,NPBY  ,itab )
 C
         IF(IPLYXFEM > 0 )
      .    CALL PLY_ACCELE(INOD_PXFEM,MS_PLY,ZI_PLY,MS,

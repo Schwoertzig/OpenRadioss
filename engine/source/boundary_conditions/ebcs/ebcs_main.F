@@ -170,7 +170,12 @@ C-----------------------------------------------
          ELSE IF (TYP == 11) THEN
             select type (twf => EBCS)
              type is (t_ebcs_propergol)
-              CALL EBCS11_SEGVAR(NSEG,twf%iseg,SEGVAR,NOD,twf%ielem,twf,IPARG,ELBUF_TAB,DT1,NPARG,NGROUP,N2D)
+              call ebcs11(nseg,twf%iseg,segvar,
+     .                    a,v,w,x,
+     .                    twf%node_list,nod,twf%elem_list,twf%ielem,twf%iface,
+     .                    twf%la,ms,stifn,twf,iparg,elbuf_tab,ixq,ixs,ixtg,
+     .                    fsavsurf,lsky, fsky, ebcs_parithon(i)%elem_adress,time,iparit,dt1,
+     .                    numels, numelq, numeltg,numnod, nparg, ngroup, nixs, nixq, nixtg, nsurf, iale, n2d)
             end select
          ELSE IF (TYP == 100) THEN
             SELECT TYPE(EBCS)

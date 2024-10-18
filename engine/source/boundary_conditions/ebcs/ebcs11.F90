@@ -273,8 +273,13 @@
             vold = zero
         endif
         ! ghost cell update ( upwind/aconve() )
-        segvar%rho(kseg)=param_rho0s
-        segvar%eint(kseg)=param_q*param_rho0s
+
+        gbuf%rho(iloc+1) = (mass + dmass_g)/vol
+        gbuf%eint(iloc+1) = (gbuf%eint(iloc+1)*vol + param_q*param_rho0s*dvol_s)/vol
+
+        segvar%rho(kseg)=gbuf%rho(iloc+1)  !param_rho0s
+        segvar%eint(kseg)=gbuf%eint(iloc+1) !param_q*param_rho0s
+
         ! burnt gas is supposed to be submat 1
         if(segvar%nbmat > 1)then
           nbsubmat = segvar%nbmat
@@ -327,12 +332,22 @@
       ! for parith/off option : update directly the acceleration array a() : no specific assembly
       if(iparit == 0) then
         do ii=1,nod
-           num=liste(ii)
-           a(1,num)=a(1,num)+la(1,ii)
-           a(2,num)=a(2,num)+la(2,ii)
-           a(3,num)=a(3,num)+la(3,ii)
+
+
+           !cycle
+
+
+
+           !num=liste(ii)
+           !a(1,num)=a(1,num)+la(1,ii)
+           !a(2,num)=a(2,num)+la(2,ii)
+           !a(3,num)=a(3,num)+la(3,ii)
         enddo
       endif
+      if(a(1,1)/=a(1,1))then
+
+      end if
+
       ! -------------
 
 

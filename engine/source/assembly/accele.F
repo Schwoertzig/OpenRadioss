@@ -28,7 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         SUBROUTINE ACCELE(
      1                  A       ,AR    ,V    ,MS      ,IN   ,
      2                  SIZE_NALE      ,NALE   ,MS_2D  ,
-     3                  SIZE_NPBY, NPBY   )
+     3                  SIZE_NPBY, NPBY ,itab  )
 C-----------------------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -49,6 +49,7 @@ C-----------------------------------------------
         INTEGER, DIMENSION(NNPBY,SIZE_NPBY), INTENT(IN) :: NPBY !< rigid body array
         my_real, DIMENSION(3,NUMNOD), INTENT(INOUT) :: A,V,AR !< acceleration, velocity and  angular acceleration
         my_real, DIMENSION(NUMNOD), INTENT(INOUT) :: MS,IN,MS_2D !< mass and inertia
+        integer,intent(in) :: itab(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -57,7 +58,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------     
-      
+      if(itab(1)/=itab(1))then
+      endif
       !------------------------------------------------!
       !       acceleration computation 
       !------------------------------------------------!       

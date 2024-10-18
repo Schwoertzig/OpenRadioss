@@ -223,7 +223,7 @@ C-----------------------------------------------
             allocate (t_ebcs_propergol :: EBCS_TAB%tab(ii)%poly)
             select type (twf => EBCS_TAB%tab(ii)%poly)
             type is (t_ebcs_propergol)
-              CALL HM_READ_EBCS_PROPERGOL(IGRSURF, MULTI_FVM, UNITAB, ID, TITR, UID, LSUBMODEL, twf)
+              CALL HM_READ_EBCS_PROPERGOL(IGRSURF, MULTI_FVM, UNITAB, ID, TITR, UID, LSUBMODEL,NSURF, NUMNOD, twf)
             end select
 
          CASE ('MONVOL')

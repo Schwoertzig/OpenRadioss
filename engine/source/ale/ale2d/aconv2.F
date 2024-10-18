@@ -62,6 +62,9 @@ C-----------------------------------------------
          IE =NFT+I
          IAD2 = ALE_CONNECT%ee_connect%iad_connect(IE)
          LGTH = ALE_CONNECT%ee_connect%iad_connect(IE+1) - IAD2
+
+           !print *, "IE, IXQ ", IE, IXQ(7,IE), " vois:",ALE_CONNECT%ee_connect%connected(IAD2 + 1 - 1:IAD2 + LGTH - 1)
+
          DO J=1,LGTH
             IV = ALE_CONNECT%ee_connect%connected(IAD2 + J - 1)
             IF(IV > 0)THEN
@@ -81,6 +84,7 @@ C-----------------------------------------------
         IE =NFT+I
         VTOT(I) = VTOT(I) + HALF * DT1 * (- PHI(IE)*FLU1(I) - VL(1,I)-VL(2,I)-VL(3,I)-VL(4,I) )
         VTOT(I)=MAX(EM20,VTOT(I))
+       ! print *, "IE ", IE, IXQ(7,IE), " vtot:", VTOT(I)
       ENDDO
 C
       IF(TRIMAT > 0 .AND. IFLG == 1)THEN
