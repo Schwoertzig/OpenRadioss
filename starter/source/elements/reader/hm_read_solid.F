@@ -87,8 +87,7 @@ C INPUT ARGUMENTS
       INTEGER,INTENT(IN)::IPART(LIPART1,*)
       INTEGER,INTENT(IN)::IGEO(NPROPGI,*)
       INTEGER,INTENT(IN)::IS_DYNA
-      my_real,
-     .  INTENT(IN)::PM(NPROPM,*)
+      my_real,INTENT(IN)::PM(NPROPM,*)
       my_real, DIMENSION(3,NUMNOD), INTENT(IN):: X
       TYPE(SUBMODEL_DATA),INTENT(IN)::LSUBMODEL(*)
 C OUTPUT ARGUMENTS
@@ -105,8 +104,7 @@ C-----------------------------------------------
       INTEGER IC,IC1,IC2,IC3,IC4,IPID,ID,IDS,N,JC,NSPHDIR,STAT
       INTEGER FLAG_FMT,FLAG_FMT_TMP,IFIX_TMP,NUMELS_READ,
      .        IOUTN, IERROR, INDEX_PART
-      my_real
-     .   BID 
+      my_real BID
       CHARACTER MESS*40, MESS2*40
       INTEGER, DIMENSION(:), ALLOCATABLE :: SUB_SOL
 C-----------------------------------------------
@@ -498,9 +496,7 @@ C-----------------------------------------------
      .   ICODE(*),IPARTS(*),ISOLNOD(*),
      .   IXS10(6,*),IPART(LIPART1,*),IXS20(12,*),IXS16(8,*),
      .   KNOD2ELS(*),NOD2ELS(*),SPH2SOL(*),SOL2SPH(2,*)
-C     REAL
-      my_real
-     .   PM(NPROPM,*),GEO(NPROPG,*)
+      my_real PM(NPROPM,NUMMAT),GEO(NPROPG,*)
 C-----------------------------------------------
       TYPE (GROUP_)  ,DIMENSION(NGRBRIC)  :: IGRBRIC
       TYPE (SURF_)   , DIMENSION(NSURF)   :: IGRSURF
@@ -541,7 +537,7 @@ C----------------------------------------------------
 C     CLASSEMENT DES ELEMENTS PAR LOI DE MATERIAU
 C----------------------------------------------------
       CALL REORDR(IXS   ,NIXS   ,NUMELS8,PM      ,IPOINT ,
-     .            IPARTS,NGRBRIC,IGRBRIC)
+     .            IPARTS,NGRBRIC,IGRBRIC,NUMMAT)
 C------------------------------------------
 C RENUMEROTATION POUR SURFACES
 C------------------------------------------
@@ -818,8 +814,7 @@ C
       !||    reader_old_mod    ../starter/share/modules1/reader_old_mod.F90
       !||    submodel_mod      ../starter/share/modules1/submodel_mod.F
       !||====================================================================
-      SUBROUTINE HM_PRELCE16S(IPART   ,IGEO    ,IXS     ,NSPHSOL ,LSUBMODEL,
-     .                        IS_DYNA )
+      SUBROUTINE HM_PRELCE16S(IPART, IGEO, IXS, NSPHSOL ,LSUBMODEL, IS_DYNA )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -840,8 +835,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER IPART(LIPART1,*), IGEO(NPROPGI,*), IXS(NIXS,*), NSPHSOL
-C     REAL
+      INTEGER IPART(LIPART1,*), IGEO(NPROPGI,NUMGEO), IXS(NIXS,*), NSPHSOL
       TYPE(SUBMODEL_DATA) LSUBMODEL(NSUBMOD)
       INTEGER,INTENT(IN)::IS_DYNA
 C-----------------------------------------------
@@ -850,8 +844,7 @@ C-----------------------------------------------
       INTEGER I, J, K, IT, NT
       INTEGER IPID,ID,IDS,N,NSPHDIR,STAT
       INTEGER FLAG_FMT,FLAG_FMT_TMP,IFIX_TMP,INDEX_PART
-      my_real
-     .   BID 
+      my_real BID 
       CHARACTER MESS*40
       INTEGER, DIMENSION(:), ALLOCATABLE :: IPARTS
       INTEGER, DIMENSION(:), ALLOCATABLE :: SUB_SOL

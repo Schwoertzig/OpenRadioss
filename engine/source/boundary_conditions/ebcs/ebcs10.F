@@ -87,7 +87,8 @@ C-----------------------------------------------
      .       XSN,YSN,ZSN,
      .       XN, YN, ZN, TMP(3), Vold, Vnew, Pold, Pvois,
      .       DP0,MACH,PP,SSP,RHOC2,
-     .       TCAR_P, TCAR_VF, SURF, TIME, EINT,PHASE_ALPHA(21),PHASE_RHO(21), PHASE_EINT(21)
+     .       TCAR_P, TCAR_VF, SURF, TIME, EINT,PHASE_ALPHA(21),PHASE_RHO(21), PHASE_EINT(21),
+     .       YMEAN, LENGTH
       LOGICAL bFOUND
       TYPE(BUF_MAT_)  ,POINTER :: MBUF  
       INTEGER :: ADRESS ! adress for parit/on array
@@ -139,7 +140,6 @@ C-----------------------------------------------
         
           KSEG=ABS(ISEG(IS))
           ORIENT=FLOAT(ISEG(IS)/KSEG)
-                   
           !---OUTWARD NORMAL
           IF(N2D == 0)THEN
             JJ = IFACE(IS)
@@ -160,7 +160,7 @@ C-----------------------------------------------
             XN = XN*FAC2                     
             YN = YN*FAC2                     
             ZN = ZN*FAC2                               
-            SURF = HALF/FAC2 
+            SURF = HALF/FAC2
             IF(IX(4) == IX(3))THEN ; NPT=3;FAC1=THIRD; ELSE; NPT=4;FAC1=FOURTH; ENDIF
           ELSE
             FAC1=HALF
@@ -179,7 +179,14 @@ C-----------------------------------------------
             FAC2 = ONE/SQRT(YN*YN+ZN*ZN) 
             YN=YN*FAC2
             ZN=ZN*FAC2                          
-            SURF = ONE/FAC2               
+            LENGTH = ONE/FAC2
+            IF(N2D==1)THEN
+              !YMEAN = HALF*(X(2,IX(1)) + X(2,IX(2)))
+              !SURF = TWO * 1.0000 * YMEAN * LENGTH
+              SURF = LENGTH
+            ELSE
+              SURF = LENGTH
+            ENDIF
           ENDIF
 
           !-- VELOCITY
@@ -292,7 +299,8 @@ C-----------------------------------------------
           !-- FORMULATION  
             MACH = ONE
             IF(SSP /= ZERO)MACH = ABS(Vnew / SSP)
-          
+            IF(SSP /= ZERO)MACH = ABS(Vnew / SSP)
+
             IF(MACH >= ONE .AND. Vnew > ZERO)THEN
               !vitesse sortante supersonique : etat = etat voisin
               PP          = Pvois
@@ -300,7 +308,8 @@ C-----------------------------------------------
               RHOC2 = RHO*SSP*SSP 
               ROC   =SQRT(RHO*RHOC2)
 C              PP    = Pold + (ROC*(Vnew-Vold)) !+ALPHA*(Pvois+DP0)/(ALPHA + ONE)
-              PP    = ONE/(ONE+ALPHA)*(Pold+ROC*(Vnew-Vold))+ALPHA*(Pvois+DP0)/(ALPHA + ONE)
+              !PP    = ONE/(ONE+ALPHA)*(Pold+ROC*(Vnew-Vold))+ALPHA*(Pvois+DP0)/(ALPHA + ONE)
+              PP    = Pold+ROC*(Vnew-Vold)
 
             ENDIF
             EBCS%pold(IS) = PP
@@ -320,28 +329,33 @@ C              PP    = Pold + (ROC*(Vnew-Vold)) !+ALPHA*(Pvois+DP0)/(ALPHA + ONE
               ENDIF 
               SEGVAR%PHASE_ALPHA(1:4,KSEG) = PHASE_ALPHA(1:4)
             ENDIF
-            
+
+           FAC2 = ONE
+           !IF(N2D==1)FAC2=YMEAN !axisymetrical factor
+
+           FAC2=FAC2*ORIENT ! exterior normal
+
            !expand pressure loading to segment nodes
            DO KK=1,NPT
-             LA(1,NN(KK)) = LA(1,NN(KK)) -  PP*SURF*XN*FAC1
-             LA(2,NN(KK)) = LA(2,NN(KK)) -  PP*SURF*YN*FAC1
-             LA(3,NN(KK)) = LA(3,NN(KK)) -  PP*SURF*ZN*FAC1
+             LA(1,NN(KK)) = LA(1,NN(KK)) -  PP*SURF*XN*FAC1*FAC2
+             LA(2,NN(KK)) = LA(2,NN(KK)) -  PP*SURF*YN*FAC1*FAC2
+             LA(3,NN(KK)) = LA(3,NN(KK)) -  PP*SURF*ZN*FAC1*FAC2
            ENDDO
 
            !/TH/SURF (massflow, velocity, pressure)
-           FSAVSURF(2,SURF_ID) = FSAVSURF(2,SURF_ID) + RHO*SURF*Vnew     !rho.S.u = dm/dt
-           FSAVSURF(3,SURF_ID) = FSAVSURF(3,SURF_ID) + SURF*Vnew         !S.u
-           FSAVSURF(4,SURF_ID) = FSAVSURF(4,SURF_ID) + SURF*PP           !S.P
-           FSAVSURF(6,SURF_ID) = FSAVSURF(6,SURF_ID) + RHO*SURF*Vnew*DT1 ! m<-m+dm (cumulative)
+           FSAVSURF(2,SURF_ID) = FSAVSURF(2,SURF_ID) + FAC2*RHO*SURF*Vnew     !rho.S.u = dm/dt
+           FSAVSURF(3,SURF_ID) = FSAVSURF(3,SURF_ID) + FAC2*SURF*Vnew         !S.u
+           FSAVSURF(4,SURF_ID) = FSAVSURF(4,SURF_ID) + FAC2*SURF*PP           !S.P
+           FSAVSURF(6,SURF_ID) = FSAVSURF(6,SURF_ID) + FAC2*RHO*SURF*Vnew*DT1 ! m<-m+dm (cumulative)
 
            ! -------------
            ! for parith/on option : need to update with FSKY array 
            IF(IPARIT>0) THEN
                 DO KK=1,NPT
                     ADRESS = ELEM_ADRESS(KK,IS) ! adress of FSKY array for element IS and node KK
-                    FSKY(1,ADRESS) = -PP*SURF*XN*FAC1
-                    FSKY(2,ADRESS) = -PP*SURF*YN*FAC1
-                    FSKY(3,ADRESS) = -PP*SURF*ZN*FAC1
+                    FSKY(1,ADRESS) = -PP*SURF*XN*FAC1*FAC2
+                    FSKY(2,ADRESS) = -PP*SURF*YN*FAC1*FAC2
+                    FSKY(3,ADRESS) = -PP*SURF*ZN*FAC1*FAC2
                     FSKY(4:8,ADRESS) = ZERO
                 ENDDO
            ENDIF      

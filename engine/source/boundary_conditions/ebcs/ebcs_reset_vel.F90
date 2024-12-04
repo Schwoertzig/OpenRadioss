@@ -21,105 +21,60 @@
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 ! ======================================================================================================================
-!                                                   procedures
+!                                                   PROCEDURES
 ! ======================================================================================================================
-!! \brief Write parameters of EOS data structure
-!! \details
-      !||====================================================================
-      !||    write_eosparam         ../starter/source/materials/mat/write_eosparam.F90
-      !||--- called by ------------------------------------------------------
-      !||    write_matparam         ../starter/source/materials/mat/write_matparam.F
-      !||--- calls      -----------------------------------------------------
-      !||    write_mat_table        ../starter/source/materials/tools/write_mat_table.F
-      !||--- uses       -----------------------------------------------------
-      !||====================================================================
-      SUBROUTINE WRITE_EOSPARAM(EOS)
+!! \brief Reset velocity on boundary surface when /EBCS/PROPERGOL is used.
+!! \details The general formulation v[n+1] = v[n] + acc.dt.  To impose v[n+1] = vel_burning_front, v[n] is set to 0
+!! \details   it leads to v[n+1] = 0 + acc.dt = vel_burning_front. acc is computed from internal force which is computed in ebcs subroutine
+        subroutine ebcs_reset_vel(ebcs_tab, v, numnod)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-      USE EOS_PARAM_MOD
-      USE NAMES_AND_TITLES_MOD
+          use ebcs_mod, only : t_ebcs_tab, t_ebcs_propergol, t_ebcs
+          use constant_mod , only : zero
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
-      implicit none
+          implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Imnclude files
+!                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
 #include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-      TYPE(EOS_PARAM_) ,INTENT(IN) :: EOS
+          type(t_ebcs_tab), target, intent(inout) :: ebcs_tab
+          my_real, intent(inout) :: v(3,numnod)
+          integer,intent(in) :: numnod
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local Variables
+!                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      INTEGER :: I,IAD,NFIX,NUPARAM,NIPARAM,NUMTABL,NUMFUNC
-      INTEGER ,DIMENSION(NCHARTITLE) :: NAME
-      INTEGER ,DIMENSION(:) ,ALLOCATABLE :: IBUF
-      my_real ,DIMENSION(:), ALLOCATABLE :: RBUF
-      INTEGER :: LENI, LENR
+          integer :: i,ii !< loops
+          integer :: typ  !< ebcs type : 11 is /EBCS/PROPERGOL
+          integer :: node_id  !< node internal identifier
+          class(t_ebcs), pointer :: ebcs
+          class(t_ebcs_propergol), pointer :: twf
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-      !INTEGER parameter
-      NFIX = 5
-      ALLOCATE (IBUF(NFIX + 1))
-      IAD = 1
-      IBUF(IAD) = NFIX
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NUPARAM
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NIPARAM
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NUVAR
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NFUNC
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NTABLE
-      IAD = IAD+1
-      CALL WRITE_I_C(IBUF,NFIX+1)
-      DEALLOCATE(IBUF)
-      
-      !REAL parameter
-      NFIX = 2
-      ALLOCATE (RBUF(NFIX))
-      ALLOCATE(IBUF(1))
-      IBUF(1)=NFIX
-      IAD = 1
-        RBUF(IAD) = EOS%CV
-      IAD = IAD+1
-        RBUF(IAD) = EOS%CP
-      IAD = IAD+1
-      CALL WRITE_I_C(IBUF,1)
-      CALL WRITE_DB_C(RBUF,NFIX)
-      DEALLOCATE(RBUF)      
+          do i = 1, ebcs_tab%nebcs
+            ebcs => ebcs_tab%tab(i)%poly
+            typ = ebcs%type
+            if (typ == 11) then
+              select type (ebcs)
+                type is (t_ebcs_propergol)
+                  twf => ebcs
+                  !--- nodal velocities at face nodes
+                  do ii = 1, twf%nb_node
+                    node_id = twf%node_list(ii)
+                    v(1,node_id) = zero
+                    v(2,node_id) = zero
+                    v(3,node_id) = zero
+                  enddo
+              end select
+            endif
+          enddo
+! ----------------------------------------------------------------------------------------------------------------------
 
-      ! write eos model title
-      DO I=1,NCHARTITLE
-        NAME(I) = ICHAR(EOS%TITLE(I:I))
-      END DO
-      CALL WRITE_C_C(NAME,NCHARTITLE)
-      
-      ! write eos parameter array
-      IF (EOS%NUPARAM > 0) THEN
-        CALL WRITE_DB(EOS%UPARAM ,NUPARAM)
-      END IF      
-      IF (EOS%NIPARAM > 0) THEN
-        CALL WRITE_I_C(EOS%IPARAM ,NIPARAM)
-      END IF      
-
-      ! write eos law function
-      IF (EOS%NFUNC > 0) THEN
-        CALL WRITE_I_C(EOS%FUNC, NUMFUNC)
-      END IF
-      
-      ! write eos law tables
-      IF (EOS%NTABLE > 0) THEN
-        LENI=0
-        LENR=0
-        CALL WRITE_MAT_TABLE(EOS%TABLE, NUMTABL)
-      END IF
-!-----------
-      RETURN
-      END
+! ----------------------------------------------------------------------------------------------------------------------
+        end subroutine ebcs_reset_vel

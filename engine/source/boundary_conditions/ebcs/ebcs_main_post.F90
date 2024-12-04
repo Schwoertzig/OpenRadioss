@@ -21,105 +21,79 @@
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 ! ======================================================================================================================
-!                                                   procedures
+!                                                   PROCEDURES
 ! ======================================================================================================================
-!! \brief Write parameters of EOS data structure
-!! \details
-      !||====================================================================
-      !||    write_eosparam         ../starter/source/materials/mat/write_eosparam.F90
-      !||--- called by ------------------------------------------------------
-      !||    write_matparam         ../starter/source/materials/mat/write_matparam.F
-      !||--- calls      -----------------------------------------------------
-      !||    write_mat_table        ../starter/source/materials/tools/write_mat_table.F
-      !||--- uses       -----------------------------------------------------
-      !||====================================================================
-      SUBROUTINE WRITE_EOSPARAM(EOS)
+      subroutine ebcs_main_post(segvar,a,v,w,x,ms,stifn,iparg,&
+                           elbuf_tab,ebcs_tab,ixq,ixs,ixtg,&
+                           fsky,fsavsurf,time,dt1,numnod,nparg,ngroup, &
+                           nixq, nixs, nixtg, numels, numelq, numeltg,&
+                           lsky,nsurf,iparit,iale,n2d)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-      USE EOS_PARAM_MOD
-      USE NAMES_AND_TITLES_MOD
+      use elbufdef_mod
+      use groupdef_mod
+      use ebcs_mod
+      use th_surf_mod , only : th_surf_num_channel
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Implicit none
+!                                                   Implicit None
 ! ----------------------------------------------------------------------------------------------------------------------
-      implicit none
+       implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Imnclude files
+!                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
 #include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-      TYPE(EOS_PARAM_) ,INTENT(IN) :: EOS
+      integer,intent(in) :: n2d !< 2d/3d fla
+      integer,intent(in) :: iale !< ale flag
+      integer,intent(in) :: iparit !< parith/on flag
+      integer,intent(in) :: lsky, nsurf !< array sizes
+      integer,intent(in) :: nixq, nixs, nixtg, numels, numelq, numeltg  !< array sizes
+      integer,intent(in) :: nparg, ngroup
+      integer,intent(in) :: numnod
+      my_real,intent(in) :: dt1 !time step
+      my_real,intent(in) :: time !simulation time
+      my_real,intent(inout) :: fsavsurf(th_surf_num_channel,nsurf)
+      integer iparg(nparg,ngroup)
+      integer,intent(in) :: ixq(nixq,numelq),ixs(nixs,numels),ixtg(nixtg,numeltg)
+      my_real segvar(*),v(3,numnod),w(3,numnod),a(3,numnod),x(3,numnod),ms(numnod),stifn(numnod)
+      type(elbuf_struct_), dimension(ngroup) :: elbuf_tab
+      type(t_ebcs_tab), target, intent(inout) :: ebcs_tab
+      my_real, dimension(8,lsky), intent(inout) :: fsky ! acceleration array for parith/on option
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      INTEGER :: I,IAD,NFIX,NUPARAM,NIPARAM,NUMTABL,NUMFUNC
-      INTEGER ,DIMENSION(NCHARTITLE) :: NAME
-      INTEGER ,DIMENSION(:) ,ALLOCATABLE :: IBUF
-      my_real ,DIMENSION(:), ALLOCATABLE :: RBUF
-      INTEGER :: LENI, LENR
+      integer i,typ,isu,nseg,nod,j
+      class(t_ebcs), pointer :: ebcs
+      logical has_th
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-      !INTEGER parameter
-      NFIX = 5
-      ALLOCATE (IBUF(NFIX + 1))
-      IAD = 1
-      IBUF(IAD) = NFIX
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NUPARAM
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NIPARAM
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NUVAR
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NFUNC
-      IAD = IAD+1
-        IBUF(IAD) = EOS%NTABLE
-      IAD = IAD+1
-      CALL WRITE_I_C(IBUF,NFIX+1)
-      DEALLOCATE(IBUF)
-      
-      !REAL parameter
-      NFIX = 2
-      ALLOCATE (RBUF(NFIX))
-      ALLOCATE(IBUF(1))
-      IBUF(1)=NFIX
-      IAD = 1
-        RBUF(IAD) = EOS%CV
-      IAD = IAD+1
-        RBUF(IAD) = EOS%CP
-      IAD = IAD+1
-      CALL WRITE_I_C(IBUF,1)
-      CALL WRITE_DB_C(RBUF,NFIX)
-      DEALLOCATE(RBUF)      
+      return
 
-      ! write eos model title
-      DO I=1,NCHARTITLE
-        NAME(I) = ICHAR(EOS%TITLE(I:I))
-      END DO
-      CALL WRITE_C_C(NAME,NCHARTITLE)
-      
-      ! write eos parameter array
-      IF (EOS%NUPARAM > 0) THEN
-        CALL WRITE_DB(EOS%UPARAM ,NUPARAM)
-      END IF      
-      IF (EOS%NIPARAM > 0) THEN
-        CALL WRITE_I_C(EOS%IPARAM ,NIPARAM)
-      END IF      
+      do i = 1, ebcs_tab%nebcs
+         if(.not.ebcs_tab%need_to_compute(i)) cycle
+         ebcs => ebcs_tab%tab(i)%poly
+         if(ebcs%is_multifluid)return
+         typ = ebcs%type
+         isu = ebcs%surf_id
+         nseg = ebcs%nb_elem
+         nod = ebcs%nb_node
+         if (typ == 11) then
+            select type (twf => ebcs)
+             type is (t_ebcs_propergol)
+              call ebcs11(nseg,twf%iseg,segvar, &
+                          a,v,w,x,   &
+                          twf%node_list,nod,twf%elem_list,twf%ielem,twf%iface, &
+                          twf%la,ms,stifn,twf,iparg,elbuf_tab,ixq,ixs,ixtg,  &
+                          fsavsurf,lsky, fsky, ebcs_parithon(i)%elem_adress,time,iparit,dt1, &
+                          numels, numelq, numeltg,numnod, nparg, ngroup, nixs, nixq, nixtg, nsurf, iale, n2d)
+            end select
+         endif
+      enddo
 
-      ! write eos law function
-      IF (EOS%NFUNC > 0) THEN
-        CALL WRITE_I_C(EOS%FUNC, NUMFUNC)
-      END IF
+      return
+      end subroutine ebcs_main_post
       
-      ! write eos law tables
-      IF (EOS%NTABLE > 0) THEN
-        LENI=0
-        LENR=0
-        CALL WRITE_MAT_TABLE(EOS%TABLE, NUMTABL)
-      END IF
-!-----------
-      RETURN
-      END

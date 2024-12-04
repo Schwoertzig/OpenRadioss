@@ -439,7 +439,9 @@ C
      .                          A,V,W,X,FSAV(1,I),FV,
      .                          WA,MS,STIFN,IPARG,
      .                          ELBUF_TAB,EBCS_TAB,MULTI_FVM,IXQ,IXS,IXTG,
-     .                          ITAB,ALE_CONNECTIVITY%NALE,FSKY,FSAVSURF)
+     .                          ITAB,ALE_CONNECTIVITY%NALE,FSKY,FSAVSURF,TT,DT1,
+     .                          SENSORS%NSENSOR,SENSORS%SENSOR_TAB,PYTHON,
+     .                          NPC, TF ,SNPC, STF)
                ENDIF
                CALL MY_BARRIER
             ENDIF
@@ -552,7 +554,7 @@ C     -------------------------
                   CALL MULTI_FVM2FEM(DT1, ELBUF_TAB, ITASK, 
      .                 IXS, IXQ, IPARG, X, A, V, W, MS, MSNF, VEUL, 
      .                 STIFN, FSKY, IADS, FSKYM, 
-     .                 CONDN, CONDNSKY, MULTI_FVM,GLOB_THERM%NODADT_THERM)  
+     .                 CONDN, CONDNSKY, MULTI_FVM,GLOB_THERM%NODADT_THERM)
                ENDIF
                CALL MY_BARRIER
 !$OMP SINGLE
@@ -701,7 +703,7 @@ C     -------------------------
                   CALL MULTI_FVM2FEM(DT1, ELBUF_TAB, ITASK, 
      .                  IXS, IXQ, IPARG, X, A, V, W, MS, MSNF, VEUL, 
      .                  STIFN, FSKY, IADS, FSKYM, 
-     .                  CONDN, CONDNSKY, MULTI_FVM,GLOB_THERM%NODADT_THERM)  
+     .                  CONDN, CONDNSKY, MULTI_FVM,GLOB_THERM%NODADT_THERM)
                   CALL MY_BARRIER
                ENDIF
 C     -------------------------
@@ -842,7 +844,7 @@ C
      I                  MAT_ELEM,        IBID,            DT,              IDEL7NOK,
      J                  NSVOIS,          SZ_BUFVOIS,      SNPC,            STF,
      K                  SBUFMAT,         SVIS,            IDTMINS,         IRESP, 
-     *                  IDEL7NG,         MAXFUNC,         USERL_AVAIL,     GLOB_THERM, 
+     *                  IDEL7NG,         MAXFUNC,         USERL_AVAIL,     GLOB_THERM,
      V                  impl_s,     idyna)
 C
                  ELSEIF (ITY == 1 .AND. ISOLNOD /= 4) THEN
@@ -882,7 +884,7 @@ C
      R                  ALE_CONNECTIVITY%NALE, D,       IOUTPRT,       NLOC_DMG,
      S                  MAT_ELEM,              IBID,    DT,            IDEL7NOK,NSVOIS,
      T                  SZ_BUFVOIS,            SNPC, STF,SBUFMAT,SVIS,IDTMINS,IRESP,
-     U                  IDEL7NG,    MAXFUNC,    USERL_AVAIL, GLOB_THERM, 
+     U                  IDEL7NG,    MAXFUNC,    USERL_AVAIL, GLOB_THERM,
      V                  impl_s,     idyna)
 C
                  ELSEIF (ITY == 2 .AND. JMULT == 0) THEN
@@ -907,7 +909,7 @@ C
      D                  SVIS            ,NSVOIS           ,IRESP       ,TT        ,DT1      ,      
      .                  IDEL7NOK        ,IDTMIN           ,MAXFUNC     ,  
      .                  IMON_MAT        ,USERL_AVAIL      ,impl_s    ,idyna    ,
-     .                  DT              ,GLOB_THERM) 
+     .                  DT              ,GLOB_THERM)
 c
                  ELSEIF (ITY == 2 .AND. JMULT /= 0) THEN
                   CALL BFORC2(
@@ -1019,7 +1021,7 @@ C     ALE ON / OFF
      I                  MAT_ELEM,        IBID,            DT,              IDEL7NOK,
      J                  NSVOIS,          SZ_BUFVOIS,      SNPC,            STF,
      K                  SBUFMAT,         SVIS,            IDTMINS,         IRESP, 
-     *                  IDEL7NG,         MAXFUNC,         USERL_AVAIL,     GLOB_THERM, 
+     *                  IDEL7NG,         MAXFUNC,         USERL_AVAIL,     GLOB_THERM,
      V                  impl_s,          idyna)
 
                  ELSEIF(ITY == 1 .AND. ISOLNOD /= 4)THEN
@@ -1059,7 +1061,7 @@ C     ALE ON / OFF
      R                  ALE_CONNECTIVITY%NALE,D,        IOUTPRT,       NLOC_DMG,
      S                  MAT_ELEM,             IBID,     DT,            IDEL7NOK,NSVOIS,
      T                  SZ_BUFVOIS,           SNPC,     STF,SBUFMAT,SVIS,IDTMINS,IRESP,
-     U                  IDEL7NG,              MAXFUNC,  USERL_AVAIL  ,GLOB_THERM, 
+     U                  IDEL7NG,              MAXFUNC,  USERL_AVAIL  ,GLOB_THERM,
      V                  impl_s,               idyna    )
                
                  ELSEIF (ITY == 2 .AND. JMULT == 0) THEN
@@ -1112,7 +1114,23 @@ c
             
           ENDIF!IF (ILAW11 /= 0) THEN
 
-        ENDIF !IF(IALE+IEULER+ITHERM /= 0)THEN
+            !------------------------------------------------!
+            ! ELEMENTARY BCS (/EBCS)                         !
+            !------------------------------------------------!
+            IF(NEBCS > 0)THEN
+               IF(ITASK == 0)THEN
+                 I=1+NINTER+NRWALL+NRBODY+NSECT+NJOINT+NRBAG
+                 CALL EBCS_MAIN_POST(SEGVAR,A,V,W,X,MS,STIFN,IPARG,
+     .                               ELBUF_TAB,EBCS_TAB,IXQ,IXS,IXTG,
+     .                               FSKY,FSAVSURF,TT,DT1,NUMNOD,NPARG,NGROUP,
+     .                               NIXQ, NIXS, NIXTG, NUMELS, NUMELQ, NUMELTG,
+     .                               LSKY,NSURF,IPARIT, IALE, N2D)
+               ENDIF
+               CALL MY_BARRIER
+            ENDIF
+
+
+        ENDIF!IF(IALE+IEULER+ITHERM /= 0)THEN
         IF(ITASK==0) CALL STOPTIME(MACRO_TIMER_IFSUB0,1)
       ENDIF!IF(IFSUB == 0)THEN
 

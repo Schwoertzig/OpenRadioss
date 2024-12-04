@@ -623,6 +623,7 @@ C-----------------------------------------------
       use glob_therm_mod
       use hm_read_inivol_mod
       use pblast_mod
+      use iniebcs_propergol_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4238,11 +4239,11 @@ C--------------------------------------------------------------------------
      .            IXS    ,BID13   ,PM      ,IWORK   ,ITAB    ,ITABM1  ,
      .            ICODE  ,IPARTS  ,IGRBRIC ,GEO     ,EANI    ,
      .            IXS10  ,IPART   ,IXS20   ,IXS16   ,KNOD2ELS,NOD2ELS ,
-     .            IGRSURF,SPH2SOL ,SOL2SPH )
+     .            IGRSURF,SPH2SOL ,SOL2SPH)
       IF(NUMELQ /= 0)
      .  CALL LCE16Q3(
      .            IXQ    ,BID13   ,PM      ,IWORK   ,ITAB    ,ITABM1  ,
-     .            ICODE  ,IPARTQ  ,IGRQUAD ,IPM     ,IGEO    )
+     .            ICODE  ,IPARTQ  ,IGRQUAD ,IPM     ,IGEO)
       IF(ALLOCATED(IWORK)) DEALLOCATE(IWORK)
       CALL TRACE_OUT1()
 C--------------------------------------------
@@ -4895,7 +4896,7 @@ C-------------------------------------------------
         IF(.NOT. ALLOCATED(SENSOR_TMP)) ALLOCATE( SENSOR_TMP(0) )
         CALL INIEBCS(ALE_CONNECTIVITY, 0, IGRSURF, IXS, IXQ, IXTG,
      .               PM, IGEO, X, SENSOR_TMP, MONVOl, MULTI_FVM%IS_USED,
-     .               EBCS_TAB, EBCS_TAG_CELL_SPMD)
+     .               EBCS_TAB, EBCS_TAG_CELL_SPMD,MAT_ELEM%MAT_PARAM)
         DEALLOCATE(SENSOR_TMP)
       ENDIF
       CALL TRACE_OUT1()
@@ -9424,6 +9425,7 @@ c
      .        PM, IGEO, X, SENSORS, MONVOl, MULTI_FVM%IS_USED, EBCS_TAB, EBCS_TAG_CELL_SPMD)
          !initialization
         CALL INIEBCSP0(X, IPARG, ELBUF_TAB, EBCS_TAB, IXS, IXQ, IXTG, IPARTS, IPARTQ, IPARTG, PM, IPM, MAT_ELEM%MAT_PARAM)
+        CALL INIEBCS_PROPERGOL(IXS,IXQ,IXTG,MULTI_FVM%IS_USED,EBCS_TAB,MAT_ELEM%MAT_PARAM,SIXS,SIXQ,SIXTG,NUMMAT)
       ENDIF
       CALL TRACE_OUT1()
 C--------------------------------------------

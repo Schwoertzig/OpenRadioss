@@ -176,6 +176,7 @@ C-----------------------------------------------
          ENDIF
       ENDDO
 
+      EBCS%title = TITR
       EBCS%irho = IRHO
       EBCS%iener = IENER
       EBCS%c = C

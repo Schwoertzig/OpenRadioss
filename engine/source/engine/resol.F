@@ -7003,7 +7003,7 @@ C-----------------------------------------------
         
         CALL ACCELE(A       ,AR      ,V    ,MS     ,IN     ,
      2              ALE%GLOBAL%SNALE ,ALE_CONNECTIVITY%NALE   ,MS_2D  ,
-     3              SIZE_NPBY,NPBY   )
+     3              SIZE_NPBY,NPBY  ,itab )
 C
         IF(IPLYXFEM > 0 )
      .    CALL PLY_ACCELE(INOD_PXFEM,MS_PLY,ZI_PLY,MS,
@@ -8903,9 +8903,7 @@ C===============================================================================
 C-----------------
 C         VITESSES
 C-----------------
-          CALL VITESSE(
-     1                 A      , AR     , V   , VR   , FZERO,
-     2                  ITAB,ALE_CONNECTIVITY%NALE             )
+          CALL VITESSE( A, AR, V, VR, FZERO, ITAB, ALE_CONNECTIVITY%NALE, EBCS_TAB)
 c        
         IF (NLOC_DMG%IMOD > 0) THEN
 c

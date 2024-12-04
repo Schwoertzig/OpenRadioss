@@ -25,10 +25,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||--- called by ------------------------------------------------------
       !||    resol     ../engine/source/engine/resol.F
       !||====================================================================
-      SUBROUTINE VITESSE(
-     1                   A    , AR   , V    ,VR    ,FZERO,
-     2                   ITAB ,NALE)
-C----6------------------------------------------------------------------
+      SUBROUTINE VITESSE( A, AR, V, VR, FZERO, ITAB, NALE, EBCS_TAB )
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE EBCS_MOD , ONLY : t_ebcs_tab
+C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
@@ -43,8 +45,8 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER NODFT, NODLT, NDDIM,ITAB(*),NALE(*)
-      my_real
-     .   FZERO(3,NUMNOD) ,A(3,NUMNOD) ,V(3,NUMNOD) ,AR(3,NUMNOD)  ,VR(3,NUMNOD)
+      my_real FZERO(3,NUMNOD) ,A(3,NUMNOD) ,V(3,NUMNOD) ,AR(3,NUMNOD)  ,VR(3,NUMNOD)
+      TYPE(t_ebcs_tab), TARGET, INTENT(INOUT) :: EBCS_TAB
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -53,6 +55,7 @@ C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
 
+      IF(NEBCS > 0)CALL EBCS_RESET_VEL(EBCS_TAB, V, NUMNOD)
       
 !$OMP DO SCHEDULE(guided)
       DO N=1,NUMNOD! NODFT,NODLT

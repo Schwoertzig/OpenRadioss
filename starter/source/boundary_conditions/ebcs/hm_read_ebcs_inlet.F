@@ -85,6 +85,7 @@ C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
 
+      EBCS%title = TITR
       EBCS%IS_MULTIFLUID = .TRUE.
       EBCS%HAS_IELEM = .TRUE.             
       EBCS%FVM_INLET_DATA%FORMULATION = -1
