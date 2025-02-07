@@ -30,7 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE NASG
      1              (IFLAG,NEL  ,PM   ,OFF  ,EINT ,MU  ,MU2 , 
      2               ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH ,
-     3               PNEW ,DPDM ,DPDE ,THETA,ECOLD)
+     3               PNEW ,DPDM ,DPDE )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -64,7 +64,7 @@ C-----------------------------------------------
      .        OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .        MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .        VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL),
-     .        DPDE(NEL) ,THETA(NEL),ECOLD(NEL)
+     .        DPDE(NEL)
       my_real, INTENT(INOUT) :: PSH(NEL)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -101,10 +101,6 @@ C-----------------------------------------------
            dPdE(I) = (GAMMA-ONE)*UNPMU / DENOM                                         !partial derivative    
            DPDM(I) = (GAMMA-ONE)*NUM/DENOM/DENOM + DPDE(I)*(PP+PSH(I))/UNPMU/UNPMU     !total derivative
          ENDDO
-         DO I=1,NEL
-           ECOLD(I)=-THREE100*SPH
-           IF(MU(I)>ZERO) ECOLD(I)=ECOLD(I)*(ONE+(GAMMA-ONE)*MU(I)*(ONE-MU(I)))
-         ENDDO
 
       !----------------------------------------
       !     UPDATE PRESSURE AND INTERNAL ENERGY
@@ -131,20 +127,15 @@ C-----------------------------------------------
            V0      = VNEW(I)*RHO/RHO0
            DENOM   = (VNEW(I)/V0-RHO0*b)
            AA      = (GAMMA-ONE)*(-RHO0*q/DENOM)-GAMMA*PSTAR
-           BB      = (GAMMA-ONE)/ DENOM     
+           BB      = (GAMMA-ONE)/ DENOM
+           dPdE(I) = BB  !partial derivative
            PNEW(I) = (AA+BB*EINT(I)/V0)/(ONE+BB*DVOL(I)/TWO/V0)      
            PNEW(I) = MAX(PNEW(I),-GAMMA*PSTAR)*OFF(I)         
            WFEXTT  = WFEXTT-DVOL(I)*PSH(I)
+           DENOM   = (ONE-RHO0*b*UNPMU)
          ENDDO
 !$OMP ATOMIC
        WFEXT = WFEXT + WFEXTT
-         DO I=1,NEL
-           IF(OFF(I)<ONE.OR.SPH<=ZERO) CYCLE
-           UNPMU   =  ONE+MU(I)
-           RHO     = UNPMU*RHO0
-           THETA(I) = (ONE/RHO-B)*(PNEW(I)+PSTAR)/Cv/(GAMMA-ONE)
-           THETA(I) = MAX(ZERO,THETA(I))
-         ENDDO
          
        !----------------------------------------
        !     FOR USE WITH MULTULMATERIAL LAW 151

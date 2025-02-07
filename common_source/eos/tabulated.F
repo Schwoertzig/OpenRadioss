@@ -29,7 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE TABULATED(IFLAG,NEL  ,PM   ,OFF  ,EINT ,MU  ,MU2 , 
      2                     ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH ,
-     3                     PNEW ,DPDM ,DPDE ,THETA,ECOLD, 
+     3                     PNEW ,DPDM ,DPDE ,
      4                     NPF  ,TF)
 C-----------------------------------------------
 C   M o d u l e s
@@ -65,7 +65,7 @@ C-----------------------------------------------
      .   OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .   MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .   VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL),
-     .   DPDE(NEL) ,THETA(NEL),ECOLD(NEL),
+     .   DPDE(NEL) ,
      .   PSH(NEL), TF(STF)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -117,11 +117,7 @@ C-----------------------------------------------
            DPDM(I) = DERI_A(I)+DERI_B(I)*ESPE(I) + RES_B(I)*(PP+PSH(I))/( (ONE+MU(I))*(ONE+MU(I)) ) ! A'(MU0) + B'(MU0)*E0+B(MU0)/(ONE+MU0)/(ONE+MU0)*P0     !total derivative
            DPDE(I) = RES_B(I) ! B(MU(I))                                               !partial derivative
          ENDDO
-         
-         DO I=1,NEL
-           ECOLD(I)=-THREE100*SPH
-           IF(MU(I)>ZERO) ECOLD(I)=ECOLD(I)*ONE
-         ENDDO
+
 C-----------------------------------------------
       ELSEIF(IFLAG == 1) THEN
          WFEXTT = ZERO
@@ -158,6 +154,7 @@ C-----------------------------------------------
          DO I=1,NEL
            AA      = RES_A(I)
            BB      = RES_B(I)
+           DPDE(I) = BB
            DVV     = HALF*DVOL(I)*DF(I) / MAX(EM15,VNEW(I))
            PP      = AA + BB * ESPE(I)
            PNEW(I) = (AA+BB*(ESPE(I)-PSH(I)*DVV))/(ONE+BB*DVV)
@@ -167,18 +164,6 @@ C-----------------------------------------------
          ENDDO       
 !$OMP ATOMIC
          WFEXT = WFEXT + WFEXTT
-         MX     = MAT(1)
-         RHO0   = PM(1 ,MX)
-         SPH    = PM(69,MX)
-         Cv     = PM(36,MX)
-         IF(SPH == ZERO)SPH=ONE
-         DO I=1,NEL
-           RHO      = RHO0*(ONE+MU(I))
-           IF(OFF(I) >= ONE)THEN
-             THETA(I) = (DF(I)*EINT(I)/VNEW(I)-ECOLD(I))/SPH
-             THETA(I) = MAX(ZERO,THETA(I))
-           ENDIF
-         ENDDO
 C-----------------------------------------------
        ELSEIF (IFLAG == 2) THEN
          MX = MAT(1)

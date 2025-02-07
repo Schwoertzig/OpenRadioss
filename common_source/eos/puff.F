@@ -27,7 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE PUFF(IFLAG,NEL  ,PM   ,OFF  ,EINT ,MU   ,MU2, 
      2                ESPE ,DVOL ,DF   ,VNEW ,MAT  ,
-     3                PNEW ,DPDM ,DPDE ,THETA, ECOLD)
+     3                PNEW ,DPDM ,DPDE )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -49,8 +49,7 @@ C-----------------------------------------------
       my_real PM(NPROPM,NUMMAT), 
      .        OFF(NEL) , EINT(NEL), MU(NEL)  , 
      .        MU2(NEL) , ESPE(NEL), DVOL(NEL), DF(NEL)   , 
-     .        VNEW(NEL), PNEW(NEL), DPDM(NEL), DPDE(NEL) ,
-     .       THETA(NEL),ECOLD(NEL)
+     .        VNEW(NEL), PNEW(NEL), DPDM(NEL), DPDE(NEL)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -112,14 +111,7 @@ C
           DPDE(I)=BB
         ENDIF
        ENDDO
-C
-       DO I=1,NEL
-        ECOLD(I)=-THREE100*SPH(I)
-        IF(MU(I)>ZERO) THEN
-           XX  = MU(I)/(ONE+MU(I))
-           ECOLD(I)=ECOLD(I)*EXP(G0(I)*XX)+HALF*C1(I)*MU2(I) 
-        ENDIF
-       ENDDO
+
 C
       ELSEIF(IFLAG == 1) THEN
 C----------------------------------------
@@ -157,23 +149,13 @@ C
           EXPA=EXP(CC*XX)
           AA= BB*ESUBL(I)*(EXPA-ONE)
         ENDIF
+        DPDE(I)=BB
 C
         PNEW(I)= (AA +BB*ESPE(I))/(ONE+ BB*DVV)
         PNEW(I)= MAX(PNEW(I),PC(I))*OFF(I)
         EINT(I)= EINT(I) - HALF*DVOL(I)*PNEW(I)
        ENDDO
-C------------------------
-C     COMPUTE TEMPERATURE
-C------------------------
-       DO I=1,NEL
-        MX     =MAT(I)
-        SPH(I) =PM(69,MX)
-       ENDDO
-       DO I=1,NEL
-        XX=DF(I)*EINT(I)/VNEW(I)-ECOLD(I)
-        IF(OFF(I)<1..OR.SPH(I)<=0..OR.XX<0.) CYCLE
-        THETA(I)=XX/SPH(I)
-       ENDDO
+
 C
       ELSEIF(IFLAG == 2) THEN
          DO I=1, NEL

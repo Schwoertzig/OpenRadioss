@@ -27,8 +27,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE GRUNEISEN(IFLAG , NEL    ,PM   ,OFF   ,EINT  ,MU   ,MU2 ,
      2                     ESPE  , DVOL   ,DF   ,VNEW  ,MAT   ,RHO0,
-     3                     PNEW  , DPDM   ,DPDE ,THETA ,ECOLD ,PSH,
-     4                     NUMMAT, NPROPM)
+     3                     PNEW  , DPDM   ,DPDE ,PSH   ,
+     4                     NUMMAT, NPROPM )
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -63,18 +63,19 @@ C-----------------------------------------------
       my_real,INTENT(IN) :: RHO0(NEL)         !< reference density
       my_real,INTENT(IN) :: DF(NEL)           !< relative volume (v/v0 = rho0/rho)
       my_real,INTENT(INOUT) :: EINT(NEL)      !< internal energy
-      my_real,INTENT(INOUT) :: ECOLD(NEL)     !< cold internal energy for temperature model
       my_real,INTENT(INOUT) :: PSH(NEL)       !< pressure shift (for relative pressure modeling)
-      my_real,INTENT(INOUT) :: PNEW(NEL)      !< current pressure      my_real,INTENT(INOUT) :: ECOLD(NEL)     !< cold internal energy (for temperature calculation)
-      my_real,INTENT(INOUT) :: THETA(NEL)     !< temperature
+      my_real,INTENT(INOUT) :: PNEW(NEL)      !< current pressure
       my_real,INTENT(INOUT) :: DPDE(NEL)      !< partial derivative dP/dE where E=Eint/V0
       my_real,INTENT(INOUT) :: DPDM(NEL)      !< total derivative : DP/Dmu = dPdmu + dPdE* P/(1+mu)**2
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, MX
-      my_real AA, BB, DVV, FF, FG, FAC, XX, DFF, DFG, FAC1, PP, ETA
+      my_real AA, BB, DVV, FF, FG, FAC, XX, DFF, DFG, FAC1, PP
       my_real CC(MVSIZ),S1(MVSIZ),S2(MVSIZ),S3(MVSIZ),G0(MVSIZ),GA(MVSIZ),PC(MVSIZ),SPH(MVSIZ)
+      my_real :: dP_de !< partial derivative at constant volume (e is specific internal energy)
+      my_real :: de  !< energy increment
+      my_real :: RHO !< mass density
 C-----------------------------------------------
 C   B o d y
 C-----------------------------------------------
@@ -113,16 +114,6 @@ C-----------------------------------------------
         DPDE(I)=BB
        ENDDO
 
-       ! Temperature
-       DO I=1,NEL
-        ECOLD(I)=-THREE100*SPH(I)
-        IF(MU(I)>ZERO) THEN
-          XX  = MU(I)/(ONE+MU(I))
-          ETA=ONE+MU(I)
-          ECOLD(I)=ECOLD(I)*EXP((G0(I)-GA(I))*XX)*ETA**GA(I)+HALF*RHO0(I)*CC(I)*CC(I)*MU2(I)
-        ENDIF
-       ENDDO
-
 C-----------------------------------------------
       ELSEIF(IFLAG == 1) THEN  !--- P[n+1] and EINT[n+1]
        ! user parameters
@@ -150,23 +141,12 @@ C-----------------------------------------------
         ENDIF
         AA=FAC*RHO0(I)*CC(I)*CC(I)*MU(I)
         BB=G0(I)+GA(I)*MU(I)
+        DPDE(I) = BB
         DVV=HALF*DVOL(I)*DF(I) / MAX(EM15,VNEW(I))
         PNEW(I)=(AA+BB*ESPE(I))/(ONE+BB*DVV)
         PNEW(I)= MAX(PNEW(I),PC(I))*OFF(I)
         EINT(I)=EINT(I) - HALF*DVOL(I)*PNEW(I) !total pressure for energy integration
         PNEW(I) = PNEW(I) - PSH(I)
-       ENDDO
-
-       !Temperature
-       DO I=1,NEL
-        MX = MAT(I)
-        SPH(I) = PM(69,MX)
-       ENDDO
-       DO I=1,NEL
-        XX=-ECOLD(I)
-        IF(VNEW(I) > EM15)XX=DF(I)*EINT(I)/VNEW(I)-ECOLD(I)
-        IF(OFF(I) < ONE .OR. SPH(I) <= ZERO .OR. XX < ZERO) CYCLE
-        THETA(I)=XX/SPH(I)
        ENDDO
 
 C-----------------------------------------------

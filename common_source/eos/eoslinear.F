@@ -25,9 +25,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||--- called by ------------------------------------------------------
       !||    eosmain     ../common_source/eos/eosmain.F
       !||====================================================================
-      SUBROUTINE EOSLINEAR(IFLAG,NEL, PM   ,OFF  ,EINT ,MU   ,MU2  , 
+      SUBROUTINE EOSLINEAR(IFLAG,NEL, PM   ,OFF  ,EINT ,MU   ,
      2                     DVOL ,VNEW ,MAT  ,PNEW ,DPDM ,
-     3                     DPDE ,ECOLD)
+     3                     DPDE )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -44,8 +44,8 @@ C-----------------------------------------------
       INTEGER MAT(NEL), IFLAG, NEL
       my_real PM(NPROPM,NUMMAT), 
      .        OFF(NEL) ,EINT(NEL) ,MU(NEL)   , 
-     .        MU2(NEL) ,DVOL(NEL) ,VNEW(NEL),
-     .        PNEW(NEL),DPDM(NEL) ,DPDE(NEL) ,ECOLD(NEL)
+     .        DVOL(NEL),VNEW(NEL),
+     .        PNEW(NEL),DPDM(NEL) ,DPDE(NEL)
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -78,15 +78,6 @@ C-----------------------------------------
         PNEW(I) = MAX(PC(I)-PSH(I),PNEW(I))        !law10 : yield criteria depends on P
         PNEW(I) = PNEW(I)*OFF(I)
        ENDDO
-C----------------------------
-C     COLD COMPRESSION ENERGY
-C----------------------------
-       DO I=1,NEL
-        ECOLD(I)=-THREE100*SPH(I)
-        IF(MU(I) > ZERO) THEN
-          ECOLD(I)=ECOLD(I)+HALF*BULK(I)*MU2(I)
-        ENDIF
-       ENDDO
 C------------------------------------------------
       ELSEIF(IFLAG == 1) THEN
 C----------------------------------------
@@ -104,6 +95,7 @@ C----------------------------------------
         PNEW(I) = MAX(PNEW(I),PC(I)-PSH(I))
         PNEW(I) = PNEW(I)*OFF(I)
         EINT(I) = EINT(I) - HALF*DVOL(I)*(PNEW(I)+PSH(I))
+        DPDE(I) = ZERO
        ENDDO
 C------------------------
        DO I=1,NEL

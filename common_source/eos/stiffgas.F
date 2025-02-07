@@ -28,9 +28,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    output_mod   ../common_source/modules/output/output_mod.F90
       !||====================================================================
       SUBROUTINE STIFFGAS
-     1                    (IFLAG,NEL, PM   ,OFF  ,EINT ,MU   ,MU2 , 
+     1                    (IFLAG,NEL, PM    ,OFF  ,EINT ,MU   ,MU2 ,
      2                     ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH ,
-     3                     PNEW ,DPDM ,DPDE ,THETA,ECOLD)
+     3                     PNEW ,DPDM ,DPDE )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -63,7 +63,7 @@ C-----------------------------------------------
      .        OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .        MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .        VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL),
-     .        DPDE(NEL) ,THETA(NEL),ECOLD(NEL)
+     .        DPDE(NEL)
       my_real, INTENT(INOUT) :: PSH(NEL)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -92,11 +92,6 @@ C-----------------------------------------
          DPDE(I) = (GAMMA-ONE)*(ONE+MU(I))
        ENDDO
 
-       DO I=1,NEL
-         ECOLD(I)=-THREE100*SPH
-         IF(MU(I)>ZERO) ECOLD(I)=ECOLD(I)*(ONE+(GAMMA-ONE)*MU(I)*(ONE-MU(I)))
-       ENDDO
-
       ELSEIF(IFLAG == 1) THEN
 C----------------------------------------
 C     UPDATE PRESSURE AND INTERNAL ENERGY
@@ -113,6 +108,7 @@ C----------------------------------------
        DO I=1,NEL
          AA      = -GAMMA*PSTAR-PSH(I)
          BB      = (GAMMA-ONE)*(ONE+MU(I))
+         DPDE(I) = BB
          DVV     = HALF*DVOL(I)*DF(I) / MAX(EM15,VNEW(I))
          PNEW(I) = PNEW(I) + (AA+BB*(ESPE(I)-PSH(I) *DVV))/(ONE+BB*DVV)
          PNEW(I) = MAX(PNEW(I),PC-PSH(I) )*OFF(I)
@@ -123,18 +119,7 @@ C----------------------------------------
 !$OMP ATOMIC
        WFEXT = WFEXT + WFEXTT
 C
-C------------------------
-C     COMPUTE TEMPERATURE
-C------------------------
 
-         MX     = MAT(1)
-         SPH    = PM(69,MX)
-
-       DO I=1,NEL
-         IF(OFF(I)<1..OR.SPH<=0.) CYCLE
-         THETA(I) = (DF(I)*EINT(I)/VNEW(I)-ECOLD(I))/SPH
-         THETA(I) = MAX(ZERO,THETA(I))
-       ENDDO
        ELSEIF(IFLAG == 2) THEN
           MX           = MAT(1)
           E0           = PM(23,MX)         

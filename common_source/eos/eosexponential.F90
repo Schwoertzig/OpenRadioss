@@ -36,7 +36,7 @@ module eosexponential_mod
       !||====================================================================
       subroutine eosexponential(iflag ,nel   ,pm   ,off  ,eint ,&
                                 dvol  ,vnew  ,mat  ,psh  ,      &
-                                pnew  ,dpdm  ,dpdE ,theta,time ,&
+                                pnew  ,dpdm  ,dpdE ,time ,&
                                 npropm,nummat,wfext)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -65,7 +65,6 @@ module eosexponential_mod
       my_real, intent(inout) :: pnew(nel)            !< pressure     
       my_real, intent(inout) :: dpdm(nel)            !< total derivative : mu = rho/rho0-1
       my_real, intent(inout) :: dpdE(nel)            !< partial derivative : E=rho0.e
-      my_real, intent(inout) :: theta(nel)           !< temperature
       my_real, intent(inout) :: psh(nel)             !< pressure shift
       my_real, intent(inout) :: eint(nel)            !< internal energy
       double precision, intent(inout) :: wfext       !< work of external forces / Double Precision
@@ -73,7 +72,7 @@ module eosexponential_mod
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
       integer :: i, mx
-      my_real :: pp,p0,alpha,wfextt
+      my_real :: p0,alpha,wfextt
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -99,11 +98,12 @@ module eosexponential_mod
          pnew(i) = pnew(i)*off(i)
          eint(i) = eint(i) - half*dvol(i)*(pnew(i)+psh(i))
          wfextt  = wfextt-dvol(i)*psh(i)
+         dpde(i) = zero
        enddo
 !$OMP ATOMIC
        wfext = wfext + wfextt
 !$OMP END ATOMIC
-       theta(1:nel) = three100
+
        
 !------------------------
       elseif(iflag == 2) then

@@ -29,7 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE OSBORNE  (IFLAG,NEL  ,PM   ,OFF  ,EINT ,MU   ,MU2 , 
      2                     ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH  ,
-     3                     PNEW ,DPDM ,DPDE ,THETA,ECOLD)
+     3                     PNEW ,DPDM ,DPDE )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -62,14 +62,14 @@ C-----------------------------------------------
      .        OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .        MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .        VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL), PSH(NEL) ,
-     .        DPDE(NEL) ,THETA(NEL),ECOLD(NEL),
-     .        DENOM,PART1,PART2,PART3
+     .        DPDE(NEL)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, MX
       my_real :: P0,E0,SPH,AA, BB,WFEXTT, DVV, PP,dPdMU
       my_real :: A1,A2,B0,B1,B2,C0,C1,D0, A2_,RHO0,DE, ESP
+      my_real :: DENOM,PART1,PART2,PART3
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -105,10 +105,6 @@ C-----------------------------------------
          DPDM(I) = dPdmu + dPdE(I)*DF(I)*DF(I)*(PP)   !total derivative
        ENDDO
 
-       DO I=1,NEL
-         ECOLD(I)=-THREE100*SPH 
-         !IF(MU(I)>ZERO) ECOLD(I)=ECOLD(I)*(ONE+C4 *MU(I)*(ONE-MU(I)))+HALF*C1 *MU2(I)
-       ENDDO
 
       ELSEIF(IFLAG == 1) THEN
 C----------------------------------------
@@ -153,23 +149,14 @@ C----------------------------------------
          EINT(I) = EINT(I) - HALF*DVOL(I)*(PNEW(I))
          PNEW(I) = PNEW(I) + PSH(I)
          WFEXTT  = WFEXTT-DVOL(I)*PSH(I)
+
+         dPdE(I) = (((B2*MU(I)+B1)*MU(I)+B0)+(TWO*(C1*MU(I)+C0))*ESPE(I) - PP/DENOM)/DENOM
        ENDDO
        
 !$OMP ATOMIC
        WFEXT = WFEXT + WFEXTT
 C
-C------------------------
-C     COMPUTE TEMPERATURE
-C------------------------
 
-       MX     = MAT(1)
-       SPH    = PM(69,MX)
-
-       DO I=1,NEL
-         IF(OFF(I)<1..OR.SPH<=0.) CYCLE
-         THETA(I) = (DF(I)*EINT(I)/VNEW(I)-ECOLD(I))/SPH
-         THETA(I) = MAX(ZERO,THETA(I))
-       ENDDO
       ELSEIF(IFLAG == 2) THEN
          MX           = MAT(1)
          RHO0         = PM(01,MX)           

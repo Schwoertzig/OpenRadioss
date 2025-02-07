@@ -27,9 +27,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||--- uses       -----------------------------------------------------
       !||    output_mod   ../common_source/modules/output/output_mod.F90
       !||====================================================================
-      SUBROUTINE NOBLE_ABEL(IFLAG,NEL, PM   ,OFF  ,EINT ,MU   ,MU2 , 
+      SUBROUTINE NOBLE_ABEL(IFLAG,NEL, PM    ,OFF  ,EINT ,MU   ,MU2 ,
      2                      ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH ,
-     3                      PNEW ,DPDM ,DPDE ,THETA,ECOLD)
+     3                      PNEW ,DPDM ,DPDE )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -57,7 +57,7 @@ C-----------------------------------------------
      .        OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .        MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .        VNEW(NEL) ,PSH(NEL)  ,PNEW(NEL) ,DPDM(NEL),
-     .        DPDE(NEL) ,THETA(NEL),ECOLD(NEL)
+     .        DPDE(NEL)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -93,13 +93,6 @@ C-----------------------------------------
         DPDM(I) = GM1(I)*ESPE(I)/DENOM + PP/DENOM*BB_(I)*RHO0(I) + PP*DF(I)*DF(I)*DPDE(I)      
        ENDDO
 C
-       DO I=1,NEL
-        ECOLD(I)=-THREE100*SPH(I)
-        IF(MU(I)>ZERO) THEN
-          ECOLD(I)=ECOLD(I)*(ONE+GM1(I)*MU(I)*(ONE-MU(I))) 
-        ENDIF
-       ENDDO
-C
       ELSEIF(IFLAG == 1) THEN
 C----------------------------------------
 C     UPDATE PRESSURE AND INTERNAL ENERGY
@@ -117,6 +110,7 @@ C
        DO I=1,NEL
         DENOM   = ONE-BB_(I)*RHO0(I)*(ONE+MU(I))
         BB      = GM1(I)*(ONE+MU(I))/DENOM
+        DPDE(I) = BB
         DVV     = HALF*DVOL(I)*DF(I) / MAX(EM15,VNEW(I))
         PNEW(I) = (BB*ESPE(I))/(ONE+BB*DVV)
         PNEW(I) = PNEW(I)*OFF(I)
@@ -127,18 +121,6 @@ C
 !$OMP ATOMIC
        WFEXT = WFEXT + WFEXTT
 C
-C------------------------
-C     COMPUTE TEMPERATURE
-C------------------------
-       DO I=1,NEL
-        MX     =MAT(I)
-        SPH(I) =PM(69,MX)
-       ENDDO
-       DO I=1,NEL
-        IF(OFF(I)<1..OR.SPH(I)<=0.) CYCLE
-        THETA(I) = (DF(I)*EINT(I)/VNEW(I)-ECOLD(I))/SPH(I)
-        THETA(I) = MAX(ZERO,THETA(I))
-       ENDDO
       ELSEIF(IFLAG == 2) THEN
          DO I=1, NEL
             MX      = MAT(I)

@@ -29,7 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE IDEALGAS(IFLAG ,NEL  ,PM   ,OFF   ,EINT  ,MU   ,MU2 , 
      2                     ESPE ,DVOL ,DF   ,VNEW  ,MAT   ,PSH  ,
-     3                     PNEW ,DPDM ,DPDE ,THETA ,ECOLD)
+     3                     PNEW ,DPDM ,DPDE ,THETA)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -62,8 +62,9 @@ C-----------------------------------------------
      .     OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .     MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .     VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL),
-     .     DPDE(NEL) ,THETA(NEL),ECOLD(NEL)
+     .     DPDE(NEL)
       my_real, INTENT(INOUT) :: PSH(NEL)
+      my_real, INTENT(INOUT) :: THETA(NEL)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -83,11 +84,7 @@ C-----------------------------------------------
          DO I=1,NEL
            PP      = (GAMMA-ONE)*(ONE+MU(I))*ESPE(I)
            DPDM(I) = (GAMMA-ONE)*(ESPE(I)+PP*DF(I))     !total derivative
-           DPDE(I) = (GAMMA-ONE)*(ONE+MU(I))             !partial derivative
-         ENDDO
-         DO I=1,NEL
-           ECOLD(I)=-THREE100*SPH
-           IF(MU(I)>ZERO) ECOLD(I)=ECOLD(I)*(ONE+(GAMMA-ONE)*MU(I)*(ONE-MU(I)))
+           DPDE(I) = (GAMMA-ONE)*(ONE+MU(I))            !partial derivative
          ENDDO
 C-----------------------------------------------
       ELSEIF(IFLAG == 1) THEN
@@ -102,18 +99,17 @@ C-----------------------------------------------
          ! p1 = p(mu,E+dE) = (g-1)*(1+mu)*(E-dvv*(p0+p1))    where p1,p0 are total pressure (no pshift), dvv = DVOL/2/V0                                               
          DO I=1,NEL
            BB          = (GAMMA-ONE)*(ONE+MU(I))
+           DPDE(I)     = BB  !partial derivative
            DVV         = HALF*DVOL(I)*DF(I) / MAX(EM15,VNEW(I))
            PNEW(I)     = BB*ESPE(I) / (ONE+BB*DVV)         
-           PNEW(I)     = MAX(PNEW(I),ZERO)*OFF(I)
-           EINT(I)     = EINT(I) - HALF*DVOL(I)*PNEW(I)
+           PNEW(I)     = (MAX(PNEW(I),ZERO)-PSH(I))*OFF(I)
+           EINT(I)     = EINT(I) - HALF*DVOL(I)*(PNEW(I)+PSH(I))
            WFEXTT      = WFEXTT-DVOL(I)*PSH(I)
-           PNEW(I)     = PNEW(I)-PSH(I)
          ENDDO       
 !$OMP ATOMIC
        WFEXT = WFEXT + WFEXTT
          MX     = MAT(1)
          RHO0   = PM(1 ,MX)
-         SPH    = PM(69,MX)
          Cv     = PM(36,MX)
          DO I=1,NEL
            RHO      = RHO0*(ONE+MU(I))
@@ -123,29 +119,21 @@ C-----------------------------------------------
          ENDDO
 C-----------------------------------------------
        ELSEIF (IFLAG == 2) THEN
-         MX = MAT(1)
-         E0 = PM(23,MX)
-         GAMMA = PM(32,MX)
-         P0 = PM(31,MX)
-         PSH(1:NEL) = PM(88,MX)
-         T0 = PM(35,MX)
-         SPH = PM(69,MX)
-         RHO0 = PM(1 ,MX)
-         Cv = PM(36,MX)
-         DO I=1, NEL
-            IF (VNEW(I) > ZERO) THEN
-               PP      = (GAMMA-ONE)*(ONE+MU(I))*ESPE(I) - PSH(I)
-               DPDM(I) = (GAMMA-ONE)*(ESPE(I)+(PP+PSH(I))*DF(I)) !total derivative
-               DPDE(I) = (GAMMA-ONE)*(ONE+MU(I)) !partial derivative
-               PNEW(I) = PP
-            ENDIF
-         ENDDO
-         DO I=1,NEL
-           IF(VNEW(I) > ZERO) THEN
-             THETA(I) = ESPE(I)/RHO0/Cv !law151 only espe is defined
-             THETA(I) = MAX(ZERO,THETA(I))
-           ENDIF
-         ENDDO
+          MX           = MAT(1)
+          E0           = PM(23,MX)         
+          GAMMA        = PM(32,MX)
+          P0           = PM(31,MX)
+          PSH(1:NEL) = PM(88,MX)
+          T0           = PM(35,MX)
+          SPH          = PM(69,MX)
+          DO I=1, NEL
+             IF (VNEW(I) > ZERO) THEN
+                PP      = (GAMMA-ONE)*(ONE+MU(I))*ESPE(I) - PSH(I)
+                DPDM(I) = (GAMMA-ONE)*(ESPE(I)+(PP+PSH(I))*DF(I)) !total derivative
+                DPDE(I) = (GAMMA-ONE)*(ONE+MU(I)) !partial derivative
+                PNEW(I) = PP
+             ENDIF
+          ENDDO
       ENDIF
 C-----------------------------------------------
       RETURN

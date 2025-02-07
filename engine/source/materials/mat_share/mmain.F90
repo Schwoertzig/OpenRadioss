@@ -444,6 +444,11 @@
           &irep,iint,igtyp,jcvt,isrot,israt,isorth,isorthg,icsen,ifailure,&
           &jsms, ihet, ipartsph,lf_dammx,niparam
           integer, dimension(:) ,pointer  :: iparamf
+          my_real :: cv,cp     ! specific heat capacity (J/K)
+          my_real :: mcv       ! mass.Cv (J/K)
+          my_real :: qheat     ! HEat due to pseudo-viscosity
+          my_real :: dtemp     ! temperature increment
+          my_real :: qold(nel) ! pseudo viscosity terms from previous cycle
 !-----------------------------------------------
 !   s o u r c e   l i n e s
 !-----------------------------------------------
@@ -548,6 +553,8 @@
           iboltp = iparg(72,ng)
           nbpreld = gbuf%g_bpreld
           bpreld => gbuf%bpreld(1:nbpreld*nel)
+
+          qold(1:nel) = lbuf%qvis(1:nel)   !qold is Q[n] and lbuf%qvis is going to be updated to Q[n+1]
 !--------------------------------------------------------
 !     compute undamaged effective stresses
 !---------------------------------------------------------
@@ -1891,14 +1898,33 @@
               pnew(:) = zero
             endif
             call eosmain(1       ,nel      ,eostyp  ,pm       ,off      ,lbuf%eint,&
-            &lbuf%rho  ,rho0     ,amu     ,amu2     ,espe     ,&
-            &dvol      ,df       ,voln    ,mat      ,psh      ,&
-            &pnew      ,dpdm     ,dpde    ,lbuf%temp,ecold    ,&
-            &bufmat    ,lbuf%sig ,lbuf%mu ,mtn      ,pold     ,&
-            &npf       ,tf       ,ebuf%var,nvareos , mat_elem%mat_param(imat),&
-            &lbuf%bfrac)
+                       & lbuf%rho  ,rho0     ,amu     ,amu2     ,espe     ,&
+                       & dvol      ,df       ,voln    ,mat      ,psh      ,&
+                       & pnew      ,dpdm     ,dpde    ,lbuf%temp,ecold    ,&
+                       & bufmat    ,lbuf%sig ,lbuf%mu ,mtn      ,pold     ,&
+                       & npf       ,tf       ,ebuf%var,nvareos , mat_elem%mat_param(imat),&
+                       & lbuf%bfrac)
 !
             call eosupda(off  ,lbuf%sig ,lbuf%eint, lbuf%vol ,pnew,nel)
+!
+            ! --- TEMPERATURE UPDATE DUE TO PSEUDO-VISCOSITY ---!
+            ! retrieving Cv parameter
+             cv = mat_elem%mat_param(imat)%eos%cv
+             if(cv == zero)then
+               cp = pm(69,mat(1))/pm(89,mat(1))
+               cv = cp !hypothesis if eos did not provide cv
+             end if
+             ! temperature dT = Q/mcv
+             if(cv > zero)then
+               do i=1,nel
+                 if(off(i) == one .and. voln(i) > zero) then
+                   mcv=lbuf%rho(i)*voln(i)*cv
+                   qheat = -half*(qold(i)+lbuf%qvis(i))*dvol(i) !2nd order integration
+                   dtemp = qheat/mcv ! heat related to entropy deposit
+                   lbuf%temp(i) = lbuf%temp(i) + dtemp
+                 endif
+                enddo
+             endif
 !
           elseif(l_mulaw_called)then
             if(l_mulaw_called)then

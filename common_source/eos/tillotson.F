@@ -28,7 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE TILLOTSON(
      1                     IFLAG,NEL  ,PM   ,OFF   ,EINT ,MU    , MU2, 
      2                     ESPE ,DVOL ,DF   ,VNEW  ,MAT  ,
-     3                     PNEW ,DPDM ,DPDE ,THETA ,ECOLD,VAREOS, NVAREOS)
+     3                     PNEW ,DPDM ,DPDE ,VAREOS, NVAREOS)
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -69,8 +69,7 @@ C-----------------------------------------------
       my_real PM(NPROPM,NUMMAT), 
      .        OFF(NEL) , EINT(NEL), VOL0(NEL), MU(NEL)   ,
      .        MU2(NEL) , ESPE(NEL), DVOL(NEL), DF(NEL)   ,
-     .        VNEW(NEL), PNEW(NEL), DPDM(NEL), DPDE(NEL) ,
-     .        THETA(NEL),ECOLD(NEL)
+     .        VNEW(NEL), PNEW(NEL), DPDM(NEL), DPDE(NEL)
       my_real,INTENT(INOUT) :: VAREOS(NEL,NVAREOS)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -129,15 +128,6 @@ C-----------------------------------------
         DPDE(I)=BB*ETA
         VAREOS(I,1)=REGION
        ENDDO
-       DO I=1,NEL
-        ECOLD(I)=-THREE100*SPH(I)
-        IF(MU(I)>ZERO) THEN
-           XX  = MU(I)/(ONE+MU(I))
-           ETA=ONE+MU(I)
-           GA=PTIA(I)+PTIB(I)-TWO_THIRD
-           ECOLD(I)=ECOLD(I)*EXP(GA*XX)*ETA**TWO_THIRD+HALF*C1(I)*MU2(I)
-        ENDIF
-       ENDDO
 
       ELSEIF(IFLAG == 1) THEN
 C----------------------------------------
@@ -186,21 +176,11 @@ C----------------------------------------
         BB=(PTIA(I)+FACPB*PTIB(I)/OMEGA)*ETA        
         PNEW(I)=(AA +BB*ESPE(I))/(ONE+ BB*DVV)
         PNEW(I)= MAX(PNEW(I),PC(I))*OFF(I)
+        DPDE(I) = BB
         EINT(I)= EINT(I) - HALF*DVOL(I)*PNEW(I)
         VAREOS(I,1)=REGION
        ENDDO
 
-       !Temperature
-       DO I=1,NEL
-        MX=MAT(I)
-        SPH(I)=PM(69,MX)
-       ENDDO
-       DO I=1,NEL
-        XX=-ECOLD(I)
-        IF(VNEW(I)>EM15)XX=DF(I)*EINT(I)/VNEW(I)-ECOLD(I)
-        IF(OFF(I)<ONE.OR.SPH(I)<=ZERO.OR.XX<ZERO) CYCLE
-        THETA(I)=XX/SPH(I)
-       ENDDO
 C
       ELSEIF(IFLAG == 2) THEN
          DO I=1, NEL

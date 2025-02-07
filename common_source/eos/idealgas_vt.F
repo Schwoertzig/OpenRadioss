@@ -29,7 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE IDEALGAS_VT(IFLAG,NEL  ,PM   ,OFF  ,EINT ,MU  ,MU2 , 
      2                       ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH ,
-     3                       PNEW ,DPDM ,DPDE ,THETA,ECOLD,POLD)
+     3                       PNEW ,DPDM ,DPDE ,THETA,SIG)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -62,15 +62,16 @@ C-----------------------------------------------
      .        OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .        MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .        VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL),
-     .        DPDE(NEL) ,THETA(NEL),ECOLD(NEL)
-      my_real, INTENT(INOUT) :: PSH(NEL),POLD(NEL)
+     .        DPDE(NEL) ,THETA(NEL)
+      my_real, INTENT(INOUT) :: PSH(NEL)
+      my_real,INTENT(IN) :: SIG(NEL,6)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, MX, CURVEID
       my_real :: P0,GAMMA,E0,SPH,AA, BB,WFEXTT, DVV, PP, RHO, RHO0
       my_real :: r_GAS,A0,A1,A2,A3,A4,CP(MVSIZ),CV, T1,T2,T3,T4
-      my_real :: TEMP, FUN, DFUN, TOL, ERROR, INCR
+      my_real :: TEMP, FUN, DFUN, TOL, ERROR, INCR, POLD
       INTEGER :: ITER, MAX_ITER
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -95,8 +96,9 @@ C-----------------------------------------------
          !SOLVE TEMPERATURE
          DO I=1,NEL
            ! Init newton
-           RHO = RHO0 * (ONE + MU(I))           
-           TEMP = POLD(I)/RHO/r_GAS
+           RHO = RHO0 * (ONE + MU(I))
+           POLD=-THIRD*(SIG(I,1)+SIG(I,2)+SIG(I,3))
+           TEMP = POLD/RHO/r_GAS
            ITER = 0
            ERROR = HUGE(ZERO)
            DO WHILE(ERROR > TOL .AND. ITER < MAX_ITER)
@@ -121,7 +123,6 @@ C-----------------------------------------------
            GAMMA = CP(I)/CV
            DPDM(I) = RHO0*GAMMA*r_GAS*THETA(I)     !total derivative
            DPDE(I) = GAMMA*(1+MU(I))
-           ECOLD(I)=ZERO        
          ENDDO
          
 C-----------------------------------------------
@@ -143,8 +144,9 @@ C-----------------------------------------------
          !SOLVE TEMPERATURE
          DO I=1,NEL
            ! Init newton
-           RHO = RHO0 * (ONE + MU(I))           
-           TEMP = POLD(I)/RHO/r_GAS
+           RHO = RHO0 * (ONE + MU(I))
+           POLD=-THIRD*(SIG(I,1)+SIG(I,2)+SIG(I,3))
+           TEMP = POLD/RHO/r_GAS
            ITER = 0
            ERROR = HUGE(ZERO)
            DO WHILE(ERROR > TOL .AND. ITER < MAX_ITER)
@@ -191,8 +193,9 @@ C-----------------------------------------------
          !SOLVE TEMPERATURE
          DO I=1,NEL
            ! Init newton
-           RHO = RHO0 * (ONE + MU(I))           
-           TEMP = POLD(I)/RHO/r_GAS
+           RHO = RHO0 * (ONE + MU(I))
+           POLD=-THIRD*(SIG(I,1)+SIG(I,2)+SIG(I,3))
+           TEMP = POLD/RHO/r_GAS
            ITER = 0
            ERROR = HUGE(ZERO)
            DO WHILE(ERROR > TOL .AND. ITER < MAX_ITER)

@@ -28,7 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE JWL
      1              (IFLAG,NEL  ,PM   ,OFF  ,EINT ,MU  ,MU2 , 
      2               ESPE ,DVOL ,DF   ,VNEW ,MAT  ,PSH ,
-     3               PNEW ,DPDM ,DPDE ,THETA,ECOLD)
+     3               PNEW ,DPDM ,DPDE )
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -57,7 +57,7 @@ C-----------------------------------------------
      .        OFF(NEL)  ,EINT(NEL) ,MU(NEL)   , 
      .        MU2(NEL)  ,ESPE(NEL) ,DVOL(NEL) ,DF(NEL)  , 
      .        VNEW(NEL) ,PNEW(NEL) ,DPDM(NEL),
-     .        DPDE(NEL) ,THETA(NEL),ECOLD(NEL)
+     .        DPDE(NEL)
       my_real, INTENT(INOUT) :: PSH(NEL)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
