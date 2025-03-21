@@ -33,7 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE M51INIT(
      .               IPM                ,DETONATORS ,PM      ,
-     .               NGL                ,NUVAR      ,UVAR    ,UPARAM  ,X       ,
+     .               NUVAR              ,UVAR       ,UPARAM  ,X       ,
      .               MAT                ,IPARG      ,IFORM   ,IX      ,NIX     ,
      .               ALE_CONNECTIVITY   ,BUFMAT     ,RHO0    ,
      .               GBUF               ,NEL        ,SIG)
@@ -57,7 +57,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER IPM(NPROPMI,NUMMAT),NGL(NEL),MAT(NEL), IPARG(NPARG),IFORM,NIX,IX(NIX,*)
+      INTEGER IPM(NPROPMI,NUMMAT),MAT(NEL), IPARG(NPARG),IFORM,NIX,IX(NIX,*)
       my_real PM(NPROPM,NUMMAT),UVAR(NEL,NUVAR),UPARAM(*), X(3,NUMNOD), BUFMAT(*), RHO0
       INTEGER,INTENT(IN) :: NEL
       my_real,INTENT(INOUT) :: SIG(NEL,6)
@@ -125,9 +125,9 @@ C-----------------------------------------------
       IF(IFLG == 1 .AND. IPARG(64) == 0)THEN   !unplug for NRF
         NPH = 1
         IF(N2D==0)THEN
-          CALL M5IN3 (PM,MAT,0,DETONATORS,UVAR(1,1),NGL,IPARG,X,IX,NIX)
+          CALL M5IN3 (PM,MAT,0,DETONATORS,UVAR(1,1),IPARG,X,IX,NIX)
         ELSE
-          CALL M5IN2 (PM,MAT,0,DETONATORS,UVAR(1,1),NGL,X,IX,NIX)
+          CALL M5IN2 (PM,MAT,0,DETONATORS,UVAR(1,1),X,IX,NIX)
         ENDIF
       ENDIF
 

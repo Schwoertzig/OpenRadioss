@@ -190,7 +190,7 @@ c
               CALL MY_ALLOC(LBUF%TEMP,NEL*BUFLY%L_TEMP)
                   LBUF%TEMP = MIN(BUFLY%L_TEMP,1) * PM(79,IMAT) ! reference (initial) temperature
               CALL MY_ALLOC(LBUF%TB,NEL*BUFLY%L_TB)                
-                  LBUF%TB = ZERO
+                  LBUF%TB = -EP20
               CALL MY_ALLOC(LBUF%RK,NEL*BUFLY%L_RK)                
                   LBUF%RK = ZERO
               CALL MY_ALLOC(LBUF%RE,NEL*BUFLY%L_RE)                
@@ -522,7 +522,7 @@ c
         CALL MY_ALLOC(ELBUF_TAB(NG)%GBUF%TEMP,NEL*GBUF%G_TEMP)                      
               ELBUF_TAB(NG)%GBUF%TEMP = ZERO               
         CALL MY_ALLOC(ELBUF_TAB(NG)%GBUF%TB,NEL*GBUF%G_TB)                        
-              ELBUF_TAB(NG)%GBUF%TB = ZERO               
+              ELBUF_TAB(NG)%GBUF%TB = -EP20
         CALL MY_ALLOC(ELBUF_TAB(NG)%GBUF%RK,NEL*GBUF%G_RK)                      
               ELBUF_TAB(NG)%GBUF%RK = ZERO               
         CALL MY_ALLOC(ELBUF_TAB(NG)%GBUF%RE,NEL*GBUF%G_RE) 

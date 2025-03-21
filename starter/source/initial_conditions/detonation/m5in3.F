@@ -35,7 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    detonators_mod      ../starter/share/modules1/detonators_mod.F
       !||    message_mod         ../starter/share/message_module/message_mod.F
       !||====================================================================
-      SUBROUTINE M5IN3(PM,MAT,M151_ID,DETONATORS,TB,NGL,IPARG,X,IX,NIX)
+      SUBROUTINE M5IN3(PM,MAT,M151_ID,DETONATORS,TB,IPARG,X,IX,NIX)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -61,16 +61,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER :: NGL(*),MAT(*),IPARG(NPARG),NIX,IX(NIX,*)
+      INTEGER :: MAT(*),IPARG(NPARG),NIX,IX(NIX,*)
       INTEGER,INTENT(IN) :: M151_ID
       my_real :: PM(NPROPM,NUMMAT),  TB(*), X(3, *)
       TYPE(DETONATORS_STRUCT_)::DETONATORS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, N, MTL, MPR, NEL,
-     .        MT, IOPT, NPE2,
-     .        NDETPS, NDETSG, NECRAN, NDETPL, NDETCORD
+      INTEGER I, N, MTL,IOPT, NPE2
+      INTEGER  NDETPS, NDETSG, NECRAN, NDETPL, NDETCORD, NDETPS_NO_SHADOW, NDETPS_SHADOW
       LOGICAL HAS_DETONATOR(MVSIZ)
       my_real
      .   X1(MVSIZ), X2(MVSIZ), X3(MVSIZ), X4(MVSIZ),
@@ -84,10 +83,11 @@ C-----------------------------------------------
      .   ALT , XLP,  YLP, ZLP, XLP1, YLP1, ZLP1,
      .   XLP2,YLP2, ZLP2, XL0,  YL0,  ZL0,  XL1,
      .   YL1 , ZL1,  XL2, YL2,  ZL2,  PS1,  PS2,
-     .   DL1, DL2, S1, S2, S3, DETO,
+     .   DL1, DL2, S1, S2, S3,
      .   NX,    NY,    NZ,    NN, VDET,VDET2
       INTEGER :: NODE1, NODE2, NODE3, NODE4, NODE5, NODE6, NODE7, NODE8, II
       INTEGER :: GRNOD_ID, INOD, NNOD, NODE_ID
+      INTEGER :: I_SHADOW_FLAG
 C=======================================================================
 C
       NDETPS = DETONATORS%N_DET_POINT
@@ -96,17 +96,28 @@ C
       NDETPL = DETONATORS%N_DET_PLANE
       NDETCORD = DETONATORS%N_DET_CORD
 
-                                        !------------------------------------!
-      IF(DETONATORS%N_DET == 0) THEN     !-> TDET=0 IF NO DETONATOR DEFINED   !
-                                        !------------------------------------!
-         !default detonation time
-         DO I=LFT,LLT
-           TB(I)=ZERO
-         END DO
+      NDETPS = DETONATORS%N_DET_POINT
+      NDETSG = DETONATORS%N_DET_LINE
+      NECRAN = DETONATORS%N_DET_WAVE_SHAPER
+      NDETPL = DETONATORS%N_DET_PLANE
+      NDETCORD = DETONATORS%N_DET_CORD
 
-           !-----------------------------------------------!
-      ELSE !-> LIGHTING TIME CALCULATION                   !
-           !-----------------------------------------------!
+      ! numbering /DFS/DETPOINT without shadowing option (then arrival time deduced from radial distance)
+      NDETPS_NO_SHADOW = 0
+      NDETPS_SHADOW = 0
+      DO I = 1, DETONATORS%N_DET_POINT
+        I_SHADOW_FLAG = DETONATORS%POINT(I)%SHADOW
+        IF(I_SHADOW_FLAG == 0)THEN
+          NDETPS_NO_SHADOW = NDETPS_NO_SHADOW + 1
+        ELSE
+          NDETPS_SHADOW = NDETPS_SHADOW + 1
+        ENDIF
+      ENDDO
+
+!------------------------------------!
+      !treat only detonators without shadowing option
+      IF(DETONATORS%N_DET - NDETPS_SHADOW > 0) THEN
+
 
          IF (JSPH == 1) THEN
 C     SPH -> only X1, Y1, Z1, have to be used
@@ -180,7 +191,7 @@ C     SPH -> only X1, Y1, Z1, have to be used
         ! INITIALIZATION BEFORE LIGHTING TIME COMPUTATION  !
         !--------------------------------------------------!
         DO I=LFT,LLT
-          TB(I)=EP37
+          TB(I)=EP20
           HAS_DETONATOR(I)=.FALSE. ! will be removed -1 for each detonator associated to this elem
           IF(JSPH == 0)THEN
             IF(IPARG(28) == 4) THEN
@@ -205,6 +216,8 @@ C     SPH -> only X1, Y1, Z1, have to be used
         IF(NDETPS /= 0) THEN
           DO I=LFT,LLT
             DO N=1,NDETPS
+              I_SHADOW_FLAG = DETONATORS%POINT(N)%SHADOW
+              IF(I_SHADOW_FLAG /= 0)CYCLE ! solve Eikonal equation instead
               MTL=DETONATORS%POINT(N)%MAT
               GRNOD_ID=DETONATORS%POINT(N)%GRNOD_ID
               IF(MTL == 0 .OR. MTL == MAT(I) .OR. MTL == M151_ID) THEN
@@ -342,36 +355,6 @@ C     SPH -> only X1, Y1, Z1, have to be used
       END IF !-> LIGHTING TIME COMPUTATION COMPLETE !
              !--------------------------------------!
 
-      !---------------------------------!
-      !    ELEM WITHOUT DETONATOR       !
-      !---------------------------------!
-      IF(DETONATORS%N_DET > 0)THEN
-        DO I=LFT,LLT
-          IF (.NOT. HAS_DETONATOR(I)) TB(I)=ZERO
-        END DO
-      ENDIF
-
-      !---------------------------------!
-      !            PRINTOUT             !
-      !---------------------------------!
-      IF(IPRI >= 3)THEN
-        MPR =0
-        DO I=LFT,LLT
-          MPR =MPR+1
-          NEL =NGL(I)
-          IF(MPR == 1) WRITE(IOUT,500)
-          DETO=-(TB(I))
-          WRITE(IOUT,510) NEL,DETO
-          IF(MPR == 50) MPR=0
-        END DO
-      ENDIF
-C-----------------------------------------------
- 500  FORMAT(//,
-     & 5X,40HDETONATION TIMES FOR JWL ELEMENTS       /,
-     & 5X,40H---------------------------------       //,
-     & 5X,40HELEMENT  DETONATION TIME                /)
-  510 FORMAT(5X,I10,E15.5)
-C-----------------------------------------------
       RETURN
       END
 
