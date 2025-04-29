@@ -383,6 +383,7 @@
           &        isvis,nvartmp,nlay,inloc,iselect,ibpreld,nvareos,nvarvis,&   
           &        idamp_freq_range,visctype
           integer ifunc(maxfunc)
+          integer nvartmp_eos
 
           ! Float/Double
           my_real facq0,e1,e2,e3,e4,e5,e6,alpha,tref,tmelt
@@ -769,6 +770,7 @@
 !-----------------------------------
           eostyp = mat_elem%mat_param(imat)%ieos
           pnew(:) = zero
+          nvartmp_eos = elbuf_tab(ng)%bufly(ilay)%nvartmp_eos
           if (eostyp > 0 .and. mtn /= 12 ) then
             call eosmain(0         ,nel      ,eostyp  ,pm        ,off      ,lbuf%eint,&
                          lbuf%rho  ,rho0     ,amu     ,amu2      ,espe     ,&
@@ -776,7 +778,7 @@
                          pnew      ,dpdm     ,dpde    ,el_temp   ,ecold    ,&
                          bufmat    ,lbuf%sig ,lbuf%mu ,mtn       ,pold     ,&
                          npf       ,tf       ,ebuf%var,nvareos   ,mat_elem%mat_param(imat),&
-                         lbuf%bfrac)
+                         lbuf%bfrac,nvartmp_eos  ,ebuf%vartmp)
           endif
 !-----------------------------------
 !     stresses deviatoric/total
@@ -1927,13 +1929,14 @@
             if (mtn /= 6 .and. mtn /= 17) then
               pnew(:) = zero
             endif
+            nvartmp_eos = elbuf_tab(ng)%bufly(ilay)%nvartmp_eos
             call eosmain(1         ,nel      ,eostyp  ,pm       ,off      ,lbuf%eint,&
                        & lbuf%rho  ,rho0     ,amu     ,amu2     ,espe     ,&
                        & dvol      ,df       ,voln    ,mat      ,psh      ,&
                        & pnew      ,dpdm     ,dpde    ,el_temp  ,ecold    ,&
                        & bufmat    ,lbuf%sig ,lbuf%mu ,mtn      ,pold     ,&
                        & npf       ,tf       ,ebuf%var,nvareos , mat_elem%mat_param(imat),&
-                       & lbuf%bfrac)
+                       & lbuf%bfrac,nvartmp_eos  ,ebuf%vartmp)
 !
             call eosupda(off  ,lbuf%sig ,lbuf%eint, lbuf%vol ,pnew,nel)
 !

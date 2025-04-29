@@ -55,7 +55,7 @@
         subroutine hm_read_mat133(                             &
            nuvar    ,mtag     , matparam ,iout     ,parmat   , &
            unitab   ,lsubmodel, mat_uid  ,titr     ,nvartmp  , &
-           ntable   ,table    )
+           ntable   ,table    ,pm37)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@
           use unitab_mod , only : unit_type_
           use submodel_mod , only : submodel_data, nsubmod
           use matparam_def_mod , only : matparam_struct_
-          use constant_mod , only : zero, half, one, two, three
+          use constant_mod , only : zero, em20, half, one, two, three
           use names_and_titles_mod , only : nchartitle
           use table_mod , only : ttable
           use mat_table_copy_mod , only : mat_table_copy
@@ -89,6 +89,7 @@
           integer,intent(in)                                :: ntable       !< array size for table
           type(ttable),dimension(ntable),intent(in)         :: table        !< tables data structure
           integer,intent(inout)                             :: nvartmp      !< number of temporary variables
+          my_real,intent(inout)                             :: PM37         !< pm37 is set to PMIN
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -146,6 +147,11 @@
             mtl_msg = "LAW133 (GRANULAR)"
             call ancmsg(msgid=1514,msgtype=msgerror,anmode=aninfo,i1 = mat_uid,c1=mtl_msg,c2=titr)
           endif
+
+          if(pmin == zero)then
+            pmin = em20
+          end if
+          PM37 = pmin
 
 !-------------------------------------
           matparam%niparam = 0          !< Number of integer material parameters

@@ -1195,7 +1195,7 @@
             call hm_read_mat133( &
              nuvar    ,mtag     , matparam ,iout     ,parmat   , &
              unitab   ,lsubmodel, mat_id   ,titr     ,nvartmp  , &
-             ntable   ,table )
+             ntable   ,table , pm(37,i))
 !-------
           case ('LAW134','VISCOUS_FOAM')
             ilaw  = 134

@@ -465,7 +465,7 @@
           integer nv46, numel, inloc
           integer i,npar,nuparam,niparam,nparf,iadbuf,nfunc,numtabl,israte,ipg,nptr,npts,&
           &ibid,ibidon1,ibidon2,ibidon3,ibidon4 ,n48,nix,ilaw_user,igtyp,&
-          &nvarf,ir,irupt,imat,isvis,ivisc,nuvarv,nuparv,iseq,idev,ntabl_fail,&
+          &nvarf,ir,irupt,imat,isvis,nuvarv,iseq,idev,ntabl_fail,&
           &l_planl,l_epsdnl,l_dmg,l_sigb
 
           my_real e1,e2,e3,e4,e5,e6,bid1,bid3,q1,q2,q3,ss1,ss2,ss3,ss4,ss5,&
@@ -485,7 +485,7 @@
           &r11(mvsiz),r12(mvsiz),r13(mvsiz),r21(mvsiz),r22(mvsiz),r23(mvsiz),&
           &r31(mvsiz),r32(mvsiz),r33(mvsiz),epsp1(mvsiz),dpla(mvsiz),&
           &pair(mvsiz),defp0(mvsiz)
-          my_real  facq0,bulk
+          my_real  facq0
           my_real fpsxx(mvsiz),fpsyy(mvsiz),fpszz(mvsiz),fpsxy(mvsiz),&
           &fpsyz(mvsiz),fpszx(mvsiz),fpsyx(mvsiz),fpszy(mvsiz),&
           &fpsxz(mvsiz),&
@@ -495,7 +495,7 @@
           my_real tt_local
           my_real, dimension(nel), target  :: le_max
 !----
-          my_real, dimension(:), pointer   :: uparam,uparam0,uparf,uparvis,uvarf,dfmax,&
+          my_real, dimension(:), pointer   :: uparam,uparam0,uparf,uvarf,dfmax,&
           &tdel,yldfac,dam,el_len,&
           &el_pla,damini
           my_real, dimension(:), allocatable ,target  :: bufzero
@@ -2843,7 +2843,7 @@
               e6 = d6(i)*(sold6(i)+sig(i,6)    + two*svis(i,6))
               eint(i)=eint(i)+(e1+e2+e3+e4+e5+e6)*vol_avg(i)*dt1*half
             end do
-          elseif (mtn == 102) then
+          elseif (mtn == 102 .or. mtn == 133) then
             !case of material law using /eos
             do i=1,nel
               p2  = -(sold1(i)+sig(i,1)+sold2(i)+sig(i,2)+sold3(i)+sig(i,3))* third
