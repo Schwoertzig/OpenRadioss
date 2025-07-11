@@ -142,6 +142,21 @@ C-----------------------------------------------
         IEOS = 13
         EOS_TAG(IEOS)%L_MU = 1
         MATPARAM%IEOS = IEOS
+        ! allocate EoS data structure
+        MATPARAM%EOS%NUPARAM = 7
+        MATPARAM%EOS%NIPARAM = 1
+        MATPARAM%EOS%NFUNC = 0
+        MATPARAM%EOS%NTABLE = 0
+        CALL MATPARAM%EOS%CONSTRUCT() !allocations
+        MATPARAM%EOS%uparam(1) = XMUMX
+        MATPARAM%EOS%uparam(2) = zero
+        MATPARAM%EOS%uparam(3) = BUNL
+        MATPARAM%EOS%uparam(4) = c0
+        MATPARAM%EOS%uparam(5) = c1
+        MATPARAM%EOS%uparam(6) = c2
+        MATPARAM%EOS%uparam(7) = c3
+        MATPARAM%EOS%iparam(1) = 2 !linear evolution of the unloading slope
+        MATPARAM%EOS%psh = psh
       ELSE
         IFORM=2 !new format (Eos defined from /EOS option)
         IEOS = 18   ! linear EOS is used by default 

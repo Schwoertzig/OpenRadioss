@@ -54,23 +54,27 @@
         private :: WP
 !
 !
-!=======================================================================
+!=======================================================================      
+      
+      type eos_param_
+        character(len=nchartitle) :: title = ''  !< eos model input name
+        integer :: nuparam                       !< number of real value paraameters
+        integer :: niparam                       !< number of int value parameters
+        !integer :: nuvar                        !< number of internal state variables    --> elbuf%bufly%eos%var(nel*nvar_eos)bg
+        integer :: nfunc                         !< number of local functions in material
+        integer :: ntable                        !< number of local function tables
+        integer :: isfluid                       !< indicated if EoS is designed for fluid
+        real(kind=WP) :: cv                      !< specific heat capacity (constant volume)
+        real(kind=WP) :: cp                      !< specific heat capacity (constant pressure)
+        real(kind=WP) :: psh                     !< pressure shift
+        real(kind=WP) :: e0                      !< initial internal energy
+        real(kind=WP) :: p0                      !< initial pressure
+        real(kind=WP) :: pmin                    !< minimum pressure
 
-        type eos_param_
-          character(len=nchartitle) :: title = ''  !< eos model input name
-          integer :: nuparam                       !< number of real value paraameters
-          integer :: niparam                       !< number of int value parameters
-          !integer :: nuvar                         !< number of internal state variables    --> elbuf%bufly%eos%var(nel*nvar_eos)bg
-          integer :: nfunc                         !< number of local functions in material
-          integer :: ntable                        !< number of local function tables
-          integer :: isfluid                      !< indicated if EoS is designed for fluid
-          real(kind=WP) :: cv                            !< specific heat capacity (constant volume)
-          real(kind=WP) :: cp                            !< specific heat capacity (constant pressure)
-
-          real(kind=WP)        ,dimension(:) ,allocatable :: uparam  !< real value eos parameter table
-          integer        ,dimension(:) ,allocatable :: iparam  !< int  value eos parameter table
-          integer        ,dimension(:) ,allocatable :: func    !< function table in eos models
-          type(table_4d_),dimension(:) ,allocatable :: table   !< local function tables
+        real(kind=WP)  ,dimension(:) ,allocatable :: uparam  !< real value eos parameter table
+        integer        ,dimension(:) ,allocatable :: iparam  !< int  value eos parameter table
+        integer        ,dimension(:) ,allocatable :: func    !< function table in eos models
+        type(table_4d_),dimension(:) ,allocatable :: table   !< local function tables
 
 
         contains
@@ -79,6 +83,12 @@
 
         end type eos_param_
 
+      type ptr_eos_param_
+          ! eos parameters for each submaterials
+          type(eos_param_), pointer :: eos
+      end type ptr_eos_param_
+      ! matparam(parent_mid)%multimat%pEOS(isubmat)%EOS(:) !with new format : => matparam(submat_mid)%eos
+                                                           !with old format : allocate  (fill with embedded eos parameters)
       contains
 
 !||====================================================================
