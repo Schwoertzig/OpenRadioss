@@ -265,6 +265,7 @@ C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------  
 
+      IF(ALE%SOLVER%MULTIMAT%is_defined_mmale3 == 1)return
       IBID          = 0
       BID           = ZERO
       SBUFVOIS      = 6
@@ -297,7 +298,7 @@ C  IOUTPRT (assembly report)
       IF(ITASK==0)ALLOCATE(BUFVOIS(SBUFVOIS ,NSVOIS+NQVOIS)) !SPMD array of adjacent ALE/CFD elems           !OPTIM : SHOULD BE ALLOCATED IN ARRALOC,  same for FLUX_VOIS & N4_VOIS
       IF(ITASK==0)SZ_BUFVOIS=SBUFVOIS*(NSVOIS+NQVOIS)
 
-      IF(N2D /= 0 .AND. NMULT /= 0)THEN
+      IF(N2D /= 0 .AND. NMULT /= 0 .AND. ALE%SOLVER%MULTIMAT%IS_DEFINED_MMALE3 == 0 )THEN
         !WA(1:IADBH-1)                         = FLUX
         !WA(IADBH:IADBH+MAX(1,NMULT)*NUMELQ-1) = BHOLE
         IADBH=MAX(1,NMULT)*4*NUMELQ+1
@@ -733,25 +734,28 @@ C     -------------------------
             ENDIF
             IF(ITASK==0) CALL STOPTIME(TIMERS,MACRO_TIMER_MULTIFVM)
 
-         ELSE
-
-!------------------------------------------------!
-! CONVECTION, CONDUCTION, REZONING               !
-!------------------------------------------------! 
+         ELSEIF(ALE%SOLVER%MULTIMAT%is_defined_mmale3 ==0)THEN
+            ! REMINDER
+            !   "mmale=1: Staggered Upwind advection + von Neumann-Richtmyer artificial viscosity + diffuse interface"
+            !   "mmale=2: Collocated HLLC + diffuse interface"
+            !   "mmale=3: Collocated HLLC + lagrangian interface tracking"
+            !------------------------------------------------!
+            ! CONVECTION, CONDUCTION, REZONING               !
+            !------------------------------------------------!
             CALL ALETHE(
-     1   IPARG,           ELBUF_TAB,       WA,              VAL2,
-     2   PHI,             ALE_CONNECTIVITY,IXS,             IXQ,
-     3   V,               W,               X,               PM,
-     4   MS,              VEUL,            FILL,            DFILL,
-     5   ALPH,            FV,              BUFMAT,          TF,
-     6   NPC,             ITASK,           NBRCVOIS,        NBSDVOIS,
-     7   LNRCVOIS,        LNSDVOIS,        NERCVOIS,        NESDVOIS,
-     8   LERCVOIS,        LESDVOIS,        SEGVAR,
-     9   MSNF,            NODFT,           NODLT,           WA(IADBH),
-     A   IPM,             QMV,             ITAB,            ITABM1,
-     B   LENQMV,          NV46,
-     C   IAD_ELEM,        GLOB_THERM,
-     D   FR_ELEM,         MATPARAM)
+     1             IPARG,           ELBUF_TAB,       WA,              VAL2,
+     2             PHI,             ALE_CONNECTIVITY,IXS,             IXQ,
+     3             V,               W,               X,               PM,
+     4             MS,              VEUL,            FILL,            DFILL,
+     5             ALPH,            FV,              BUFMAT,          TF,
+     6             NPC,             ITASK,           NBRCVOIS,        NBSDVOIS,
+     7             LNRCVOIS,        LNSDVOIS,        NERCVOIS,        NESDVOIS,
+     8             LERCVOIS,        LESDVOIS,        SEGVAR,
+     9             MSNF,            NODFT,           NODLT,           WA(IADBH),
+     A             IPM,             QMV,             ITAB,            ITABM1,
+     B             LENQMV,          NV46,
+     C             IAD_ELEM,        GLOB_THERM,
+     D             FR_ELEM,         MATPARAM)
          ENDIF
       ELSE
         ALE%SUB%IFSUBM=0
@@ -762,7 +766,7 @@ C
          !---------------------------------------------
          !     MULTIMATERIAL - LAW20(BIMAT)
          !---------------------------------------------
-          IF(NMULT > 0)THEN
+          IF(NMULT > 0 .AND. ALE%SOLVER%MULTIMAT%is_defined_mmale3 == 0)THEN
             DO N=NODFT,NODLT
               IMS(N)=0
               DO M=1,NMULT
@@ -808,24 +812,23 @@ C
           ENDIF
 
          !---------------------------------------------
-         ! ALL ELEMENTS EXPECT LAW/=11
+         ! ALL ELEMENTS (EXPECT LAW 11,151, 20+MMALE=3(cut-cell) )
          !---------------------------------------------
           DO NG=ITASK+1,NGROUP,NTHREAD
-C     ALE ON / OFF
              SENSORS%NGR_SENSOR(ITASK+1) = NG
              IF (TT  >  ZERO .AND. IPARG(76, NG)  ==  1) CYCLE ! --> OFF
              IF(IPARG(8,NG) /= 1) THEN
-C
-             CALL INITBUF(IPARG    ,NG      ,
+             CALL INITBUF(
+     1          IPARG   ,NG      ,
      2          MTN     ,NEL     ,NFT     ,IAD     ,ITY     ,
      3          NPT     ,JALE    ,ISMSTR  ,JEUL    ,JTUR    ,
      4          JTHE    ,JLAG    ,JMULT   ,JHBE    ,JIVF    ,
      5          NVAUX   ,JPOR    ,JCVT    ,JCLOSE  ,IPLA    ,
      6          IREP    ,IINT    ,IGTYP   ,ISRAT   ,ISROT   ,
      7          ICSEN   ,ISORTH  ,ISORTHG ,IFAILURE,JSMS    )
-C
-             IF (MTN  ==  151) CYCLE
-               IF(JLAG /= 1 .AND. ITY <= 2) THEN
+                IF (MTN  ==  151) CYCLE
+                IF (MTN  ==  20 .AND. ALE%SOLVER%MULTIMAT%IS_DEFINED_MMALE3 == 0) CYCLE
+                IF(JLAG /= 1 .AND. ITY <= 2) THEN
                 IF(IPARG(64,NG)==1) ILAW11=1                      !place later in starter>priv>spmd>ddsplit>c_vois() for law51
                 IF (MTN /= 0  .AND.  IPARG(64,NG)==0) THEN     !IPARG(64) : law11 & law51-outlet
                  NSG    =IPARG(10,NG)
@@ -839,7 +842,7 @@ C
                  LFT=1
                  LLT=NEL
                  NF1=NFT+1
-C
+
                  IF (ITY == 1 .AND. ISOLNOD == 4) THEN
                   CALL S4FORC3(TIMERS,  OUTPUT,
      1                  ELBUF_TAB,       NG,              PM,              GEO,
@@ -864,7 +867,7 @@ C
      K                  SBUFMAT,         SVIS,            IDTMINS,         IRESP, 
      *                  IDEL7NG,         MAXFUNC,         USERL_AVAIL,     GLOB_THERM, 
      V                  impl_s,          idyna,           S_SFEM_NODVAR)
-C
+
                  ELSEIF (ITY == 1 .AND. ISOLNOD /= 4) THEN
                   NULLIFY(pQMV); 
                   IF(TRIMAT>0)THEN
@@ -1003,9 +1006,10 @@ C     ALE ON / OFF
      5               NVAUX   ,JPOR    ,JCVT    ,JCLOSE  ,IPLA    ,   
      6               IREP    ,IINT    ,IGTYP   ,ISRAT   ,ISROT   ,   
      7               ICSEN   ,ISORTH  ,ISORTHG ,IFAILURE,JSMS    )   
-               IF (MTN  ==  151) CYCLE
-              IF (IPARG(8,NG) /= 1) THEN
-               IF (JLAG /= 1 .AND. ITY <= 2) THEN
+                IF (MTN  ==  151) CYCLE
+                IF (MTN  ==  20 .AND. ALE%SOLVER%MULTIMAT%IS_DEFINED_MMALE3 == 0) CYCLE
+                IF (IPARG(8,NG) /= 1) THEN
+                IF (JLAG /= 1 .AND. ITY <= 2) THEN
                 IF (MTN == 11 .OR. IPARG(64,NG) == 1) THEN
                  NSG    =IPARG(10,NG)
                  NVC    =IPARG(19,NG)

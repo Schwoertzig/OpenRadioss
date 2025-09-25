@@ -749,6 +749,7 @@ C-----------------------------------------------
               use damping_funct_ini_mod    , only : damping_funct_ini
               USE VIPER_MOD
               USE BCS_NRF_MOD , ONLY : BCS_NRF
+              USE ALEMAIN_CUTCELL_MOD , ONLY : ALEMAIN_CUTCELL
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4161,6 +4162,21 @@ C
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
+
+
+              ! 2D BIMATERIAL WITH CUT CELL INTERFACE TRACKING
+                DT2TT    = DT2T
+                NELTSTT  = NELTST
+                ITYPTSTT = ITYPTST
+                CALL ALEMAIN_CUTCELL(NIXQ,NUMELQ,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
+     .                               ITYPTSTT, NELTSTT, T1S, TT,
+     .                               ngroup,ngrnod,igrnod,nparg,iparg,dt2tt, elbuf_tab)
+                IF(DT2TT<DT2T)THEN
+                   DT2T   = DT2TT
+                   ITYPTST= ITYPTSTT
+                   NELTST = NELTSTT
+                ENDIF
+
 
               IF(ALE%SUB%IALESUB ==2 .AND. ALE%SUB%IFSUB==2)GOTO 22
  21           CONTINUE
