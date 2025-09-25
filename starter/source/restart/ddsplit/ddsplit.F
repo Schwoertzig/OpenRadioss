@@ -561,18 +561,18 @@ C-----------------------------------------------
       TYPE (SENSORS_) ,INTENT(IN) :: SENSORS
       TYPE (DRAPEG_)   :: DRAPEG
 C-----------------------------------------------
-      TYPE (SUBSET_) , DIMENSION(NSUBS)   :: SUBSET
-      TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
-      TYPE (GROUP_)  , DIMENSION(NGRBRIC) :: IGRBRIC
-      TYPE (GROUP_)  , DIMENSION(NGRQUAD) :: IGRQUAD
-      TYPE (GROUP_)  , DIMENSION(NGRSHEL) :: IGRSH4N
-      TYPE (GROUP_)  , DIMENSION(NGRSH3N) :: IGRSH3N
-      TYPE (GROUP_)  , DIMENSION(NGRTRUS) :: IGRTRUSS
-      TYPE (GROUP_)  , DIMENSION(NGRBEAM) :: IGRBEAM
-      TYPE (GROUP_)  , DIMENSION(NGRSPRI) :: IGRSPRING
-      TYPE (GROUP_)  , DIMENSION(NGRPART) :: IGRPART
-      TYPE (SURF_)   , DIMENSION(NSURF)   :: IGRSURF
-      TYPE (SURF_)   , DIMENSION(NSLIN)   :: IGRSLIN
+      TYPE (SUBSET_) , DIMENSION(NSUBS)         :: SUBSET
+      TYPE (GROUP_)  , DIMENSION(NGRNOD),TARGET :: IGRNOD
+      TYPE (GROUP_)  , DIMENSION(NGRBRIC)       :: IGRBRIC
+      TYPE (GROUP_)  , DIMENSION(NGRQUAD)       :: IGRQUAD
+      TYPE (GROUP_)  , DIMENSION(NGRSHEL)       :: IGRSH4N
+      TYPE (GROUP_)  , DIMENSION(NGRSH3N)       :: IGRSH3N
+      TYPE (GROUP_)  , DIMENSION(NGRTRUS)       :: IGRTRUSS
+      TYPE (GROUP_)  , DIMENSION(NGRBEAM)       :: IGRBEAM
+      TYPE (GROUP_)  , DIMENSION(NGRSPRI)       :: IGRSPRING
+      TYPE (GROUP_)  , DIMENSION(NGRPART)       :: IGRPART
+      TYPE (SURF_)   , DIMENSION(NSURF)         :: IGRSURF
+      TYPE (SURF_)   , DIMENSION(NSLIN)         :: IGRSLIN
       TYPE (PINCH) :: PINCH_DATA
 
       LOGICAL, INTENT(IN) :: FLAG_24_25
@@ -806,6 +806,8 @@ C
       TYPE(t_connectivity_ext1) :: ee_connect_l
       LOGICAL :: IS_EBCS_PARALLEL
       INTEGER :: ISHADOW !< shadowing option for detonators (Eikonal equation solver)
+      INTEGER, DIMENSION(:), POINTER :: INGR2USR
+      INTEGER,EXTERNAL :: NGR2USR
 C-----------------------------------------------
       TYPE(SEATBELT_REMOTE_NODES_STRUCT) ANCHOR_REMOTE_L,ANCHOR_REMOTE_SEND_L
 C-----------------------------------------------
@@ -3270,6 +3272,12 @@ C--------------------------------------
 C ALE LINKS
 C--------------------------------------
       CALL WRITE_ALE_GRID()
+C--------------------------------------
+C ALE SOLVER MULTIMAT
+C--------------------------------------
+      INGR2USR => IGRNOD(1:NGRNOD)%ID
+      ALE%SOLVER%MULTIMAT%LIST(1)%surf_id = NGR2USR(ALE%SOLVER%MULTIMAT%LIST(1)%surf_id,INGR2USR,NGRNOD)
+      CALL ALE%SOLVER%MULTIMAT%WRITE_TO_RESTART()
 C-----------------------------------------------
 C FXBODY
 C-----------------------------------------------

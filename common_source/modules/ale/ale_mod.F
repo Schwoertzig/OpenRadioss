@@ -149,6 +149,8 @@ C-----------------------------------------------
 !||====================================================================
       MODULE ALE_MOD
 
+        USE multimat_method_mod , only : multimat_method_struct
+
         IMPLICIT NONE
 #include      "my_real.inc"
 
@@ -208,6 +210,7 @@ C-----------------------------------------------
           INTEGER :: HLLC_LOWMACH
           INTEGER :: INCOMP
           INTEGER :: ISFINT
+          INTEGER :: IS_ALE_SOLVER_MULTIMAT
           INTEGER :: I_DT_NODA_ALE_ON
           INTEGER :: I_DT_NODA_ALE_ON_KEY
           INTEGER :: IDT_ALE
@@ -238,6 +241,10 @@ C-----------------------------------------------
           INTEGER :: NUM_NUVAR_EOS
         END TYPE ALE_REZON_
 
+        TYPE ALE_SOLVER_
+          TYPE(multimat_method_struct) :: MULTIMAT
+        END TYPE ALE_SOLVER_
+
         ! GENERAL DATA STRUCTURE USED IN SOURCE CODE
         TYPE ALE_
           TYPE(ALE_GRID_)   :: GRID
@@ -245,6 +252,7 @@ C-----------------------------------------------
           TYPE(ALE_GLOBAL_) :: GLOBAL
           TYPE(ALE_SUB_)    :: SUB
           TYPE(ALE_REZON_)  :: REZON
+          TYPE(ALE_SOLVER_) :: SOLVER
         contains
           procedure, pass :: init
         END TYPE ALE_

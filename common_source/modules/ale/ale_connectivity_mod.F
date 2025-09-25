@@ -259,7 +259,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
           TYPE(T_CONNECTIVITY_EXT1) :: EE_CONNECT
           LOGICAL :: HAS_NN_CONNECT = .FALSE.
           LOGICAL :: HAS_NE_CONNECT = .FALSE.
-          LOGICAL :: HAS_EE_CONNECT = .FALSE.
           LOGICAL :: HAS_IDGLOB = .FALSE.
           LOGICAL :: NALE_ALREADY_COMPUTED = .FALSE.
           INTEGER, DIMENSION(:), ALLOCATABLE :: NALE
@@ -716,7 +715,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C     B e g i n n i n g   o f   S u b r o u t i n e
 C-----------------------------------------------
-          IF (IALE + IEULER + IALELAG +ITHERM == 0 .AND. .NOT.ISHADOW) THEN
+          IF (IALE+IEULER+IALELAG+ITHERM == 0 .AND. .NOT.ISHADOW) THEN
             RETURN
           ENDIF
 !     List of nodes of interest for tetra

@@ -48,6 +48,7 @@ C-----------------------------------------------
       USE INIVOL_DEF_MOD
       USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -84,6 +85,7 @@ C     B o d y
 C-----------------------------------------------
       IS_AVAILABLE = .FALSE.
       NBMAT = 0
+      ALE%SOLVER%MULTIMAT%is_defined_mmale2 = 1
       CALL HM_GET_INTV('NIP',NBMAT,IS_AVAILABLE,LSUBMODEL)
       MULTI_FVM%NBMAT = MAX(MULTI_FVM%NBMAT, NBMAT)
 
