@@ -4155,6 +4155,12 @@ C===============================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
 
+
+                         ! 2D BIMAT CUT CELL HERE. EVERYTHING IS REACHABLE : IXQ, X, ALE_CONNECTIVITY, ...
+                         ! CALL BRIDGE
+
+
+
               IF(ALE%SUB%IALESUB ==2 .AND. ALE%SUB%IFSUB==2)GOTO 22
  21           CONTINUE
 C

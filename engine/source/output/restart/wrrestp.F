@@ -1479,6 +1479,10 @@ C ALE GRID
 C--------------------------------------
       CALL WRITE_ALE_GRID()
 C--------------------------------------
+C ALE SOLVER MULTIMAT
+C--------------------------------------
+      CALL ALE%SOLVER%MULTIMAT%WRITE_TO_RESTART()
+C--------------------------------------
 C FXBODY (moved from resol.F)
 C--------------------------------------
       IF (NFXBODY>0) CALL FXBWREST(ICH)

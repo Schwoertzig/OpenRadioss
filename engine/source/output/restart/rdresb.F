@@ -1401,6 +1401,10 @@ C ALE LINK
 C--------------------------------------
       CALL READ_ALE_GRID()
 C--------------------------------------
+C ALE SOLVER MULTIMAT
+C--------------------------------------
+      CALL ALE%SOLVER%MULTIMAT%READ_FROM_RESTART()
+C--------------------------------------
 C FXBODY (moved from radioss2.F)
 C--------------------------------------
       IF (NFXBODY>0) THEN

@@ -52,6 +52,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE MULTIMAT_PARAM_MOD , ONLY : M20_DISCRETE_FILL
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -123,7 +124,11 @@ C     Material proportions
       IF(IS_ENCRYPTED)THEN
         WRITE(IOUT,'(5X,A,//)')'CONFIDENTIAL DATA'
       ELSE
-        WRITE(IOUT,1300)(MAT(I),AMAT(I),CMAT(I),I=1,NMAT)
+        IF(ALE%SOLVER%MULTIMAT%LIST(1)%MMALE /= 3)THEN
+          WRITE(IOUT,1300)(MAT(I),AMAT(I),CMAT(I),I=1,NMAT)
+        ELSE
+          WRITE(IOUT,1400)(MAT(I),AMAT(I),I=1,NMAT)
+        ENDIF
       ENDIF
 C
       IF(CMAT(3)>=ONE)M20_DISCRETE_FILL=.TRUE.
@@ -152,9 +157,12 @@ C--------------------------------
      & 5X,40H  /MAT/LAW20 : 2D BI-MATERIAL LAW       ,/,
      & 5X,40H  -------------------------------       ,//)
  1300 FORMAT(
-     & 5X,40HREFERENCED MATERIAL NUMBER. . . . . . .=,I5/,
+     & 5X,40HREFERENCED MATERIAL NUMBER . . . . . .=,I5/,
      & 5X,40HFILLING RATIO . . . . . . . . . . . . .=,E12.4/,
      & 5X,40HINCOMING PHASIS CONTROL FLAG. . . . . .=,I5)
+ 1400 FORMAT(
+     & 5X,40HREFERENCED MATERIAL NUMBER. . . . . . .=,I5/,
+     & 5X,40HFILLING RATIO . . . . . . . . . . . . .=,E12.4/)
 C-----------
       RETURN
       END
