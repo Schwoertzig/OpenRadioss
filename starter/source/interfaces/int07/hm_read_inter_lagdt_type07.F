@@ -49,6 +49,7 @@ C-----------------------------------------------
       USE GROUPDEF_MOD
       USE SUBMODEL_MOD , ONLY : SUBMODEL_DATA, NSUBMOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -231,39 +232,29 @@ C
       IPRINT = 0
 C
        KEY1='IGSTI'
-       CALL DEFINTER(KEY1    ,IGSTI    ,IASSIGN   ,IPRINT   ,
-     .               NTYP     ,DEF_INTER)
+       CALL DEFINTER(KEY1    ,IGSTI    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
        KEY1='IGAP'
-       CALL DEFINTER(KEY1    ,IGAP    ,IASSIGN   ,IPRINT   ,
-     .               NTYP     ,DEF_INTER)
+       CALL DEFINTER(KEY1    ,IGAP    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
        KEY1='IBAG'
-       CALL DEFINTER(KEY1    ,IBAG    ,IASSIGN   ,IPRINT   ,
-     .                  NTYP     ,DEF_INTER)
+       CALL DEFINTER(KEY1    ,IBAG    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
        KEY1='IDEL'
-       CALL DEFINTER(KEY1    ,IDEL7N  ,IASSIGN   ,IPRINT   ,
-     .               NTYP     ,DEF_INTER)
+       CALL DEFINTER(KEY1    ,IDEL7N  ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
         KEY1='INACTI'
-        CALL DEFINTER(KEY1     ,INACTI,IASSIGN   ,IPRINT   ,
-     .                  NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,INACTI,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
         KEY1='MODFR'
-        CALL DEFINTER(KEY1     ,MODFR,IASSIGN   ,IPRINT   ,
-     .                  NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,MODFR,IASSIGN   ,IPRINT   , NTYP     ,DEF_INTER)
 C------------------------------------------------------------
 C  Card1
 C------------------------------------------------------------
 C
 C-------*CHECKS*-------------------
        IF(ISU2==0) THEN
-          CALL ANCMSG(MSGID=119,
-     .                MSGTYPE=MSGERROR,
-     .                ANMODE=ANINFO,
-     .                I1=NOINT,
-     .                C1=TITR)
+          CALL ANCMSG(MSGID=119,MSGTYPE=MSGERROR,ANMODE=ANINFO,I1=NOINT,C1=TITR)
        ENDIF
 !
        IF(ISU1==0)THEN
@@ -408,12 +399,8 @@ C
         FRIC_P(5) = C5
         FRIC_P(6) = C6
 
-        IF (IBAG/=0.AND.NVOLU==0.AND.IALELAG==0.AND.NSPHSOL==0) THEN
-             CALL ANCMSG(MSGID=614,
-     .                   MSGTYPE=MSGWARNING,
-     .                   ANMODE=ANINFO_BLIND_2,
-     .                   I1=NOINT,
-     .                   C1=TITR)
+        IF (IBAG /= 0 .AND. NVOLU == 0 .AND. ALE%GLOBAL%IALELAG == 0 .AND. NSPHSOL == 0) THEN
+             CALL ANCMSG(MSGID=614,MSGTYPE=MSGWARNING,ANMODE=ANINFO_BLIND_2,I1=NOINT,C1=TITR)
              IBAG=0
         ENDIF
         IPARI(32) = IBAG

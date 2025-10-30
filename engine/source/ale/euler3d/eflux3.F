@@ -34,6 +34,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE I22TRI_MOD
       USE ALE_CONNECTIVITY_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,7 +60,7 @@ C-----------------------------------------------
 !    (1:NIXS, NUMELS+1:) additional elems (also on adjacent domains but connected to the boundary of the current domain)
 !
       INTEGER IXS(NIXS,SIXS/NIXS)
-      my_real PM(NPROPM,NUMMAT), V(3,NUMNOD), FLUX(6,*), FLU1(*), VEUL(LVEUL,*), TAG22(*)
+      my_real PM(NPROPM,NUMMAT), V(3,NUMNOD), FLUX(6,*), FLU1(*), VEUL(ALE%GLOBAL%LVEUL,*), TAG22(*)
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

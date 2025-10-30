@@ -52,6 +52,7 @@ C-----------------------------------------------
       USE MULTI_FVM_MOD
       USE ALE_CONNECTIVITY_MOD
       use element_mod , only : nixs,nixq,nixc,nixt,nixtg
+      use ale_mod , only : ale
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -82,7 +83,7 @@ C-----------------------------------------------
       CALL ALE_CONNECTIVITY%ALE_COMPUTE_EE_CONNECTIVITY(
      .     PM     , IGEO,
      .     NPROPGI, NUMGEO, NPROPM, NUMMAT , NUMNOD , NUMELQ, NUMELTG, NUMELS, N2D, 
-     .     IALE   , IEULER, ITHERM, IALELAG, ISHADOW,
+     .     ALE%GLOBAL%IALE   , ALE%GLOBAL%IEULER, ITHERM, ALE%GLOBAL%IALELAG, ISHADOW,
      .     NIXQ   , NIXTG , NIXS  , 
      .     IXQ    , IXTG  , IXS   )
       

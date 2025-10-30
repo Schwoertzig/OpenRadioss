@@ -136,7 +136,7 @@ C-----------------------------------------------
       USE SENSOR_MOD
       USE ALE_CONNECTIVITY_MOD
       USE H3D_MOD
-      USE ALE_MOD
+      USE ALE_MOD , ONLY : ALE
       USE DT_MOD
       USE OUTPUT_MOD
       USE PRELOAD_AXIAL_MOD
@@ -299,7 +299,7 @@ C
        OFF_IGRTH = 0
        IBID = 0
 C
-        IF (IALELAG > 0) THEN   ! law 77
+        IF (ALE%GLOBAL%IALELAG > 0) THEN   ! law 77
          DO I=NODFT,NODLT
            MSF(I) = MSF(I) - MSNF(I)
            MSNF(I) = ZERO

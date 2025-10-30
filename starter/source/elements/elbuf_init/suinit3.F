@@ -62,6 +62,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use glob_therm_mod
       use element_mod , only : nixs
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -92,7 +93,7 @@ C-----------------------------------------------
      .    NPF(*),FAIL_INI(*),PERTURB(NPERTURB)
       my_real
      .   MS(*), X(3,*), GEO(NPROPG,*),PM(NPROPM,*),
-     .   VEUL(LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
+     .   VEUL(ALE%GLOBAL%LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
      .   PARTSAV(20,*), V(3,*), MSS(8,*),RNOISE(NPERTURB,*), 
      . SIGSP(NSIGI,*) , IN(*), VR(3,*),TEMP(*),
      . VOLNOD(*), BVOLNOD(*), VNS(8,*), BNS(8,*),BUFMAT(*), TF(*),

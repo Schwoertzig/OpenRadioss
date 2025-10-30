@@ -25,12 +25,12 @@ C...mis a 0 par defaut en spmd
       INTEGER MX_STOP
       PARAMETER(MX_STOP = 50000)      
       COMMON /SCR07/ IFREEF , MDESS, MREST , MSTOP , MANIM ,
-     .               IFOP   , ITOP , LLLINK, LLINAL, RAD_IPFAIL,
+     .               IFOP   , ITOP ,LLLINK,  RAD_IPFAIL,
      .               MCHECK , NTH  , NANIM , IRPREV, WMCHECK,NABFILE,
      .               ICTLSTOP,NERR_POSIT,
      .               NSDYNANIN
       INTEGER IFREEF, MDESS, MREST , MSTOP , MANIM ,
-     .        IFOP  , ITOP , LLLINK, LLINAL, RAD_IPFAIL,
+     .        IFOP  , ITOP , LLLINK, RAD_IPFAIL,
      .        MCHECK, NTH  , NANIM, IRPREV, WMCHECK,NABFILE,
      .        ICTLSTOP,NERR_POSIT,NSDYNANIN
 

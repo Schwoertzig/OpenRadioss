@@ -185,7 +185,7 @@ C-----------------------------------------------
       USE PLOAD_CYL_MOD
       USE STATE_MOD
       USE USER_WINDOWS_MOD
-      USE ALE_MOD
+      USE ALE_MOD , ONLY : ALE
       USE OUTPUT_MOD
       USE INTERFACES_MOD
       USE SENSOR_MOD
@@ -383,7 +383,7 @@ C
 
         CALL READ_I_C(ALE_CONNECTIVITY%NALE,ALE%GLOBAL%SNALE)
 
-        IF (IALE + IEULER + IALELAG + GLOB_THERM%ITHERM /= 0) THEN
+        IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + ALE%GLOBAL%IALELAG + GLOB_THERM%ITHERM /= 0) THEN
            CALL READ_I_C(ITMP, 1)
            ALLOCATE(ALE_CONNECTIVITY%ee_connect%iad_connect(ITMP))
            CALL READ_I_C(ALE_CONNECTIVITY%ee_connect%iad_connect, ITMP)
@@ -416,7 +416,7 @@ C
            ALLOCATE(NE_LERCVOIS(0))
            ALLOCATE(NE_LESDVOIS(0))
         ENDIF
-        IF (IALE > 0 .AND. ALE%GRID%NWALE_RST >= 0) THEN
+        IF (ALE%GLOBAL%IALE > 0 .AND. ALE%GRID%NWALE_RST >= 0) THEN
          IF(ALE_CONNECTIVITY%has_nn_connect)THEN
            ALLOCATE(ALE_CONNECTIVITY%NN_CONNECT%IAD_CONNECT(NUMNOD + 1))
            CALL READ_I_C(ALE_CONNECTIVITY%NN_CONNECT%IAD_CONNECT, NUMNOD + 1)
@@ -1086,7 +1086,7 @@ C--------------------------------------
 
         CALL READ_DB(W,SW)
 
-        CALL READ_DB(VEUL,SVEUL)
+        CALL READ_DB(VEUL,ALE%GLOBAL%SVEUL)
 
         IF (MULTI_FVM%IS_USED) THEN
            CALL READ_DB(MULTI_FVM%PRES_SHIFT, 1)
@@ -1101,13 +1101,13 @@ C--------------------------------------
            ENDIF
         ENDIF
 
-        CALL READ_DB(FILL,SFILL)
+        CALL READ_DB(ALE%MULTIMAT%VOF%FILL,ALE%MULTIMAT%VOF%SFILL)
 
-        CALL READ_DB(DFILL,SDFILL)
+        CALL READ_DB(ALE%MULTIMAT%VOF%DFILL,ALE%MULTIMAT%VOF%SDFILL)
 
-        CALL READ_DB(ALPH,SALPH)
+        CALL READ_DB(ALE%MULTIMAT%VOF%ALPH,ALE%MULTIMAT%VOF%SALPH)
 
-        CALL READ_DB(WB,SWB)
+        CALL READ_DB(WB,ALE%GRID%SWB)
 
         CALL READ_DB(DSAVE,SDSAVE)
 
@@ -1242,7 +1242,6 @@ C     used for checkpoint restarts.
           CALL READ_I_C(FR_RL,(NSPMD+2)*NRLINK)
           CALL READ_I_C(LLINK,LLLINK)
           CALL READ_I_C(IADRL,MIN(1,IPARIT)*LLLINK)
-          !CALL READ_I_C(LINALE,LLINAL)
           CALL READ_I_C(NEFLSW,NSFLSW)
           CALL READ_I_C(NNFLSW,8*NTFLSW)
           CALL READ_I_C(ICUT,44*NCUTS)
@@ -1394,8 +1393,7 @@ C------------------------
 C--------------------------------------
 C ALE LINK
 C--------------------------------------
-!      print *,"rdresb.F: READ_I_C, SLINALE=", SLINALE
-      IF (SLINALE>0)CALL READ_I_C(LINALE,SLINALE)
+      IF (ALE%LINK%SLINALE>0)CALL READ_I_C(ALE%LINK%LINALE,ALE%LINK%SLINALE)
 C--------------------------------------
 C ALE LINK
 C--------------------------------------
@@ -1632,7 +1630,7 @@ C--------------------------------------
       IF(ALEFVM_Param%IEnabled  > 0) CALL READ_DB(ALEFVM_Buffer%FCELL ,6*NUMELS)
 
       ! ALELAG
-      IF(IALELAG  > 0) CALL ALELAG_RREST()
+      IF(ALE%GLOBAL%IALELAG  > 0) CALL ALELAG_RREST()
 
       IF(SRTHBUF > 0) CALL RTHBUFREST(RTHBUF,SRTHBUF)
 

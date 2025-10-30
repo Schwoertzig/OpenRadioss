@@ -233,6 +233,7 @@ C-----------------------------------------------
       USE INIT_BCS_NRF_MOD , ONLY : INIT_BCS_NRF
       use init_inivol_mod , only : INIT_INIVOL
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1337,7 +1338,7 @@ C Case total strain: conf_ref <- XREF
      .                IPARG   ,ILOADP ,FACLOAD ,PARTSAV,V, MAT_PARAM)
               ENDIF
            ELSE  ! JMULT > 0
-              IF (MTN == 20) THEN
+              IF (MTN == 20 .OR. MTN == 251) THEN
                  CALL BINIT2(
      .                ELBUF_TAB(NG),MS        ,IXQ              ,PM           ,X    ,
      .                DETONATORS   ,VEUL      ,ALE_CONNECTIVITY ,IPARG(1,NG)  ,FILL ,
@@ -1813,7 +1814,7 @@ C------------------------------------------------------------------
      .       IPARG        ,ELBUF_TAB   ,IGEO         ,IDDLEVEL     ,TAGPRT_SMS )
       ENDIF
 C
-      IF(ILAG+IALE+IEULER == 0)THEN
+      IF(ILAG + ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER == 0)THEN
         DEALLOCATE(I8MI)
         RETURN
       ENDIF

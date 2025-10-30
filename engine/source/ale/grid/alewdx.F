@@ -358,9 +358,9 @@ C-----------------------------------
 C--------------------------------------
 C     /ALE/LINK/VEL
 C--------------------------------------
-         IF(NALELK /= 0) THEN
+         IF(ALE%LINK%NALELK /= 0) THEN
             IF(IMON > 0 .AND. ITASK == 0) CALL STARTIME(TIMERS,4)
-            CALL ALELIN(NALELK,LINALE,W,WEIGHT,IGRNOD)
+            CALL ALELIN(LINALE,W,WEIGHT,IGRNOD)
             IF(IMON > 0 .AND. ITASK == 0) CALL STOPTIME(TIMERS,4)
          ENDIF
 C-----------------------------------

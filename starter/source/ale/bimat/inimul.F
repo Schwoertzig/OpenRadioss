@@ -27,6 +27,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE INIMUL(PM,F,DF,M20_DISCRETE_FILL)
 C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+        USE ALE_MOD , ONLY : ALE
+C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
@@ -47,7 +51,7 @@ C-----------------------------------------------
       INTEGER M, N
 C-----------------------------------------------      
 
-      DO M=1,NMULT
+      DO M=1,ALE%MULTIMAT%NMULT
         DO N=1,NUMNOD
           IF(DF(N,M)==ZERO)CYCLE !N
           F(N,M)=TWO*F(N,M)/DF(N,M)-ONE

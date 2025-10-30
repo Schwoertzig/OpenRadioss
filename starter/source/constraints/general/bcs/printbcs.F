@@ -39,6 +39,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE GROUPDEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARFIELD, NCHARKEY
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -92,52 +93,47 @@ C
       DO I=1,NUMNOD
         IF(ISKEW(I)==-1)ISKEW(I)=0
       ENDDO
-C
-      IF(IALE==0)THEN
-        WRITE(IOUT,'(/A/A/A/)')TITRE(80),TITRE(81),
-     .   '       NODE  TRANS. ROTAT.         SKEW'
-C
+
+      IF(ALE%GLOBAL%IALE == 0)THEN
+        WRITE(IOUT,'(/A/A/A/)')TITRE(80),TITRE(81), '       NODE  TRANS. ROTAT.         SKEW'
       ELSE
         WRITE(IOUT,'(/A/A/A/)')TITRE(80),TITRE(81),TITRE(82)
       ENDIF
-      IF(IPRI>=2)THEN
-       DO 500 N=1,NUMNOD
-       IC=ICODE(N)
-       IF (IC==0) GO TO 500
-       IC1=IC/512
-       IC2=(IC-512*IC1)/64
-       IC3=(IC-512*IC1-64*IC2)/8
-       IC4=(IC-512*IC1-64*IC2-8*IC3)
-       J6(1)=IC1/4
-       J6(2)=(IC1-4*J6(1))/2
-       J6(3)=(IC1-4*J6(1)-2*J6(2))
-       J6(4)=IC2/4
-       J6(5)=(IC2-4*J6(4))/2
-       J6(6)=(IC2-4*J6(4)-2*J6(5))
-       IF(IALE==0)THEN
-C
-         WRITE(IOUT,'(1X,I10,2(1X,3I2),3X,I10)')ITAB(N),J6,
-     .           ISKN(4,ISKEW(N))
-       ELSE
-         JJ(1)=J6(1)
-         JJ(2)=J6(2)
-         JJ(3)=J6(3)
-         JJ(4)=J6(4)
-         JJ(5)=J6(5)
-         JJ(6)=J6(6)
-         JJ(7)=IC3/4
-         JJ(8)=(IC3-4*JJ(7))/2
-         JJ(9)=(IC3-4*JJ(7)-2*JJ(8))
-         JJ(10)=IC4/4
-         JJ(11)=(IC4-4*JJ(10))/2
-         JJ(12)=(IC4-4*JJ(10)-2*JJ(11))
-C
-       WRITE(IOUT,'(1X,I10,4(1X,3I2),3X,I10)')ITAB(N),JJ,
-     .           ISKN(4,ISKEW(N))
-       ENDIF
- 500   CONTINUE
+
+      IF(IPRI >= 2)THEN
+       DO N=1,NUMNOD
+         IC=ICODE(N)
+         IF (IC==0) CYCLE
+         IC1=IC/512
+         IC2=(IC-512*IC1)/64
+         IC3=(IC-512*IC1-64*IC2)/8
+         IC4=(IC-512*IC1-64*IC2-8*IC3)
+         J6(1)=IC1/4
+         J6(2)=(IC1-4*J6(1))/2
+         J6(3)=(IC1-4*J6(1)-2*J6(2))
+         J6(4)=IC2/4
+         J6(5)=(IC2-4*J6(4))/2
+         J6(6)=(IC2-4*J6(4)-2*J6(5))
+         IF(ALE%GLOBAL%IALE == 0)THEN
+           WRITE(IOUT,'(1X,I10,2(1X,3I2),3X,I10)')ITAB(N),J6,ISKN(4,ISKEW(N))
+         ELSE
+           JJ(1)=J6(1)
+           JJ(2)=J6(2)
+           JJ(3)=J6(3)
+           JJ(4)=J6(4)
+           JJ(5)=J6(5)
+           JJ(6)=J6(6)
+           JJ(7)=IC3/4
+           JJ(8)=(IC3-4*JJ(7))/2
+           JJ(9)=(IC3-4*JJ(7)-2*JJ(8))
+           JJ(10)=IC4/4
+           JJ(11)=(IC4-4*JJ(10))/2
+           JJ(12)=(IC4-4*JJ(10)-2*JJ(11))
+           WRITE(IOUT,'(1X,I10,4(1X,3I2),3X,I10)')ITAB(N),JJ,ISKN(4,ISKEW(N))
+         ENDIF
+       ENDDO !500
       ENDIF
-      IF (NBCSLAG>0) THEN
+      IF (NBCSLAG > 0) THEN
         WRITE(IOUT,1000)
         DO I = 1, NBCSLAG
           IGRS=IBCSLAG(1,I)
@@ -157,9 +153,7 @@ C
           IF (IPRI>=2) THEN
             DO J=1,IGRNOD(IGRS)%NENTITY
               NOSYS=IGRNOD(IGRS)%ENTITY(J)
-C
-              WRITE(IOUT,'(1X,I10,2(1X,3I2),3X,I10)')ITAB(NOSYS),J6,
-     .                ISKN(4,IS)
+              WRITE(IOUT,'(1X,I10,2(1X,3I2),3X,I10)')ITAB(NOSYS),J6,ISKN(4,IS)
             ENDDO
           ENDIF
           IC1=J6(1)*4 +J6(2)*2 +J6(3)

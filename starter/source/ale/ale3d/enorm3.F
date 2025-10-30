@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                  X1   ,X2   ,X3   ,X4   ,X5   ,X6   ,X7   ,X8   , 
      .                  Y1   ,Y2   ,Y3   ,Y4   ,Y5   ,Y6   ,Y7   ,Y8   , 
      .                  Z1   ,Z2   ,Z3   ,Z4   ,Z5   ,Z6   ,Z7   ,Z8   )
+       USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   Description
 C-----------------------------------------------
@@ -51,7 +52,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      my_real,INTENT(INOUT) :: VEUL(LVEUL,*)
+      my_real,INTENT(INOUT) :: VEUL(ALE%GLOBAL%LVEUL,*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------

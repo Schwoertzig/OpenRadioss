@@ -81,6 +81,7 @@ C-----------------------------------------------
       USE MAT_ELEM_MOD
       USE HM_READ_MAT_MOD
       use hm_read_therm_stress_mod
+      USE ALE_MOD , ONLY : ALE
 c-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -138,8 +139,8 @@ c----------
       ILAW    = 0
       BUFLEN  = 0
       ILAG    = 0
-      IALE    = 0
-      IEULER  = 0
+      ALE%GLOBAL%IALE    = 0
+      ALE%GLOBAL%IEULER  = 0
       ITURB   = 0
 
       PM(1:100,NUMMAT)=ZERO
@@ -164,7 +165,7 @@ c-------------------------------------------------------------------
      .     BUFLEN      ,IADBUF      ,IPM         ,PM          ,
      .     MULTI_FVM   ,UNITAB      ,LSUBMODEL   ,TABLE       ,
      .     SBUFMAT     ,NPROPMI     ,NPROPM      ,
-     .     IALELAG     ,NTABLE      ,NUMMAT      ,HM_NUMMAT   ,
+     .     ALE%GLOBAL%IALELAG     ,NTABLE      ,NUMMAT      ,HM_NUMMAT   ,
      .     LTITR       ,USERL_AVAIL,MAT_NUMBER   )
 
 c-------------------------------------------------------------------

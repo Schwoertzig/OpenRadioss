@@ -38,7 +38,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-      USE I22BUFBRIC_MOD 
+      USE I22BUFBRIC_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -56,7 +57,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: NEL
       INTEGER, INTENT(IN) :: JEUL
       my_real
-     .   MS(*), RHO(*),VOLU(*),VOLGP(LVEUL,*),
+     .   MS(*), RHO(*),VOLU(*),VOLGP(ALE%GLOBAL%LVEUL,*),
      .   MSNF(*),OFF(*),TAG22(*)
       INTEGER NC1(*),NC2(*),NC3(*),NC4(*),NC5(*),NC6(*),NC7(*),NC8(*)
       INTEGER NVC,IXS(NIXS,*)

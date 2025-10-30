@@ -55,6 +55,7 @@ C-----------------------------------------------
       USE I22TRI_MOD        
       USE ALE_CONNECTIVITY_MOD
       USE ALEFVM_MOD , only:ALEFVM_Param
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -89,7 +90,7 @@ C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
       IF(ITASK == 0) THEN
-       IF (NMULT /= 0) THEN
+       IF (ALE%MULTIMAT%NMULT /= 0) THEN
          DO NG=1,NGROUP
 C     ALE ON / OFF
             IF (IPARG(76, NG)  ==  1) CYCLE ! --> OFF

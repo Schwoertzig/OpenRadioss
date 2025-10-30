@@ -77,7 +77,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: NFT
       INTEGER, INTENT(IN) :: JHBE
       my_real
-     .   VOL(*), VEUL(LVEUL,*),
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),
      .   X1(*), X2(*), X3(*), X4(*), X5(*), X6(*), X7(*), X8(*),
      .   Y1(*), Y2(*), Y3(*), Y4(*), Y5(*), Y6(*), Y7(*), Y8(*),  
      .   Z1(*), Z2(*), Z3(*), Z4(*), Z5(*), Z6(*), Z7(*), Z8(*),  

@@ -89,7 +89,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, NF1, IMULT, IGTYP, IP,IBID
+      INTEGER I, NF1, IGTYP,IMAT,MID
       INTEGER MAT(MVSIZ), NGL(MVSIZ)
       my_real
      .     Y1(MVSIZ), Y2(MVSIZ), Y3(MVSIZ), Y4(MVSIZ),
@@ -107,110 +107,53 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------
       GBUF => ELBUF_STR%GBUF
       LBUF => ELBUF_STR%BUFLY(1)%LBUF(1,1,1)
-      IGTYP= IPARG(38)
+      IGTYP = IPARG(38)
       NF1  = NFT+1
-      IBID = 0
       TEMPEL(:) = ZERO
-c
-      CALL QCOOR2(X,IXQ(1,NF1),NGL,MAT, 
-     .     PID, IX1, IX2, IX3, IX4, 
-     .     Y1, Y2, Y3, Y4, 
-     .     Z1, Z2, Z3, Z4,
-     .     SY, SZ, TY, TZ)
-      CALL QVOLI2(GBUF%VOL,IXQ(1,NF1),
-     .     NGL, AIRE, 
-     .     Y1, Y2, Y3, Y4, 
-     .     Z1, Z2, Z3, Z4)
+      CALL QCOOR2(X,IXQ(1,NF1),NGL,MAT, PID, IX1, IX2, IX3, IX4, Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4, SY, SZ, TY, TZ)
+      CALL QVOLI2(GBUF%VOL,IXQ(1,NF1), NGL, AIRE, Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4)
       IF (JEUL/=0) THEN
-        CALL QDLEN2(IPARG(63), 
-     .        AIRE, DELTAX, 
-     .        Y1, Y2, Y3, Y4, 
-     .        Z1, Z2, Z3, Z4)
+        CALL QDLEN2(IPARG(63), AIRE, DELTAX, Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4)
         CALL EDLEN2(VEUL(1,NF1), AIRE, DELTAX)
       ENDIF
 
-C---------------------------------------
-C     MULTIMATRIAUX 1
-C---------------------------------------
-      IMULT=JMULT
-      JMULT=1
-      LBUF => ELBUF_STR%BUFLY(JMULT)%LBUF(1,1,1)
-      MBUF => ELBUF_STR%BUFLY(JMULT)%MAT(1,1,1)
-      MTN  =  IPARG(25)
-
-      DO I=LFT,LLT
-        MAT(I)=MAT_PARAM(IABS(IXQ(1,NFT+I)))%MULTIMAT%MID(JMULT)
-      ENDDO
-
-      !------------------------------------------
-      ! multimaterials filling percentage
-      !------------------------------------------
-      CALL BIMAT2(GBUF%VOL, LBUF%FRAC, FILL(1,1), LBUF%VOL, LBUF%OFF, IXQ(1,NF1))
-      !----------------------------------------
-      !     INITIALISATION GENERALE
-      !----------------------------------------
-      IP=1
-      CALL MATINI(PM     ,IXQ    ,NIXQ       ,X      ,
-     .            GEO    ,ALE_CONNECTIVITY  ,DETONATORS ,IPARG  ,
-     .            SIGI   ,NEL    ,SKEW       ,IGEO   ,
-     .            IPART  ,IPARTQ ,
-     .            MAT    ,IPM    ,NSIGS  ,NUMQUAD   ,PTQUAD ,
-     .            IP     ,NGL    ,NPF    ,TF        ,BUFMAT ,
-     .            GBUF   ,LBUF   ,MBUF   ,ELBUF_STR ,ILOADP ,
-     .            FACLOAD, DELTAX,TEMPEL ,MAT_PARAM )
-      !----------------------------------------
-      ! initialization of thermal and turbulence
-      !----------------------------------------
-      IF(JTHE/=0) CALL ATHERI(MAT,PM,LBUF%TEMP)
-      IF(JTUR/=0) CALL ATURI2(IPARGG ,LBUF%RHO,PM,IXQ,X,
-     .                          LBUF%RK,LBUF%RE, AIRE)
-      !------------------------------------------
-      ! initialization of the mass matrix
-      !------------------------------------------
-      IF(JLAG+JALE+JEUL/=0)
-     .  CALL QMASI2(PM,MAT,MS,LBUF%VOL,MSQ(NF1),WMA,IPARTQ(NFT+1),PARTSAV, 
-     .     IX1, IX2, IX3, IX4, X ,V)
-      !---------------------------------------
-      !     MULTIMATRIAUX 2
-      !---------------------------------------
-      IF(IMULT==1)RETURN
-      JMULT=2
-      LBUF => ELBUF_STR%BUFLY(JMULT)%LBUF(1,1,1)
-      MBUF => ELBUF_STR%BUFLY(JMULT)%MAT(1,1,1)
-      MTN  =  IPARG(26)
-
-      NF1=NFT+1
-      DO I=LFT,LLT
-        MAT(I)=MAT_PARAM(IABS(IXQ(1,NFT+I)))%MULTIMAT%MID(JMULT)
-      ENDDO
-      !------------------------------------------
-      ! multimaterials filling percentage
-      !------------------------------------------
-      CALL BIMAT2( GBUF%VOL, LBUF%FRAC, FILL(1,2), LBUF%VOL, LBUF%OFF, IXQ(1,NF1) )
-      !----------------------------------------
-      !     INITIALISATION GENERALE
-      !----------------------------------------
-      IP=1
-      CALL MATINI(PM     , IXQ               ,NIXQ      ,X         ,
-     .            GEO    , ALE_CONNECTIVITY  ,DETONATORS,IPARG     ,
-     .            SIGI   , NEL               ,SKEW      ,IGEO      ,
-     .            IPART  , IPARTQ            ,
-     .            MAT    , IPM               ,NSIGS     ,NUMQUAD   ,PTQUAD ,
-     .            IP     , NGL               ,NPF       ,TF        ,BUFMAT ,
-     .            GBUF   , LBUF              ,MBUF      ,ELBUF_STR ,ILOADP ,
-     .            FACLOAD, DELTAX,TEMPEL     ,MAT_PARAM )
-      !----------------------------------------
-      ! initialization of thermal and turbulence
-      !----------------------------------------
-      IF (JTHE/=0) CALL ATHERI(MAT,PM, LBUF%TEMP)
-      IF (JTUR/=0) CALL ATURI2(IPARGG ,LBUF%RHO,PM,IXQ,X,
-     .                          LBUF%RK,LBUF%RE, AIRE)
-      !------------------------------------------
-      ! initialization of the mass matrix
-      !------------------------------------------
-      IF(JLAG+JALE+JEUL/=0)
-     .  CALL QMASI2B(PM,MAT,MS,LBUF%VOL,MSQ(NF1),WMA,IPARTQ(NFT+1),PARTSAV,
-     .     IX1, IX2, IX3, IX4 ,X ,V)
+!---------------------------------------
+!     MULTIMATRIAUX loop
+!---------------------------------------
+      DO IMAT = 1,JMULT
+        JMULT = IMAT
+        LBUF => ELBUF_STR%BUFLY(IMAT)%LBUF(1,1,1)
+        MBUF => ELBUF_STR%BUFLY(IMAT)%MAT(1,1,1)
+        MID = IPARG(18)
+        MTN = IPM(20+IMAT,MID)
+        DO I=LFT,LLT
+          MAT(I)=MAT_PARAM(MID)%MULTIMAT%MID(IMAT)
+        ENDDO
+        !------------------------------------------
+        ! multimaterials filling percentage
+        !------------------------------------------
+        CALL BIMAT2(GBUF%VOL, LBUF%FRAC, FILL(1,1), LBUF%VOL, LBUF%OFF, IXQ(1,NF1))
+        !----------------------------------------
+        !     INITIALISATION GENERALE
+        !----------------------------------------
+        CALL MATINI(PM     ,IXQ    ,NIXQ       ,X      ,
+     .              GEO    ,ALE_CONNECTIVITY  ,DETONATORS ,IPARG  ,
+     .              SIGI   ,NEL    ,SKEW       ,IGEO   ,
+     .              IPART  ,IPARTQ ,
+     .              MAT    ,IPM    ,NSIGS  ,NUMQUAD   ,PTQUAD ,
+     .              IMAT   ,NGL    ,NPF    ,TF        ,BUFMAT ,
+     .              GBUF   ,LBUF   ,MBUF   ,ELBUF_STR ,ILOADP ,
+     .              FACLOAD, DELTAX,TEMPEL ,MAT_PARAM )
+          !----------------------------------------
+          ! initialization of thermal and turbulence
+          !----------------------------------------
+          IF(JTHE/=0) CALL ATHERI(MAT,PM,LBUF%TEMP)
+          IF(JTUR/=0) CALL ATURI2(IPARGG ,LBUF%RHO,PM,IXQ,X,LBUF%RK,LBUF%RE, AIRE)
+          !------------------------------------------
+          ! initialization of the mass matrix
+          !------------------------------------------
+          IF(JLAG+JALE+JEUL /= 0)CALL QMASI2(PM,MAT,MS,LBUF%VOL,MSQ(NF1),WMA,IPARTQ(NFT+1),PARTSAV, IX1, IX2, IX3, IX4, X ,V)
+      ENDDO ! next IMAT
 C-----------
       RETURN
       END

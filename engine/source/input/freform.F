@@ -1843,7 +1843,7 @@ C--------------------------
 C     /VEL
 C-------------------------- 
       NRLINK=0
-      NALELK=0
+      ALE%LINK%NALELK=0
       IKEY=KVEL
       K=0
       DO WHILE (IKAD(IKEY) + K /= IKAD(IKEY + 1))
@@ -1854,36 +1854,36 @@ C--------------------------
         NRLINK=NRLINK+1
        ELSEIF(KEY2=='ALE  ')THEN
         ! /VEL/ALE (OBSOLETE, replaced with /ALE/LINK)
-        NALELK=NALELK+1
+        ALE%LINK%NALELK = ALE%LINK%NALELK + 1
        ELSE
         CALL ERRMSG(KEY2)
        ENDIF
        K=K+NBC+1
       ENDDO
-      WRITE(IIN,'(2I8)')NRLINK,NALELK
+      WRITE(IIN,'(2I8)')NRLINK,ALE%LINK%NALELK
       
 C-----------------------
 C     /ALE/LINK
 C-----------------------
-      IKEY          = KALE
-      NALELINK      = 0
+      IKEY = KALE
+      ALE%LINK%NALELINK = 0
       K=0
       DO WHILE (IKAD(IKEY) + K /= IKAD(IKEY + 1))
         READ(IUSC1,REC=IKAD(IKEY)+K,FMT='(7X,A,1X,A,31X,I10)',ERR=9990)KEY2,KEY3,NBC
          IF(KEY2(1:5)=='LINK ')THEN
             IF(KEY3(1:5)=='VEL  ')THEN
-               NALELINK=NALELINK+1
+               ALE%LINK%NALELINK = ALE%LINK%NALELINK + 1
             ELSEIF(KEY3(1:5)=='OFF  ')THEN
-               NALELINK=NALELINK+1
+               ALE%LINK%NALELINK = ALE%LINK%NALELINK + 1
             ELSEIF(KEY3(1:5)=='ON   ')THEN
-               NALELINK=NALELINK+1
+               ALE%LINK%NALELINK = ALE%LINK%NALELINK + 1
             ELSE
                CALL ERRMSG('/ALE/LINK')
             ENDIF
          ENDIF
          K=K+NBC+1
       ENDDO
-      WRITE(IIN,'(I8)')NALELINK
+      WRITE(IIN,'(I8)')ALE%LINK%NALELINK
 
 C-----------------------
 C     /ALE/SUPG
@@ -2459,9 +2459,9 @@ C--------------------
 C--------------------
 C     ALE LINK
 C--------------------
-      LLINAL = 0
-      IF(NALELK/=0)  CALL FRALNK (IKAD(0),KEY0,KVEL,NALELK)       !format v5.1
-      IF(NALELINK/=0)CALL FRALNK2(IKAD(0),KEY0,KALE,NALELINK) !format v12
+      ALE%LINK%LLINAL = 0
+      IF(ALE%LINK%NALELK/=0)  CALL FRALNK (IKAD(0),KEY0,KVEL,ALE%LINK%NALELK)       !format v5.1
+      IF(ALE%LINK%NALELINK/=0)CALL FRALNK2(IKAD(0),KEY0,KALE,ALE%LINK%NALELINK) !format v12
       !LLINAL is now LINALE() dimension for engine ALE links definitions.
       
 C--------------------

@@ -130,7 +130,7 @@ C-----------------------------------------------
         BETA = ONE
       ENDIF
       
-      IF(IALE == 1)THEN 
+      IF(ALE%GLOBAL%IALE == 1)THEN
 
         DO II=1,NOD
           NUM=LISTE(II)
@@ -138,7 +138,7 @@ C-----------------------------------------------
           V0(2,II)=V(2,NUM)-W(2,NUM)
           V0(3,II)=V(3,NUM)-W(3,NUM)
         ENDDO 
-       ELSEIF(IEULER == 1)THEN
+       ELSEIF(ALE%GLOBAL%IEULER == 1)THEN
          DO II=1,NOD
            NUM=LISTE(II)
            V0(1,II)=V(1,NUM)

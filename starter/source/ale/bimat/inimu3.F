@@ -26,9 +26,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    lectur        ../starter/source/starter/lectur.F
 !||--- uses       -----------------------------------------------------
 !||====================================================================
-      SUBROUTINE INIMU3(PM,IX,F,DF)
+      SUBROUTINE INIMU3(PM,IX,F,DF,NMULT)
       use element_mod , only : nixs
-C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -36,13 +35,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
-#include      "com01_c.inc"
 #include      "com04_c.inc"
 #include      "param_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER :: IX(NIXS,*)
+      INTEGER,INTENT(IN) :: NMULT
       my_real :: PM(NPROPM,*), F(NUMNOD,*), DF(NUMNOD,*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

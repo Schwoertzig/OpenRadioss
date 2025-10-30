@@ -45,6 +45,7 @@ C   M o d u l e s
 C-----------------------------------------------
       use glob_therm_mod
       use my_alloc_mod
+      use ale_mod , only : ale
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -117,7 +118,7 @@ C
        ENDDO
       ENDIF
 C
-      IF (N2D == 0 .AND. IALE+IEULER + GLOB_THERM%ITHERM > 0) THEN
+      IF (N2D == 0 .AND. ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM > 0) THEN
         DO I = 1, LSKY
           FSKYM(I)=ZERO
         ENDDO

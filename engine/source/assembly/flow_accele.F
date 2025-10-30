@@ -26,7 +26,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol         ../engine/source/engine/resol.F
 !||====================================================================
       SUBROUTINE FLOW_ACCELE(NALE,MS     , A    ,V      ,NODFT ,NODLT  )
-C----6---------------------------------------------------------------7---------8
+        USE ALE_MOD , ONLY : ALE
+C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
@@ -34,20 +35,17 @@ C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
 #include      "com01_c.inc"
-C-----------------------------------------------------------------
+C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER NODFT, NODLT,NALE(*)
-C     REAL
-      my_real
-     .   A(3,*) ,V(3,*) ,MS(*)
+      my_real :: A(3,*) ,V(3,*) ,MS(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER  J,K,N
-      my_real
-     .         RTMP
-C
+      my_real :: RTMP
+
 #include      "vectorize.inc"
       DO N=NODFT,NODLT
         IF(NALE(N) == 3) THEN
@@ -60,7 +58,7 @@ C
            A(1,N) = ZERO
            A(2,N) = ZERO
            A(3,N) = ZERO
-           IF(NMULT/=0) THEN
+           IF(ALE%MULTIMAT%NMULT/=0) THEN
              V(1,N) = ZERO
              V(2,N) = ZERO
              V(3,N) = ZERO

@@ -77,6 +77,7 @@ C-----------------------------------------------
       USE PYTHON_FUNCT_MOD
       USE OUTPUT_MOD , only : OUTPUT_
       USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
+      USE ALE_MOD , ONLY : ALE
       USE EBCS0_GRADP0_MOD      , ONLY : EBCS0_GRADP0
       USE EBCS123_PRES_MOD      , ONLY : EBCS123_PRES
       USE EBCS4_VEL_MOD         , ONLY : EBCS4_VEL
@@ -213,7 +214,7 @@ C-----------------------------------------------
      .           EBCS%LA, FV,TWF,OUTPUT,DT1,TIME,
      .           NGROUP, ELBUF_TAB, NPARG, IPARG, N2D,
      .           TWF%SURF_ID,NSURF,FSAVSURF,NUMMAT,MATPARAM,SNPC,NPC,STF,TF,
-     .           NPROPM, PM, BUFMAT, NCYCLE, IALE)
+     .           NPROPM, PM, BUFMAT, NCYCLE, ALE%GLOBAL%IALE)
             end select
          ELSE IF (TYP == 10) THEN
             select type (twf => EBCS)
@@ -245,7 +246,7 @@ C-----------------------------------------------
      .                    twf%la,ms,stifn,twf,iparg,elbuf_tab,ixq,ixs,ixtg,
      .                    fsavsurf,iparit,dt1,
      .                    numels, numelq, numeltg,numnod, nparg, ngroup, nixs, nixq, nixtg, nsurf, n2d,
-     .                     ncycle, iale,ebcs_parithon(i)%elem_adress,lsky,fsky)
+     .                     ncycle, ale%global%iale,ebcs_parithon(i)%elem_adress,lsky,fsky)
             end select
          ELSE IF (TYP == 100) THEN
             SELECT TYPE(EBCS)

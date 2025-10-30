@@ -2081,6 +2081,7 @@ C
               DO J=1,NUMMAT
                 IF(IS == IPM(1,J))  THEN
                   MAT_PARAM(I)%MULTIMAT%MID(K)=J
+                  PM(20+K, I) = J
                   RHO_MAX=MAX(RHO_MAX,PM(1,J))
                   GOTO 200
                 ENDIF
@@ -2105,7 +2106,7 @@ C
           ENDDO !next K
           PM(91,I)=RHO_MAX
 
-        ELSE IF (ILAW == 151) THEN
+        ELSE IF (ILAW == 151 .OR. ILAW == 251) THEN
            ID=IPM(1,I)
            CALL FRETITL2(TITR,IPM(NPROPMI-LTITR+1,I),LTITR)
            NF = MAT_PARAM(I)%MULTIMAT%NB ! Number of submaterials

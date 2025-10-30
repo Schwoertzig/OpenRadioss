@@ -74,6 +74,7 @@ C-----------------------------------------------
         USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
         USE READER_OLD_MOD , ONLY : KINTER, NSLASH
         use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -344,18 +345,16 @@ C---------------Tag of nodes of pretaged elements ( for TYPE2)-------C
               COMPT = COMPT+1
             END DO ! DO WHILE
 C---------------Tag of nodes ALE/lagrange ---------------------------C
-            IF (IALE>0) THEN
+            IF (ALE%GLOBAL%IALE > 0) THEN
               CALL ALE_CHECK_LAG(NALE_R2R,IXS,IXQ,IXC,IXT,IXTG,PM,ITAB,NALE_R2R,0,IGEO_)
             ENDIF
 C---------------Check of FLG_FSI ------------------------------------C
-            IF (IALE+IEULER>0) THEN
+            IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER > 0) THEN
               CALL CHK_FLG_FSI(IXS,PM,IPARTS,ALE_EULER,IGEO_)
             ENDIF
 C---------------Error message infinite loop -------------------------C
-            IF (COMPT>=80) THEN
-              CALL ANCMSG(MSGID=972,
-     .                    MSGTYPE=MSGERROR,
-     .                    ANMODE=ANINFO)
+            IF (COMPT >= 80) THEN
+              CALL ANCMSG(MSGID=972,MSGTYPE=MSGERROR,ANMODE=ANINFO)
             END IF
 C--------------------------------------------------------------------C
 C////////////////////////////////////////////////////////////////////C
@@ -390,30 +389,17 @@ C---------------Counting of remaining nodes--------------------------C
             ENDDO
 C---------------Warnings for size of interfaces ---------------------C
             IF (INNOD==0) THEN
-              CALL ANCMSG(MSGID=839,
-     .                  MSGTYPE=MSGERROR,
-     .                  ANMODE=ANINFO,
-     .                     C1="CONNECTIONS FOUND",
-     .                     C2="FOR DOMAIN",
-     .                     I1=ISUBDOM(1,P))
+              CALL ANCMSG(MSGID=839,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1="CONNECTIONS FOUND",C2="FOR DOMAIN",I1=ISUBDOM(1,P))
             ELSE
 C--         For SPH big multidomains interfaces are alloxed -> no error message only a warning
               IF ((FLG_SPH==1).OR.(FLG_FSI==1)) R2R_FLAG_ERR_OFF = 1
 C
               FAC = (100*INNOD) / NUMNOD
               IF (((FAC>20).AND.(FAC<50)).OR.((R2R_FLAG_ERR_OFF==1).AND.(FAC>50))) THEN
-                CALL ANCMSG(MSGID=859,
-     .                      MSGTYPE=MSGWARNING,
-     .                      ANMODE=ANINFO_BLIND_1,
-     .                      I1=INNOD,
-     .                      I2=FAC)
+                CALL ANCMSG(MSGID=859,MSGTYPE=MSGWARNING,ANMODE=ANINFO_BLIND_1,I1=INNOD,I2=FAC)
               ELSEIF (FAC>50) THEN
                 FLG_R2R_ERR = 1
-                CALL ANCMSG(MSGID=1075,
-     .                      MSGTYPE=MSGERROR,
-     .                      ANMODE=ANINFO_BLIND_1,
-     .                      I1=INNOD,
-     .                      I2=FAC)
+                CALL ANCMSG(MSGID=1075,MSGTYPE=MSGERROR,ANMODE=ANINFO_BLIND_1,I1=INNOD,I2=FAC)
               ENDIF
             ENDIF
 C---------------Warnings for splitted contact interfaces ------------C
@@ -437,8 +423,7 @@ C---------------Tag of nodes with nlocal dof-------------------------C
               NN = 5
               CALL MY_ALLOC(TAG_NLOCAL,NUMNOD)
               TAG_NLOCAL(1:NUMNOD) = 0
-              CALL TAGNOD_R2R_NL(IXC,IXTG,IXS,IXS10,IXS20,
-     .                           IXS16,TAG_NLOCAL,MAT_PARAM)
+              CALL TAGNOD_R2R_NL(IXC,IXTG,IXS,IXS10,IXS20,IXS16,TAG_NLOCAL,MAT_PARAM)
             ENDIF
 C
             DO K=1,NN
@@ -497,12 +482,7 @@ C---------------Incrementation of Variables for future GRNOD---------C
             IF (INNOD==0) THEN
               IF (IPID/=0) THEN
               ENDIF
-              CALL ANCMSG(MSGID=839,
-     .                    MSGTYPE=MSGERROR,
-     .                    ANMODE=ANINFO,
-     .                    C1="CONNECTIONS FOUND",
-     .                    C2="FOR DOMAIN",
-     .                    I1=ISUBDOM(1,P))
+              CALL ANCMSG(MSGID=839,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1="CONNECTIONS FOUND",C2="FOR DOMAIN",I1=ISUBDOM(1,P))
             ENDIF
 c
             IF (NLOC_DMG%IMOD > 0) THEN

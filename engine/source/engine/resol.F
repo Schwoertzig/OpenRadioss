@@ -704,7 +704,7 @@ C-----------------------------------------------
               USE LOADS_MOD
               USE STATE_MOD
               USE USER_WINDOWS_MOD
-              USE ALE_MOD
+              USE ALE_MOD , ONLY : ALE
               USE OUTPUT_MOD
               USE INTERFACES_MOD
               USE DEBUG_CHKSM_MOD ,  ONLY : SPMD_FLUSH_ACCEL
@@ -1744,7 +1744,7 @@ C
 C ----------------------------------------------
 C    SIMPLIFIED ALE FORMULATION
 C ----------------------------------------------
-              IF( IALELAG > 0) THEN
+              IF( ALE%GLOBAL%IALELAG > 0) THEN
                 IF(IPARIT == 0) THEN
                   ALLOCATE (AFLOW(3*NUMNOD*NTHREAD))
                   ALLOCATE(FFSKY(0))
@@ -3368,12 +3368,12 @@ C-----------------------------
 C    Not pure thermal case
 C-----------------------------
 
-              IF(ILAG+IALE+IEULER/=0)THEN
+              IF(ILAG + ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0)THEN
 C--- // N/3 -------------------------------------
 C         CANCEL Mass matrix in 2D
 C------------------------------------------------
                 ISYNC = 0
-                IF(N2D/=0) THEN
+                IF(N2D /= 0) THEN
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -3446,7 +3446,7 @@ C--------------------------------------------------------
 C-----------------------------------------------
 C      pressure gauges, position calculation
 C-----------------------------------------------
-              IF (IALE+IEULER+GLOB_THERM%ITHERM+NUMSPH/=0) THEN
+              IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + NUMSPH /= 0) THEN
                 IF(NBGAUGE/=0)CALL AGAUGE0(LGAUGE,GAUGE,NODES%X,ELEMENT%SHELL%IXC,IGAUP,NGAUP)
               END IF
 C----------------------------------------
@@ -3485,7 +3485,7 @@ C----------------------------------
 C       FUNCTIONS
 C----------------------------------
 
-              IF(NFUNCT /= 0.AND.IALE+IEULER+GLOB_THERM%ITHERM+NEBCS>0) THEN
+              IF(NFUNCT /= 0 .AND. ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + NEBCS > 0) THEN
                 CALL TIMFUN(PYTHON,FV, NPC, TF)
                 IF(EBCS_TAB%nebcs_loc/=0) THEN
                   !!! Need to "extrapolate values" whenever current time
@@ -4060,7 +4060,7 @@ C--------------------------------------------------------
 C       ALE flux + forces
 C--------------------------------------------------------
               NEED_COMM_INTER18 = .FALSE.
-              IF (IALE+IEULER+GLOB_THERM%ITHERM/=0.AND.GLOBAL_ACTIVE_ALE_ELEMENT) THEN
+              IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM /= 0 .AND. GLOBAL_ACTIVE_ALE_ELEMENT) THEN
                 CALL STARTIME(TIMERS,MACRO_TIMER_ALEMAIN)
 C-----------------------------
 C        SPMD : MS=0 boundary nodes if  weight/=1  (for amas03)
@@ -4202,10 +4202,8 @@ C Init var parallel SMP
 C-------------------------------------------------------
 C     RESET ICONTACT(1:NUMNOD)
 C-------------------------------------------------------
-              IF(KCONTACT/=0)THEN
-                IF(IALELAG >0)
-     .          IFOAM_CONT(NODFTSK:NODLTSK)= ICONTACT(NODFTSK:NODLTSK)
-C
+              IF(KCONTACT /= 0)THEN
+                IF(ALE%GLOBAL%IALELAG > 0) IFOAM_CONT(NODFTSK:NODLTSK)= ICONTACT(NODFTSK:NODLTSK)
                 ICONTACT(NODFTSK:NODLTSK)=0
               END IF
 
@@ -5132,7 +5130,7 @@ C Parith/OFF assembly necessary before boundary communication if multi-thread
      2            NPART    ,PARTFTSK,PARTLTSK ,NODES%A      ,NODES%AR    ,
      3            PARTSAV  ,NODES%STIFN ,NODES%STIFR  ,NODES%VISCN  , FTHE ,
      4            GLOB_THERM%ITHERM_FE,GLOB_THERM%NODADT_THERM,STCND ,GREFTSK,GRELTSK ,
-     5            GRESAV   ,NGPE  ,NTHPART ,IALELAG, AFLOW,
+     5            GRESAV   ,NGPE  ,NTHPART ,ALE%GLOBAL%IALELAG, AFLOW,
      6            DMSPH    ,CONDN ,
      7            PINCH_DATA%APINCH,PINCH_DATA%STIFPINCH)
 
@@ -5247,7 +5245,7 @@ C
                     IF (GLOB_THERM%NODADT_THERM == 1 ) LENGTH = LENGTH + 1
                   ENDIF
 C
-                  IF(IALELAG > 0 )THEN
+                  IF(ALE%GLOBAL%IALELAG > 0 )THEN
                     LENGTH = LENGTH + 4
                   ENDIF
 C
@@ -5300,7 +5298,7 @@ C
                   ENDIF
                   IF(INTPLYXFEM >  0) SIZI = SIZI + 5
 C
-                  IF(IALELAG > 0 )THEN
+                  IF(ALE%GLOBAL%IALELAG > 0 )THEN
                     LENGTH = LENGTH + 4
                   ENDIF
 C
@@ -5558,7 +5556,7 @@ C
 C
 C Communication IFOAM
 C
-              IF(IALELAG > 0.AND.NSPMD>1) THEN
+              IF(ALE%GLOBAL%IALELAG > 0.AND.NSPMD>1) THEN
                 LENGTH = 1
                 LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
                 CALL SPMD_EXCH_ICONT(IFOAM,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENGTH,LENR)
@@ -5973,8 +5971,7 @@ C-----------------------------------------------------
 C-----------------------------------------------------
 C         INTERFACES 18 KINE
 C-----------------------------------------------------
-              IF(NINTER /= 0.and.IALE+IEULER /= 0.and.
-     .           INT18KINE == -1)THEN
+              IF(NINTER /= 0 .and. ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0 .and. INT18KINE == -1)THEN
 
 C========================================================================================
 C                    PARALLEL SECTION (SMP)
@@ -6100,7 +6097,7 @@ C----------------------------------------------------------
 C------------------------
 C     test of mass and inertia on main nodes of interf. type 2
 C------------------------
-              IF(TT==ZERO.AND.IALE+IEULER+GLOB_THERM%ITHERM==0)THEN
+              IF(TT==ZERO. AND. ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM == 0)THEN
 
                 NEGMAS=0
 C========================================================================================
@@ -7077,15 +7074,14 @@ C===============================================================================
                 NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
                 NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
 
-                IF (ILAG+IALE+IEULER/=0) THEN
+                IF (ILAG + ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER/=0) THEN
 C-----------------------
 C         MULTIMATERIAL
 C-----------------------
-                  IF (NMULT>0) THEN
-                    CALL BMULTN(FILL,DFILL,IMS,NODFTSK,NODLTSK)
+                  IF (ALE%MULTIMAT%NMULT > 0) THEN
+                    CALL BMULTN(ALE%MULTIMAT%VOF%FILL,ALE%MULTIMAT%VOF%DFILL,ALE%MULTIMAT%VOF%IMS,NODFTSK,NODLTSK)
                   ENDIF
-                  CALL IMP_FANII(OUTPUT,NODES%A     ,NFIA      ,NODFT    ,NODLT    ,
-     .                         H3D_DATA )
+                  CALL IMP_FANII(OUTPUT,NODES%A     ,NFIA      ,NODFT    ,NODLT    , H3D_DATA )
                   IF (IMPDEB==1.AND.IMCONV==0) THEN
                     IF (NCYCLE>=NDEB0.AND.NCYCLE<=NDEB1) THEN
                       CALL IMP_FOUT(
@@ -7113,7 +7109,7 @@ C-----------------------------------------------
 
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C-----------------------------------------------
-                IF (ILAG+IALE+IEULER/=0)THEN
+                IF (ILAG + ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER/=0)THEN
                   IF(IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
                   IF(IMONM > 0) CALL STARTIME(TIMERS,40)
 
@@ -7205,7 +7201,7 @@ c
 C-----------------------------
 C       Non pure thermal case
 C-----------------------------
-              IF (ILAG + IALE + IEULER /= 0) THEN
+              IF (ILAG + ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0) THEN
 
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_INTEG)
 
@@ -7222,7 +7218,7 @@ C===============================================================================
 C--- //   ----------------
 C         MULTIMATERIAL
 C-------  ----------------
-                IF(NMULT>0) THEN
+                IF(ALE%MULTIMAT%NMULT>0) THEN
                   CALL BMULTN(FILL,DFILL,IMS,NODFTSK,NODLTSK)
                 ENDIF
 
@@ -7364,7 +7360,7 @@ C
      .                      NODFTSK,NODLTSK,NPLYMAX,NPLYXFE,NUMNOD,MSZ2 )
 
 C
-                IF(IALELAG > 0) THEN
+                IF(ALE%GLOBAL%IALELAG > 0) THEN
                   CALL FLOW_ACCELE(ALE_CONNECTIVITY%NALE, MSF    ,AFLOW        ,VFLOW    ,
      2                             NODFTSK,NODLTSK)
                 ENDIF
@@ -7673,7 +7669,7 @@ C----------------------
 C         INTERFACE ALE
 C----------------------
                 IERR=0
-                IF(NINTER/=0.AND.IALE/=0)THEN
+                IF(NINTER /= 0 .AND. ALE%GLOBAL%IALE /= 0)THEN
                   IF(ISPMD==0)THEN
                     IF (IMON>0) THEN
                       CALL STARTIME(TIMERS,6)
@@ -7696,7 +7692,7 @@ C----------------------
                 ENDIF
                 IF(IERR == 1)CALL ARRET(2)
 
-                IF(NINTER /= 0 .and. IALE+IEULER /= 0 .and. INT18KINE == -1)THEN
+                IF(NINTER /= 0 .and. ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER /= 0 .and. INT18KINE == -1)THEN
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -9246,8 +9242,7 @@ C
 C---------------------------
 C     Not pure thermal case
 C---------------------------
-              ELSEIF(ILAG+IALE+IEULER/=0)THEN
-
+              ELSEIF(ILAG + ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0)THEN
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -9258,7 +9253,7 @@ C===============================================================================
 C----------------------------
 C    RBODIES TO RIGIDE SURFACE.
 C--- //  ----------------
-                IF (NSURF/=0) THEN
+                IF (NSURF /= 0) THEN
 
 C========================================================================================
 C                                   DOMAIN 0
@@ -9303,7 +9298,7 @@ C------------------------------------------
 C         SYNCHRONIZATION ON V TT AND NCYCLE (implicit)
 C----------------------------
 
-                IF(IMON>0) CALL STARTIME(TIMERS,TIMER_INTEG)
+                IF(IMON > 0) CALL STARTIME(TIMERS,TIMER_INTEG)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -9328,7 +9323,7 @@ c
                   CALL NLOCAL_VEL(NLOC_DMG, NODFT_NL ,NODLT_NL)
                 ENDIF
 c
-                IF(IALELAG > 0) THEN
+                IF(ALE%GLOBAL%IALELAG > 0) THEN
                   CALL FLOW_VELOCITY(ALE_CONNECTIVITY%NALE,AFLOW   ,VFLOW   , FZERO  ,
      2                              NODFTSK,NODLTSK  ,WFLOW, NODES%V,IFOAM)
                 ENDIF
@@ -9356,7 +9351,7 @@ CC
      .                            NUMSKW,    LSKEW,    NUMFRAM,       SENSORS,
      .                            XFRAME,SKEWS%SKEW,         NODES%X,             NODES%V,
      .                                NODES%VR,   NUMNOD,      VFLOW,         WFLOW,
-     .                                 W,MULTI_FVM,      IALE ,       IALELAG,
+     .                                 W,MULTI_FVM,      ALE%GLOBAL%IALE ,       ALE%GLOBAL%IALELAG,
      .                                TT,   IRODDL, LOADS%NINIVELT,LOADS%INIVELT,
      .                             NPARG,   NGROUP,       LENGTH,         IPARG,
      .                         ELBUF_TAB,       NODES%MS,         NODES%IN,        NODES%WEIGHT,
@@ -9392,7 +9387,7 @@ c for smp parallel is not parit on
 C
                 IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 
-                IF(IALE+IEULER==0) THEN
+                IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER==0) THEN
 C----------------------
 C          LAGRANGE PUR
 C----------------------
@@ -9425,7 +9420,7 @@ c
                     CALL NLOCAL_INCR(NLOC_DMG, NODFT_NL,NODLT_NL)
                   ENDIF
 c
-                  IF(IALELAG > 0) THEN
+                  IF(ALE%GLOBAL%IALELAG > 0) THEN
                     CALL FLOW_DEPLA(ALE_CONNECTIVITY%NALE, VFLOW      ,DFLOW    ,
      2                            NODFTSK,NODLTSK)
                   ENDIF
@@ -9440,7 +9435,7 @@ C
 
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C
-                ELSEIF(IALE/=0)THEN
+                ELSEIF(ALE%GLOBAL%IALE/=0)THEN
 C-------------------------------------
 C          -A.L.E.-(+LAGRANGE)(+EULER)
 C-------------------------------------

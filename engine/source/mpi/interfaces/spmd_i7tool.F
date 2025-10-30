@@ -39,6 +39,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2886,6 +2887,7 @@ C-----------------------------------------------
       USE INTER_SORTING_MOD
       USE SENSOR_MOD
       USE MY_ALLOC_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3225,7 +3227,7 @@ C
 
         ILENXV = 10 + 3*IRODDL
 C comm w
-        IF(IALE/=0.AND.NINTER>0) ILENXV = ILENXV + 6
+        IF(ALE%GLOBAL%IALE/=0.AND.NINTER>0) ILENXV = ILENXV + 6
 
         IF(IDTMIN(11)==3.OR.IDTMIN(10)==3) ILENXV = ILENXV + 2
 C

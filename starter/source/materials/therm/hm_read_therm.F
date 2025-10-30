@@ -68,6 +68,7 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE MATPARAM_DEF_MOD
+      USE ALE_MOD , ONLY : ALE
 C============================================================================
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -93,8 +94,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER :: I,ITH,FLAGMAT,FLAGUNIT,IUNIT,UID,MAT_ID,IMAT,ILAW,ALE,
-     .           LAG,EUL,JALE,JTUR,IAD_THERM,NTHERM,IFORM,LAW2_FORM
+      INTEGER :: I,ITH,FLAGMAT,FLAGUNIT,IUNIT,UID,MAT_ID,IMAT,ILAW,
+     .           LAG,JALE,JTUR,IAD_THERM,NTHERM,IFORM,LAW2_FORM
       my_real :: TINI,TMELT,RHO_CP,AS,BS,AL,BL,RHO_CPM1,EFRAC
       CHARACTER(LEN=NCHARTITLE) :: TITR
       CHARACTER :: KEY*80
@@ -199,21 +200,17 @@ c--------------------------------------------------
 c-------
 c       Check at least if the corresponding material is indeed lagrangian !!
         LAG = 0
-        EUL = 0
-        ALE = 0
-        JALE = NINT(PM(72,IMAT)) 
+        JALE = NINT(PM(72,IMAT))
         IF (JALE == 0 .AND. ILAW/=18 .AND. ILAW/=11) THEN  
-           ILAG= 1  
-           LAG = 1                                          
+           ILAG= 1 ! global flag
+           LAG = 1 ! for current mat
         ELSEIF(JALE == 1)THEN                            
-           IALE= 1                                          
-           ALE = 1
+           ALE%GLOBAL%IALE= 1
         ELSEIF(JALE == 2)THEN                            
-           IEULER= 1  
-           EUL   = 1
+           ALE%GLOBAL%IEULER= 1
         ELSEIF(JALE == 3) THEN
-           ILAG= 1  
-           LAG = 1                                       
+           ILAG= 1 ! global flag
+           LAG = 1 ! for current mat
         ENDIF    
 c
         IF(IS_AVAILABLE_IFORM)THEN        

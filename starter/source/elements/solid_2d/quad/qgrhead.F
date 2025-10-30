@@ -174,8 +174,14 @@ C
         JMULT=0
         IF(MLN==20)THEN
           JMULT=NINT(PM(20,MID))
-          MT1=NINT(PM(21,MID))
-          MT2=NINT(PM(22,MID))
+          MT1=MAT_PARAM(MID)%MULTIMAT%MID(1)
+          MT2=MAT_PARAM(MID)%MULTIMAT%MID(2)
+          ML1=NINT(PM(19,MT1))
+          ML2=NINT(PM(19,MT2))
+        ELSEIF(MLN==251)THEN
+          JMULT=NINT(PM(20,MID))
+          MT1=MAT_PARAM(MID)%MULTIMAT%MID(1)
+          MT2=MAT_PARAM(MID)%MULTIMAT%MID(2)
           ML1=NINT(PM(19,MT1))
           ML2=NINT(PM(19,MT2))
         ELSE
@@ -184,16 +190,10 @@ C
           ML2=0 
         ENDIF
 C
-        IF(JCVT/=0.AND.(JLAG==0.OR.MLN==20))THEN
+        IF(JCVT /=0 .AND. (JLAG == 0 .OR. MLN == 20 .OR. MLN == 251))THEN
           ID=IGEO(1,PID)
-          CALL FRETITL2(TITR,
-     .                  IGEO(NPROPGI-LTITR+1,PID),LTITR)
-          CALL ANCMSG(MSGID=608,
-     .                MSGTYPE=MSGWARNING,
-     .                ANMODE=ANINFO_BLIND_1,
-     .                I1=ID,
-     .                C1=TITR,
-     .                I2=IXQ(7,I))
+          CALL FRETITL2(TITR,IGEO(NPROPGI-LTITR+1,PID),LTITR)
+          CALL ANCMSG(MSGID=608, MSGTYPE=MSGWARNING, ANMODE=ANINFO_BLIND_1, I1=ID, C1=TITR, I2=IXQ(7,I))
           JCVT=0
         END IF
         IEOS = IPM(4,MID)

@@ -43,6 +43,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD , ONLY : ANCMSG, ANINFO, MSGERROR
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -60,7 +61,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER :: IGEO(NPROPGI,*),NGL(*),NGEO(*),NEL,JEUL,NXREF
       my_real
-     .   VOL(*), VEUL(LVEUL,*), GEO(NPROPG,*),
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*), GEO(NPROPG,*),
      .   JAC1(*), JAC2(*), JAC3(*), JAC4(*), JAC5(*), JAC6(*), JAC9(*),
      .   PX1(*), PX2(*), PX3(*), PX4(*),  
      .   PY1(*), PY2(*), PY3(*), PY4(*),  

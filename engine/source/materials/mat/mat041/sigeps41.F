@@ -46,6 +46,7 @@ C   D e s c r i p t i o n
 C-----------------------------------------------
       USE ROOT_FINDING_ALGO_MOD
       USE OUTPUT_MOD, ONLY : OUTPUT_
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -256,7 +257,7 @@ c
         pold = pres
         artvisc = ZERO !pseudo viscosity
         mt=RHO(I)*VOLUME(I) !mass
-        IF (TIME > ZERO .AND. IALE + IEULER > 0) THEN
+        IF (TIME > ZERO .AND. ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER > 0) THEN
           UVAR(I, 1) = UVAR(I, 1) / MT
           UVAR(I, 1) = MAX(ZERO, MIN(UVAR(I, 1), ONE))
         ENDIF

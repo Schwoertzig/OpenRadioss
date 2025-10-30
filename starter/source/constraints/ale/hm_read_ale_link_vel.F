@@ -55,6 +55,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
       USE FORMAT_MOD , ONLY : LFIELD
+      USE ALE_MOd , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -106,7 +107,7 @@ C-----------------------------------------------
       WRITE(IOUT,1000)
       CALL HM_OPTION_START('/ALE/LINK/VEL')
 
-      DO I = 1, NALELK
+      DO I = 1, ALE%LINK%NALELK
          CALL HM_OPTION_READ_KEY(LSUBMODEL, OPTION_ID = N, OPTION_TITR = TITR)
          CALL HM_GET_INTV('node_ID1', NODE_ID1, IS_AVAILABLE, LSUBMODEL)
          CALL HM_GET_INTV('node_ID2', NODE_ID2, IS_AVAILABLE, LSUBMODEL)

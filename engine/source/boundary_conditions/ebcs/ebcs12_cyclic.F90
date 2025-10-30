@@ -44,8 +44,11 @@
 !||    ebcs_mod              ../common_source/modules/boundary_conditions/ebcs_mod.F90
 !||    elbufdef_mod          ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    multimat_param_mod    ../common_source/modules/multimat_param_mod.F90
+!||    output_mod            ../common_source/modules/output/output_mod.F90
 !||    precision_mod         ../common_source/modules/precision_mod.F90
+!||    python_funct_mod      ../common_source/modules/python_mod.F90
 !||    segvar_mod            ../engine/share/modules/segvar_mod.F
+!||    sensor_mod            ../common_source/modules/sensor_mod.F90
 !||    th_surf_mod           ../common_source/modules/interfaces/th_surf_mod.F
 !||====================================================================
         subroutine ebcs12_cyclic(nseg,iseg,segvar, &

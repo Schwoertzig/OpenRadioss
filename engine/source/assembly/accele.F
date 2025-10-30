@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      1                  A       ,AR    ,V    ,MS      ,IN   ,
      2                  SIZE_NALE      ,NALE   ,MS_2D  ,
      3                  SIZE_NPBY, NPBY   )
+         USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,7 +60,7 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------     
       
       !------------------------------------------------!
-      !       acceleration computation 
+      !       nodal acceleration
       !------------------------------------------------!       
         IF(N2D == 0) THEN
 !$OMP DO SCHEDULE(guided)
@@ -73,7 +74,7 @@ C-----------------------------------------------
                     A(1,N) = ZERO
                     A(2,N) = ZERO
                     A(3,N) = ZERO
-                    IF(NMULT/=0) THEN
+                    IF(ALE%MULTIMAT%NMULT/=0) THEN
                         V(1,N) = ZERO
                         V(2,N) = ZERO
                         V(3,N) = ZERO
@@ -99,7 +100,7 @@ C-----------------------------------------------
                     A(1,N) = ZERO
                     A(2,N) = ZERO
                     A(3,N) = ZERO
-                    IF(NMULT/=0) THEN
+                    IF(ALE%MULTIMAT%NMULT/=0) THEN
                         V(1,N) = ZERO
                         V(2,N) = ZERO
                         V(3,N) = ZERO
@@ -110,7 +111,7 @@ C-----------------------------------------------
         ENDIF
 
       !------------------------------------------------!
-      !       angular acceleration computation 
+      !       nodal angular acceleration
       !------------------------------------------------!
         IF (IRODDL/=0) THEN
 !$OMP DO SCHEDULE(guided)

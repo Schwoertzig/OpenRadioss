@@ -45,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      F               STRP,STRR,STRTG,STIFINTR,NSHNOD,VNIGE,BNIGE,
      G               MCPP ,ITHERM_FE)
         use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr
+        use ale_mod , only : ale
 C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -135,7 +136,7 @@ C
        ENDDO
       ENDIF 
 C
-      IF(IALE==1.OR.IEULER==1 .OR. IALELAG==1) THEN
+      IF(ALE%GLOBAL%IALE == 1 .OR. ALE%GLOBAL%IEULER == 1 .OR. ALE%GLOBAL%IALELAG == 1) THEN
         DO J=1,NUMELS
           I = INDEX(J)
           DO K=1,8

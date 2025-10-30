@@ -125,7 +125,8 @@ C-----------------------------------------------
       use PBLAST_MOD
       use TIMER_MOD
       use rbe3_mod
-      use coupling_adapter_mod 
+      use coupling_adapter_mod
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -226,11 +227,11 @@ C
      7  IPARI           ,NPRW           ,ICONX          ,NPBY           ,
      8  LPBY            ,LRIVET         ,NSTRF          ,LJOINT         ,NODPOR         ,MONVOL      ,
      9  ILINK     ,
-     A  LLINK           ,LINALE         ,NEFLSW         ,NNFLSW         ,ICUT           ,CLUSTER     ,
+     A  LLINK           ,ALE%LINK%LINALE,NEFLSW         ,NNFLSW         ,ICUT           ,CLUSTER     ,
      B  ITASK           ,IAF(IF01)      ,
-     C  THKE        ,DAMP               ,
-     D  PM             ,SKEWS          ,GEO            ,EANI           ,BUFMAT      ,BUFGEO           ,BUFSF     ,
-     E  W               ,VEUL           ,FILL           ,DFILL          ,ALPH           ,WB          ,DSAVE            ,ASAVE     ,
+     C  THKE            ,DAMP               ,
+     D  PM              ,SKEWS          ,GEO            ,EANI           ,BUFMAT      ,BUFGEO           ,BUFSF     ,
+     E  W               ,VEUL           ,ALE%MULTIMAT%VOF%FILL, ALE%MULTIMAT%VOF%DFILL, ALE%MULTIMAT%VOF%ALPH  ,WB  ,DSAVE  ,ASAVE,
      .  MSNF            , 
      F  TF              ,FORC           ,VEL            ,FSAV           ,FZERO          ,XLAS        ,ACCELM           ,
      G  GRAV            ,FR_WAVE        ,FAILWAVE       ,PARTS0         ,ELBUF          ,RWBUF       ,SENSORS,

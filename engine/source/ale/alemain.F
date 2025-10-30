@@ -297,17 +297,17 @@ C  IOUTPRT (assembly report)
       IF(ITASK==0)ALLOCATE(BUFVOIS(SBUFVOIS ,NSVOIS+NQVOIS)) !SPMD array of adjacent ALE/CFD elems           !OPTIM : SHOULD BE ALLOCATED IN ARRALOC,  same for FLUX_VOIS & N4_VOIS
       IF(ITASK==0)SZ_BUFVOIS=SBUFVOIS*(NSVOIS+NQVOIS)
 
-      IF(N2D /= 0 .AND. NMULT /= 0)THEN
+      IF(N2D /= 0 .AND. ALE%MULTIMAT%NMULT /= 0)THEN
         !WA(1:IADBH-1)                         = FLUX
         !WA(IADBH:IADBH+MAX(1,NMULT)*NUMELQ-1) = BHOLE
-        IADBH=MAX(1,NMULT)*4*NUMELQ+1
+        IADBH=MAX(1,ALE%MULTIMAT%NMULT)*4*NUMELQ+1
       ELSE
         IADBH=1
       ENDIF
       !IFSUBM=1 : masse changed
       ALE%SUB%IFSUBM=1
 
-      IF(IALE+IEULER /= 0)THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0)THEN
        DO N=NODFT,NODLT
         IF(ALE_CONNECTIVITY%NALE(N) /= 0) MS0(N) = MS(N)
        ENDDO
@@ -360,7 +360,7 @@ C  IOUTPRT (assembly report)
       !       ALE%SUB%IALESUB=1 LEGACY IMPLEMENTATION, NOT PARALLEL, DELETED IN V11
       !       ALE%SUB%IALESUB=2 PARALLEL IMPLMEMENTATION IN 2002
       !--------------------------------------------------------
-      IF(ALE%SUB%IALESUB /= 0) CALL MY_BARRIER    
+      IF(ALE%SUB%IALESUB /= 0) CALL MY_BARRIER
       !-----
       IF(ALE%SUB%IALESUB == 2)THEN
         IF(ITASK == 0)THEN
@@ -390,7 +390,7 @@ C  IOUTPRT (assembly report)
       ENDIF
       !-----      
       
-      IF (GLOB_THERM%ITHERM == 1 .AND. IALE+IEULER == 0) ALE%SUB%IFSUBM=0
+      IF (GLOB_THERM%ITHERM == 1 .AND. ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER == 0) ALE%SUB%IFSUBM=0
 C----------------------------------
 C       ALE - EULER - THERMAL
 C       WA  = flux for sforc3 and qforc3
@@ -417,7 +417,7 @@ C---------------------------------------------------------
 C
       IF(ALE%SUB%IFSUB == 0)THEN
         IF(ITASK==0) CALL STARTIME(TIMERS,MACRO_TIMER_IFSUB0)
-        IF(IALE+IEULER+GLOB_THERM%ITHERM /= 0)THEN
+        IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM /= 0)THEN
           IF(ALE%GLOBAL%INCOMP == 0) THEN
             IF(NSEGFLU > 0 .AND. N2D == 0) THEN
               CALL SEGGETV(IPARG,ELBUF_TAB,ALE_CONNECTIVITY,ITASK,SEGVAR)
@@ -566,7 +566,7 @@ C     -------------------------
                   ENDDO                  
                ENDIF
                CALL MY_BARRIER
-               IF (IALE  >  0) THEN
+               IF (ALE%GLOBAL%IALE  >  0) THEN
                   CALL MULTI_FVM2FEM(DT1, ELBUF_TAB, ITASK, 
      .                 IXS, IXQ, IPARG, X, A, V, W, MS, MSNF, VEUL, 
      .                 STIFN, FSKY, IADS, FSKYM, 
@@ -718,7 +718,7 @@ C     -------------------------
                   ENDDO                  
                ENDIF
                CALL MY_BARRIER
-               IF (IALE  >  0) THEN
+               IF (ALE%GLOBAL%IALE  >  0) THEN
                   CALL MULTI_FVM2FEM(DT1, ELBUF_TAB, ITASK, 
      .                  IXS, IXQ, IPARG, X, A, V, W, MS, MSNF, VEUL, 
      .                  STIFN, FSKY, IADS, FSKYM, 
@@ -762,15 +762,14 @@ C
          !---------------------------------------------
          !     MULTIMATERIAL - LAW20(BIMAT)
          !---------------------------------------------
-          IF(NMULT > 0)THEN
-            DO N=NODFT,NODLT
-              IMS(N)=0
-              DO M=1,NMULT
-                IFILL(N,M)=-2
-                DFILL(N,M)=ZERO
-              ENDDO
-            ENDDO
-          ENDIF
+         DO M=1,ALE%MULTIMAT%NMULT
+           DO N=NODFT,NODLT
+             IMS(N)=0
+             IFILL(N,M)=-2
+             DFILL(N,M)=ZERO
+           ENDDO
+         ENDDO
+
 
          !---------------------------------------------
          !     ALEFVM : FINITE VOLUME FOR MOMENTUM

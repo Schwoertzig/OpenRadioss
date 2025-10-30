@@ -54,6 +54,7 @@ C--------------------------------------
         USE H3D_MOD
         USE GLOB_THERM_MOD
         USE INTERFACES_MOD
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -534,7 +535,7 @@ C a optimiser
               L = L0
             END IF
 
-            IF(IALELAG == 0) THEN
+            IF(ALE%GLOBAL%IALELAG == 0) THEN
               IF(GLOB_THERM%ITHERM_FE == 0 .AND. GLOB_THERM%INTHEAT == 0 ) THEN
                 IF(IFSUBM==0)THEN
 C PREPARATION SEND TO PRO fixed part (ELEM)
@@ -1180,7 +1181,7 @@ C a optimiser
             L = IAD_RECV(I)
           END IF
 C
-          IF(IALELAG == 0) THEN
+          IF(ALE%GLOBAL%IALELAG == 0) THEN
             IF(GLOB_THERM%ITHERM_FE == 0 .AND. GLOB_THERM%INTHEAT == 0  ) THEN
               IF(IFSUBM==0)THEN
                 IF(IVECTOR==1) THEN

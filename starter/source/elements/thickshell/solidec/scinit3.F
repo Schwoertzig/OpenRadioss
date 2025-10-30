@@ -70,6 +70,7 @@ C-----------------------------------------------
       USE GLOB_THERM_MOD
       USE MATPARAM_DEF_MOD
       use element_mod , only : nixs
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -96,7 +97,7 @@ C-----------------------------------------------
      .   STRSGLOB(*),STRAGLOB(*),ORTHOGLOB(*),FAIL_INI(*),PERTURB(NPERTURB)
       my_real
      .   MAS(*), PM(NPROPM,*), X(*), GEO(NPROPG,*),
-     .   VEUL(LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
+     .   VEUL(ALE%GLOBAL%LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
      .   PARTSAV(20,*), V(*), MSS(8,*), 
      .   SIGSP(NSIGI, *),MSNF(*), MSSF(8,*), WMA(*),
      .   VOLNOD(*), BVOLNOD(*), VNS(8,*), BNS(8,*), BUFMAT(*),

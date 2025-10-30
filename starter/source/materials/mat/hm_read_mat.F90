@@ -235,6 +235,7 @@
           use hm_read_mat134_mod
           use hm_read_mat163_mod
           use hm_read_mat169_arup_mod
+          use hm_read_mat251_mod
           use names_and_titles_mod ,only : nchartitle, ncharline
           use reader_old_mod     ,only : key0
           use multimat_param_mod ,only : m51_ssp0max,m51_lc0max,m51_tcp_ref,m51_lset_iflg6,m20_discrete_fill
@@ -1261,6 +1262,12 @@
               &pm(1,i)  ,lsubmodel,mat_id   ,titr     ,matparam   ,&
               &nvartmp ,imatvis)
 !-------
+             case ('LAW251','MMALE')
+              ilaw  = 251
+              call hm_read_mat251(&
+              &npropm, npropmi, ipm(1,i) ,pm(1,i)  ,mat_id   ,titr     ,&
+              &lsubmodel,mtag     ,matparam , unitab)
+!-------
              case ('GAS')
               ilaw = 999
               call hm_read_matgas(pm(1, i), ipm(1, i),mat_id, titr, key2, unitab, lsubmodel)
@@ -1518,7 +1525,7 @@
               matparam%rho = rho
             endif
 !
-            if (ilaw/=0   .and. ilaw/=20 .and. ilaw/=51 .and. ilaw/=151 .and.&
+            if (ilaw/=0   .and. ilaw/=20 .and. ilaw/=51 .and. ilaw/=151 .and. ilaw/=251 .and. &
               ilaw/=108 .and. ilaw /= 999) then
               if (matparam%rho0 <= zero) then
                 call ancmsg(msgid=683, msgtype=msgerror, anmode=aninfo,&

@@ -67,6 +67,7 @@ C-----------------------------------------------
       USE OUTMAX_MOD
       USE FVBAG_MOD , only : FVBAG_DATA, NFVBAG
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -528,7 +529,7 @@ C--------------------------------------------------
 C--------------------------------------------------
       ELSEIF (KEYWORD == 'GVEL') THEN
 C--------------------------------------------------
-        IF(IALELAG  > 0 ) THEN
+        IF(ALE%GLOBAL%IALELAG  > 0 ) THEN
           DO I=1,NUMNOD
             VALUE(1) = VGAZ(1,I)
             VALUE(2) = VGAZ(2,I)

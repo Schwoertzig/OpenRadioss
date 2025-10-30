@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    radioss2   ../engine/source/engine/radioss2.F
 !||====================================================================
       SUBROUTINE BCS0(ICODE,ICODT,ICODR,ICODE_PLY, ICODT_PLY,IBC_PLY)
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -33,8 +34,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER ICODE(*), ICODT(*), ICODR(*), ICODE_PLY(*), ICODT_PLY(*),
-     .        IBC_PLY(*)
+      INTEGER ICODE(*), ICODT(*), ICODR(*), ICODE_PLY(*), ICODT_PLY(*), IBC_PLY(*)
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -58,13 +58,13 @@ C
              IF(II == 1 ) IBC_PLY(N) = -1
          ENDDO
       ENDIF 
-      IF(IRODDL>0)THEN
+      IF(IRODDL > 0)THEN
        DO 20 N=1,NUMNOD
        ICODR(N)=(ICODE(N)-512*(ICODE(N)/512))/64
    20  CONTINUE
       END IF
 C
-      IF(IALE>0) THEN
+      IF(ALE%GLOBAL%IALE > 0) THEN
       DO 30 N=1,NUMNOD
       M=N+NUMNOD
       ICODT(M)=(ICODE(N)-64*(ICODE(N)/64))/8

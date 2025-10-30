@@ -610,7 +610,7 @@ C-----------------------------------------------
       USE STATE_MOD
       USE USER_WINDOWS_MOD
       USE USER_SENSOR_MOD
-      USE ALE_MOD
+      USE ALE_MOD , ONLY : ALE
       USE OUTPUT_MOD
       USE INTERFACES_MOD
       USE READ_FUNCT_PYTHON_MOD
@@ -646,6 +646,7 @@ C-----------------------------------------------
       use hm_read_bcs_nrf_mod , only : hm_read_bcs_nrf
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
       use hm_preread_skw_mod, ONLY : hm_preread_skw
+      use ale_allocations_mod , only : ale_allocations
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1270,7 +1271,7 @@ C
       IRIGID_MAT = 0
 C
 !      IKINE1LAG = 0
-      IALELAG = 0
+      ALE%GLOBAL%IALELAG = 0
 C  added nodal mass
       TOTADDMAS = ZERO
       IPART_STACK = 0
@@ -2422,43 +2423,9 @@ C
 C--------------------------------------------
 C     STOCKAGE DYNAMIQUE (A.L.E.) ENTIER
 C--------------------------------------------
-      ALE%GLOBAL%SNALE  = MAX(IALE,IEULER,IALELAG)*NUMNOD
-      ALE%GLOBAL%SIELVS = 6*NUMELS+MAX(IALE,GLOB_THERM%ITHERM,IEULER,IALELAG)* (4 * NUMELQ + 3 * NUMELTG)
-      SIFILL = NMULT*NUMNOD
-      SIMS   = NMULT*NUMNOD
-C---
-      ALLOCATE(IFILL(SIFILL),STAT=stat)
-      IF(STAT /= 0) CALL ANCMSG(MSGID   = 268,
-     .                           ANMODE  = ANINFO,
-     .                           MSGTYPE = MSGERROR,
-     .                           C1      = 'IFILL')
-
-      ALLOCATE(IMS(SIMS),STAT=stat)
-      IF(STAT /= 0) CALL ANCMSG(MSGID   = 268,
-     .                           ANMODE  = ANINFO,
-     .                           MSGTYPE = MSGERROR,
-     .                           C1      = 'IMS')
+      CALL ALE_ALLOCATIONS(NUMNOD,NUMELQ,NUMELS,NUMELTG, GLOB_THERM)
 
 
-      IF(SIFILL > 0) IFILL = 0
-      IF(SIMS   > 0) IMS   = 0
-
-      ALLOCATE(DFLOW(3*NUMNOD*IALELAG)      ,STAT=stat)
-      ALLOCATE(VFLOW(3*NUMNOD*IALELAG)      ,STAT=stat)
-      ALLOCATE(WFLOW(3*NUMNOD*IALELAG)      ,STAT=stat)
-
-      IF(IALELAG > 0) THEN
-       DFLOW = ZERO
-       VFLOW = ZERO
-       WFLOW = ZERO
-      ENDIF
-
-      IF(ALEFVM_Param%IEnabled > 0)THEN
-        ALLOCATE(ALEFVM_Buffer%FCELL(6,NUMELS)   ,STAT=stat)
-        ALEFVM_Buffer%FCELL(:,:) = ZERO
-      ENDIF
-
-C----------------------------------      
 C--------------------------------------------
 C     MULTIDOMAINS
 C--------------------------------------------
@@ -4364,34 +4331,32 @@ C--------------------------------------------
       ERR_CATEGORY='INTERNAL'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
       SGJBUFR = LKJNR*NGJOINT
-      SW      = 3*NUMNOD*IALE
+      SW      = 3*NUMNOD*ALE%GLOBAL%IALE
       NUMELSK8     =    NUMELS
       NUMELQK8     =    NUMELQ
-      SVEUL   = (LVEUL*NUMELS+10*NUMELQ)*IEULER
-      SVEUL8  = (INT(LVEUL,KIND(SVEUL8))*NUMELSK8+10*NUMELQK8)*INT(IEULER,KIND(SVEUL8))
-      SFILL   = NMULT*NUMNOD
-      SDFILL  = NMULT*NUMNOD
-      SALPH   = 2*NMULT*(NUMELQ+NUMELS)
-      SWB     = 0
+      ALE%GLOBAL%SVEUL   = (ALE%GLOBAL%LVEUL*NUMELS+10*NUMELQ)*ALE%GLOBAL%IEULER
+      SVEUL8  = (INT(ALE%GLOBAL%LVEUL,KIND(SVEUL8))*NUMELSK8+10*NUMELQK8)*INT(ALE%GLOBAL%IEULER,KIND(SVEUL8))
+      ALE%MULTIMAT%VOF%SFILL   = ALE%MULTIMAT%NMULT*NUMNOD*ALE%MULTIMAT%IS_DEFINED_LAW20
+      ALE%MULTIMAT%VOF%SDFILL  = ALE%MULTIMAT%NMULT*NUMNOD*ALE%MULTIMAT%IS_DEFINED_LAW20
+      ALE%MULTIMAT%VOF%SALPH   = 2*ALE%MULTIMAT%NMULT*(NUMELQ+NUMELS)*ALE%MULTIMAT%IS_DEFINED_LAW20
+      ALE%GRID%SWB     = 0
       IF(ALE%GRID%NWALE == 2) THEN
-        SWB  = 3*NUMNOD
+        ALE%GRID%SWB  = 3*NUMNOD
       ELSEIF(ALE%GRID%NWALE == 4) THEN
-        SWB  = 4*NUMNOD
+        ALE%GRID%SWB  = 4*NUMNOD
       ENDIF
-      ALLOCATE(WB(SWB)          ,STAT=stat)
-      IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
-     .                           MSGTYPE=MSGERROR,
-     .                         C1='WB')
-      IF(SWB > 0) WB = ZERO
+      ALLOCATE(WB(ALE%GRID%SWB)          ,STAT=stat)
+      IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='WB')
+      IF(ALE%GRID%SWB > 0) WB = ZERO
       IF(ALE%GRID%NWALE == 4) THEN
-        WMA => WB(3*NUMNOD+1:SWB)
+        WMA => WB(3*NUMNOD+1:ALE%GRID%SWB)
       ELSE
         WMA => WB
       ENDIF
 C
       SDSAVE   = 0
       SASAVE   = 0
-      IF(ILAG == 1 .AND. (IALE+IEULER) > 0) THEN
+      IF(ILAG == 1 .AND. (ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER) > 0) THEN
         SDSAVE  = 3*NUMNOD
         SASAVE  = 3*NUMNOD
       ENDIF
@@ -4407,15 +4372,15 @@ C
       IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                         C1='VEUL')
-      ALLOCATE(FILL(SFILL)      ,STAT=stat)
+      ALLOCATE(ALE%MULTIMAT%VOF%FILL(ALE%MULTIMAT%VOF%SFILL)      ,STAT=stat)
       IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                         C1='FILL')
-      ALLOCATE(DFILL(SDFILL)    ,STAT=stat)
+      ALLOCATE(ALE%MULTIMAT%VOF%DFILL(ALE%MULTIMAT%VOF%SDFILL)    ,STAT=stat)
       IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                         C1='DFILL')
-      ALLOCATE(ALPH(SALPH)      ,STAT=stat)
+      ALLOCATE(ALE%MULTIMAT%VOF%ALPH(ALE%MULTIMAT%VOF%SALPH)      ,STAT=stat)
       IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                         C1='ALPH')
@@ -4429,10 +4394,10 @@ C
      .                         C1='ASAVE')
       IF(SGJBUFR > 0)  GJBUFR  = ZERO
       IF(SW > 0)       W       = ZERO
-      IF(SVEUL8 > 0)    VEUL    = ZERO
-      IF(SFILL > 0)    FILL    = ZERO
-      IF(SDFILL > 0)   DFILL   = ZERO
-      IF(SALPH > 0)    ALPH    = ZERO
+      IF(SVEUL8 > 0)   VEUL    = ZERO
+      IF(ALE%MULTIMAT%VOF%SFILL > 0)    ALE%MULTIMAT%VOF%FILL    = ZERO
+      IF(ALE%MULTIMAT%VOF%SDFILL > 0)   ALE%MULTIMAT%VOF%DFILL   = ZERO
+      IF(ALE%MULTIMAT%VOF%SALPH > 0)    ALE%MULTIMAT%VOF%ALPH    = ZERO
       IF(SDSAVE > 0)   DSAVE   = ZERO
       IF(SASAVE > 0)   ASAVE   = ZERO
       CALL TRACE_OUT1()
@@ -4469,23 +4434,23 @@ C--------------------------------------------
       ERR_MSG='ALE LINKS'
       ERR_CATEGORY='ALE'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-      IF(NALELK/=0) THEN
+      IF(ALE%LINK%NALELK/=0) THEN
         WRITE(ISTDO,'(A)')TITRE(29)
-        LLINAL = 7 * NALELK
-        SLINALE=LLINAL
-        ALLOCATE(LINALE(SLINALE),STAT=stat)
+        ALE%LINK%LLINAL = 7 * ALE%LINK%NALELK
+        ALE%LINK%SLINALE = ALE%LINK%LLINAL
+        ALLOCATE(ALE%LINK%LINALE(ALE%LINK%SLINALE),STAT=stat)
         IF(IERR/=0) THEN
           WRITE(IOUT,*) ' ** ERROR IN MEMORY ALLOCATION'
           WRITE(ISTDO,*)' ** ERROR IN MEMORY ALLOCATION'
         ENDIF
         CALL HM_READ_ALE_LINK(ICODE, ISKEW, ITAB, ITABM1, D,
      .       IGRNOD, IBCSLAG, LAG_NCF, LAG_NKF, LAG_NHF,
-     .       IKINE1LAG, LINALE, LSUBMODEL, UNITAB)
+     .       IKINE1LAG, ALE%LINK%LINALE, LSUBMODEL, UNITAB)
       ELSE
-        ALLOCATE(LINALE(0))
+        ALLOCATE(ALE%LINK%LINALE(0))
       ENDIF
       ERR_MSG='ALE NEIGHBOURS'
-      IF(IALE+IEULER+IALELAG /= 0)THEN
+      IF(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER+ALE%GLOBAL%IALELAG /= 0)THEN
        WRITE(ISTDO,'(A)')TITRE(30)
        CALL ALELEC(
      1     ICODE    ,IXS      ,IXQ       ,IXC               ,IXT     ,
@@ -4503,13 +4468,11 @@ C     MULTIMATERIALS
 C     INITIALIZATION OF NODAL PERCENTAGES
 C--------------------------------------------
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-       IF(NMULT>0)THEN
-        WRITE(ISTDO,'('' .. MULTIMATERIALS'')')
-        IF(NUMELS>0)
-     .      CALL INIMU3(PM     ,IXS    ,FILL   ,DFILL  )
-        IF(NUMELQ>0)
-     .      CALL INIMU2(PM     ,IXQ    ,FILL   ,DFILL  )
-          CALL INIMUL  (PM     ,FILL   ,DFILL  ,MAT20_DISCRETE_FILL)
+       IF(ALE%MULTIMAT%NMULT>0)THEN
+         WRITE(ISTDO,'('' .. MULTIMATERIALS'')')
+         IF(NUMELS > 0) CALL INIMU3(PM ,IXS ,ALE%MULTIMAT%VOF%FILL ,ALE%MULTIMAT%VOF%DFILL)
+         IF(NUMELQ > 0) CALL INIMU2(PM ,IXQ ,ALE%MULTIMAT%VOF%FILL ,ALE%MULTIMAT%VOF%DFILL)
+         CALL INIMUL  (PM, ALE%MULTIMAT%VOF%FILL, ALE%MULTIMAT%VOF%DFILL, MAT20_DISCRETE_FILL)
        ENDIF
       ENDIF
       CALL TRACE_OUT1()
@@ -4519,7 +4482,7 @@ C---------------------------------------------------
       ERR_MSG='CFD BOUNDARY ELEMENTS'
       ERR_CATEGORY='CFD BOUNDARY ELEMENTS'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-      IF(IALE+IEULER/=0)
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER/=0)
      +   CALL PAROI(PM     ,IXS    ,IXQ    ,ICODE  ,ALE_CONNECTIVITY%NALE   )
       CALL TRACE_OUT1()
 C--------------------------------------------
@@ -4679,7 +4642,7 @@ C---------------------------------------------
       ERR_MSG='FLUID NODAL MASSES'
       ERR_CATEGORY='FLUID NODAL MASSES'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-      SMSNF = NUMNOD*MAX(IALE,IEULER,IALELAG)
+      SMSNF = NUMNOD*MAX(ALE%GLOBAL%IALE,ALE%GLOBAL%IEULER,ALE%GLOBAL%IALELAG)
       ALLOCATE(MSNF(SMSNF)    ,STAT=stat)
         IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
@@ -4876,7 +4839,7 @@ C--------------------------------------------
 C     READ INITIAL TEMPERATURE
 C--------------------------------------------
       NINTEMP = GLOB_THERM%NINTEMP
-      IF (IALE + IEULER /= 0) THEN
+      IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0) THEN
         IF (GLOB_THERM%ITHERM_FE == 0 .AND. (GLOB_THERM%NIMTEMP /= 0 .OR. NINTEMP /= 0)) THEN
           CALL ANCMSG(MSGID=1724, ANMODE=ANINFO, MSGTYPE=MSGWARNING)
         ENDIF
@@ -6018,7 +5981,7 @@ C---------------------------
      .              ANMODE=ANSTOP,
      .              C1='IPARG')
       ENDIF
-C     REPLACEMENT OF OUR EXTERNALS OF SS-MATERIAUX BY OUR SYSTEMS
+C     USER MATERIAL IDS -> INTERNAL MATERIAL IDS (MM-ALE)
       IF(IDDLEVEL == 0) CALL M20DCOD(MLAW_TAG,IPM, PM, MAT_ELEM%MAT_PARAM)
 C
 C Temporary address of DD_IAD
@@ -7398,15 +7361,15 @@ C--------------------------------------------
       ENDIF
       CALL ALE_CONNECTIVITY%ALE_COMPUTE_EE_CONNECTIVITY(PM,IGEO,
      .     NPROPGI,NUMGEO, NPROPM, NUMMAT , NUMNOD, NUMELQ, NUMELTG, NUMELS, N2D,
-     .     IALE  , IEULER, GLOB_THERM%ITHERM, IALELAG,DETONATORS%IS_SHADOWING_REQUIRED,
+     .     ALE%GLOBAL%IALE  , ALE%GLOBAL%IEULER, GLOB_THERM%ITHERM, ALE%GLOBAL%IALELAG,DETONATORS%IS_SHADOWING_REQUIRED,
      .     NIXQ  , NIXTG , NIXS  ,
      .     IXQ   , IXTG  , IXS   )
 C--------------------------------------------
       IF(NSUBDOM > 0) THEN
 C---------------Deactivation of ALE flags if no more ALE elements in domain -------------C
         IF(ALE_EULER == 0) THEN
-          IALE = 0
-          IEULER = 0
+          ALE%GLOBAL%IALE = 0
+          ALE%GLOBAL%IEULER = 0
         ENDIF
       ENDIF
 C
@@ -7978,7 +7941,7 @@ C OPTIMISATION INTERFACE SPMD
 C--------------------------------------------
         ERR_CATEGORY='INTERNAL'
         IF(IDDLEVEL==0)THEN
-          IF(IALE+IEULER/=0)
+          IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER/=0)
      +       CALL PAROI(PM     ,IXS    ,IXQ    ,ICODE  ,ALE_CONNECTIVITY%NALE   )
           IF(NUMELS/=0)
      +       CALL LCE16S4(IXS    ,PM     ,ICODE  )
@@ -8548,7 +8511,7 @@ C
 C non optimise (12 max(8,10,12)
       ALLOCATE(MSS(8*NUMELS)     ,STAT=stat)
       ALLOCATE(MSSX(ICO*NUMELS)  ,STAT=stat)
-      ALLOCATE(MSSF(8*NUMELS*MAX(IALE,IEULER,IALELAG))  ,STAT=stat)
+      ALLOCATE(MSSF(8*NUMELS*MAX(ALE%GLOBAL%IALE,ALE%GLOBAL%IEULER,ALE%GLOBAL%IALELAG))  ,STAT=stat)
       ALLOCATE(MSQ(NUMELQ)       ,STAT=stat)
       IF(.NOT.ALLOCATED(MSTR)) ALLOCATE(MSTR(NUMELT)      ,STAT=stat)
       IF(.NOT.ALLOCATED(MSP)) ALLOCATE(MSP(NUMELP)       ,STAT=stat)
@@ -8734,7 +8697,7 @@ C
      &            X          , IXS            , IXQ              , IXC                , IXT      ,
      &            IXP        , IXR            , DETONATORS       , GEO                , PM       ,
      &            RBY        , NPBY           , LPBY             , NPC                , NPTS     ,
-     &            TF         , VEUL           , ALE_CONNECTIVITY , SKEW               , FILL     ,
+     &            TF         , VEUL           , ALE_CONNECTIVITY , SKEW               , ALE%MULTIMAT%VOF%FILL     ,
      &            IPART      , ITAB           , SENSORS          , SKVOL              ,
      &            IXTG       , THKE           , NLOC_DMG         , GROUP_PARAM_TAB    ,GLOB_THERM,
      &            IGRNOD     , IGRSURF        , BUFSF            , VR                 ,
@@ -8898,7 +8861,7 @@ C   ---> for interface and AMS  - small loop, without INITIA.F
 C-  ---> for AMS with automatic element selection - big loop with INITIA.F
 C XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 C
-        IF(IALE+IEULER/=0) CALL PAROI(PM     ,IXS    ,IXQ    ,ICODE  ,ALE_CONNECTIVITY%NALE   )
+        IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER/=0) CALL PAROI(PM     ,IXS    ,IXQ    ,ICODE  ,ALE_CONNECTIVITY%NALE   )
         IF(NUMELS/=0) CALL LCE16S4(IXS    ,PM     ,ICODE  )
 C
         LAG_NCF = LAG_NCF0
@@ -9460,7 +9423,7 @@ C-------------------------------------------------
       ERR_MSG='BLOCK BOUNDARY MATERIAL NODES'
       ERR_CATEGORY='BLOCK BOUNDARY MATERIAL NODES'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-      IF(IALE+IEULER /= 0 .AND. NUMELQ+NUMELS  > 0) THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0 .AND. NUMELQ+NUMELS  > 0) THEN
         CALL NODM11(PM,IXS,IXQ,ICODE)
       ENDIF
       CALL TRACE_OUT1()
@@ -9470,7 +9433,7 @@ C-------------------------------------------------
       ERR_MSG='POROUS NODES'
       ERR_CATEGORY='POROUS NODES'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-      IF(IALE+IEULER /=0 .AND. NUMELQ+NUMELS >0)THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /=0 .AND. NUMELQ+NUMELS >0)THEN
         SIWORK = NUMNOD+4*NFACX
         ALLOCATE(IWORK(SIWORK)    ,STAT=stat)
         SIWORK = 0
@@ -10692,7 +10655,7 @@ C----------------------------------------------
      B        STACK%GEO   ,STACK%IGEO ,IPARG           ,IPADMESH      ,PADMESH          ,
      C        LIFLOW      ,LRFLOW     ,IFLOW           ,RFLOW         ,
      D        SH4TREE     ,SH3TREE    ,SH4TRIM         ,SH3TRIM       ,QP_IPERTURB      ,
-     E        QP_RPERTURB ,LLINAL     ,LINALE          ,FVM_INIVEL    ,GJBUFI           ,
+     E        QP_RPERTURB ,ALE%LINK%LLINAL     ,ALE%LINK%LINALE          ,FVM_INIVEL    ,GJBUFI           ,
      F        GJBUFR      ,MS         ,IN              ,LGAUGE        ,GAUGE            ,
      G        KXX         ,IXX        ,IPARTX          ,LRIVET        ,IXS16            ,
      H        ICONX       ,FXBIPM     ,FXBFILE_TAB     ,EIGIPM        ,EIGRPM           ,
@@ -10909,14 +10872,14 @@ c         start CPU timer for ddsplit
           CALL GET_SIZE_NUMNOD_LOCAL(NUMNOD,NUMNOD_L)
 
           ALLOCATE( ALE_ELM(NSPMD) )
-          IF( (NUMELS>0).AND.(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG/=0) ) THEN
+          IF( (NUMELS>0).AND.(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER+GLOB_THERM%ITHERM+ALE%GLOBAL%IALELAG/=0) ) THEN
                 CALL SPLIT_CFD_SOLIDE(NUMELS,ALE_CONNECTIVITY,IXS,ALE_ELM,SIZE_ALE_ELM)
           ELSE
                 SIZE_ALE_ELM(1:NSPMD) = 0
           ENDIF
           ! -----------------------------------------
           ! reverse connectivity for FVM solver : useful to ensure the parith/on
-          IF(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG/=0) THEN
+          IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + ALE%GLOBAL%IALELAG/=0) THEN
                 ALLOCATE( INDX_S(NUMELS) )
                 ALLOCATE( INDX_Q(NUMELQ) )
                 ALLOCATE( INDX_TG(NUMELTG) )
@@ -11047,8 +11010,8 @@ c
      I         DR           ,THKE        ,DAMPR          ,DAMP        ,MS         ,    
      J         IN           ,TF          ,PM             ,SKEW        ,XFRAME     ,    
      K         GEO          ,EANI        ,BUFMAT         ,BUFGEO      ,BUFSF      ,    
-     L         RBMPC        ,GJBUFR      ,W              ,VEUL        ,FILL       ,    
-     M         DFILL        ,WB          ,DSAVE          ,ASAVE       ,MSNF       ,    
+     L         RBMPC        ,GJBUFR      ,W              ,VEUL        ,ALE%MULTIMAT%VOF%FILL       ,
+     M         ALE%MULTIMAT%VOF%DFILL        ,WB          ,DSAVE          ,ASAVE       ,MSNF       ,
      N         SPBUF        ,FORC        ,VEL            ,FSAV        ,FZERO      ,    
      O         XLAS         ,ACCELM      ,FBVEL          ,GRAV       ,    
      P         FR_WAVE      ,FAILWAVE    ,PARTS0         ,ELBUF      ,                
@@ -11085,8 +11048,8 @@ c
      y         MSSA         ,MSTR        ,MSP            ,MSRT        ,IBCR       ,    
      z         FRADIA       ,DMELC       ,DMELTG         ,DMELS       ,DMELTR     ,    
      1         DMELP        ,DMELRT      ,RES_SMS                     ,ISPHIO     ,    
-     2         LPRTSPH      ,LONFSPH     ,VSPHIO         ,SPHVELN     ,ALPH       ,    
-     3         IFILL        ,IMS         ,IRBE2          ,LRBE2       ,    
+     2         LPRTSPH      ,LONFSPH     ,VSPHIO         ,SPHVELN     ,ALE%MULTIMAT%VOF%ALPH       ,
+     3         ALE%MULTIMAT%VOF%IFILL,ALE%MULTIMAT%VOF%IMS,IRBE2,LRBE2       ,
      8         MS_PLY,
      9         ZI_PLY       ,INOD_PXFEM  ,IEL_PXFEM      ,ICODEP      ,ISKEWP     ,
      A         ADDCNE_PXFEM ,CNE_PXFEM   ,CEL_PXFEM      ,ITHVAR      ,XDP,TABLE  ,
@@ -11095,7 +11058,7 @@ c
      D         ILOADP       ,LLOADP      ,LOADP,
      E         INOD_CRKXFEM ,IEL_CRKXFEM ,ADDCNE_CRKXFEM ,CNE_CRKXFEM ,CEL_CRKXFEM,
      F         IBUFSSG_IO   ,INTERCEP    ,IBORDNODE      ,IEDGESH     ,IBORDEDGE  ,
-     G         LINALE       ,NODEDGE     ,IEDGE          ,CEP_CRKXFEM ,IEDGE_TMP  ,
+     G         ALE%LINK%LINALE       ,NODEDGE     ,IEDGE          ,CEP_CRKXFEM ,IEDGE_TMP  ,
      H         CRKNODIAD    ,ELBUF_TAB   ,NOM_OPT        ,LGAUGE      ,GAUGE      ,
      I         IGAUP        ,NGAUP       ,NODLEVXF       ,FRONTB_R2R  ,DFLOW      ,
      J         VFLOW        ,WFLOW       ,SPH2SOL        ,SOL2SPH     ,IRST       ,
@@ -11134,7 +11097,9 @@ C
       CALL DEALLOCATE_IGRSURF_SPLIT(T_MONVOL,IGRSURF_PROC)
       DEALLOCATE( IGRSURF_PROC )
 
-      IF( (NUMELS>0).AND.(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG/=0) ) CALL DEALLOCATE_SPLIT_CFD_SOLIDE(ALE_ELM)
+      IF( (NUMELS>0).AND.(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + ALE%GLOBAL%IALELAG/=0) ) THEN
+        CALL DEALLOCATE_SPLIT_CFD_SOLIDE(ALE_ELM)
+      ENDIF
 
       CALL BCS%DEALLOCATE()
       DO P=1,NSPMD

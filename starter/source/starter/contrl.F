@@ -102,7 +102,7 @@ C-----------------------------------------------
       USE ALEMUSCL_MOD , only:ALEMUSCL_Param
       USE ALEFVM_MOD , only:ALEFVM_Param
       USE USER_WINDOWS_MOD
-      USE ALE_MOD
+      USE ALE_MOD , ONLY : ALE
       USE MAT_ELEM_MOD
       USE NAMES_AND_TITLES_MOD
       USE BCS_MOD , only : BCS
@@ -970,8 +970,8 @@ C---------------------------------------------------
       ENDDO
       JEUL = ALE%GLOBAL%IS_DEFINED_EULER ! =1 : if /EULER/MAT or /PROP/SOLID (IALE=2) is defined within the input file
       JALE = ALE%GLOBAL%IS_DEFINED_ALE   ! =1 : if /ALE/MAT or /PROP/SOLID (IALE=1) is defined within the input file
-      LVEUL=32
-      IF(INTEG8==1)LVEUL=52
+      ALE%GLOBAL%LVEUL=32
+      IF(INTEG8==1)ALE%GLOBAL%LVEUL=52
 C---------------------------------------------------
       NALEBCS = 0
       CALL HM_OPTION_COUNT('/ALE/BCS', NALEBCS)
@@ -991,7 +991,7 @@ C---------------------------------------------------
       !************************
       ! /ALE/LINK/VEL: counting
       !************************
-      CALL HM_OPTION_COUNT('/ALE/LINK/VEL', NALELK)
+      CALL HM_OPTION_COUNT('/ALE/LINK/VEL', ALE%LINK%NALELK)
 
       !*****************
       ! /ALE/SOLVER/FINT
@@ -1315,9 +1315,8 @@ C=======================================================================
      .      TITRE(155)(1:57),NJOINT
 C
       IF(NINTERFRIC > 0) WRITE (IOUT,'(A,I10)') TITRE(190)(1:57),NINTERFRIC
-      IF(NALELK>0)WRITE(IOUT,'(A,I10)')
-     .'    NALELK: NUMBER OF ALE LINKS. . . . . . . . . . . . . ',
-     .NALELK
+      IF(ALE%LINK%NALELK>0)WRITE(IOUT,'(A,I10)')
+     .'    NALELK: NUMBER OF ALE LINKS. . . . . . . . . . . . . ', ALE%LINK%NALELK
       WRITE (IOUT, 5051) NACTIV
       WRITE (IOUT, 5052) NDAMP
       WRITE (IOUT, 5053) NGJOINT

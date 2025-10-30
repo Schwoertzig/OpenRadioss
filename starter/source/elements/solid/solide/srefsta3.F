@@ -53,6 +53,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixs
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -125,7 +126,7 @@ C-----------------------------------------------
      .   G1X(MVSIZ),G2X(MVSIZ),G3X(MVSIZ),
      .   G1Y(MVSIZ),G2Y(MVSIZ),G3Y(MVSIZ),
      .   G1Z(MVSIZ),G2Z(MVSIZ),G3Z(MVSIZ),
-     .   VBID(LVEUL,MVSIZ)
+     .   VBID(ALE%GLOBAL%LVEUL,MVSIZ)
       my_real
      .   FAC, XT, YT, ZT
 C-----
@@ -813,6 +814,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -832,7 +834,7 @@ C-----------------------------------------------
       INTEGER :: NEL,JEUL,IGEO(NPROPGI,*),NGL(*),NGEO(*)
 C
       my_real
-     .   VOL(*), VEUL(LVEUL,*),GEO(NPROPG,*),
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),GEO(NPROPG,*),
      .   X1(*), X2(*), X3(*), X4(*), X5(*), X6(*),
      .   X7(*), X8(*), Y1(*), Y2(*), Y3(*), Y4(*), Y5(*), Y6(*), Y7(*),
      .   Y8(*), Z1(*), Z2(*), Z3(*), Z4(*), Z5(*), Z6(*), Z7(*), Z8(*),
@@ -1063,6 +1065,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1081,7 +1084,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER :: NEL,JEUL,IGEO(NPROPGI,*),NGL(*),NGEO(*)
       my_real
-     .   VOL(*), VEUL(LVEUL,*),GEO(NPROPG,*),
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),GEO(NPROPG,*),
      .   JAC1(*), JAC2(*), JAC3(*), JAC4(*), JAC5(*), JAC6(*), JAC9(*),
      .   X1(*), X2(*), X3(*), X4(*), X5(*), X6(*), X7(*), X8(*), 
      .   Y1(*), Y2(*), Y3(*), Y4(*), Y5(*), Y6(*), Y7(*), Y8(*), 

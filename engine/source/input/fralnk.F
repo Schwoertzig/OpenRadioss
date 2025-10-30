@@ -40,6 +40,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -106,14 +107,12 @@ C-----------------------------------------------
            ENDDO             
            !checking input             
            IF(IERR==1)THEN
-             WRITE(ISTDO,*)
-     .         ' ** ERROR : NODE ID(S) NOT FOUND IN ALE LINK CARD'
-             WRITE(IOUT ,*)
-     .         ' ** ERROR : NODE ID(S) NOT FOUND IN ALE LINK CARD'
+             WRITE(ISTDO,*) ' ** ERROR : NODE ID(S) NOT FOUND IN ALE LINK CARD'
+             WRITE(IOUT ,*) ' ** ERROR : NODE ID(S) NOT FOUND IN ALE LINK CARD'
              CALL ARRET(2)          
            END IF 
            !array size for allocation (LINALE(SLINALE))           
-           LLINAL=LLINAL+NS+6                          
+           ALE%LINK%LLINAL=ALE%LINK%LLINAL+NS+6
          !---------------------------------!
          !  ALE LINK DEFINED FROM GRNOD    !
          !---------------------------------!
@@ -145,7 +144,7 @@ C-----------------------------------------------
            END IF
            NS=-NS
            !array size for allocation (LINALE(SLINALE))           
-           LLINAL=LLINAL+1+6           
+           ALE%LINK%LLINAL=ALE%LINK%LLINAL+1+6
          ENDIF
          
          WRITE(IIN,'(3I10,5X,I3.3,I10)')M1,M2,NS,IXYZ(KEY3),K4
@@ -180,6 +179,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+      USE ALE_MOd , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -210,10 +210,8 @@ C
       IKEY=KALELINK
       N=0
       DO WHILE(N<NALELK)
-        READ(IUSC1,REC=IKAD(IKEY)+K,
-     .       FMT='(7X,A,1X,A,1X,I5,1X,A,1X,A,13X,I10)',
-     .       ERR=9990) KEY1 , KEY2 , IFORM  , KEY3 , KEY4   ,   NBC
-                 !    'LINK','VEL' ,'Iform' ,'XYZ' ,'GRNOD' ,...NBC
+        READ(IUSC1,REC=IKAD(IKEY)+K,FMT='(7X,A,1X,A,1X,I5,1X,A,1X,A,13X,I10)',ERR=9990) KEY1 , KEY2 , IFORM  , KEY3 , KEY4   ,NBC
+                                                                                  !    'LINK','VEL' ,'Iform' ,'XYZ' ,'GRNOD' ,...NBC
         IF(KEY1(1:5)/='LINK ')THEN
           K=K+1
           CYCLE
@@ -271,9 +269,7 @@ C
              K=K+1
              NS=NS+NVAR(CARTE)
             ENDDO
-            LLINAL=LLINAL+NS+6
-            !WRITE(IIN,'(3I10,5X,I3.3,I10)')M1,M2,NS,IXYZ(KEY3),IFORM
-            !CALL READ10(IKAD(IKEY)+KK,NBC-1,KEY0(IKEY))
+            ALE%LINK%LLINAL = ALE%LINK%LLINAL + NS + 6
           !---------------------------------!
           !  ALE LINK DEFINED FROM GRNOD    !
           !---------------------------------!
@@ -293,14 +289,12 @@ C
             ENDDO
             !checking input
             IF(IERR==1)THEN
-              WRITE(ISTDO,*)
-     .          ' ** ERROR : SINGLE GRNOD ID NOT FOUND IN ALE LINK CARD'
-              WRITE(IOUT ,*)
-     .          ' ** ERROR : SINGLE GRNOD ID NOT FOUND IN ALE LINK CARD'
+              WRITE(ISTDO,*) ' ** ERROR : SINGLE GRNOD ID NOT FOUND IN ALE LINK CARD'
+              WRITE(IOUT ,*) ' ** ERROR : SINGLE GRNOD ID NOT FOUND IN ALE LINK CARD'
               CALL ARRET(2)          
             END IF  
             NS=-NS
-            LLINAL=LLINAL+1+6             
+            ALE%LINK%LLINAL = ALE%LINK%LLINAL + 1 + 6
           ENDIF     
           !---------------------------------!                    
           WRITE(IIN,'(3I10,5X,I3.3,I10)')M1,M2,NS,IXYZ(KEY3),IFORM
@@ -312,7 +306,6 @@ C
       RETURN
 C
  9990 CONTINUE
-      CALL ANCMSG(MSGID=73,ANMODE=ANINFO,
-     .            C1=KEY0(IKEY))
+      CALL ANCMSG(MSGID=73,ANMODE=ANINFO,C1=KEY0(IKEY))
       CALL ARRET(0)
       END

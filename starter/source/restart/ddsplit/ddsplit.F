@@ -377,7 +377,7 @@ C-----------------------------------------------
       USE LOADS_MOD
       USE STATE_MOD
       USE USER_WINDOWS_MOD
-      USE ALE_MOD
+      USE ALE_MOD , ONLY : ALE
       USE OUTPUT_MOD
       USE INTERFACES_MOD
       USE SUBMODEL_MOD , ONLY : NSUBMOD
@@ -394,7 +394,6 @@ C-----------------------------------------------
       use checksum_starter_option_mod, only : checksum_write_starter_restart
       use w_bcs_proc_mod , only : w_bcs_proc
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
-
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -934,7 +933,7 @@ C--------------------------------------------
       NE_NESVOIS  = 0
       ISHADOW = 0
       IF(DETONATORS%IS_SHADOWING_REQUIRED) ISHADOW = 1
-      IF (IALE + IEULER + GLOB_THERM%ITHERM + IALELAG + ISHADOW > 0) THEN
+      IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + ALE%GLOBAL%IALELAG + ISHADOW > 0) THEN
         NUMEL = MAX(NUMELS,NUMELQ)
         NUMEL_L = MAX(NUMELS_L,NUMELQ_L)
         IF (MULTI_FVM%IS_USED .AND. N2D /= 0) THEN
@@ -1244,17 +1243,15 @@ C count Airbags
 C--------------------------------------------
       INTBAG_L = 0
       IF(NVOLU>0)THEN
-        IF(INTBAG/=0)
-     +    INTBAG_L = LENVOLU
-      ELSEIF(INTBAG > 0 .AND. IALELAG > 0 ) THEN
+        IF(INTBAG/=0) INTBAG_L = LENVOLU
+      ELSEIF(INTBAG > 0 .AND. ALE%GLOBAL%IALELAG > 0 ) THEN
         INTBAG_L = INTBAG
       ENDIF
 C--------------------------------------
 C counts  Elem multi-brins
 C--------------------------------------
       ISUMNX_L = 0
-      IF (NUMELX_L>0)
-     .  CALL C_ELMX(KXX,CEP,P-1,ISUMNX_L)
+      IF (NUMELX_L>0) CALL C_ELMX(KXX,CEP,P-1,ISUMNX_L)
 C--------------------------------------
 C count SPH Cells
 C--------------------------------------
@@ -1940,7 +1937,7 @@ C boundary Elts CFD/ALE
 C--------------------------------------------
       ISHADOW = 0
       IF(DETONATORS%IS_SHADOWING_REQUIRED) ISHADOW = 1
-      IF (IALE+IEULER+GLOB_THERM%ITHERM+IALELAG +ISHADOW > 0) THEN
+      IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER+GLOB_THERM%ITHERM + ALE%GLOBAL%IALELAG +ISHADOW > 0) THEN
         IF(NUMELS_L+NUMELQ_L+NUMELTG_L>0) THEN
           ALLOCATE(IDGLOB_L(NUMELS_L + NSVOIS + NUMELQ_L + NQVOIS + NUMELTG_L + NTGVOIS))
           ALLOCATE(UIDGLOB_L(NUMELS_L + NSVOIS + NUMELQ_L + NQVOIS + NUMELTG_L + NTGVOIS))
@@ -1987,14 +1984,12 @@ C--------------------------------------------
 C Solid: elements connectivity
 C--------------------------------------------
       OFF = 0
-      CALL W_IXLOC(IXS,NIXS,8,CEP(MIN(OFF+1,LEN_CEP)),P-1,
-     +             NUMELS,NUMELS_L,NODLOCAL,LEN_IA)
+      CALL W_IXLOC(IXS,NIXS,8,CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELS,NUMELS_L,NODLOCAL,LEN_IA)
 C
-      IF (IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0) THEN
+      IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + ALE%GLOBAL%IALELAG > 0) THEN
          CALL WRITE_I_C(IXSF,NIXS*NSVOIS)
          LEN_IA = LEN_IA + NIXS*NSVOIS
-         IF(NSVOIS>0)
-     +        DEALLOCATE(IXSF)
+         IF(NSVOIS>0) DEALLOCATE(IXSF)
       ENDIF
 C--------------------------------------------
 C Solids
@@ -2015,7 +2010,7 @@ C--------------------------------------------
 C--------------------------------------------
 C Boundary Elts CFD/ALE
 C--------------------------------------------
-      IF (IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0) THEN
+      IF (ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + ALE%GLOBAL%IALELAG > 0) THEN
         CALL WRITE_I_C(IXQF,NIXQ*NQVOIS)
         LEN_IA = LEN_IA + NIXQ*NQVOIS
         IF(NQVOIS>0)
@@ -2049,9 +2044,8 @@ C--------------------------------------
 C--------------------------------------
 C NALE and ALE neighbor
 C--------------------------------------
-      IF(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0) THEN
-        IF(IALE+IEULER+IALELAG/=0)
-     .       CALL W_INLOC(NALE,NODGLOB,NUMNOD_L,LEN_IA)
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM + ALE%GLOBAL%IALELAG > 0) THEN
+        IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + ALE%GLOBAL%IALELAG/=0)CALL W_INLOC(NALE,NODGLOB,NUMNOD_L,LEN_IA)
 
         ITMP = SIZE(ee_connect_l%iad_connect)
         CALL WRITE_I_C(ITMP, 1)
@@ -2122,7 +2116,7 @@ C     ----------------------    C
 C
 C multi mat 2D mono SPMD
 C
-      IF(NMULT > 0) THEN
+      IF(ALE%MULTIMAT%NMULT > 0) THEN
         CALL WRITE_I_C(IFILL,SIFILL)
         CALL WRITE_I_C(IMS,SIMS)
         LEN_IA = LEN_IA +SIFILL + SIMS
@@ -2728,13 +2722,13 @@ C--------------------------------------------
 
 C--------------------------------------------
       CALL W_R3NLOC(X,NODGLOB,NUMNOD_L,LEN_AM)
-      IF(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0)
+      IF(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER+GLOB_THERM%ITHERM+ALE%GLOBAL%IALELAG > 0)
      .  CALL W_BID(3*NRCVVOIS,LEN_AM)
       CALL W_R3NLOC(D,NODGLOB,NUMNOD_L,LEN_AM)
-      IF(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0)
+      IF(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER+GLOB_THERM%ITHERM+ALE%GLOBAL%IALELAG > 0)
      .  CALL W_BID(3*NRCVVOIS,LEN_AM)
       CALL W_R3NLOC(V,NODGLOB,NUMNOD_L,LEN_AM)
-      IF(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0)
+      IF(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER+GLOB_THERM%ITHERM+ALE%GLOBAL%IALELAG > 0)
      .  CALL W_BID(3*NRCVVOIS,LEN_AM)
       IF(IRODDL>0) THEN
         CALL W_R3NLOC(VR,NODGLOB,NUMNOD_L,LEN_AM)
@@ -2865,14 +2859,14 @@ C Lag Options
 C--------------------------------------------
 C W, VEUL, WB, ASAV, DSAV,
 C--------------------------------------------
-      IF(IALE/=0) THEN
+      IF(ALE%GLOBAL%IALE/=0) THEN
         CALL W_R3NLOC(W,NODGLOB,NUMNOD_L,LEN_AM)
       ENDIF
-      IF(IEULER * (1 - IMULTI_FVM)/=0)THEN
+      IF(ALE%GLOBAL%IEULER * (1 - IMULTI_FVM)/=0)THEN
         IF(N2D==0) THEN
           OFF = 0
           CALL W_RELOC2(
-     .      VEUL,LVEUL,CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELS,NUMELS_L,LEN_AM)
+     .      VEUL,ALE%GLOBAL%LVEUL,CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELS,NUMELS_L,LEN_AM)
         ELSE
           OFF = NUMELS
           CALL W_RELOC2(VEUL,10,CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELQ,NUMELQ_L,LEN_AM)
@@ -2902,11 +2896,11 @@ C--------------------------------------------
 C
 C multi mat 2D: mono SPMD
 C
-      IF(NMULT > 0) THEN
-        CALL W_RFILLOC(FILL,NODGLOB,NUMNOD,NUMNOD_L,NMULT,LEN_AM)
-        CALL W_RFILLOC(DFILL,NODGLOB,NUMNOD,NUMNOD_L,NMULT,LEN_AM)
-        CALL WRITE_DB(ALPH,SALPH)
-        LEN_AM = LEN_AM + SALPH
+      IF(ALE%MULTIMAT%NMULT > 0) THEN
+        CALL W_RFILLOC(FILL,NODGLOB,NUMNOD,NUMNOD_L,ALE%MULTIMAT%NMULT,LEN_AM)
+        CALL W_RFILLOC(DFILL,NODGLOB,NUMNOD,NUMNOD_L,ALE%MULTIMAT%NMULT,LEN_AM)
+        CALL WRITE_DB(ALE%MULTIMAT%VOF%ALPH,ALE%MULTIMAT%VOF%SALPH)
+        LEN_AM = LEN_AM + ALE%MULTIMAT%VOF%SALPH
       END IF
       IF(ALE%GRID%NWALE==2) THEN
         CALL W_R3NLOC(WB,NODGLOB,NUMNOD_L,LEN_AM)
@@ -2914,7 +2908,7 @@ C
         CALL W_R3NLOC(WB,NODGLOB,NUMNOD_L,LEN_AM)
         CALL W_RNLOC(WMA,NODGLOB,NUMNOD_L,LEN_AM)
       ENDIF
-      IF(ILAG==1.AND.(IALE+IEULER)/=0)THEN
+      IF(ILAG==1.AND.(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER)/=0)THEN
         CALL W_R3NLOC(DSAV,NODGLOB,NUMNOD_L,LEN_AM)
         CALL W_R3NLOC(ASAV,NODGLOB,NUMNOD_L,LEN_AM)
       ENDIF
@@ -2927,7 +2921,7 @@ C--------------------------------------
 C--------------------------------------
 C Nodal fluid masses
 C--------------------------------------
-      IF(IALE == 1 .OR. IEULER == 1 .OR. IALELAG == 1) THEN
+      IF(ALE%GLOBAL%IALE == 1 .OR. ALE%GLOBAL%IEULER == 1 .OR. ALE%GLOBAL%IALELAG == 1) THEN
         CALL W_RNLOC(MSNF,NODGLOB,NUMNOD_L,LEN_AM)
       ENDIF
 C--------------------------------------------
@@ -3263,11 +3257,11 @@ C--------------------------------------
 C--------------------------------------
 C ALE LINKS
 C--------------------------------------
-      IF(NALELK>0.AND.SLINALE>0)THEN
-        CALL WRITE_I_C(LINALE,SLINALE)
+      IF(ALE%LINK%NALELK > 0 .AND. ALE%LINK%SLINALE>0)THEN
+        CALL WRITE_I_C(LINALE,ALE%LINK%SLINALE)
       ENDIF
 C--------------------------------------
-C ALE LINKS
+C ALE GRID
 C--------------------------------------
       CALL WRITE_ALE_GRID()
 C-----------------------------------------------
@@ -3527,7 +3521,7 @@ C--------------------------------------
        IF(ALEFVM_Param%IEnabled > 0)CALL WRITE_DB(ALEFVM_Buffer%FCELL ,6*NUMELS)
 C--------------------------------------------
 C  for foam+air
-       IF(IALELAG > 0) THEN
+       IF(ALE%GLOBAL%IALELAG > 0) THEN
           CALL W_ALELAG(DFLOW,VFLOW,WFLOW,NODGLOB,NUMNOD_L,LEN_AM)
        ENDIF
 C--------------------------------------------
@@ -3679,13 +3673,13 @@ C
         NISKY0_L=NISKY0_L+4*NCONV_L+4*NRADIA_L+4*NFXFLUX_L
       END IF
 C
-      I_EVAL = NUMNOD_L+2*NUMNOD_L*MAX(IALE,IEULER,IALELAG)+NUMNOD_L*IRODDL
+      I_EVAL = NUMNOD_L+2*NUMNOD_L*MAX(ALE%GLOBAL%IALE,ALE%GLOBAL%IEULER,ALE%GLOBAL%IALELAG)+NUMNOD_L*IRODDL
       R_EVAL = LENWA_L+NFUNCT
       IF(IPARI0/=0)THEN
         LSKYI = NINT(5*MAX(4*NUMNOD_L,IMAXIMP_L)*PROBINT)+4*NUMSPH_L+NSKYI18_L
         R_EVAL = R_EVAL+8*NUMNOD_L+NPSAV*NPART
         R_EVAL = R_EVAL+8*LCNE_L
-        IF (N2D==0.AND.IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0) R_EVAL = R_EVAL+ LCNE_L
+        IF (N2D==0.AND.ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER+GLOB_THERM%ITHERM+ALE%GLOBAL%IALELAG > 0) R_EVAL = R_EVAL+ LCNE_L
 C NFSKYI = 5
         R_EVAL = R_EVAL+5*LSKYI
         I_EVAL = I_EVAL+LSKYI+NUMNOD_L+1+LCNI2_L
@@ -3697,7 +3691,7 @@ C NFSKYI = 5
         IF(I2NSNT>0.AND.IVECTOR==1)I_EVAL = I_EVAL+ NUMNOD_L
       ELSE
         R_EVAL = R_EVAL+7*NUMNOD_L+NUMNOD_L*IRODDL+NPSAV*NPART
-        R_EVAL = R_EVAL+2*MAX(IALE,GLOB_THERM%ITHERM,IEULER)*(NUMELS_L+NUMELQ_L)
+        R_EVAL = R_EVAL+2*MAX(ALE%GLOBAL%IALE,GLOB_THERM%ITHERM,ALE%GLOBAL%IEULER)*(NUMELS_L+NUMELQ_L)
       END IF
 C      IF(KDTINT/=0)
       R_EVAL = R_EVAL+NUMNOD_L

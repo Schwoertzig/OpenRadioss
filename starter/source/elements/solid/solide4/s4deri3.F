@@ -45,6 +45,7 @@ CCgw|============================================================
      .                   DELTAX,DET   ,NGL   ,NGEO   ,MXT  ,
      .                   PM    ,VOLDP ) 
       USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -71,7 +72,7 @@ C-----------------------------------------------
      .   Z1(MVSIZ), Z2(MVSIZ), Z3(MVSIZ), Z4(MVSIZ),VOLDP(*) 
 C     REAL
       my_real
-     .   VOL(*), VEUL(LVEUL,*),GEO(NPROPG,*), PM(NPROPM,*),
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),GEO(NPROPG,*), PM(NPROPM,*),
      .   RX(*), RY(*), RZ(*), SX(*), SY(*), SZ(*), TX(*), TY(*), TZ(*), DET(*),
      .   PX1(MVSIZ), PX2(MVSIZ), PX3(MVSIZ), PX4(MVSIZ),  
      .   PY1(MVSIZ), PY2(MVSIZ), PY3(MVSIZ), PY4(MVSIZ),  

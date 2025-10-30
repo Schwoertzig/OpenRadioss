@@ -45,6 +45,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
 C----------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -65,7 +66,7 @@ C-----------------------------------------------
       INTEGER :: NEL, JEUL, NXREF, IMULTI_FVM
 C
       my_real
-     .   VOL(NEL), VEUL(LVEUL,*) , GEO(NPROPG,NUMGEO),
+     .   VOL(NEL), VEUL(ALE%GLOBAL%LVEUL,*) , GEO(NPROPG,NUMGEO),
      .   JAC1(NEL), JAC2(NEL), JAC3(NEL), JAC4(NEL), JAC5(NEL), JAC6(NEL),
      .   JAC12(NEL), JAC45(NEL), JAC78(NEL),
      .   PX1(NEL), PX2(NEL), PX3(NEL), PX4(NEL),  

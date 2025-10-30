@@ -155,7 +155,7 @@ C-----------------------------------------------
       N2D     =TABVINT(1)
       NCPRI   =TABVINT(2)
       !IUSERWI =TABVINT(3)
-      IALE    =TABVINT(4)
+      ALE%GLOBAL%IALE    =TABVINT(4)
       NGROUP  =TABVINT(5)
       MAT_ELEM%NGROUP = NGROUP
       NCYCLE  =TABVINT(6)
@@ -163,7 +163,7 @@ C-----------------------------------------------
       IGER    =TABVINT(8)
       LBUFEL  =TABVINT(9)
       IRODDL  =TABVINT(10)
-      IEULER  =TABVINT(11)
+      ALE%GLOBAL%IEULER  =TABVINT(11)
       GLOB_THERM%ITHERM  =TABVINT(12)
       IHSH    =TABVINT(13)
       ITESTV  =TABVINT(14)
@@ -172,7 +172,7 @@ C-----------------------------------------------
       ISECUT  =TABVINT(17)
       IDAMP   =TABVINT(18)
       IRXDP   =TABVINT(19)
-      NMULT   =TABVINT(20)
+      ALE%MULTIMAT%NMULT   =TABVINT(20)
       INTEG8  =TABVINT(21)
       ISIGI   =TABVINT(22)
       NSPMD   =TABVINT(23)
@@ -218,8 +218,8 @@ C Empty field           = TABVINT(47)
       SGJBUFI   = TABVINT(58)
       ALE%GLOBAL%SNALE     = TABVINT(59)
       ALE%GLOBAL%SIELVS    = TABVINT(60)
-      SIFILL    = TABVINT(62)
-      SIMS      = TABVINT(63)
+      ALE%MULTIMAT%VOF%SIFILL    = TABVINT(62)
+      ALE%MULTIMAT%VOF%SIMS      = TABVINT(63)
 !! to empty+++
       SISUBS    = TABVINT(64)
       SIGRN     = TABVINT(65)
@@ -355,10 +355,10 @@ c     ENDIF
       SRBMPC    = TABVINT(181)
       SGJBUFR   = TABVINT(182)
       SW        = TABVINT(183) ! IALE > 0 => 3 * NUMNOD
-      SVEUL     = TABVINT(184)
-      SFILL     = TABVINT(185)
-      SDFILL    = TABVINT(186)
-      SALPH     = TABVINT(187)
+      ALE%GLOBAL%SVEUL     = TABVINT(184)
+      ALE%MULTIMAT%VOF%SFILL     = TABVINT(185)
+      ALE%MULTIMAT%VOF%SDFILL    = TABVINT(186)
+      ALE%MULTIMAT%VOF%SALPH     = TABVINT(187)
       SWB       = TABVINT(188) !  0 or 3 * NUMNOD or 4 * NUMNOD
       SDSAVE    = TABVINT(189) !  0 or 3 * NUMNOD 
       !         = TABVINT(190)
@@ -491,7 +491,7 @@ C-----
       NVSIZ  =TABVINT(313)
       NPROPG =TABVINT(314)
       NPARG  =TABVINT(315)
-      LVEUL  =TABVINT(316)
+      ALE%GLOBAL%LVEUL  =TABVINT(316)
       NIXFR1 =TABVINT(325)
       NIXFR2 =TABVINT(326)
       NPARI  =TABVINT(327)
@@ -729,8 +729,8 @@ C No more used        TABVINT(NEXT + 22 )
         NOISEP    = TABVINT(NEXT + 54 )
 c link
         NRLINK    = TABVINT(NEXT + 55 )
-        NALELK    = TABVINT(NEXT + 56 )
-        LLLINK    = TABVINT(NEXT + 57 ) 
+        ALE%LINK%NALELK    = TABVINT(NEXT + 56 )
+        LLLINK    = TABVINT(NEXT + 57 )
       ENDIF
 
       NEXT=NEXT+58
@@ -1226,7 +1226,7 @@ C
 C --- simplified ale option + lagrange
 C
       NEXT   = NEXT + 1
-      IALELAG = TABVINT(NEXT)
+      ALE%GLOBAL%IALELAG = TABVINT(NEXT)
 C
       NEXT   = NEXT + 1
       NRBE2G=TABVINT(NEXT)
@@ -1295,7 +1295,7 @@ C xfem for layered shell (cracks)
       NEXT = NEXT + 1
       NIBSPH   = TABVINT(NEXT)
       NEXT = NEXT + 1
-      SLINALE  = TABVINT(NEXT)      
+      ALE%LINK%SLINALE  = TABVINT(NEXT)
       NEXT = NEXT + 1
       NSUBMOD  = TABVINT(NEXT)
       NEXT = NEXT + 1
@@ -1729,7 +1729,7 @@ C  BCS/CYCLIC
       NEXT       = NEXT + 1
       IF(TABVINT(NEXT) == 1)INTER18_IS_VARIABLE_GAP_DEFINED = .TRUE.
 
-      IF ((IALE > 0 .AND.  ALE%GRID%NWALE_RST == 6) .OR. 
+      IF ((ALE%GLOBAL%IALE > 0 .AND.  ALE%GRID%NWALE_RST == 6) .OR.
      .     INTER18_AUTOPARAM == 1 .OR. INTER18_IS_VARIABLE_GAP_DEFINED) THEN
          NEXT = NEXT + 1
          NE_SLERCVOIS = TABVINT(NEXT)

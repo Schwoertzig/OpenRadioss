@@ -24,7 +24,7 @@ C.../PARAM/
       INTEGER LVARITHB
       PARAMETER (LVARITHB = 4)
 C
-      COMMON /PARAM/ NPROPM, NVSIZ, NPROPG, NPARG,  LVEUL,
+      COMMON /PARAM/ NPROPM, NVSIZ, NPROPG, NPARG,
      .               NIXFR1 ,NIXFR2,
      .               NPARI,  LWAMP, LWANMP, NISX,
      .               NISU,   NIMV,  NNPBY,  NRBY   ,NIFV,
@@ -44,7 +44,7 @@ C
      .               NIBCLD, NIGRV, LFACGRV,NRTRANS,NSLIPRING,NRETRACTOR,
      .               N_SEATBELT
 
-      INTEGER        NPROPM, NVSIZ, NPROPG, NPARG,  LVEUL,
+      INTEGER        NPROPM, NVSIZ, NPROPG, NPARG,
      .               NIXFR1 ,NIXFR2,
      .               NPARI,  LWAMP, LWANMP, NISX,
      .               NISU,   NIMV,  NNPBY,  NRBY   ,NIFV,

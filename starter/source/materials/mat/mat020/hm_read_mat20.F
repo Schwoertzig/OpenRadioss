@@ -52,6 +52,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE MULTIMAT_PARAM_MOD , ONLY : M20_DISCRETE_FILL
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -88,6 +89,7 @@ C-----------------------------------------------
       IS_AVAILABLE = .FALSE.
       
       CALL HM_OPTION_IS_ENCRYPTED(IS_ENCRYPTED)
+      ALE%MULTIMAT%IS_DEFINED_LAW20 = .TRUE.
 
 C     Number of material (it's always 2...)
       NMAT = 2      
@@ -107,7 +109,7 @@ C     Material proportions
          PM(185 + I) = CMAT(I)
       ENDDO
       PM(20)=NMAT+EM01
-      NMULT=MAX(NMULT,NMAT)
+      ALE%MULTIMAT%NMULT=MAX(ALE%MULTIMAT%NMULT,NMAT)
 
       ! Multimaterial data
       MATPARAM%multimat%nb = 2

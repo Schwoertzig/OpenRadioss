@@ -72,6 +72,7 @@ C-----------------------------------------------
       USE NLOCAL_REG_MOD
       use constraint_mod , only : constraint_
       use element_mod , only : nixs,nixq,nixtg
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1629,7 +1630,7 @@ C
 C
 C CFD boundarys
 C    
-      IF(IALE+IEULER+ITHERM+IALELAG/=0)THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + ITHERM + ALE%GLOBAL%IALELAG /= 0)THEN
 C
 C Partie nodale LNRCVOIS
 C
@@ -2686,7 +2687,7 @@ C
 C
 C Writing Frontiere Ale/CFD
 C
-      IF(IALE+IEULER+ITHERM+IALELAG/=0)THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + ITHERM + ALE%GLOBAL%IALELAG/=0)THEN
         CALL WRITE_I_C(NBRCVOIS,NSPMD+1)
         LEN_IA = LEN_IA + NSPMD+1
         CALL WRITE_I_C(LNRCVOIS,NRCVVOIS)

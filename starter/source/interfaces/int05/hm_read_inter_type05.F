@@ -50,6 +50,7 @@ C-----------------------------------------------
       USE UNITAB_MOD
       USE SENSOR_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -222,23 +223,15 @@ C
         IF (IDEL5>2.OR.N2D==1) IDEL5 = 0
         IPARI(17)=IDEL5
 
-        IF (IBAG/=0.AND.NVOLU==0.AND.IALELAG==0.AND.NSPHSOL==0) THEN
-             CALL ANCMSG(MSGID=614,
-     .                   MSGTYPE=MSGWARNING,
-     .                   ANMODE=ANINFO_BLIND_2,
-     .                   I1=NOINT,
-     .                   C1=TITR)
+        IF (IBAG /= 0 .AND. NVOLU == 0 .AND. ALE%GLOBAL%IALELAG == 0 .AND. NSPHSOL == 0) THEN
+             CALL ANCMSG(MSGID=614,MSGTYPE=MSGWARNING,ANMODE=ANINFO_BLIND_2,I1=NOINT,C1=TITR)
              IBAG=0
         ENDIF
         IPARI(32)=IBAG
 
 C         Iadm has not been implemented for TYPE5 yet.
         IF (IADM/=0.AND.NADMESH==0) THEN
-             CALL ANCMSG(MSGID=647,
-     .                   MSGTYPE=MSGWARNING,
-     .                   ANMODE=ANINFO_BLIND_2,
-     .                   I1=NOINT,
-     .                   C1=TITR)
+             CALL ANCMSG(MSGID=647,MSGTYPE=MSGWARNING,ANMODE=ANINFO_BLIND_2,I1=NOINT,C1=TITR)
              IADM=0
         ENDIF
         IPARI(44)=IADM

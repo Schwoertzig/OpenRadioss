@@ -51,6 +51,7 @@ C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD 
       USE MULTI_FVM_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C     I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -249,14 +250,14 @@ C     UPDATE OF MASSES
 C----------------------------
                      IF(IPARIT == 0)THEN
                         CALL AMASS3(
-     1   MS,                GBUF%RHO,          VEUL(LVEUL*NFT+44),GBUF%TAG22,
+     1   MS,                GBUF%RHO,          VEUL(ALE%GLOBAL%LVEUL*NFT+44),GBUF%TAG22,
      2   GBUF%VOL,          NC1,               NC2,               NC3,
      3   NC4,               NC5,               NC6,               NC7,
      4   NC8,               MSNF,              NVC,               GBUF%OFF,
      5   IXS,               NEL,               JEUL)
                      ELSE
                         CALL AMASS3P(
-     1   FSKYM,             GBUF%RHO,          VEUL(LVEUL*NFT+44),GBUF%TAG22,
+     1   FSKYM,             GBUF%RHO,          VEUL(ALE%GLOBAL%LVEUL*NFT+44),GBUF%TAG22,
      2   GBUF%VOL,          IADS,              GBUF%OFF,          IXS,
      3   NEL,               NFT,               JEUL)
                      ENDIF

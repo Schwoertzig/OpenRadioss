@@ -144,7 +144,8 @@ C-----------------------------------------------
         !  EULERIAN AND ALE CASES : ALLOWS ONLY IGTYP=14 & IGTYP=15      !   !(14)'FLUID'
         !################################################################!   !(15)'POROUS'                
         IF(JALE_FROM_MAT > 0 .OR. JALE_FROM_PROP > 0)THEN
-           IF (ILAW  ==  151 .AND. N2D /= 0) THEN
+           IF (N2D /= 0) THEN
+             IF(ILAW == 151 .OR. ILAW == 251)THEN
               !Allow tria for 2D law 151
               IF(IGTYP/=14.AND.IGTYP/=15.AND.IGTYP/=1)THEN  
                  CALL ANCMSG(MSGID=42,
@@ -155,6 +156,7 @@ C-----------------------------------------------
                  PM(1:NPROPM,IMID) =  ZERO
                  IPM(1:NPROPMI,IMID) = 0                  
               ENDIF
+             ENDIF
            ELSE
               IF(IGTYP/=14.AND.IGTYP/=15)THEN  
                  !material set to void for normal termination otherwise engine will set value to non allocated arrays.
@@ -172,7 +174,7 @@ C-----------------------------------------------
         !################################################################!  
         !display error message if MATERIAL 20,37,51,151 are set with lagrangian framework
         IF(JALE_FROM_MAT == 0 .AND. JALE_FROM_PROP == 0)THEN
-          IF(ILAW==20 .OR. ILAW==37 .OR. ILAW==51 .OR. ILAW==151)THEN
+          IF(ILAW==20 .OR. ILAW==37 .OR. ILAW==51 .OR. ILAW==151 .OR. ILAW==251)THEN
             CALL FRETITL2(TITR1,IGEO(NPROPGI-LTITR+1,IPID),LTITR)
             CALL FRETITL2(TITR2,IPM(NPROPMI-LTITR+1,IMID),LTITR)
             CALL ANCMSG(MSGID=101, MSGTYPE=MSGERROR,ANMODE=ANINFO,
@@ -217,7 +219,7 @@ C-----------------------------------------------
         IF(JALE_FROM_PROP > 0 .OR. JALE_FROM_MAT > 0)THEN
           IF(IMID > 0)THEN
             MLAW_TAG(IMID)%L_SSP = 1
-            IF(ILAW == 20)THEN
+            IF(ILAW == 20 .OR. ILAW == 251)THEN
               uID1 = NINT(PM(21,IMID))
               uID2 = NINT(PM(22,IMID))
               MID1 = NINTRI(uID1,IPM,NPROPMI,NUMMAT,1)
@@ -249,14 +251,14 @@ C-----------------------------------------------
         !################################################################!     
         !  GLOBAL FLAGS 
         !################################################################!                
-        IF ((JALE_FROM_PROP == 0 .AND. JALE_FROM_MAT == 0).AND. ILAW/=18 .AND. ILAW/=11) THEN  
+        IF ((JALE_FROM_PROP == 0 .AND. JALE_FROM_MAT == 0).AND. ILAW /= 18 .AND. ILAW /= 11) THEN
           ILAG=1                                          
         ELSEIF(JALE_FROM_PROP == 1 .OR. JALE_FROM_MAT == 1)THEN                            
-          IALE=1                                          
+          ALE%GLOBAL%IALE=1
         ELSEIF(JALE_FROM_PROP == 2 .OR. JALE_FROM_MAT == 2)THEN                            
-          IEULER=1  
+          ALE%GLOBAL%IEULER=1
         ELSE
-          ILAG=1                                       
+          ILAG=1
         ENDIF   
               
         !################################################################!     

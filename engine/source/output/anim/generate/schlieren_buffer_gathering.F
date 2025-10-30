@@ -58,7 +58,8 @@ C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD  
       USE MULTI_FVM_MOD       
-      USE SCHLIEREN_MOD       
+      USE SCHLIEREN_MOD
+      USE ALE_MOD ,ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -86,9 +87,13 @@ C-----------------------------------------------
       TYPE(G_BUFEL_)  ,POINTER :: GBUF
       INTEGER :: ITY !< group value : elem type
       INTEGER :: NFT !< group value : shift (to inject local -> global)
+      INTEGER :: IALE,IEULER,IALELAG
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------      
+      IALE = ALE%GLOBAL%IALE
+      IEULER = ALE%GLOBAL%IEULER
+      IALELAG = ALE%GLOBAL%IALELAG
       II=0
       IF(N2D/=0)II=1
       SWA_L = MAX(IALE,ITHERM,IEULER,IALELAG)*( NUMELS + NUMELQ + II*NUMELTG + NSVOIS+ NQVOIS + II*NTGVOIS + NSEGFLU )        

@@ -175,7 +175,7 @@ C         SPMD exchange : PHI+VAL2
 C=======================================================================
 C     CONVECTIVE TERM (REYNOLDS TRANSPORTATION THEOREM)
 C=======================================================================
-      IF(IALE+IEULER /= 0)THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0)THEN
       !-----------------------------!
       !  CONVECTIVE FLUXES          !
       !   ZEROING MASSES            !
@@ -199,7 +199,7 @@ C----------------------
         !-----------------------------!
         !     BIMAT (LAW20)           !
         !-----------------------------!
-        IF(N2D /= 0.AND.NMULT  > 0)THEN
+        IF(N2D /= 0 .AND. ALE%MULTIMAT%NMULT  > 0)THEN
          CALL BHOL2(ITASK,IPARG , PM ,BHOLE ,IXQ  )
 C-----------------------
          CALL MY_BARRIER

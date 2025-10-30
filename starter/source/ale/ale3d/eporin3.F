@@ -32,6 +32,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       use element_mod , only : nixs
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -45,7 +46,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER, INTENT(IN) :: IXS(NIXS,NUMELS), NFT, NEL
-      my_real :: GEO(NPROPG,NUMGEO),VEUL(LVEUL,*)
+      my_real :: GEO(NPROPG,NUMGEO),VEUL(ALE%GLOBAL%LVEUL,*)
       TYPE(t_ale_connectivity), INTENT(INOUT) :: ALE_CONNECTIVITY
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

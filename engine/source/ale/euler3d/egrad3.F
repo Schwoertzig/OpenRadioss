@@ -32,6 +32,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +59,7 @@ C-----------------------------------------------
 !  (1:3, NUMNOD+1:) additional nodes (also on adjacent domains but connected to the boundary of the current domain)
 C-----------------------------------------------
       INTEGER,INTENT(IN) :: IXS(NIXS,SIXS/NIXS)
-      my_real,INTENT(IN) :: X(3,SX/3), VEUL(LVEUL,*)
+      my_real,INTENT(IN) :: X(3,SX/3), VEUL(ALE%GLOBAL%LVEUL,*)
       my_real,INTENT(INOUT) :: GRAD(6,*)
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
 C-----------------------------------------------

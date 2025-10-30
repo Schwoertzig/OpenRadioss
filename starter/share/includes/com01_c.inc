@@ -21,10 +21,10 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the 
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.    
 C.../COM01/
-      COMMON /COM01/ N2D,    NCPRI,  IALE,    NGROUP,
+      COMMON /COM01/ N2D,    NCPRI,  NGROUP,
      .               NCYCLE, IRUN,   IGER,    LBUFEL,  IRODDL,
-     .               IEULER, IMULTI_FVM, IHSH,    ITESTV,  ITURB,
-     .               ILAG,   ISECUT, IDAMP,   IRXDP,   NMULT,
+     .               IMULTI_FVM, IHSH,    ITESTV,  ITURB,
+     .               ILAG,   ISECUT, IDAMP,   IRXDP,
      .               INTEG8, ISIGI,  NSPMD,   LENWA,
      .               NNODS,  NCNOIS, LCNE0,   IPARI0,
      .               IMAXIMP,NNOISER,NSPGROUP,IRESMD,  IFRWV,
@@ -37,7 +37,7 @@ C.../COM01/
      .              IORTSHEL,NORTSHEL,ICRACK,IUSRSHEL,
      .           IMPOSE_DR,IRIGID_MAT,ISTAMPING,IINTTHICK,
      .              IPLYXFEM,IPLYBCS,IREAC,IGRELEM,IREST_MSELT,
-     .              NTHREAD,IALELAG,INVOL,IIMPLICIT,IRODDL0,
+     .              NTHREAD,INVOL,IIMPLICIT,IRODDL0,
      .              NVSOLID3,IMASADD,IDAMP_RDOF,KMP_SET,KMPSTSIZ,
      .              ICRASH,STACKSIZ,FTEMPVAR21,NVSOLID4,INTPLYXFEM,
      .              UNITMAX,NVSHELL1,NFILSOL,IPART_STACK,TEST_POIDS,
@@ -46,10 +46,10 @@ C.../COM01/
      .              IS17OLD ,NSEGQUADFR, NUMBCSN,INTERADHESION,NITSCHE,
      .              INISPRI ,INISHVAR1,NVSPRI,NVSOLID6,TH_STRAIN
 
-      INTEGER        N2D,    NCPRI,  IALE,    NGROUP,
+      INTEGER        N2D,    NCPRI,  NGROUP,
      .               NCYCLE, IRUN,   IGER,    LBUFEL,  IRODDL,
-     .               IEULER, IMULTI_FVM, IHSH,    ITESTV,  ITURB,
-     .               ILAG,   ISECUT, IDAMP,   IRXDP,  NMULT, 
+     .               IMULTI_FVM, IHSH,    ITESTV,  ITURB,
+     .               ILAG,   ISECUT, IDAMP,   IRXDP,
      .               INTEG8, ISIGI,  NSPMD,   LENWA,
      .               NNODS,  NCNOIS, LCNE0,   IPARI0,
      .               IMAXIMP,NNOISER,NSPGROUP,IRESMD,  IFRWV,
@@ -62,7 +62,7 @@ C.../COM01/
      .              IORTSHEL,NORTSHEL,ICRACK,IUSRSHEL,
      .           IMPOSE_DR,IRIGID_MAT,ISTAMPING,IINTTHICK,
      .              IPLYXFEM,IPLYBCS,IREAC,IGRELEM,IREST_MSELT,
-     .              NTHREAD,IALELAG,INVOL,IIMPLICIT,IRODDL0,
+     .              NTHREAD,INVOL,IIMPLICIT,IRODDL0,
      .              NVSOLID3,IMASADD,IDAMP_RDOF,KMP_SET,KMPSTSIZ,
      .              ICRASH,STACKSIZ,FTEMPVAR21,NVSOLID4,INTPLYXFEM,
      .              UNITMAX,NVSHELL1,NFILSOL,IPART_STACK,TEST_POIDS,

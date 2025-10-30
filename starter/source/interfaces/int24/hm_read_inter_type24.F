@@ -59,6 +59,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
       USE FORMAT_MOD , ONLY : FMT_I_2F
       USE READER_OLD_MOD , ONLY : LINE, IREC
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -274,28 +275,22 @@ C
         IPRINT = 0
 
         KEY1='IGSTI'
-        CALL DEFINTER(KEY1     ,IGSTI    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,IGSTI    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
         KEY1='IDEL24'
-        CALL DEFINTER(KEY1     ,IDEL24  ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,IDEL24  ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
         KEY1='IEDGE'
-        CALL DEFINTER(KEY1     ,IEDGE    ,IASSIGN   ,IPRINT   ,
-     .                  NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,IEDGE    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
         KEY1='IGAP0'
-        CALL DEFINTER(KEY1     ,IGAP0    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,IGAP0    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
         KEY1='IPEN0'
-        CALL DEFINTER(KEY1     ,IPEN0    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,IPEN0    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
         KEY1='INACTI'
-        CALL DEFINTER(KEY1     ,INACTI    ,IASSIGN   ,IPRINT   ,
-     .                NTYP     ,DEF_INTER)
+        CALL DEFINTER(KEY1     ,INACTI    ,IASSIGN   ,IPRINT   ,NTYP     ,DEF_INTER)
 C
 C--------------------------------------------------
 C CHECKS And  Storage IPARI FRIGAP 
@@ -340,27 +335,15 @@ C            3 : ISU1=0,ISU2>0;IS3>0
            IF (ISU1 == ISU2) THEN
              ILEV = 1
              ISU2 = 0
-             CALL ANCMSG(MSGID=1022,
-     .                  MSGTYPE=MSGWARNING,
-     .                  ANMODE=ANINFO,
-     .                  I1=NOINT,
-     .                  C1=TITR)
+             CALL ANCMSG(MSGID=1022,MSGTYPE=MSGWARNING,ANMODE=ANINFO,I1=NOINT,C1=TITR)
            END IF
         ELSEIF(ISU1 == 0 .AND.ISU2 /= 0 .AND. NOD1 /= 0) THEN
            ILEV = 3
         ELSE
            IF(ISU2 == 0) THEN
-             CALL ANCMSG(MSGID=119,
-     .                   ANMODE=ANINFO,
-     .                   MSGTYPE=MSGERROR,
-     .                   I1=NOINT,
-     .                   C1=TITR)
+             CALL ANCMSG(MSGID=119,ANMODE=ANINFO,MSGTYPE=MSGERROR,I1=NOINT,C1=TITR)
            ELSEIF (NOD1 == 0) THEN
-             CALL ANCMSG(MSGID=1001,
-     .                   ANMODE=ANINFO,
-     .                   MSGTYPE=MSGERROR,
-     .                   I1=NOINT,
-     .                   C1=TITR)
+             CALL ANCMSG(MSGID=1001,ANMODE=ANINFO,MSGTYPE=MSGERROR,I1=NOINT,C1=TITR)
            ENDIF
            IS1=0
            IS2=0
@@ -380,11 +363,7 @@ C----------------if we copy int7--
             INGR2USR => IGRSURF(1:NSURF)%ID
             IS1=NGR2USR(ISU1,INGR2USR,NSURF)
             IF (IS1==0) THEN
-              CALL ANCMSG(MSGID=1000,
-     .                    ANMODE=ANINFO_BLIND_1,
-     .                    MSGTYPE=MSGERROR,
-     .                    I1=NOINT,
-     .                    C1=TITR)
+              CALL ANCMSG(MSGID=1000,ANMODE=ANINFO_BLIND_1,MSGTYPE=MSGERROR,I1=NOINT,C1=TITR)
             ELSE
              ISU1=IS1
             END IF
@@ -428,18 +407,10 @@ C---------Default Istif for implicit
            IGSTI = IGSTI - 10 
            IF(INTNITSCHE > 0 ) NITSCHE = 1
            IF (ILEV /= 1.AND.ILEV /= 2) THEN
-              CALL ANCMSG(MSGID=1622,
-     .                  MSGTYPE=MSGERROR,
-     .                  ANMODE=ANINFO,
-     .                  I1=NOINT,
-     .                  C1=TITR)
+              CALL ANCMSG(MSGID=1622,MSGTYPE=MSGERROR,ANMODE=ANINFO,I1=NOINT,C1=TITR)
            ENDIF
            IF (IEDGE > 0) THEN
-              CALL ANCMSG(MSGID=1746,
-     .                  MSGTYPE=MSGERROR,
-     .                  ANMODE=ANINFO,
-     .                  I1=NOINT,
-     .                  C1=TITR)
+              CALL ANCMSG(MSGID=1746,MSGTYPE=MSGERROR,ANMODE=ANINFO,I1=NOINT,C1=TITR)
            ENDIF
         ENDIF
 
@@ -667,30 +638,16 @@ C           IF(MODFR==2)VISCF=ZERO
              IF (MOD(IFQ,10)==2) XFILTR=FOUR*ATAN2(ONE,ZERO) / ALPHA
              IF (MOD(IFQ,10)==3) XFILTR=FOUR*ATAN2(ONE,ZERO) * ALPHA
              IF (XFILTR<ZERO) THEN
-               CALL ANCMSG(MSGID=554,
-     .                     MSGTYPE=MSGERROR,
-     .                     ANMODE=ANINFO_BLIND_1,
-     .                     I1=NOINT,
-     .                     C1=TITR,
-     .                     R1=ALPHA)
+               CALL ANCMSG(MSGID=554,MSGTYPE=MSGERROR,ANMODE=ANINFO_BLIND_1,I1=NOINT,C1=TITR,R1=ALPHA)
              ELSEIF (XFILTR>1.AND.MOD(IFQ,10)<=2) THEN
-                CALL ANCMSG(MSGID=554,
-     .                      MSGTYPE=MSGERROR,
-     .                      ANMODE=ANINFO_BLIND_1,
-     .                      I1=NOINT,
-     .                      C1=TITR,
-     .                      R1=ALPHA)
+                CALL ANCMSG(MSGID=554,MSGTYPE=MSGERROR,ANMODE=ANINFO_BLIND_1,I1=NOINT,C1=TITR,R1=ALPHA)
              ENDIF
           ELSE
             XFILTR = ZERO
           ENDIF
 
-          IF (IBAG/=0.AND.NVOLU==0 .AND. IALELAG == 0) THEN
-             CALL ANCMSG(MSGID=614,
-     .                   MSGTYPE=MSGWARNING,
-     .                   ANMODE=ANINFO_BLIND_2,
-     .                   I1=NOINT,
-     .                   C1=TITR)
+          IF (IBAG/=0.AND.NVOLU==0 .AND. ALE%GLOBAL%IALELAG == 0) THEN
+             CALL ANCMSG(MSGID=614,MSGTYPE=MSGWARNING,ANMODE=ANINFO_BLIND_2,I1=NOINT,C1=TITR)
              IBAG=0
           ENDIF
           INTBAG = MAX(INTBAG,IBAG)

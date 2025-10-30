@@ -79,6 +79,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
       USE MULTI_MUSCL_FLUXES_COMPUTATION_MOD , ONLY : MULTI_MUSCL_FLUXES_COMPUTATION
       USE OUTPUT_MOD , ONLY : OUTPUT_
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C     I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -144,7 +145,7 @@ C-----------------------------------------------
 C     ------------------------- 
 C     Movement of nodes
 C     -------------------------  
-      IF (IALE /= 0 .AND. .NOT. PRED) THEN     ! IF CORRECTION : maillage en configuration tn+1/2 pour les flux a tn+1/2
+      IF (ALE%GLOBAL%IALE /= 0 .AND. .NOT. PRED) THEN     ! IF CORRECTION : maillage en configuration tn+1/2 pour les flux a tn+1/2
          DO NODE_ID = 1 + ITASK, NUMNOD, NTHREAD
             VDT = HALF * TIMESTEP * WGRID(1, NODE_ID)
             DNOD(1, NODE_ID) = DNOD(1, NODE_ID) + VDT
@@ -164,7 +165,7 @@ C     -------------------------
 C     ==========================================
 C     Face data computation (NX, NY, NZ, SURFACE)
 C     ==========================================
-      IF (IALE /= 0) THEN
+      IF (ALE%GLOBAL%IALE /= 0) THEN
 C     Only ALE, since nodes have moved
          CALL MULTI_FACE_ELEM_DATA(ITASK, IPARG, IXS, IXQ, IXTG, XGRID, WGRID, MULTI_FVM)
       ENDIF
@@ -208,7 +209,7 @@ C     SUBMAT VARTIABLES
          ENDIF
 
          IF (MULTI_FVM%MUSCL > 0) THEN
-            IF (IALE /= 0) THEN
+            IF (ALE%GLOBAL%IALE /= 0) THEN
                CALL SPMD_ENVOIS(3, MULTI_FVM%ELEM_DATA%CENTROID, 
      .              NERCVOIS, NESDVOIS, LERCVOIS, LESDVOIS, LENCOM)
             ENDIF
@@ -304,7 +305,7 @@ C---------------------
 C     ------------------------- 
 C     Movement of nodes
 C     -------------------------  
-      IF (IALE /= 0 .AND. .NOT. PRED) THEN    ! IF CORRECTION : maillage en configuration tn+1 pour les volumes
+      IF (ALE%GLOBAL%IALE /= 0 .AND. .NOT. PRED) THEN    ! IF CORRECTION : maillage en configuration tn+1 pour les volumes
          DO NODE_ID = 1 + ITASK, NUMNOD, NTHREAD
             VDT = HALF * TIMESTEP * WGRID(1, NODE_ID)
             DNOD(1, NODE_ID) = DNOD(1, NODE_ID) + VDT

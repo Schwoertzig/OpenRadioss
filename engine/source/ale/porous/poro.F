@@ -37,6 +37,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      1    GEO    ,NODPOR ,MS ,X   ,V     ,
      2    W      ,AF     ,AM ,SKEW,WEIGHT,
      3    NPORGEO)
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -116,7 +117,7 @@ C VELOCITY CORRECTION
         R(3,3)=R13*R13*G1+R23*R23*G2+R33*R33*G3
         JRB=INT(GEO(29,IG))
 C
-        IF(IALE == 1)THEN
+        IF(ALE%GLOBAL%IALE == 1)THEN
           DO I=NAD+1,NAD+N
             JP=NODPOR(I)
             VX=MS(JP)*(V(1,JP)-W(1,JP))+AF(1,JP)*DT1

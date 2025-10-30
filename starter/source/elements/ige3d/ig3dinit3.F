@@ -55,6 +55,7 @@ C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE MATPARAM_DEF_MOD
+      USE ALE_MOd , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -83,7 +84,7 @@ C-----------------------------------------------
      .    IPARTIG3D(*),PX,PY,PZ
       my_real
      .   MS(*), X(3,*), GEO(NPROPG,*),PM(NPROPM,*),
-     .   VEUL(LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
+     .   VEUL(ALE%GLOBAL%LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
      .   PARTSAV(20,*), V(3,*), MSS(8,*), KNOTLOCPC(DEG_MAX,3,*),
      .   KNOTLOCEL(2,3,*), SIGSP(NSIGI,*) , IN(*), VR(3,*),
      .   VNIGE(NCTRLMAX,*), BNIGE(NCTRLMAX,*),BUFMAT(*), TF(*),

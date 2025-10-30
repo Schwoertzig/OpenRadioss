@@ -41,6 +41,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +59,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       my_real
-     .   VOL(*), VEUL(LVEUL,*),GEO(NPROPG,*)
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),GEO(NPROPG,*)
       my_real
      .   KSI,ETA,ZETA,WI,
      .   HX(4,*), HY(4,*), HZ(4,*),  
@@ -2368,6 +2369,7 @@ C
      .    JACP7,JACP8,JACP9,
      .    SMAX, DELTAX, NGL,VOLDP)
       USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2385,7 +2387,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       my_real
-     .   VOL(*), VEUL(LVEUL,*),GEO(NPROPG,*),WI
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),GEO(NPROPG,*),WI
       my_real
      .   JACP1(*),JACP2(*),JACP3(*),
      .   JACP4(*),JACP5(*),JACP6(*),

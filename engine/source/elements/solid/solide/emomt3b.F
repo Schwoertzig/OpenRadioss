@@ -56,7 +56,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e  s
 C-----------------------------------------------
-      USE ALE_MOD     
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -76,7 +76,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: NEL
       INTEGER, INTENT(IN) :: MTN
       my_real
-     .   PM(NPROPM,NUMMAT), RHO(*),VOLGP(LVEUL,*),
+     .   PM(NPROPM,NUMMAT), RHO(*),VOLGP(ALE%GLOBAL%LVEUL,*),
      .   F11(*),F21(*),F31(*),F12(*),F22(*),F32(*),
      .   F13(*),F23(*),F33(*),F14(*),F24(*),F34(*),
      .   F15(*),F25(*),F35(*),F16(*),F26(*),F36(*),

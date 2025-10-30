@@ -1223,7 +1223,7 @@ C--------------------------------------------
       ENDIF
       
       !no need to output zero contour for ALE ANIM keywords if ALE not defined. (example: schlieren +SH3N)
-      IF(IALE+IEULER+GLOB_THERM%ITHERM == 0)THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + GLOB_THERM%ITHERM == 0)THEN
         NCE_ANI = NCE_ANI - ANIM_CE(10672)
         NSE_ANI = NSE_ANI - ANIM_SE(4892)
         ANIM_CE(10672) = 0 !quad schlieren
@@ -1465,7 +1465,7 @@ C------------------------------------------------
      2              IXQ ,    ELEMENT%SHELL%IXC ,    IXT ,    IXP ,   IXR  ,
      3              NODES%ITAB ,   NODES%ITABM1  ,NPC,     IPARG,    IGRV ,
      4              LGRAV   ,IPARI,
-     5              NPBY ,   LPBY    ,ILINK,   LLINK  ,LINALE ,
+     5              NPBY ,   LPBY    ,ILINK,   LLINK  ,ALE%LINK%LINALE ,
      6              NEFLSW , NNFLSW , ICUT ,   IAF(IF01),
      7              NODES%X  ,NODES%V,  NODES%VR, NODES%MS   ,NODES%IN  ,
      8              SKEWS%SKEW  ,TF       ,RBY  ,

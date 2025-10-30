@@ -119,7 +119,7 @@ C=======================================================================
 C PHI IS DEFINED DEPENDING ON NVAR VALUE
 C=======================================================================
 
-      NMN=MAX(1,NMULT)
+      NMN=MAX(1,ALE%MULTIMAT%NMULT)
       
       DO NM=1,NMN
         DO NG=ITASK+1,NGROUP,NTHREAD
@@ -607,7 +607,7 @@ C     ALE ON / OFF
            ELSE                                                                              
              NF1=NFT+1+(NM-1)*NUMELQ                                                         
              NFX=NFT+(NM-1)*NUMELQ                                                           
-             IF (NMULT == 0) THEN                                                            
+             IF (ALE%MULTIMAT%NMULT == 0) THEN
                CALL ACONV2(VAR          ,PHI         ,FLUX(4*NFX+1),FLU1(NF1),
      .                     ALE_CONNECT  ,QMV(8*NFX+1),IFLG         ,IXQ      ,
      .                     X            ,IOFF         )

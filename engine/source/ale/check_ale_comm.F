@@ -38,6 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !$ENDCOMMENT
         USE ELBUFDEF_MOD
         USE SPMD_MOD
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -75,7 +76,7 @@ C-----------------------------------------------
 #endif
 C-----------------------------------------------
         ! ---------------------------------
-        IF(IALE+IEULER+ITHERM /= 0) THEN
+        IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + ITHERM /= 0) THEN
           ACTIVE_ALE_ELEMENT = .FALSE.
           ! -------------------
           ! loop over the element groups to find the deactivated ALE elements

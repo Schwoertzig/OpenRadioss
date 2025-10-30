@@ -27,6 +27,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE BHOL2(ITASK ,IPARG ,PM ,BHOLE ,IXQ   )
 C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+        USE ALE_MOD , ONLY : ALE
+C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
@@ -41,7 +45,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER ITASK,IPARG(NPARG,NGROUP),BHOLE(NMULT,*),IXQ(NIXQ,NUMELQ)
+      INTEGER ITASK,IPARG(NPARG,NGROUP),BHOLE(ALE%MULTIMAT%NMULT,*),IXQ(NIXQ,NUMELQ)
       my_real PM(NPROPM,NUMMAT)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -50,7 +54,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C------------------------------------------------
-      DO NM=1,NMULT
+      DO NM=1,ALE%MULTIMAT%NMULT
        DO NG=ITASK+1,NGROUP,NTHREAD
 C       ALE ON / OFF
         IF (IPARG(76, NG)  ==  1) CYCLE ! --> OFF

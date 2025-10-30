@@ -122,7 +122,7 @@ C----------------------------------------------------------
       ENDIF
       
       !ALE or EULER grid points are not concerned about /DT/NODA & /DT/NODA/CST options
-      IF(IALE+IEULER/=0 .AND. ALE%GLOBAL%I_DT_NODA_ALE_ON==0 .AND. NODADT/=0)THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER/=0 .AND. ALE%GLOBAL%I_DT_NODA_ALE_ON==0 .AND. NODADT/=0)THEN
         !NOD_LAG_COUNT = 0
         DO N=NODFT,NODLT
           IF(IABS(NALE(N))==1 .OR. IABS(NALE(N))==2)THEN
@@ -225,7 +225,7 @@ C----------------------------------------------------------
          K = 0
          DTNOD = EP20
 C true dependency
-         IF(IALE+IEULER == 0 .OR.  ALE%GLOBAL%I_DT_NODA_ALE_ON==1)THEN
+         IF(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER == 0 .OR.  ALE%GLOBAL%I_DT_NODA_ALE_ON==1)THEN
            DO N=I,MIN(NODLT,I+1023)
 c            write(6,*) "STIFN(",N,")=",STIFN(N)
 c            call flush(6)

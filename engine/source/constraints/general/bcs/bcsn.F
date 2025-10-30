@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol   ../engine/source/engine/resol.F
 !||====================================================================
       SUBROUTINE BCSN(ICODE,ICODT,ICODR,PARTS0,PARTSAV)
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -39,9 +40,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      my_real
-     .   PARTSAV(NPSAV,*),PARTS0(*)
-      INTEGER ICODE(*), ICODT(*), ICODR(*)
+      my_real :: PARTSAV(NPSAV,*),PARTS0(*)
+      INTEGER :: ICODE(*), ICODT(*), ICODR(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -64,7 +64,7 @@ C
    20  CONTINUE
       END IF
 C
-      IF(IALE>0) THEN
+      IF(ALE%GLOBAL%IALE > 0) THEN
       DO 30 N=1,NUMNOD
        IC=ICODE(N)
        IC1=IC/512

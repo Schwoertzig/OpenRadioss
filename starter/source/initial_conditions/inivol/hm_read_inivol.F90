@@ -248,7 +248,7 @@
               !check multimaterial compatibility
               imat = ipart(lipart1*(part_id-1)+1)
               ilaw = ipm((imat-1)*npropmi + 2)     !ipm(2,imat)
-              if(ilaw/=51 .and. ilaw/=151)then
+              if(ilaw/=51 .and. ilaw/=151 .and. ilaw /= 251)then
                 !INIVOL OPTION IS ONLY COMPATIBLE WITH MULTIMATERIAL LAWS 51 and 151
                 call ancmsg(msgid=821, msgtype=msgerror, anmode=aninfo, i1=id, c1=titr)
               end if

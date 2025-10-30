@@ -47,6 +47,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD , ONLY : NSUBMOD, SUBMODEL_DATA
       USE UNITAB_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -195,12 +196,8 @@ C....* CHECKS And Storage IPARI FRIGAP  *.............
 
       IPARI(34)=IGSTI
 
-      IF (IBAG/=0.AND.NVOLU==0 .AND. IALELAG == 0) THEN
-        CALL ANCMSG(MSGID=614,
-     .              MSGTYPE=MSGWARNING,
-     .              ANMODE=ANINFO_BLIND_2,
-     .              I1=NOINT,
-     .              C1=TITR)
+      IF (IBAG /= 0 .AND. NVOLU == 0 .AND. ALE%GLOBAL%IALELAG == 0) THEN
+        CALL ANCMSG(MSGID=614,MSGTYPE=MSGWARNING,ANMODE=ANINFO_BLIND_2,I1=NOINT,C1=TITR)
         IBAG=0
       ENDIF
 C.......* *........
@@ -265,19 +262,9 @@ C
         IF (MOD(IFQ,10)==2) XFILTR=FOUR*ATAN2(ONE,ZERO) / ALPHA
         IF (MOD(IFQ,10)==3) XFILTR=FOUR*ATAN2(ONE,ZERO) * ALPHA
         IF (XFILTR<ZERO) THEN
-          CALL ANCMSG(MSGID=554,
-     .                MSGTYPE=MSGERROR,
-     .                ANMODE=ANINFO_BLIND_1,
-     .                I1=NOINT,
-     .                C1=TITR,
-     .                R1=ALPHA)
+          CALL ANCMSG(MSGID=554,MSGTYPE=MSGERROR,ANMODE=ANINFO_BLIND_1,I1=NOINT,C1=TITR,R1=ALPHA)
         ELSEIF (XFILTR>1.AND.MOD(IFQ,10)<=2) THEN
-          CALL ANCMSG(MSGID=554,
-     .                MSGTYPE=MSGERROR,
-     .                ANMODE=ANINFO_BLIND_1,
-     .                I1=NOINT,
-     .                C1=TITR,
-     .                R1=ALPHA)
+          CALL ANCMSG(MSGID=554,MSGTYPE=MSGERROR,ANMODE=ANINFO_BLIND_1,I1=NOINT,C1=TITR,R1=ALPHA)
         ENDIF
       ELSE
         XFILTR = ZERO
@@ -347,11 +334,9 @@ C
         WRITE(IOUT,1526)  FRIC,FRIC_P(1),FRIC_P(2)
       ENDIF
       IF(IDEL23/=0) THEN
-        WRITE(IOUT,'(A,I5/)')
-     .  '    DELETION FLAG ON FAILURE (1:YES) : ',IDEL23
+        WRITE(IOUT,'(A,I5/)')'    DELETION FLAG ON FAILURE (1:YES) : ',IDEL23
         IF(IDELKEEP == 1)THEN
-          WRITE(IOUT,'(A)')
-     .    '    IDEL: DO NOT REMOVE NON-CONNECTED NODES FROM SECONDARY SURFACE'
+          WRITE(IOUT,'(A)')'    IDEL: DO NOT REMOVE NON-CONNECTED NODES FROM SECONDARY SURFACE'
         ENDIF         
       ENDIF
 

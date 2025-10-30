@@ -49,7 +49,8 @@ C   M o d u l e s
 C-----------------------------------------------      
         USE MULTI_FVM_MOD
         USE GROUPDEF_MOD
-        USE ELBUFDEF_MOD 
+        USE ELBUFDEF_MOD
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -219,7 +220,7 @@ C-----------------------------------------------
                 MASS = ELBUF_TAB(GROUP_ID)%GBUF%RHO(ILOC) * ELBUF_TAB(GROUP_ID)%GBUF%VOL(ILOC)
                 MASS_APPEND(NUMNOD + IBRIC) = ZERO!MASS
                 !   position
-                IF(IALE /= 0) THEN
+                IF(ALE%GLOBAL%IALE /= 0) THEN
                     X_APPEND(1, NUMNOD + IBRIC) = ZERO
                     X_APPEND(2, NUMNOD + IBRIC) = ZERO
                     X_APPEND(3, NUMNOD + IBRIC) = ZERO

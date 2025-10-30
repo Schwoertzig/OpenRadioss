@@ -53,6 +53,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixs
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -117,7 +118,7 @@ C-----------------------------------------------
      .   DZX(MVSIZ),DZY(MVSIZ),DZZ(MVSIZ),
      .   D1(MVSIZ),D2(MVSIZ),D3(MVSIZ),D4(MVSIZ),D5(MVSIZ),D6(MVSIZ),
      .   S1(MVSIZ),S2(MVSIZ),S3(MVSIZ),S4(MVSIZ),S5(MVSIZ),S6(MVSIZ),
-     .   WXX(MVSIZ), WYY(MVSIZ), WZZ(MVSIZ),VBID(LVEUL,MVSIZ)
+     .   WXX(MVSIZ), WYY(MVSIZ), WZZ(MVSIZ),VBID(ALE%GLOBAL%LVEUL,MVSIZ)
       my_real
      .   FAC, XT, YT, ZT, A11, A12, A13, A21, A22, A23, A31, A32, A33,JAC(10,MVSIZ)
       my_real

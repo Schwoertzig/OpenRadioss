@@ -60,6 +60,7 @@ C-----------------------------------------------
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
       USE AREZO3_MOD , ONLY : AREZO3
       USE AREZO2_MOD , ONLY : AREZO2
+      USE ALE_MOD , only : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -91,13 +92,15 @@ C-----------------------------------------------
       INTEGER :: NUVAR_EOS !< number of user variable (EOS) to rezon
       my_real, DIMENSION(:), POINTER :: VAR,SIG,VOL, TAG22,TEMP
       INTEGER :: FLAG_MAT_EOS
+      INTEGER :: NMULT_
 C-----------------------------------------------
 C     S o u r c e   L i n e s
 C-----------------------------------------------
       FLAG_MAT_EOS = 0
       IF(PRESENT(OPT_FLAG_MAT_EOS))FLAG_MAT_EOS = OPT_FLAG_MAT_EOS
       IDX=NV
-      NMN=MAX(1,NMULT)
+      NMULT_ = ALE%MULTIMAT%NMULT
+      NMN=MAX(1,NMULT_)
       DO NM=1,NMN
 C---------------------
        CALL MY_BARRIER
@@ -327,7 +330,7 @@ C     ALE ON / OFF
             CALL AREZO3(ALE_CONNECT,SIG,PHI,FLUX(6*NFT+1),VOL,TAG22)
           ELSE
             NFX = NFT+(NM-1)*NUMELQ
-            IF (NMULT == 0) THEN
+            IF (NMULT_ == 0) THEN
               CALL AREZO2(ALE_CONNECT,SIG,PHI,FLUX(4*NFX+1),VOL)
             ELSE
               CALL BREZO2(ALE_CONNECT,SIG ,PHI,FLUX(4*NFX+1),VOL,BHOLE,NM)
@@ -368,7 +371,7 @@ C     ALE ON / OFF
             CALL AREZO3(ALE_CONNECT,VAR,PHI,FLUX(6*NFT+1),VOL,TAG22)
           ELSE                                                        
             NFX=NFT+(NM-1)*NUMELQ                                     
-            IF(NMULT == 0)THEN                                        
+            IF(NMULT_ == 0)THEN
               CALL AREZO2(ALE_CONNECT,VAR,PHI,FLUX(4*NFX+1),VOL)
             ELSE                                                      
               CALL BREZO2(ALE_CONNECT,VAR,PHI,FLUX(4*NFX+1),VOL,BHOLE,NM)
@@ -412,7 +415,7 @@ C     ALE ON / OFF
             CALL AREZO3(ALE_CONNECT,VAR,PHI,FLUX(6*NFT+1),VOL,TAG22)
           ELSE                                                        
             NFX=NFT+(NM-1)*NUMELQ                                     
-            IF(NMULT == 0)THEN
+            IF(NMULT_ == 0)THEN
               CALL AREZO2(ALE_CONNECT,VAR,PHI,FLUX(4*NFX+1),VOL)
             ELSE                                                      
               CALL BREZO2(ALE_CONNECT,VAR,PHI,FLUX(4*NFX+1),VOL,BHOLE,NM)
@@ -445,7 +448,7 @@ C     ALE ON / OFF
             CALL AREZO3(ALE_CONNECT,TEMP,PHI,FLUX(6*NFT+1),VOL,TAG22)
           ELSE
             NFX=NFT+(NM-1)*NUMELQ
-            IF(NMULT == 0)THEN
+            IF(NMULT_ == 0)THEN
               CALL AREZO2(ALE_CONNECT,TEMP,PHI,FLUX(4*NFX+1),VOL)
             ELSE
               CALL BREZO2(ALE_CONNECT,TEMP,PHI,FLUX(4*NFX+1),VOL,BHOLE,NM)

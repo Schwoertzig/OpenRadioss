@@ -24,15 +24,15 @@ C.../SCR03/
       INTEGER LSCR03
 
       PARAMETER (LSCR03 = 22)
-      COMMON /SCR03/ NRLINK, NALELK, NCRST, IOUTV, INVERS,
+      COMMON /SCR03/ NRLINK,  NCRST, IOUTV, INVERS,
      .               CODVERS, NOTUSED, ICODRUN,
      .               IMINVER, ISRCVER, PCODVER, PMINVER, PSRCVER,
-     .               PINVERS, PIRUN, PCODRUN,IISROT,NXREF, NALELINK,
+     .               PINVERS, PIRUN, PCODRUN,IISROT,NXREF,
      .               ST_INVERS,PDEL
-      INTEGER NRLINK, NALELK, NCRST, IOUTV, INVERS,
+      INTEGER NRLINK, NCRST, IOUTV, INVERS,
      .                CODVERS, NOTUSED, ICODRUN,
      .                IMINVER, ISRCVER, PCODVER, PMINVER, PSRCVER,
-     .                PINVERS, PIRUN, PCODRUN,IISROT,NXREF, NALELINK,
+     .                PINVERS, PIRUN, PCODRUN,IISROT,NXREF,
      .                ST_INVERS,PDEL
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
 C     CODE OF THIS RUN (1:ENGINE)

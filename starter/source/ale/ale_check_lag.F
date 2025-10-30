@@ -43,6 +43,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       use element_mod , only : nixs,nixq,nixc,nixt,nixtg
+      use ale_mod , only : ale
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -183,7 +184,7 @@ C---------------------------------------------------
 C---------------------------------------------------
 C MULTIDOMAINS : SYNCHRONISATION OF NALE FOR COMMON NODES
 C---------------------------------------------------
-      IF(IALE /= 0)THEN  !this subroutine alebcs is also now called even if IALE=0 and IEULER=1, this block was previously only treated if IALE /= 0
+      IF(ALE%GLOBAL%IALE /= 0)THEN  !this subroutine alebcs is also now called even if IALE=0 and IEULER=1, this block was previously only treated if IALE /= 0
         !-----------------------------------!
         IF (FLAG_R2R > 0) THEN
           DO N=1,NUMNOD

@@ -73,7 +73,8 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
       USE SENSOR_MOD
-      USE INIVEL_MOD 
+      USE INIVEL_MOD
+      USE ALE_MOD , ONLY : ALE
 C----------------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -518,7 +519,7 @@ C
                     V(1,NOSYS)=V1
                     V(2,NOSYS)=V2
                     V(3,NOSYS)=V3
-                    IF(IALELAG > 0) THEN
+                    IF(ALE%GLOBAL%IALELAG > 0) THEN
                        VFLOW(1,NOSYS) = V1
                        VFLOW(2,NOSYS) = V2
                        VFLOW(3,NOSYS) = V3
@@ -537,12 +538,12 @@ C
                     V(1,NOSYS)=V1
                     V(2,NOSYS)=V2
                     V(3,NOSYS)=V3
-                    IF (IALE == 1) THEN
+                    IF (ALE%GLOBAL%IALE == 1) THEN
                        W(1,NOSYS)=V1
                        W(2,NOSYS)=V2
                        W(3,NOSYS)=V3
                     ENDIF
-                    IF(IALELAG > 0) THEN
+                    IF(ALE%GLOBAL%IALELAG > 0) THEN
                        VFLOW(1,NOSYS) = V1
                        VFLOW(2,NOSYS) = V2
                        VFLOW(3,NOSYS) = V3
@@ -554,7 +555,7 @@ C
                     W(1,NOSYS)=V1
                     W(2,NOSYS)=V2
                     W(3,NOSYS)=V3
-                    IF(IALELAG > 0) THEN
+                    IF(ALE%GLOBAL%IALELAG > 0) THEN
                        VFLOW(1,NOSYS) = V1
                        VFLOW(2,NOSYS) = V2
                        VFLOW(3,NOSYS) = V3
@@ -613,7 +614,7 @@ C--                 /INIVEL/AXIS -> tag of main nodes of rbody
                     V(1,NOSYS)= V1+VRA*(NIXJ(3)-NIXJ(4))
                     V(2,NOSYS)= V2+VRA*(NIXJ(5)-NIXJ(6))
                     V(3,NOSYS)= V3+VRA*(NIXJ(1)-NIXJ(2))
-                    IF(IALELAG > 0) THEN
+                    IF(ALE%GLOBAL%IALELAG > 0) THEN
                        VFLOW(1,NOSYS) = V(1,NOSYS)
                        VFLOW(2,NOSYS) = V(2,NOSYS)
                        VFLOW(3,NOSYS) = V(3,NOSYS)
@@ -679,7 +680,7 @@ C--                 /INIVEL/AXIS -> data must be stored to update initial veloci
 
           !---TITLE OUTPUT
           !     STAGGERED SCHEME (VELOCITIES AT NODES)
-          IF(IALE /= 0) THEN
+          IF(ALE%GLOBAL%IALE /= 0) THEN
             WRITE(IOUT,2100)
           ELSEIF(KROT == 0) THEN
             WRITE(IOUT,2000)
@@ -693,7 +694,7 @@ C--                 /INIVEL/AXIS -> data must be stored to update initial veloci
             DO N=1,NUMNOD,50
               J=J+50
               J=MIN(J,NUMNOD)
-              IF(IALE == 0)THEN
+              IF(ALE%GLOBAL%IALE == 0)THEN
                 DO I=N,J
                   IF(KPRI >= 50) THEN
                     IF(KROT == 0) THEN
@@ -720,7 +721,7 @@ C--                 /INIVEL/AXIS -> data must be stored to update initial veloci
                   ENDIF
                 ENDDO!next I
 
-              ELSEIF(IALE /= 0)THEN
+              ELSEIF(ALE%GLOBAL%IALE /= 0)THEN
                 DO I=N,J
                   IF(KPRI==50) THEN
                     WRITE(IOUT,2100)

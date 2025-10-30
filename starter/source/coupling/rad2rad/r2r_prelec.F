@@ -74,6 +74,7 @@ C-----------------------------------------------
         USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
         USE READER_OLD_MOD , ONLY : KINTER, KCUR, LINE, NSLASH
         use element_mod , only : nixc
+        USE ALE_MOD ,ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1201,10 +1202,10 @@ C--------------------------------------------------------------------C
 C------Prereading of ALE/LINK----------------------------------------C
 C--------------------------------------------------------------------C
 
-        CALL HM_OPTION_COUNT('/ALE/LINK/VEL', NALELK)
-        IF (NALELK > 0) THEN
+        CALL HM_OPTION_COUNT('/ALE/LINK/VEL', ALE%LINK%NALELK)
+        IF (ALE%LINK%NALELK > 0) THEN
           CALL HM_OPTION_START('/ALE/LINK/VEL')
-          DO I = 1, NALELK
+          DO I = 1, ALE%LINK%NALELK
             CALL HM_OPTION_READ_KEY(LSUBMODEL, OPTION_ID = ID, OPTION_TITR = TITR)
             CALL HM_GET_INTV('node_ID1', N1, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('node_ID2', N2, IS_AVAILABLE, LSUBMODEL)

@@ -185,6 +185,7 @@ C-----------------------------------------------
           INTEGER :: NWALE_RST          !        read from RESTART FILE
           INTEGER :: NWALE              !        effective value used in numerical scheme
           TYPE(FLOW_TRACKING_DATA_) :: FLOW_TRACKING_DATA
+          INTEGER :: SWB
         END TYPE ALE_GRID_
 
         ! UPWIND PARAMETERS
@@ -200,6 +201,34 @@ C-----------------------------------------------
           INTEGER :: UPWM
           INTEGER :: UPW_UPDATE
         END TYPE ALE_UPWIND_
+
+        TYPE ALE_VOF_
+          ! law20 volume of fluid
+          INTEGER :: SIFILL
+          INTEGER :: SFILL
+          INTEGER :: SIMS
+          INTEGER :: SDFILL
+          INTEGER :: SALPH
+          INTEGER, DIMENSION(:),ALLOCATABLE :: IFILL
+          INTEGER, DIMENSION(:),ALLOCATABLE :: IMS
+          my_real,DIMENSION(:),ALLOCATABLE :: FILL
+          my_real,DIMENSION(:),ALLOCATABLE :: DFILL
+          my_real,DIMENSION(:),ALLOCATABLE :: ALPH
+        END TYPE
+
+        TYPE ALE_LINK_
+          INTEGER :: SLINALE
+          INTEGER :: LLINAL
+          INTEGER :: NALELK
+          INTEGER :: NALELINK
+          INTEGER,DIMENSION(:),ALLOCATABLE :: LINALE
+        END TYPE
+
+        TYPE ALE_MULTIMAT_
+          INTEGER :: NMULT
+          INTEGER :: IS_DEFINED_LAW20
+          TYPE(ALE_VOF_) :: VOF
+        END TYPE
 
         !GLOBAL PARAMETERS
         TYPE ALE_GLOBAL_
@@ -219,6 +248,12 @@ C-----------------------------------------------
           INTEGER :: SIELVS
           INTEGER :: IS_DEFINED_ALE    !not needed for RST
           INTEGER :: IS_DEFINED_EULER  !not needed for RST
+          INTEGER :: IALE
+          INTEGER :: IEULER
+          INTEGER :: IALELAG
+          INTEGER :: SVEUL
+          INTEGER :: SVEUL8
+          INTEGER :: LVEUL
         END TYPE ALE_GLOBAL_
 
         !ALE SUBCCLING (obsolete)
@@ -240,11 +275,13 @@ C-----------------------------------------------
 
         ! GENERAL DATA STRUCTURE USED IN SOURCE CODE
         TYPE ALE_
-          TYPE(ALE_GRID_)   :: GRID
-          TYPE(ALE_UPWIND_) :: UPWIND
-          TYPE(ALE_GLOBAL_) :: GLOBAL
-          TYPE(ALE_SUB_)    :: SUB
-          TYPE(ALE_REZON_)  :: REZON
+          TYPE(ALE_GRID_)     :: GRID
+          TYPE(ALE_UPWIND_)   :: UPWIND
+          TYPE(ALE_GLOBAL_)   :: GLOBAL
+          TYPE(ALE_SUB_)      :: SUB
+          TYPE(ALE_REZON_)    :: REZON
+          TYPE(ALE_MULTIMAT_) :: MULTIMAT
+          TYPE(ALE_LINK_)     :: LINK
         contains
           procedure, pass :: init
         END TYPE ALE_

@@ -88,6 +88,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE FORMAT_MOD , ONLY : FMW_A_I
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -865,7 +866,7 @@ C weight permutation element <=> dof
         END IF
 
       ELSE
-        IF(ILAG==1.AND.(IALE==1.OR.IEULER==1))THEN
+        IF( ILAG==1 .AND. (ALE%GLOBAL%IALE==1 .OR. ALE%GLOBAL%IEULER==1))THEN
 C if FSI 
           NCOND = NCOND+1
           NB_ELEM_ALE = 0

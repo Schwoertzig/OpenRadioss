@@ -259,6 +259,7 @@ C-----------------------------------------------
         use drape_mod
         USE OUTPUT_MOD , ONLY : OUTPUT_
         USE ANIM_MONVOL_MOD
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3621,11 +3622,11 @@ C
      .                 NNNSRG,NODGLOB,WEIGHT,NFVNOD,NFNOD_PXFEM,
      .                 NFNOD_PXFEMG,NFNOD_CRKXFEMG)
         ENDIF
-        IF(ANIM_V(16)==1 .AND. IALELAG  > 0 ) THEN
+        IF(ANIM_V(16)==1 .AND. ALE%GLOBAL%IALELAG  > 0 ) THEN
           CALL VELVEC(VGAZ,BID_TEMP,ICBUF(MIC2),CBUF(MAC2),NODCUT,NNWL,
      .         NNNSRG,NODGLOB,WEIGHT,NFVNOD,16,
      .         NFNOD_PXFEM,NOD_PXFEM,INDX_PLY,NFNOD_CRKXFEMG,ITAB)
-        ELSEIF(ANIM_V(16)==1 .AND. IALELAG  == 0 ) THEN
+        ELSEIF(ANIM_V(16)==1 .AND. ALE%GLOBAL%IALELAG  == 0 ) THEN
           IF (ISPMD == 0) THEN
             DO I=1,NUMNODG
               R4 = ZERO

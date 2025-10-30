@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol    ../engine/source/engine/resol.F
 !||====================================================================
       SUBROUTINE BMULTN(FILL,DFILL,IMS,NODFT,NODLT)
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -39,16 +40,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NODFT,NODLT
-      INTEGER IMS(NUMNOD,*)
-      my_real
-     .   FILL(NUMNOD,*), DFILL(NUMNOD,*)
+      INTEGER :: NODFT,NODLT
+      INTEGER :: IMS(NUMNOD,*)
+      my_real :: FILL(NUMNOD,*), DFILL(NUMNOD,*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER M, N
 C-----------------------------------------------
-      DO M=1,NMULT
+      DO M=1,ALE%MULTIMAT%NMULT
         DO N=NODFT,NODLT
           IF(IMS(N,M)>0)THEN
             DFILL(N,M)=DT2*DFILL(N,M)/IMS(N,M)
@@ -58,7 +58,7 @@ C-----------------------------------------------
         ENDDO !next N
       ENDDO !next M
 
-      DO M=1,NMULT
+      DO M=1,ALE%MULTIMAT%NMULT
         DO N=NODFT,NODLT
           IF(IMS(N,M)/=0)THEN
             IMS(N,M) = 0

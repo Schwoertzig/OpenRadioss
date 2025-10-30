@@ -93,7 +93,7 @@ C-----------------------------------------------
       USE SEGVAR_MOD 
       USE OUTMAX_MOD
       USE OUTPUT_MOD
-      USE ALE_MOD
+      USE ALE_MOD , ONLY : ALE
       USE DAMP_MOD
       USE INTERFACES_MOD
       USE SKEW_MOD
@@ -892,9 +892,9 @@ c       IADS = 0
         IF (IERR/=0) GOTO 1000
         IADRL = 0 
 
-        ALLOCATE (LINALE(SLINALE+LLINAL),STAT=IERR)
+        ALLOCATE (ALE%LINK%LINALE(ALE%LINK%SLINALE + ALE%LINK%LLINAL),STAT=IERR)
         IF (IERR/=0) GOTO 1000
-        LINALE = 0
+        ALE%LINK%LINALE = 0
 
         ALLOCATE (NEFLSW(SNEFLSW),STAT=IERR)
         IF (IERR/=0) GOTO 1000
@@ -1098,21 +1098,21 @@ C   -----------------------------------------------
         IF (IERR/=0) GOTO 1000
         W = 0 
 
-        ALLOCATE (VEUL(SVEUL),STAT=IERR)
+        ALLOCATE (VEUL(ALE%GLOBAL%SVEUL),STAT=IERR)
         IF (IERR/=0) GOTO 1000
         VEUL = 0  
 
-        ALLOCATE (FILL(SFILL),STAT=IERR)
+        ALLOCATE (ALE%MULTIMAT%VOF%FILL(ALE%MULTIMAT%VOF%SFILL),STAT=IERR)
         IF (IERR/=0) GOTO 1000
-        FILL = 0  
+        ALE%MULTIMAT%VOF%FILL = 0
 
-        ALLOCATE (DFILL(SDFILL),STAT=IERR)
+        ALLOCATE (ALE%MULTIMAT%VOF%DFILL(ALE%MULTIMAT%VOF%SDFILL),STAT=IERR)
         IF (IERR/=0) GOTO 1000
-        DFILL = 0 
+        ALE%MULTIMAT%VOF%DFILL = 0
 
-        ALLOCATE (ALPH(SALPH),STAT=IERR)
+        ALLOCATE (ALE%MULTIMAT%VOF%ALPH(ALE%MULTIMAT%VOF%SALPH),STAT=IERR)
         IF (IERR/=0) GOTO 1000
-        ALPH = 0  
+        ALE%MULTIMAT%VOF%ALPH = 0
 
         ALLOCATE (WB(SWB),STAT=IERR)
         IF (IERR/=0) GOTO 1000
@@ -1567,7 +1567,7 @@ C   thermal bc
 C
          ALLOCATE (MSF(SMS),STAT=IERR)
          IF (IERR/=0) GOTO 1000
-         IF(IALELAG > 0) THEN
+         IF(ALE%GLOBAL%IALELAG > 0) THEN
            MSF = ZERO
          ENDIF
 C--------------------------------------------
@@ -2183,7 +2183,7 @@ C-------TAG_SKINS6----------------------
          ALLOCATE(TAG_SKINS6(NUMELS),STAT=IERR)
          SXCELL = 0
 C-------ALE BUFFER----------------------
-         IF ((IALE > 0 .AND. ALE%GRID%NWALE_RST == 6) ) THEN
+         IF ((ALE%GLOBAL%IALE > 0 .AND. ALE%GRID%NWALE_RST == 6) ) THEN
             SXCELL = NUMELS + NUMELQ + NE_NSVOIS + NE_NQVOIS
             ALLOCATE(XCELL(3, SXCELL),STAT=IERR)
             IF (IERR/=0) GOTO 1000
@@ -2701,7 +2701,7 @@ C   I89
 C   I89A
         WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SIADRL : ',SIADRL
 C   I90
-        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SLINALE : ',SLINALE
+        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SLINALE : ',ALE%LINK%SLINALE
 C   I91
         WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SNEFLSW : ',SNEFLSW
 C   I92
@@ -2777,15 +2777,15 @@ C   M29
 C   M30
         WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SW : ',SW
 C   M31
-        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SVEUL : ',SVEUL
+        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SVEUL : ',ALE%GLOBAL%SVEUL
 C   M32
-        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SFILL : ',SFILL
+        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SFILL : ',ALE%MULTIMAT%VOF%SFILL
 C   M33
-        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SDFILL : ',SDFILL
+        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SDFILL : ',ALE%MULTIMAT%VOF%SDFILL
 C   M34
-        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SALPH : ',SALPH
+        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SALPH : ',ALE%MULTIMAT%VOF%SALPH
 C   M35
-        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SWB : ',SWB
+        WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SWB : ',ALE%GRID%SWB
 C   M36
         WRITE(IOUT,'(I4,A13,I8)') ISPMD+1,' SDSAVE : ',SDSAVE
 C   M37

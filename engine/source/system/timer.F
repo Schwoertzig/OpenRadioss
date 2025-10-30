@@ -27,7 +27,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    print_block     ../engine/source/system/timer.F
 !||====================================================================
-      SUBROUTINE PRINT_SUMMARY(FLAG,NTIMAX,TABTIME,TITLES,OUT_ID,ITHERM) 
+      SUBROUTINE PRINT_SUMMARY(FLAG,NTIMAX,TABTIME,TITLES,OUT_ID,ITHERM)
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -126,8 +127,7 @@ c       IF(IMONM >= 1)THEN
          FIELDS(5) = MACRO_TIMER_TMP1 ; TITLES(MACRO_TIMER_TMP1) = 'TOT'
          FIELDS(6) = MACRO_TIMER_TMP2 ; TITLES(MACRO_TIMER_TMP2) = '%'
          NFIELDS = 6
-         CALL PRINT_BLOCK("** SPMD COM. TIME **",TABTIME,NTIMAX,
-     .                     FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+         CALL PRINT_BLOCK("** SPMD COM. TIME **",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
         ENDIF ! SPMD
 C
         IF (IMONM>=1) THEN
@@ -145,8 +145,7 @@ C
             FIELDS(11) =74 ; TITLES(74) = 'COMP_MV_E ' 
             FIELDS(12) =75 ; TITLES(75) = 'BUILD_M' 
             NFIELDS = 12
-            CALL PRINT_BLOCK("** AMS TIME **",TABTIME,NTIMAX,
-     .                        FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+            CALL PRINT_BLOCK("** AMS TIME **",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
 
           END IF
 C
@@ -156,8 +155,7 @@ C
             FIELDS(3) = 68 ; TITLES(FIELDS(3)) = 'GPU_CPU ' 
             FIELDS(4) = 69 ; TITLES(FIELDS(4)) = 'CPU_GPU' 
             NFIELDS = 4
-            CALL PRINT_BLOCK("** IMPLICIT PCG **",TABTIME,NTIMAX,
-     .                        FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+            CALL PRINT_BLOCK("** IMPLICIT PCG **",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
           END IF
 C
           DO I = 1, NSPMD
@@ -193,8 +191,7 @@ C
               FIELDS(NFIELDS) = MACRO_TIMER_FRIC ; TITLES(FIELDS(NFIELDS)) = 'FRIC' 
             ENDIF
             
-            CALL PRINT_BLOCK("** INTERFACE TIME **",TABTIME,NTIMAX,
-     .                        FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+            CALL PRINT_BLOCK("** INTERFACE TIME **",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
             
             FIELDS(1 )=21    ; TITLES(FIELDS(1 )) = 'FICOM1'
             FIELDS(2 )=22    ; TITLES(FIELDS(2 )) = 'FICOM2'
@@ -208,8 +205,7 @@ C
             FIELDS(10)=29    ; TITLES(FIELDS(10)) = 'SHOOTING'
             FIELDS(11)=28    ; TITLES(FIELDS(11)) = 'INT2_FV'
             NFIELDS = 11
-            CALL PRINT_BLOCK(" ",TABTIME,NTIMAX,
-     .                        FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+            CALL PRINT_BLOCK(" ",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
           ENDIF
 
           FIELDS(1 )=40    ; TITLES(FIELDS(1 )) = 'RB_SENS'
@@ -221,8 +217,7 @@ C
           FIELDS(7 )=46    ; TITLES(FIELDS(7 )) = 'GRAV'
 
           NFIELDS = 7
-          CALL PRINT_BLOCK("** KIN COND & TASK0 TIME **",TABTIME,NTIMAX,
-     .                      FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+          CALL PRINT_BLOCK("** KIN COND & TASK0 TIME **",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
 
           FIELDS(1 )=47    ; TITLES(FIELDS(1 )) = 'MANCTR'         
           FIELDS(2 )=50    ; TITLES(FIELDS(2 )) = 'MONVOL'        
@@ -242,18 +237,16 @@ C
             NFIELDS = NFIELDS + 1
             FIELDS(11)=55    ; TITLES(FIELDS(11)) = 'R2M'      
           ENDIF
-          CALL PRINT_BLOCK(" ",TABTIME,NTIMAX,
-     .                      FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+          CALL PRINT_BLOCK(" ",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
 
-          IF(IALE+IEULER+ITHERM/=0) THEN
+          IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + ITHERM/=0) THEN
             FIELDS(1) = MACRO_TIMER_ALEMAIN                           
             FIELDS(2) = MACRO_TIMER_IFSUB0                           
             FIELDS(3) = MACRO_TIMER_MULTIFVM                           
             FIELDS(4) = MACRO_TIMER_SPMDCFD                           
             FIELDS(5) = MACRO_TIMER_MUSCL
             NFIELDS = 5
-            CALL PRINT_BLOCK("** ALE TIME **",TABTIME,NTIMAX,
-     .                      FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
+            CALL PRINT_BLOCK("** ALE TIME **",TABTIME,NTIMAX,FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
 
           ENDIF
 
@@ -514,7 +507,8 @@ C-----------------------------------------------
       USE TIMER_MOD
       USE TIME_MOD
       USE INOUTFILE_MOD
-      USE OUTPUT_MOD  
+      USE OUTPUT_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -848,7 +842,7 @@ C---------------------------
       WRITE(ISTDO,'(A,E9.4,3x,F6.2,A)')' AMS.........................: ',
      +  CUMUL(39),100*CUMUL(39)/CUMUL(1),' % '
       END IF
-      IF(IALE+IEULER+ITHERM/=0) THEN
+      IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER + ITHERM/=0) THEN
       WRITE(ISTDO,'(A,E9.4,3x,F6.2,A)')' ALE.........................: ',
      + CUMUL(MACRO_TIMER_ALEMAIN),
      + 100*CUMUL(MACRO_TIMER_ALEMAIN)/CUMUL(1),' % '
@@ -891,7 +885,7 @@ c     ENDIF
         WRITE(IOUT,'(A,E9.4,3x,F6.2,A)')' AMS.........................: ',
      +  CUMUL(39),100*CUMUL(39)/CUMUL(1),' % '
       END IF
-      IF(IALE+IEULER+ITHERM/=0) THEN
+      IF(ALE%GLOBAL%IALE+ALE%GLOBAL%IEULER+ITHERM/=0) THEN
       WRITE(IOUT,'(A,E9.4,3x,F6.2,A)')' ALE.........................: ',
      +  CUMUL(MACRO_TIMER_ALEMAIN)
      +  ,100*CUMUL(MACRO_TIMER_ALEMAIN)/CUMUL(1),' % '

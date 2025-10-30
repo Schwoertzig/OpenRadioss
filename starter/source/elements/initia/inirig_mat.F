@@ -76,6 +76,7 @@ C-----------------------------------------------
       use glob_therm_mod
       USE DRAPE_MOD
       use element_mod , only : nixs,nixc,nixtg
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -106,7 +107,7 @@ C-----------------------------------------------
       my_real ::
      .   PM(NPROPM,*), GEO(NPROPG,*),MS(*),MSC(*),MSS(8,*), 
      .   MSTG(*),INTG(*),PTG(3,*),IN(*),INC(*),THKC(*),THKT(*), 
-     .   X(3,*),V(3,*),VEUL(LVEUL,*),DTELEM(*),PARTSAV(20,*),
+     .   X(3,*),V(3,*),VEUL(ALE%GLOBAL%LVEUL,*),DTELEM(*),PARTSAV(20,*),
      .   MSNF(*), MSSF(8,*), WMA(*), ETNOD(*), STC(*), STTG(*),
      .   MCP(*),MCPC(*),TEMP(*),MCPS(8,*),INS(8,*),MCPSX(12,*),
      .   MSSX(12,*),STIFN(*), STIFR(*),

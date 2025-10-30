@@ -85,6 +85,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use glob_therm_mod
       use element_mod , only : nixs
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -116,7 +117,7 @@ C-----------------------------------------------
      .        KXSP(NISP,*), IPARTSP(*), NOD2SP(*), SOL2SPH(2,*), IRST(3,*),
      .        PERTURB(NPERTURB)
       my_real MAS(*), PM(NPROPM,NUMMAT), X(3,NUMNOD),GEO(NPROPG,NUMGEO),
-     .        VEUL(LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
+     .        VEUL(ALE%GLOBAL%LVEUL,*), DTELEM(*),SIGI(NSIGS,*),SKEW(LSKEW,*),STIFN(*),
      .        PARTSAV(20,*), V(*), MSS(8,*), 
      .        SIGSP(NSIGI,*),MSNF(*), MSSF(8,*), WMA(*),
      .        VOLNOD(*), BVOLNOD(*), VNS(8,*), BNS(8,*),
@@ -294,7 +295,7 @@ C
       CALL SVEOK3(NVC,8, IX1, IX2, IX3, IX4, IX5, IX6, IX7, IX8)
 C
       IF(JEUL /= 0.AND.INTEG8 /= 0) THEN
-        CALL SDERI3B(GBUF%VOL,VEUL(1,NF1),LVEUL,GEO,IGEO ,NGL  ,PID  ,
+        CALL SDERI3B(GBUF%VOL,VEUL(1,NF1),ALE%GLOBAL%LVEUL,GEO,IGEO ,NGL  ,PID  ,
      .              X1   ,X2   ,X3   ,X4   ,X5   ,X6   ,X7   ,X8   ,
      .              Y1   ,Y2   ,Y3   ,Y4   ,Y5   ,Y6   ,Y7   ,Y8   ,
      .              Z1   ,Z2   ,Z3   ,Z4   ,Z5   ,Z6   ,Z7   ,Z8   ,
@@ -386,7 +387,7 @@ C----------------------------------------
       IF(JLAG+JALE+JEUL /= 0) THEN
         IF(INTEG8 /= 0 .AND. JEUL /= 0) THEN
           CALL SMASS3B(
-     1          GBUF%RHO,MAS,VEUL(44,NF1),LVEUL      ,MSS(1,NF1),
+     1          GBUF%RHO,MAS,VEUL(44,NF1),ALE%GLOBAL%LVEUL      ,MSS(1,NF1),
      2          PARTSAV,X  ,V           ,IPARTS(NF1),MSNF      ,
      3          MSSF(1,NF1),WMA         , RHOCP     ,MCP       ,
      4          MCPS(1,NF1),MSSA, VOLU, 

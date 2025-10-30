@@ -34,6 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      6   PY3,     PY4,     PZ1,     PZ2,
      7   PZ3,     PZ4,     DET,     DELTAX,
      8   NEL,     NFT)
+       USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -48,7 +49,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: NEL
       INTEGER, INTENT(IN) :: NFT
       my_real
-     .   VOL(*), VEUL(LVEUL,*),
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),
      .   X1(*), X2(*), X3(*), X4(*), 
      .   Y1(*), Y2(*), Y3(*), Y4(*),  
      .   Z1(*), Z2(*), Z3(*), Z4(*), 

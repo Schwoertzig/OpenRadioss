@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4      LWASPH0,NUMSPH0   ,LWASPIO  , NRCVVOIS0 ,NGROUP_L,
      5      LWAMP_L, LWANMP_L ,ITHERM   )
 C Please note the dummy can be either local or global following appeal
+       USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -40,7 +41,6 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
-#include      "com01_c.inc"
 #include      "com09_c.inc"
 #include      "sphcom.inc"
 #include      "param_c.inc"
@@ -61,8 +61,12 @@ C-----------------------------------------------
       INTEGER NFLUWA, NBHOLWA, NAIRWA, NINTWA, NXELWA, NSPHWA,
      .        NASSNMP, NASSMP, NIDELWA, NWASPH, MSPR,
      .        IUN,LENVOISWA
+      INTEGER :: IALE,IEULER,NMULT
 C-----------------------------------------------
       IUN = 1
+      IALE = ALE%GLOBAL%IALE
+      IEULER = ALE%GLOBAL%IEULER
+      NMULT = ALE%MULTIMAT%NMULT
 C---------------------------------------------------------------------
 C SPH
       NSPHWA = MAX(2*KVOISPH,4*KVOISPH,
@@ -72,7 +76,7 @@ C work array WASPH, prive au SPH.
      .                            +MIN(IUN,NSPHSOL)*NUMSPH0
 C---------------------------------------------------------------------
 C ALE / CFD
-      NFLUWA  = MAX(IALE,ITHERM,IEULER) * MAX(1,NMULT) * 
+      NFLUWA  = MAX(IALE,ITHERM,IEULER) * MAX(1,NMULT) *
      .          MAX(7 * (NUMELS0+NUMELQ0),3 * NUMNOD0)
       NBHOLWA = MAX(IALE,ITHERM,IEULER) * NMULT * NUMELQ0
       LENVOISWA = 3 * ( NUMNOD0 + NRCVVOIS0 ) 
@@ -86,13 +90,12 @@ C SPMD assembly: all in dynamics
       NASSMP  = 0
 C shooting nodes
       NIDELWA = 3*NUMNOD0
-C lenwa non parallele
+C lenwa non parallel
       LWANMP_L   = MAX(NTHWA0,NASSNMP,L_MUL_LAG)
 C---------------------------------------------------------------------
       NXELWA   = 22*MAXNX0                                         ! Rigorously Maxnx Local
-C lenwa parallele
-      LWAMP_L    = MAX(NAIRWA,NINTWA,NFLUWA+NBHOLWA,NASSMP,NXELWA,NSPHWA,
-     +               NIDELWA,LENVOISWA)
+C lenwa parallel
+      LWAMP_L    = MAX(NAIRWA,NINTWA,NFLUWA+NBHOLWA,NASSMP,NXELWA,NSPHWA,NIDELWA,LENVOISWA)
 C MSPR used in the starter
       MSPR    = MAX(4*NUMELR0,NPARG*NGROUP_L)
 C

@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sinit3   ../starter/source/elements/solid/solide/sinit3.F
 !||====================================================================
       SUBROUTINE EDLEN3(VEUL, DELTAX)
+        USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -42,7 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      my_real, INTENT(INOUT) :: VEUL(LVEUL,*)
+      my_real, INTENT(INOUT) :: VEUL(ALE%GLOBAL%LVEUL,*)
       my_real,INTENT(IN) :: DELTAX(MVSIZ)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

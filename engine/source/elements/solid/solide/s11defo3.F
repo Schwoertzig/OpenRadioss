@@ -40,6 +40,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +59,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: NUMELS
       INTEGER IXS(NIXS,NUMELS)
       my_real
-     .   V(3,*), VEUL(LVEUL,*),X(3,*),PM(NPROPM,NUMMAT),
+     .   V(3,*), VEUL(ALE%GLOBAL%LVEUL,*),X(3,*),PM(NPROPM,NUMMAT),
      .   DXX(*), DXY(*), DXZ(*),
      .   DYX(*), DYY(*), DYZ(*),
      .   DZX(*), DZY(*), DZZ(*), D4(*), D5(*), D6(*),

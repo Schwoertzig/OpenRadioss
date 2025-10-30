@@ -134,6 +134,7 @@ C-----------------------------------------------
       USE GROUPDEF_MOD
       USE ALE_CONNECTIVITY_MOD
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -157,7 +158,7 @@ C-----------------------------------------------
       INTEGER,INTENT(IN)                             :: IXS(NIXS,*)   ,IPARG(NPARG,*),ITAB(*)   ,NV46  ,BUFBRIC(*),
      .                                                  IPARI(*)      ,IXT(NIXT,*)  ,ITASK ,IPM(NPROPMI,*)
       TYPE(ELBUF_STRUCT_), TARGET, DIMENSION(NGROUP) :: ELBUF_TAB
-      my_real,INTENT(IN)                             :: V(3,*), VEUL(LVEUL,*)
+      my_real,INTENT(IN)                             :: V(3,*), VEUL(ALE%GLOBAL%LVEUL,*)
       my_real,INTENT(IN),TARGET                      :: BUFMAT(*)
       my_real,INTENT(INOUT)                          :: X(3,*)
 !

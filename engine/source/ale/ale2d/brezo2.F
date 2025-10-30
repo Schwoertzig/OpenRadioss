@@ -32,6 +32,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -45,7 +46,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER BHOLE(NMULT,*),NM
+      INTEGER BHOLE(ALE%MULTIMAT%NMULT,*),NM
       my_real VAR(*), PHI(*), FLUX(4,*), VOL(*)
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
 C-----------------------------------------------
@@ -134,7 +135,11 @@ C-----------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
 !||====================================================================
       SUBROUTINE BREZO2_SIG(ALE_CONNECT,SIG,NV,PHI,NDIM,FLUX,VOL,BHOLE,NM,NEL)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      USE ALE_MOD ,ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -149,7 +154,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER NDIM,NV,NEL
-      INTEGER BHOLE(NMULT,*),NM
+      INTEGER BHOLE(ALE%MULTIMAT%NMULT,*),NM
       my_real SIG(NEL,NDIM), PHI(*), FLUX(4,*), VOL(*)
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
 C-----------------------------------------------

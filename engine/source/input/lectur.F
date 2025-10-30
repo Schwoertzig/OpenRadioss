@@ -119,7 +119,7 @@ C-----------------------------------------------
       USE OUTPUT_MOD
       USE STATE_MOD
       USE ALEMUSCL_MOD , only:ALEMUSCL_Param
-      USE ALE_MOD
+      USE ALE_MOD , ONLY : ALE
       USE DT_MOD
       USE LOADS_MOD
       USE FXB_MOD
@@ -283,8 +283,8 @@ C--------------
       READ (IIN, '(I8, I8)') NBPARTALEON, NBPARTALEOFF
       IF(MCHECK == 0)THEN
         NRLINK=NRLINK0
-        NALELK=NALELK0
-        NALELINK=NALELINK0
+        ALE%LINK%NALELK=NALELK0
+        ALE%LINK%NALELINK=NALELINK0
         IRPREV = 0
       ENDIF
       NRBYON = 0
@@ -829,7 +829,7 @@ C-----------------------
        WRITE(IOUT,1300) NSLIOF,NPARTOF,NELSOF,NELQOF,NELCOF,NELTOF,NELPOF,NELROF,NELTGOF,NSPHOF
        WRITE(IOUT,1400) NRLINK
        WRITE(IOUT,1500) NUBCSN
-       IF(IALE /= 0.OR.IEULER /= 0)WRITE(IOUT,1450) NALELINK+NALELK !format v12 + format v5
+       IF(ALE%GLOBAL%IALE /= 0 .OR. ALE%GLOBAL%IEULER /= 0)WRITE(IOUT,1450) ALE%LINK%NALELINK+ALE%LINK%NALELK !format v12 + format v5
 c
       ELSEIF(ISPMD == 0 .AND. MCHECK /= 0) THEN
       ENDIF                     !(ISPMD==0.AND.MCHECK==0)
@@ -840,7 +840,7 @@ C----------------------------------------
          !ALE%UPWIND%UPW_UPDATE == 2 : /UPWIND CARD IS CHANGING AT LEAST ONE PARAMETER
          !if /UPWIND is defined then set new parameters
       IF(ISPMD == 0 .AND. MCHECK == 0)THEN
-        IF(IALE /= 0 .OR. IEULER /= 0)THEN
+        IF(ALE%GLOBAL%IALE /= 0 .OR. ALE%GLOBAL%IEULER /= 0)THEN
          IF(ALE%UPWIND%UPW_UPDATE /= 0 )THEN
            DO K=1,NUMMAT-1
              !ILAW=PM(19,K)
@@ -880,7 +880,7 @@ C----------------------------------------
 C-----------------------------------
 C     ALE/EULER : OUTPUT
 C----------------------------------------
-      IF(IALE /= 0 .OR. IEULER /= 0)THEN
+      IF(ALE%GLOBAL%IALE /= 0 .OR. ALE%GLOBAL%IEULER /= 0)THEN
          !-----------------------
          !     QUASI-INCOMPRESSIBLE /INCMP
          !-----------------------
@@ -1005,7 +1005,7 @@ C----------------------------------------
 !     FEM MOMENTUM INTEGRATION
 !-----------------------
       IF(ISPMD == 0.AND.MCHECK == 0)THEN
-        IF(IALE+IEULER /= 0 .AND. ALE%GLOBAL%ISFINT /= 3)THEN
+        IF(ALE%GLOBAL%IALE + ALE%GLOBAL%IEULER /= 0 .AND. ALE%GLOBAL%ISFINT /= 3)THEN
           SELECT CASE(ALE%GLOBAL%ISFINT)
             !CASE(3)
             ! WRITE(IOUT,1197)   !default
@@ -1020,17 +1020,17 @@ C----------------------------------------
 C-------------------------------
 C ELIMINATION PARTIE ALE EULER THERMIQUE
 C-------------------------------
-      IF(IALE /= 0.AND.NALEOF == 1)THEN
+      IF(ALE%GLOBAL%IALE /= 0 .AND. NALEOF == 1)THEN
         IF(ISPMD == 0.AND.MCHECK == 0)THEN
           WRITE(IOUT,*)'ALE FORMULATION SWITCHED OFF '
         END IF
-        IALE = 0
+        ALE%GLOBAL%IALE = 0
       END IF
-      IF(IEULER /= 0.AND.NEULEROF == 1)THEN
+      IF(ALE%GLOBAL%IEULER /= 0 .AND. NEULEROF == 1)THEN
         IF(ISPMD == 0.AND.MCHECK == 0)THEN
           WRITE(IOUT,*)'EULER FORMULATION SWITCHED OFF '
         END IF
-        IEULER = 0
+        ALE%GLOBAL%IEULER = 0
       END IF
       IF (GLOB_THERM%ITHERM /= 0.AND.NTHERMOF == 1)THEN
         IF(ISPMD == 0.AND.MCHECK == 0)THEN
@@ -1979,27 +1979,26 @@ C     after reading : SLINALE <- SLINALE+LLINAL
 C                      NALELK <- NALELK+NALELINK
 
       NALELK_starter = 0
-      IF(MCHECK==0)NALELK_starter = SLINALE/7 !SLINALE : starter linale size
+      IF(MCHECK==0)NALELK_starter = ALE%LINK%SLINALE/7 !SLINALE : starter linale size
       NALELK_removed=0
       K=6
 
       !setting MAIN node user id to internal id
       DO J=1,NALELK_starter
-        IF(IRUN == 1 .AND. MCHECK == 0)
-     .   CALL FR_RLALE(LINALE(K-4),LINALE(K-3),LINALE(K+1),ITABM1,-1)
+        IF(IRUN == 1 .AND. MCHECK == 0)CALL FR_RLALE(LINALE(K-4),LINALE(K-3),LINALE(K+1),ITABM1,-1)
         K=K+1+6
       ENDDO
 
-      IF(NALELK /= 0.AND.MCHECK == 0)THEN
-       K=SLINALE+6                                                  !LINALE(1:SLINALE):starter cards ;LINALE(SLINALE+1:SLINALE+LLINE):engine cards
+      IF(ALE%LINK%NALELK /= 0.AND.MCHECK == 0)THEN
+       K=ALE%LINK%SLINALE+6                                                  !LINALE(1:SLINALE):starter cards ;LINALE(SLINALE+1:SLINALE+LLINE):engine cards
        !K=5 !en attendant de copier LIALE starter dans (1:SLINALE)
-       DO J=1,NALELK
+       DO J=1,ALE%LINK%NALELK
          READ (IIN,'(3I10,5X,3I1,I10)')M1,M2,N,I1,I2,I3,IM
          !---------------------------------!
          !  ALE LINK DEFINED FROM NODES    !
          !---------------------------------!
          IF(N>0)THEN
-           READ (IIN,'(10I10)')(LINALE(K+I),I=1,N)
+           READ (IIN,'(10I10)')(ALE%LINK%LINALE(K+I),I=1,N)
            IC=I3+2*I2+4*I1
            IF(IC == 0)THEN
             IC=7
@@ -2008,17 +2007,17 @@ C                      NALELK <- NALELK+NALELINK
             I3=1
            ENDIF
            IF(ISPMD == 0.AND.MCHECK == 0)WRITE(IOUT,2200)M1,M2,I1,I2,I3,IM
-            LINALE(K-4)=M1
-            LINALE(K-3)=M2
-            LINALE(K-2)=N
-            LINALE(K-1)=IC
-            LINALE(K)=IM
+            ALE%LINK%LINALE(K-4)=M1
+            ALE%LINK%LINALE(K-3)=M2
+            ALE%LINK%LINALE(K-2)=N
+            ALE%LINK%LINALE(K-1)=IC
+            ALE%LINK%LINALE(K)=IM
             IF(ISPMD == 0.AND.MCHECK == 0)THEN
-              WRITE(IOUT,'(10I10)')(LINALE(K+I),I=1,N)
+              WRITE(IOUT,'(10I10)')(ALE%LINK%LINALE(K+I),I=1,N)
               WRITE(IOUT,2201)
             ENDIF
 c           Verification shared and tag in - nodes not present
-            CALL FR_RLALE(LINALE(K-4),LINALE(K-3),LINALE(K+1),ITABM1,N)
+            CALL FR_RLALE(ALE%LINK%LINALE(K-4),ALE%LINK%LINALE(K-3),ALE%LINK%LINALE(K+1),ITABM1,N)
             K=K+N+6
          !---------------------------------!
          !  ALE LINK DEFINED FROM GRNOD    !
@@ -2066,23 +2065,23 @@ c           Verification shared and tag in - nodes not present
             K=K+1+6
          ENDIF
        ENDDO !next J
-       SLINALE = SLINALE + LLINAL
+       ALE%LINK%SLINALE = ALE%LINK%SLINALE + ALE%LINK%LLINAL
       ENDIF !IF(NALELK /= 0.AND.MCHECK == 0)THEN
 
 C-------------------------------------------
 C     ALE - LINK ON GRID VELOCITY
 C     format >= v12  ('/ALE/LINK/*')
 C-------------------------------------------
-      IF(NALELINK /= 0.AND.MCHECK == 0)THEN
-       IF(NALELK==0)K=SLINALE+6
-       DO J=1,NALELINK
+      IF(ALE%LINK%NALELINK /= 0.AND.MCHECK == 0)THEN
+       IF(ALE%LINK%NALELK==0)K=ALE%LINK%SLINALE+6
+       DO J=1,ALE%LINK%NALELINK
          READ (IIN,'(3I10,5X,3I1,I10)')M1,M2,N,I1,I2,I3,IM
          IF(M1>0.AND.M2>0)THEN
            !---------------------------------!
            !  ALE LINK DEFINED FROM NODES    !
            !---------------------------------!
            IF(N>0)THEN
-             READ (IIN,'(10I10)')(LINALE(K+I),I=1,N)
+             READ (IIN,'(10I10)')(ALE%LINK%LINALE(K+I),I=1,N)
              IC=I3+2*I2+4*I1
              IF(IC == 0)THEN
               IC=7
@@ -2091,17 +2090,17 @@ C-------------------------------------------
               I3=1
              ENDIF
              IF(ISPMD == 0.AND.MCHECK == 0)WRITE(IOUT,2200)M1,M2,I1,I2,I3,IM
-             LINALE(K-4)=M1
-             LINALE(K-3)=M2
-             LINALE(K-2)=N
-             LINALE(K-1)=IC
-             LINALE(K)=IM
+             ALE%LINK%LINALE(K-4)=M1
+             ALE%LINK%LINALE(K-3)=M2
+             ALE%LINK%LINALE(K-2)=N
+             ALE%LINK%LINALE(K-1)=IC
+             ALE%LINK%LINALE(K)=IM
              IF(ISPMD == 0.AND.MCHECK == 0)THEN
-               WRITE(IOUT,'(10I10)')(LINALE(K+I),I=1,N)
+               WRITE(IOUT,'(10I10)')(ALE%LINK%LINALE(K+I),I=1,N)
                WRITE(IOUT,2201)
              ENDIF
               ! Verification shared and tag in - nodes not present
-              CALL FR_RLALE(LINALE(K-4),LINALE(K-3),LINALE(K+1),ITABM1,N)
+              CALL FR_RLALE(ALE%LINK%LINALE(K-4),ALE%LINK%LINALE(K-3),ALE%LINK%LINALE(K+1),ITABM1,N)
               K=K+N+6
             !---------------------------------!
             !  ALE LINK DEFINED FROM GRNOD    !
@@ -2114,13 +2113,13 @@ C-------------------------------------------
                 CALL ARRET(2) !node group not read
               ENDIF
 
-              LINALE(K+1)=NGR2USR(GR_ID,IGRNOD,NGRNOD)
-              IF(LINALE(K+1)==0)THEN
+              ALE%LINK%LINALE(K+1)=NGR2USR(GR_ID,IGRNOD,NGRNOD)
+              IF(ALE%LINK%LINALE(K+1)==0)THEN
                 WRITE(ISTDO,*)  ' ** ERROR IN ALE LINK: INVALID GRNOD_ID'
                 CALL ARRET(2) !node group not found
               ENDIF
 
-              IF(IM==0.AND.IGRNOD(LINALE(K+1))%SORTED /= 1)THEN
+              IF(IM==0.AND.IGRNOD(ALE%LINK%LINALE(K+1))%SORTED /= 1)THEN
               !option 0 needs to be defined with a /GRNOD/NODENS
                 WRITE(ISTDO,*)' ** ERROR IN ALE LINK:'
                 WRITE(ISTDO,*)'    UNSORTABLE NODE GROUP REQUIRED WITH OPTION 0 (/GRNOD/NODENS)'
@@ -2140,13 +2139,13 @@ C-------------------------------------------
                 WRITE(IOUT,2200)M1,M2,I1,I2,I3,IM !N=1 with GRNOD option
                 WRITE(IOUT,2202)GR_ID
               ENDIF
-              LINALE(K-4)=M1
-              LINALE(K-3)=M2
-              LINALE(K-2)=N
-              LINALE(K-1)=IC
-              LINALE(K)=IM
+              ALE%LINK%LINALE(K-4)=M1
+              ALE%LINK%LINALE(K-3)=M2
+              ALE%LINK%LINALE(K-2)=N
+              ALE%LINK%LINALE(K-1)=IC
+              ALE%LINK%LINALE(K)=IM
               !shared verification & untag non present nodes
-              CALL FR_RLALE(LINALE(K-4),LINALE(K-3),LINALE(K+1),ITABM1,N)
+              CALL FR_RLALE(ALE%LINK%LINALE(K-4),ALE%LINK%LINALE(K-3),ALE%LINK%LINALE(K+1),ITABM1,N)
               K=K+1+6
            ENDIF !(N>0)
 
@@ -2165,17 +2164,17 @@ C-------------------------------------------
              !---------------------------------!
              !  CHECK AND DEACTIVATE           !
              !---------------------------------!
-             IF(L>=SLINALE)THEN
+             IF(L>=ALE%LINK%SLINALE)THEN
                !warning : uID does not exist
                  WRITE(ISTDO,*)' ** WARNING ALE LINK DOES NOT EXIST :',M1
                  WRITE(IOUT,*) ' ** WARNING ALE LINK DOES NOT EXIST :',M1
                EXIT
              ELSE
-               uID = LINALE(L+0)
-               N   = LINALE(L+3)
+               uID = ALE%LINK%LINALE(L+0)
+               N   = ALE%LINK%LINALE(L+3)
                IF(uID==-M1)THEN
                  NALELK_removed = NALELK_removed+1 !counting deactivated links
-                 LINALE(L+0)=-LINALE(L+0)          !setting negative uID to skip ALE LINK treatment (alelin.F)
+                 ALE%LINK%LINALE(L+0)=-ALE%LINK%LINALE(L+0)          !setting negative uID to skip ALE LINK treatment (alelin.F)
                  !printout :
                  IF(ISPMD == 0.AND.MCHECK == 0)WRITE(IOUT,2211)M1 !N=1 with GRNOD option
                  EXIT !next ALELIN_ON_OFF
@@ -2208,7 +2207,7 @@ C-------------------------------------------
              !---------------------------------!
              !  CHECK AND DEACTIVATE           !
              !---------------------------------!
-             IF(L>=SLINALE)THEN
+             IF(L>=ALE%LINK%SLINALE)THEN
                !warning : uID does not exist
                  WRITE(ISTDO,*) ' ** WARNING ALE LINK DOES NOT EXIST :',M1
                  WRITE(IOUT,*)  ' ** WARNING ALE LINK DOES NOT EXIST :',M1
@@ -2237,11 +2236,11 @@ C-------------------------------------------
          ENDIF
 
        ENDDO
-       SLINALE = SLINALE + LLINAL
-       NALELK  = NALELK+NALELINK-NALELK_removed
+       ALE%LINK%SLINALE = ALE%LINK%SLINALE + ALE%LINK%LLINAL
+       ALE%LINK%NALELK  = ALE%LINK%NALELK + ALE%LINK%NALELINK - NALELK_removed
       ENDIF !(NALELINK /= 0.AND.MCHECK == 0)
 
-      IF(MCHECK==0)NALELK=NALELK+NALELK_starter
+      IF(MCHECK==0)ALE%LINK%NALELK = ALE%LINK%NALELK + NALELK_starter
 
 C-------------------------------------------
 C     ALE ON/ OFF

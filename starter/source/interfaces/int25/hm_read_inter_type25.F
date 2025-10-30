@@ -59,6 +59,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD
       USE PARAMETERS_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -678,7 +679,7 @@ C           IF(MODFR==2)VISCF=ZERO
             XFILTR = ZERO
           ENDIF
 
-          IF (IBAG/=0.AND.NVOLU==0 .AND. IALELAG == 0) THEN
+          IF (IBAG/=0.AND.NVOLU==0 .AND. ALE%GLOBAL%IALELAG == 0) THEN
              CALL ANCMSG(MSGID=614,
      .                   MSGTYPE=MSGWARNING,
      .                   ANMODE=ANINFO_BLIND_2,

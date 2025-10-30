@@ -351,7 +351,7 @@ C-----------------------------------------------
 
         ! ------------------------------
         ! simplified flow
-        IF(IALELAG > 0) THEN
+        IF(ALE%GLOBAL%IALELAG > 0) THEN
 !$OMP DO SCHEDULE(guided)
           DO N = 1,NUMNOD
             NCT = ADSKY(N)-1
@@ -405,7 +405,7 @@ C-----------------------------------------------
 !$OMP END DO
         ENDIF
 
-        IF( (N2D/=0).OR.(ALE%SUB%IFSUBM==1).OR.(IALELAG > 0) ) CALL MY_BARRIER
+        IF( (N2D /= 0) .OR. (ALE%SUB%IFSUBM == 1) .OR. (ALE%GLOBAL%IALELAG > 0) ) CALL MY_BARRIER
 
 C mass stored in FSKY(1) and NODES%A(1) used for 2D accumulation
         IF(N2D/=0) THEN
@@ -423,7 +423,7 @@ C mass stored in FSKY(1) and NODES%A(1) used for 2D accumulation
 !$OMP END DO
         ENDIF
 C
-        IF(IALELAG > 0) THEN
+        IF(ALE%GLOBAL%IALELAG > 0) THEN
 !$OMP DO SCHEDULE(guided)
           DO I = 1,NUMNOD
             MSF(I) = MSF(I) + MSNF(I)

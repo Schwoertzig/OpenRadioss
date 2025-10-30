@@ -40,6 +40,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -90,7 +91,7 @@ C-----------------------------------------------
         K=K+1
         NS=NS+NVAR(CARTE)
        ENDDO
-       LLLINK=LLLINK+NS
+       LLLINK = LLLINK + NS
        IF(KEY2=='TRA  ')THEN
         WRITE(IIN,'(I8,1X,I3.3,4X,I10)')NS,IXYZ(KEY3),K4
        ELSEIF(KEY2=='ROT  ')THEN

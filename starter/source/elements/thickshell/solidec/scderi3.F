@@ -39,6 +39,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -56,7 +57,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER :: NEL,JEUL,NGL(*),NGEO(*)
       my_real
-     .   VOL(*), VEUL(LVEUL,*),GEO(NPROPG,*),
+     .   VOL(*), VEUL(ALE%GLOBAL%LVEUL,*),GEO(NPROPG,*),
      .   VZL(*),VZQ(*), DET(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

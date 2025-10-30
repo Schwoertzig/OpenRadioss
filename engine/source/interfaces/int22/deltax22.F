@@ -50,6 +50,7 @@ C-----------------------------------------------
       USE I22BUFBRIC_MOD 
       USE I22TRI_MOD
       USE ELBUFDEF_MOD
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -66,7 +67,7 @@ C-----------------------------------------------
       INTEGER, INTENT(INOUT) :: LLT
       INTEGER, INTENT(INOUT) :: JALE
       INTEGER, INTENT(INOUT) :: JEUL
-      my_real :: VOL(*), VEUL(LVEUL,*), VOLN(*),DELTAX(*)
+      my_real :: VOL(*), VEUL(ALE%GLOBAL%LVEUL,*), VOLN(*),DELTAX(*)
       my_real :: IAD22(*)
       INTEGER :: IXS(NIXS,*)
 C-----------------------------------------------

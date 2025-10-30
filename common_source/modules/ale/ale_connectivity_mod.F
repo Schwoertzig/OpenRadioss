@@ -282,13 +282,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_mod                 ../common_source/modules/ale/ale_mod.F
 !||====================================================================
         SUBROUTINE ALE_CONNECTIVITY_INIT(THIS)
-          USE ALE_MOD
+          USE ALE_MOD , ONLY : ALE
           IMPLICIT NONE
           CLASS(T_ALE_CONNECTIVITY), INTENT(INOUT) :: THIS
-#include "com01_c.inc"
 #include "inter18.inc"
           LOGICAL RESULT
+          INTEGER :: IALE
           RESULT = .FALSE.
+          IALE = ALE%GLOBAL%IALE
           IF(IALE > 0 .AND. ALE%GRID%NWALE == 6)RESULT=.TRUE. !/ALE/GRID/VOLUME DEFINED
           IF(INTER18_AUTOPARAM == 1)RESULT=.TRUE. !/INTER/TYPE18 WITH FLAG IAUTO SET TO 1
           IF(INTER18_IS_VARIABLE_GAP_DEFINED)RESULT=.TRUE. !/INTER/TYPE18 WITH FLAG IAUTO SET TO 1
