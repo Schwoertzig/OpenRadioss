@@ -24,6 +24,7 @@
 
       module multi_cutcell_mod
         use precision_mod, only : WP
+        use grid2D_struct_multicutcell_mod, only : grid2D_struct_multicutcell
         
         implicit none
 
@@ -38,6 +39,7 @@
           real(kind=WP), dimension(:), allocatable :: rho, eint, pres !size nelem
           real(kind=WP), dimension(:, :), allocatable :: phase_pres, phase_rho !size nelem x nbmat
           real(kind=WP), dimension(:, :), allocatable :: phase_velx, phase_vely, phase_velz !size nelem x nbmat
+          type(grid2D_struct_multicutcell), dimension(:, :), allocatable :: grid !size nelem x nbmat
 
           ! indicates whether we run in 3d (sym = 0), or 2d (sym = 1 planar case, sym = 2 cylindrical case)
           integer :: sym
@@ -48,7 +50,7 @@
         contains
 
         subroutine allocate_multi_cutcell_type(nbmat, nelem, multi_cutcell_var)
-            integer, intent(in) :: nbmat, nelem
+            integer, value :: nbmat, nelem
             type(multi_cutcell_struct), intent(out) :: multi_cutcell_var
 
             multi_cutcell_var%nbmat = nbmat

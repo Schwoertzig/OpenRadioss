@@ -30,17 +30,18 @@
 !! \details ...
         subroutine  alemain_cutcell(nixq,numelq,ixq, numnod, x, ale_connect, ncycle, &
                                     ityptstt, neltstt, t1s, tt, &
-                                    ngroup, ngrnod, igrnod, nparg, iparg, dt2t, elbuf)
+                                    ngroup, ngrnod, igrnod, nparg, iparg, dt_scale, dt1, dt2t, multi_cutcell)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use constant_mod, only : pi,zero,one,em01               !module containing all constant insitialized with either single or double precision
           use precision_mod, only : wp                            !provides kind for eigther single or double precision (wp means working precision)
           use ale_connectivity_mod , only : t_ale_connectivity    !data structure for ale elem-elem connectivities
-          use elbufdef_mod , only : elbuf_struct_
           use groupdef_mod , only : group_
           use ale_mod , only : ALE
           use debug_mod , only : ITAB_DEBUG
+          use multi_cutcell_mod, only : multi_cutcell_struct, allocate_multi_cutcell_type
+          use multi_cutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -65,11 +66,13 @@
           real(kind=wp),intent(in) :: tt                                !< current time
           type(t_ale_connectivity), intent(inout) :: ale_connect
           integer,intent(in) :: ngrnod                                  !< number of group of nodes(array size for igrnod)
-          type(group_)  ,dimension(ngrnod)  :: igrnod                   !< groupd of nodes (data structure)
+          type(group_)  ,dimension(ngrnod)  :: igrnod                   !< group of nodes (data structure)
+          real(kind=WP), intent(in) :: dt_scale
+          real(kind=wp),intent(in) :: dt1
 
           !output
-          real(kind=wp),intent(inout) :: dt2t
-          type(elbuf_struct_),dimension(ngroup) :: elbuf                !< element buffer (storage for output files : pressure, density, velocity, ...)
+          real(kind=wp),intent(out) :: dt2t
+          type(multi_cutcell_struct), intent(inout) :: multi_cutcell        !< element buffer (storage for output files : pressure, density, velocity, ...)
           integer,intent(inout) :: ityptstt                             !< element type imposing the time step (here 2)
           integer,intent(inout) :: neltstt                              !< element user id imposing the time step
           real(kind=WP),intent(inout) :: t1s                            !< simulation time
@@ -85,6 +88,9 @@
           integer :: elem_uid !< user id
           integer :: iad2,lgth, iadj, JJ !< ale_connectivity usage (elem-elem)
           real(kind=WP) :: result_density !< temp
+          real(kind=WP) :: gamma
+          integer :: sign !Not used for now
+          integer :: nb_phase !TODO should be input
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Precondition
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -134,7 +140,21 @@
 
                  ! -------------------------------CALL 2D POC HERE
                  ! -----------------------------------------------
+                 gamma = 1.4
+                 sign = 1 !not used for now
 
+                 if (dt1>0) then
+                  call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, itab, ALE_CONNECT, &
+                         multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
+                         gamma, dt1, dt_scale, sign, dt2t, multi_cutcell%sound_speed)
+                 else
+                  !Initialization
+                  nb_phase = 2
+                  call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
+                  call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, itab, ALE_CONNECT, &
+                              ALE%solver%multimat%nb, ALE%solver%multimat%list(:)%surf_id, igrnod, multi_cutcell%grid)
+                 end if
+                   
 
 
 
