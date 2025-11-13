@@ -784,12 +784,9 @@ module multicutcell_solver_mod
     dx = sqrt(minval(grid(:, 1)%area))
     nb_cell = NUMELQ+NUMELTG !size(vely, 1)
     nb_regions = size(vely, 2)
-    !minimal_length = 0.5*dx
-    !maximal_length = dx
-    !minimal_angle = ATAN(1.d0) !pi/4
-    minimal_length = -1
-    maximal_length = 10000000
-    minimal_angle = -1
+    minimal_length = 0.5*dx
+    maximal_length = dx
+    minimal_angle = ATAN(1.d0) !pi/4
   
     call nb_pts_clipped_fortran(nb_pts_clipped)
     call nb_edge_clipped_fortran(nb_edge_clipped)
@@ -914,9 +911,22 @@ module multicutcell_solver_mod
       end do
     end do
   
-    !TODO : compute next dt
-    sound_speed = ...
-    dt_next = ...
+    !Compute next dt
+    sound_speed = sqrt(gamma * p / rho)
+    largest_speed_wave = -1.
+    do i = 1,nb_cell
+      do k = 1,nb_regions
+        largest_speed_wave = max(largest_speed_wave, max(abs(vely(i, k)), abs(velz(i, k))) + sound_speed(i, k))
+      end do
+    end do
+    dt_next = threshold * dx / largest_speed_wave
+
+    !Compute global variables for output
+    do i = 1,nb_cell
+      do k = 1,nb_regions
+        
+      end do
+    end do
   
     !Deallocate local memory
     deallocate(lambdan_prev)

@@ -147,6 +147,15 @@
                   call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, itab, ALE_CONNECT, &
                          multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
                          gamma, dt1, dt_scale, sign, dt2t, multi_cutcell%sound_speed)
+                 
+                    multi_cutcell%rho = multi_cutcell%grid(:,1)%lambdanp1_per_cell*multi_cutcell%phase_rho(:,1) + &
+                                        multi_cutcell%grid(:,2)%lambdanp1_per_cell*multi_cutcell%phase_rho(:,2)
+                    multi_cutcell%pres = multi_cutcell%grid(:,1)%lambdanp1_per_cell*multi_cutcell%phase_pres(:,1) + &
+                                        multi_cutcell%grid(:,2)%lambdanp1_per_cell*multi_cutcell%phase_pres(:,2)
+                    multi_cutcell%vel(2,:) = multi_cutcell%grid(:,1)%lambdanp1_per_cell*multi_cutcell%phase_vely(:,1) + &
+                                        multi_cutcell%grid(:,2)%lambdanp1_per_cell*multi_cutcell%phase_vely(:,2)
+                    multi_cutcell%etot = 0.5*(multi_cutcell%vel(2,:)*multi_cutcell%vel(2,:)+multi_cutcell%vel(3,:)*multi_cutcell%vel(3,:)) &
+                                          + multi_cutcell%pres/((gamma-1)*multi_cutcell%rho)
                  else
                   !Initialization
                   nb_phase = 2

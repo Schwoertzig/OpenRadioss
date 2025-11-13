@@ -36,7 +36,7 @@
           !integer :: muscl
           real(kind=WP), dimension(:, :), allocatable :: vel ! size 3 x nelem
           real(kind=WP), dimension(:), allocatable :: sound_speed !size nelem
-          real(kind=WP), dimension(:), allocatable :: rho, eint, pres !size nelem
+          real(kind=WP), dimension(:), allocatable :: rho, eint, etot, pres !size nelem
           real(kind=WP), dimension(:, :), allocatable :: phase_pres, phase_rho !size nelem x nbmat
           real(kind=WP), dimension(:, :), allocatable :: phase_velx, phase_vely, phase_velz !size nelem x nbmat
           type(grid2D_struct_multicutcell), dimension(:, :), allocatable :: grid !size nelem x nbmat
@@ -60,6 +60,7 @@
             allocate(multi_cutcell_var%sound_speed(nelem))
             allocate(multi_cutcell_var%rho(nelem))
             allocate(multi_cutcell_var%eint(nelem))
+            allocate(multi_cutcell_var%etot(nelem))
             allocate(multi_cutcell_var%pres(nelem))
             allocate(multi_cutcell_var%phase_pres(nelem, nbmat))
             allocate(multi_cutcell_var%phase_rho(nelem, nbmat))
@@ -75,6 +76,7 @@
             deallocate(multi_cutcell_var%sound_speed)
             deallocate(multi_cutcell_var%rho)
             deallocate(multi_cutcell_var%eint)
+            deallocate(multi_cutcell_var%etot)
             deallocate(multi_cutcell_var%pres)
             deallocate(multi_cutcell_var%phase_pres)
             deallocate(multi_cutcell_var%phase_rho)
