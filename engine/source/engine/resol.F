@@ -4170,9 +4170,12 @@ C===============================================================================
                 DT2TT    = DT2T
                 NELTSTT  = NELTST
                 ITYPTSTT = ITYPTST
+                ! DT1         : current time step (input)
+                ! DT2TT       : solver computed minimal time step (output)
+                ! DTFAC1(102) : Courant number for ALE CFL (/DT/ALE)
                 CALL ALEMAIN_CUTCELL(NIXQ,NUMELQ,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
      .                               ITYPTSTT, NELTSTT, T1S, TT,
-     .                               ngroup,ngrnod,igrnod,nparg,iparg,dt_scale,dt1,dt2tt, multi_cutcell)!TODO : declare dt_scale, dt1
+     .                               NGROUP,NGRNOD,IGRNOD,NPARG,IPARG,DTFAC1(102),DT1,DT2TT,MULTI_CUTCELL)
                 IF(DT2TT<DT2T)THEN
                    DT2T   = DT2TT
                    ITYPTST= ITYPTSTT
@@ -8983,7 +8986,8 @@ C Regular animation
      s          LOADP         ,TAGNCONT       ,LOADP_HYD_INTER,FORC               ,DRAPEG        ,
      t          USER_WINDOWS  ,OUTPUT         ,DT             ,OUTPUT%TH%TH_SURF%CHANNELS        ,
      u          TABLE         ,LOADS          ,SFANI          ,IPARIT             ,ptrX_offset   ,
-     v          SZ_NPCONT2    ,NPCONT2        ,GLOB_THERM     ,PBLAST             ,OUTPUT%TH%WFEXT)
+     v          SZ_NPCONT2    ,NPCONT2        ,GLOB_THERM     ,PBLAST             ,OUTPUT%TH%WFEXT,
+     W          MULTI_CUTCELL)
 
                 IF((MSTOP == 1 .AND. ICTLSTOP == 0) .OR. MSTOP == 2 .OR. DT2<=ZERO)THEN
                   CALL SORTIE_ERROR(

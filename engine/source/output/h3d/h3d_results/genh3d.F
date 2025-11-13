@@ -208,7 +208,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4                  LLOADP   ,FAC      ,SENSORS     ,TAGNCONT    ,LOADP_HYD_INTER,
      5                  XFRAME   ,FORC     ,AR          ,CSEFRIC     ,CSEFRICG  ,
      6                  CSEFRIC_STAMP,CSEFRICG_STAMP    ,TABLE       ,IFRAME    ,LOADS,
-     7                  DRAPE_SH4N, DRAPE_SH3N, DRAPEG  ,X_C         ,GLOB_THERM,PBLAST)
+     7                  DRAPE_SH4N, DRAPE_SH3N, DRAPEG  ,X_C         ,GLOB_THERM,PBLAST,
+     8                  MULTI_CUTCELL)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -242,6 +243,7 @@ C-----------------------------------------------
         USE PBLAST_MOD 
         USE h3d_gather_id_val_mod
         USE SPMD_MOD
+        USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -353,6 +355,7 @@ C-----------------------------------------------
         TYPE (DRAPEG_), INTENT(IN)  :: DRAPEG
         type (glob_therm_), intent(in) :: GLOB_THERM
         type (pblast_), intent(in) :: PBLAST
+        TYPE(MULTI_CUTCELL_STRUCT) :: MULTI_CUTCELL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -2794,8 +2797,8 @@ c          IF(ISPMD == 0)  print *,'solid scalar',N_OUTP_DATA,'IFUNC',IFUNC,'INF
      .                      SOLID_ID  ,SOLID_ITY     ,IPARTS       ,LAYER      ,
      .                      IR        ,IS        ,IT            ,IUVAR        ,H3D_DATA%OUTPUT_LIST(I)%PART,
      .                      IS_WRITEN_SOLID,INFO1,KEYWORD       ,GLOB_THERM%ITHERM,OUTPUT%DATA%FANI_CELL    ,
-     .                      MULTI_FVM, IDMDS         ,IMDSVAR      ,
-     .                      OBJECT_ID ,MAT_PARAM ,MODE          )
+     .                      MULTI_FVM, IDMDS          , IMDSVAR      ,
+     .                      OBJECT_ID ,MAT_PARAM ,MODE, MULTI_CUTCELL          )
 c
             IF (NSPMD > 1 ) THEN
               CALL STARTIME(TIMERS,MACRO_TIMER_SPMDH3D)

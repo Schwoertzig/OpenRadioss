@@ -167,6 +167,10 @@
                  ityptstt = 2 !element type imposing the minimal time step
                  T1S = TT     ! required to go to next cycle
 
+                 ! note : MULTI_CUTCELL%EINT ! is output as internal energy per unit volume (SI:J/m3) :  rho.e = EINT/VOL
+                 !        consequently  MULTI_CUTCELL%EINT / MULTI_CUTCELL%RHO is internal energy density :  e
+                 ! ... todo
+
                  ! example of USAGE
                  result_density = em01
                  do ng=1,ngroup

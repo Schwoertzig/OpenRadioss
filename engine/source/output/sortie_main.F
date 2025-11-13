@@ -139,7 +139,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      s            LOADP     ,TAGNCONT    ,LOADP_HYD_INTER,FORC  ,DRAPEG,USER_WINDOWS,
      t            OUTPUT    ,DT          ,FSAVSURF    ,TABLE    ,
      u            LOADS     ,SFANI       ,IPARIT      ,X_C      ,
-     v            SZ_NPCONT2,NPCONT2     ,GLOB_THERM  ,PBLAST   ,WFEXT     )
+     v            SZ_NPCONT2,NPCONT2     ,GLOB_THERM  ,PBLAST   ,WFEXT     ,
+     w            MULTI_CUTCELL)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -180,6 +181,7 @@ C-----------------------------------------------
       use PBLAST_MOD
       USE HIST2_MOD , ONLY : HIST2
       USE NODAL_ARRAYS_MOD , ONLY : NODAL_ARRAYS_
+      USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -305,6 +307,7 @@ C-----------------------------------------------
       INTEGER,INTENT(IN) ::  IPARIT
       DOUBLE PRECISION,INTENT(INOUT) :: WFEXT
       LOGICAL :: TRIGGER_ANIM, TRIGGER_TH, TRIGGER_H3D
+      TYPE(MULTI_CUTCELL_STRUCT) :: MULTI_CUTCELL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -810,7 +813,8 @@ c
      4             LLOADP     ,LOADP     ,SENSORS     ,TAGNCONT    ,LOADP_HYD_INTER,
      5             XFRAME     ,FORC      ,AR          ,CSEFRIC     ,CSEFRICG  ,
      6             CSEFRIC_STAMP,CSEFRICG_STAMP,TABLE ,IFRAME      ,LOADS   ,
-     7             DRAPE_SH4N, DRAPE_SH3N, DRAPEG     ,X_C         ,GLOB_THERM,PBLAST)
+     7             DRAPE_SH4N, DRAPE_SH3N, DRAPEG     ,X_C         ,GLOB_THERM,PBLAST,
+     8             MULTI_CUTCELL)
       ENDIF
       IF(ALLOCATED(CSEFRIC)) DEALLOCATE(CSEFRIC)
       IF(ALLOCATED(CSEFRICG)) DEALLOCATE(CSEFRICG)
