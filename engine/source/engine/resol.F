@@ -675,6 +675,7 @@ C-----------------------------------------------
               USE ALEMUSCL_MOD
               USE ECND_MOD
               USE MULTI_FVM_MOD
+              USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT, deallocate_multi_cutcell_type !TODO : define and add this structure
               USE H3D_MOD
               USE PBLAST_MOD
               USE GROUPDEF_MOD
@@ -938,6 +939,7 @@ C     Mat + Prop timers
               INTEGER, DIMENSION(7,TAILLE) :: TAB_UMP
               my_real TAB_MAT(NGROUP)
               TYPE(MULTI_FVM_STRUCT) :: MULTI_FVM
+              TYPE(MULTI_CUTCELL_STRUCT) :: MULTI_CUTCELL 
               TYPE(H3D_DATABASE) :: H3D_DATA
               TYPE (FAILWAVE_STR_) :: FAILWAVE
 !
@@ -4170,7 +4172,7 @@ C===============================================================================
                 ITYPTSTT = ITYPTST
                 CALL ALEMAIN_CUTCELL(NIXQ,NUMELQ,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
      .                               ITYPTSTT, NELTSTT, T1S, TT,
-     .                               ngroup,ngrnod,igrnod,nparg,iparg,dt2tt, elbuf_tab)
+     .                               ngroup,ngrnod,igrnod,nparg,iparg,dt_scale,dt1,dt2tt, multi_cutcell)!TODO : declare dt_scale, dt1
                 IF(DT2TT<DT2T)THEN
                    DT2T   = DT2TT
                    ITYPTST= ITYPTSTT
@@ -10179,6 +10181,12 @@ C
                 IF(ALLOCATED(V22MAX_L))         DEALLOCATE (V22MAX_L)
                 IF(ALLOCATED(DX22MIN_L))        DEALLOCATE (DX22MIN_L)
                 IF(ALLOCATED(INT22_FCELL_ANIM)) DEALLOCATE (INT22_FCELL_ANIM)
+                
+                !ALE CUTCELL
+                IF(ALE%solver%multimat%is_defined_mmale3 /= 0) THEN 
+                  call deallocate_multi_cutcell_type(multi_cutcell)
+                  call deallocate_solver_multicutcell() 
+                END IF
 
                 !ALEFVM
                 IF(ALLOCATED(ALEFVM_Buffer%WFEXT_CELL)) DEALLOCATE (ALEFVM_Buffer%WFEXT_CELL)
