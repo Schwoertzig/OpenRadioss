@@ -939,7 +939,7 @@ C     Mat + Prop timers
               INTEGER, DIMENSION(7,TAILLE) :: TAB_UMP
               my_real TAB_MAT(NGROUP)
               TYPE(MULTI_FVM_STRUCT) :: MULTI_FVM
-              TYPE(MULTI_CUTCELL_STRUCT) :: MULTI_CUTCELL 
+              TYPE(MULTI_CUTCELL_STRUCT) :: MULTI_CUTCELL
               TYPE(H3D_DATABASE) :: H3D_DATA
               TYPE (FAILWAVE_STR_) :: FAILWAVE
 !
@@ -10185,11 +10185,11 @@ C
                 IF(ALLOCATED(V22MAX_L))         DEALLOCATE (V22MAX_L)
                 IF(ALLOCATED(DX22MIN_L))        DEALLOCATE (DX22MIN_L)
                 IF(ALLOCATED(INT22_FCELL_ANIM)) DEALLOCATE (INT22_FCELL_ANIM)
-                
+
                 !ALE CUTCELL
-                IF(ALE%solver%multimat%is_defined_mmale3 /= 0) THEN 
+                IF(ALE%solver%multimat%is_defined_mmale3 /= 0) THEN
                   call deallocate_multi_cutcell_type(multi_cutcell)
-                  call deallocate_solver_multicutcell() 
+                  call deallocate_solver_multicutcell()
                 END IF
 
                 !ALEFVM
