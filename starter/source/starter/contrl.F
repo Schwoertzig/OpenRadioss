@@ -108,12 +108,13 @@ C-----------------------------------------------
       USE BCS_MOD , only : BCS
       USE DEFAULTS_MOD
       USE FORMAT_MOD
-      use glob_therm_mod
+      USE GLOB_THERM_MOD
       USE PBLAST_MOD
       USE OUTPUT_MOD , ONLY : OUTPUT_
-      use ascii_encoding_mu_letter_mod, only : ascii_encoding_mu_letter
+      USE ASCII_ENCODING_MU_LETTER_MOD, ONLY : ASCII_ENCODING_MU_LETTER
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
-      use element_mod , only : nixs
+      USE ELEMENT_MOD , ONLY : NIXS
+      USE HM_READ_ALE_INTERFACE_CAPTURING_MOD , ONLY : HM_READ_ALE_INTERFACE_CAPTURING
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -208,6 +209,8 @@ C-----------------------------------------------
       CHARACTER (LEN=255) :: STR_NBTHREADS
       CHARACTER MESS*40, ERRMSG*40
       CHARACTER*3 :: LABEL_DEF,LABEL_ROT
+      CHARACTER(LEN=17), DIMENSION(5) :: ALE_IC_LABEL =
+     . ['UPWIND           ', 'MUSCL            ', 'SUPERBEE         ','HYPER_C          ','DEPRES-LAGOUTIERE']
 C-----------------------------------------------
 C OpenMP specific
 #if defined(_OPENMP)
@@ -522,9 +525,9 @@ C=======================================================================
           DECTYP = 3
         END IF
       END IF
-      IF(NSPMD < 1)       NSPMD=1
+      IF(NSPMD < 1) NSPMD=1
       IF(NSPMD > PARASIZ) NSPMD=PARASIZ
-      IF(NTHREAD < 1)       NTHREAD=1
+      IF(NTHREAD < 1) NTHREAD=1
 C maximum number of SMP threads equal to NTHMAX
       IF(NTHREAD > NTHMAX) NTHREAD=NTHMAX
 C
@@ -984,6 +987,11 @@ C---------------------------------------------------
      .                      VOLMIN, LSUBMODEL, UNITAB)
 
       !*******************************************************************
+      ! /ALE/INTERFACE_CAPTURING: chose MM-ALE interface capturing method
+      !*******************************************************************
+      CALL HM_READ_ALE_INTERFACE_CAPTURING(LSUBMODEL, UNITAB)
+
+      !*******************************************************************
       ! /ALE/MUSCL: activation of second order methods for LAW51 or LAW151
       !*******************************************************************
       CALL HM_READ_ALE_MUSCL(LSUBMODEL, UNITAB)
@@ -1386,7 +1394,19 @@ C
         ENDIF
       ENDIF
 
-      IF(JALE+JEUL/=0)THEN
+      ! /ALE/INTERFACE_CAPTURING/... PRINTOUT
+      IF(JALE+JEUL /= 0)THEN
+        IF(ALE%INTER_CAPTURING%IS_DEFINED == 1)THEN
+          J = ALE%INTER_CAPTURING%IMETH
+          WRITE(IOUT,5506) TRIM(ALE_IC_LABEL(J))
+          IF(J >= 2) WRITE(IOUT,5507)ALE%INTER_CAPTURING%BETA             !beta parameter if relevant
+          IF(J == 4 .OR. J == 5)WRITE(IOUT,5508)ALE%INTER_CAPTURING%KAPPA !kappa parameter if relevant
+          !WRITE(IOUT,5509)
+        ENDIF
+      ENDIF
+
+      ! /ALE/MUSCL PRINTOUT
+      IF(JALE+JEUL /= 0)THEN
         IF(ALEMUSCL_Param%IALEMUSCL == 1 .AND. JUPW/=0 ) THEN   !eta3 + muscl(law51) : conflict
            CALL ANCMSG(MSGID=1564, MSGTYPE=MSGWARNING, ANMODE=ANINFO)
         ELSEIF(ALEMUSCL_Param%IALEMUSCL == 0 .OR. JUPW/=0)THEN
@@ -1657,6 +1677,15 @@ c     & 4X,'MEMORY AVAILABLE FOR REALS. . . . . . . . . . . . . .',I10)
      & 5X,'FORMULATION FLAG (IFLAG). . . . . . . . . . . . . . : ',I10)
  5505 FORMAT(
      & 4X,'ITEMP  : TEMPERATURE CUTOFF FLAG . . . . . . . . . . .',I10)
+ 5506 FORMAT(//
+     & 4X,'MULTIMATERIAL-ALE : INTERFACE CAPTURING METHOD'/
+     & 4X,'----------------------------------------------'/
+     & 5X,'INTERFACE CAPTURING METHOD  . . . . . . . . . . . . : ',A)
+ 5507 FORMAT(
+     & 5X,'BETA  . . . . . . . . . . . . . . . . . . . . . . . : ',1PG20.13)
+ 5508 FORMAT(
+     & 5X,'KAPPA . . . . . . . . . . . . . . . . . . . . . . . : ',1PG20.13)
+
  5700 FORMAT(//
      & 4X,'LAGRANGE MULTIPLIER OPTIONS'/
      & 4X,'---------------------------'/

@@ -1938,6 +1938,11 @@ C-----ALE%REZON
       TABVINT(LVARINT) = ALE%REZON%NUM_NUVAR_MAT
       LVARINT=LVARINT+1
       TABVINT(LVARINT) = ALE%REZON%NUM_NUVAR_EOS
+C-----ALE%INTERFACE_CAPTURING
+      LVARINT=LVARINT+1
+      TABVINT(LVARINT) = ALE%INTER_CAPTURING%IS_DEFINED
+      LVARINT=LVARINT+1
+      TABVINT(LVARINT) = ALE%INTER_CAPTURING%IMETH
 C----------------------------------------------------------------
 C    warning to radioss developers : Check LVARINT < LMXVINT
 C----------------------------------------------------------------

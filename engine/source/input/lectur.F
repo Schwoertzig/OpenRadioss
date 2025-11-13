@@ -250,6 +250,7 @@ C-----------------------------------------------
       REAL(KIND=8) :: DTH
       REAL(KIND=8), DIMENSION(9) :: DTH1
       INTEGER, DIMENSION(:), ALLOCATABLE :: IPARTOF
+      CHARACTER(LEN=17), DIMENSION(5) :: ALE_IC_LABEL
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
@@ -415,13 +416,14 @@ C
       IF(DTMIN1(52) == ZERO)DTMIN1(52) = EM20
 
       I=102
-        IF(ALE%GLOBAL%IDT_ALE==-1)THEN
-          IF(DTMIN1(I) == ZERO)DTMIN1(I) = DTMIN
-          IF(DTFAC1(I) == ZERO)DTFAC1(I) = DTFAC
-        ELSE
-          IF(DTMIN1(I) == ZERO)DTMIN1(I) = ZERO
-          IF(DTFAC1(I) == ZERO)DTFAC1(I) = HALF
-        ENDIF
+      IF(ALE%GLOBAL%IDT_ALE==-1)THEN
+        IF(DTMIN1(I) == ZERO)DTMIN1(I) = DTMIN
+        IF(DTFAC1(I) == ZERO)DTFAC1(I) = DTFAC
+      ELSE
+        IF(DTMIN1(I) == ZERO)DTMIN1(I) = ZERO
+        IF(DTFAC1(I) == ZERO)DTFAC1(I) = HALF
+      ENDIF
+      CALL ALE_INTERFACE_CAPTURING_CFL_CHECK(DTFACT1(I))
 C
       IF(NODADT == 0)THEN
         IF(IDTMIN(1) == 0)IDTMIN(1) = 1
@@ -957,8 +959,10 @@ C----------------------------------------
          IF(ALE%UPWIND%UPWM>1)eta1=ALE%UPWIND%CUPWM
          !OUTPUT NUMERICAL SCHEME AND ITS PARAMETERS
          IF(ISPMD == 0 .AND. MCHECK == 0)THEN
+           ALE_IC_LABEL =
+     .        ['UPWIND           ', 'MUSCL            ', 'SUPERBEE         ','HYPER_C          ','DEPRES-LAGOUTIERE']
            WRITE(IOUT,1001)
-           WRITE(IOUT,1002)Label1,eta1,Label2,eta2,Label3,eta2,Label4
+           WRITE(IOUT,1002)Label1,eta1,Label2,eta2,Label3,eta2,ALE_IC_LABEL(ALE%INTER_CAPTURING%IMETH)
            IF(MULTI_FVM%IS_USED)THEN
              WRITE(IOUT,1003)Label5,Label6,Label7,Label8
              IF(MULTI_FVM%LOWMACH_OPT)WRITE(IOUT,1004)

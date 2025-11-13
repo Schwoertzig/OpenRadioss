@@ -336,9 +336,15 @@ C     KINETIC ENERGY
       RVARINT = RVARINT + 1
       TABVREA(RVARINT) = ZERO !ENCIN
       RVARINT = RVARINT + 1
-      TABVREA(RVARINT) = ZERO !ENROT  
+      TABVREA(RVARINT) = ZERO !ENROT
+C-----ALE%INTERFACE_CAPTURING
+      RVARINT = RVARINT + 1
+      TABVREA(RVARINT) = ALE%INTER_CAPTURING%BETA
+      RVARINT = RVARINT + 1
+      TABVREA(RVARINT) = ALE%INTER_CAPTURING%KAPPA
+C-----------------------
 C
-C---- fin check point restart      
+C---- end of check point restart
 C      
       LVARREA=RVARINT
 C----------------------------------------------------------------

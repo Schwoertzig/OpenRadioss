@@ -71,6 +71,8 @@ C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       USE ALEMUSCL_MOD , only:ALEMUSCL_Param
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
+      USE ALE_MOD , ONLY : ALE
+      USE ALE_FLUX_COMPRESSION_MOD , ONLY : ALE_FLUX_COMPRESSION
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -105,7 +107,9 @@ C-----------------------------------------------
       INTEGER NG, I, K, II, NF1, NFIRST, NLAST, NV46, LLT_
       INTEGER :: IB, IE, NIN, NBF, NBL, K0, K1, IBM, J, IE_M, IDLOC, IPOS, ICELL, NCELL, MCELL, tNB, J1, J2, IBV
       my_real :: VFRAC
-      TYPE(BUF_MAT_)  ,POINTER :: MBUF      
+      TYPE(BUF_MAT_)  ,POINTER :: MBUF
+      INTEGER :: IMETH !< interface capturing method
+      INTEGER :: NEL
 C-----------------------------------------------
 C   S o u r c e   L i n e s 
 C-----------------------------------------------
@@ -271,24 +275,26 @@ C     ALE ON / OFF
         !------------------------------------!
         ! VOLUME FLUXES UPDATE (SUBMATERIAL) !
         !------------------------------------!
-        LFT=1
+        LFT = 1
+        NEL = LLT
+        IMETH = ALE%INTER_CAPTURING%IMETH
         VOLG => ELBUF_TAB(NG)%GBUF%VOL
         IF(N2D == 0)THEN
            IF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN
-              CALL ALEMUSCL_UPWIND(FLUX, ALE_CONNECT, X, IXS, FLUX_VOIS, N4_VOIS,
-     .                             ITAB, NV46       , ITRIMAT,SEGVAR)
+              CALL ALEMUSCL_UPWIND(FLUX, ALE_CONNECT, X, IXS, FLUX_VOIS, N4_VOIS,ITAB, NV46       , ITRIMAT,SEGVAR)
            ELSE
-              CALL ALE51_ANTIDIFF3(FLUX, ALE_CONNECT, ALPHA  , VOLG, IXS, FLUX_VOIS, N4_VOIS, 
-     .                             ITAB, NV46       , ITRIMAT, SEGVAR)
+              CALL ALE51_ANTIDIFF3(FLUX, ALE_CONNECT, ALPHA  , VOLG, IXS, FLUX_VOIS, N4_VOIS, ITAB, NV46       , ITRIMAT, SEGVAR)
            ENDIF
         ELSE
-           IF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN
-              CALL ALEMUSCL_UPWIND2(FLUX, ALE_CONNECT, X    , IXQ, FLUX_VOIS, N4_VOIS,
-     .                              ITAB, NV46       , ITRIMAT,SEGVAR)
-           ELSE
-              CALL ALE51_ANTIDIFF2(FLUX   ,ALE_CONNECT,ALPHA  ,VOLG  ,IXQ,FLUX_VOIS,
-     .                             N4_VOIS,ITAB       ,ITRIMAT,SEGVAR)
-           ENDIF
+           SELECT CASE (IMETH)
+             CASE(1)
+                CALL ALE51_ANTIDIFF2(FLUX,ALE_CONNECT,ALPHA,VOLG,IXQ,FLUX_VOIS,N4_VOIS,ITAB,ITRIMAT,SEGVAR)
+             CASE(2,3)
+                CALL ALEMUSCL_UPWIND2(FLUX,ALE_CONNECT,X,IXQ,FLUX_VOIS, N4_VOIS,ITAB,NV46,ITRIMAT,SEGVAR)
+             CASE(4)
+                CALL ALE_FLUX_COMPRESSION(FLUX,ALE_CONNECT,X,IXQ,FLUX_VOIS, N4_VOIS,ITAB,NV46,ITRIMAT,SEGVAR,NUMELQ,
+     .                                    NUMNOD,NQVOIS,NFT,NEL,NSEGFLU)
+           END SELECT
         ENDIF
       ENDDO !next NG
 
@@ -344,25 +350,19 @@ C     ALE ON / OFF
         !------------------------------!
         IF(N2D == 0)THEN
           IF(NSPMD > 1)THEN
-            CALL ALE51_SPMD3(IXS,FLUX(1,NF1),ALE_CONNECT,
-     .                       FLUX_VOIS,N4_VOIS,ITABM1 ,NV46)
+            CALL ALE51_SPMD3(IXS,FLUX(1,NF1),ALE_CONNECT,FLUX_VOIS,N4_VOIS,ITABM1 ,NV46)
           ENDIF
-          CALL ALE51_UPWIND3(PM,IXS,FLUX(1,NF1),FLU2(NF1),ALE_CONNECT,
-     .                       ITRIMAT,pDDVOL,QMV(1,NF1),1,
-     .                       NV46)
+          CALL ALE51_UPWIND3(PM,IXS,FLUX(1,NF1),FLU2(NF1),ALE_CONNECT,ITRIMAT,pDDVOL,QMV(1,NF1),1,NV46)
         ELSE
           IF(NSPMD > 1)THEN
-            CALL ALE51_SPMD2(IXQ,FLUX(1,NF1),ALE_CONNECT,
-     .                       FLUX_VOIS,N4_VOIS, ITABM1,NV46)
+            CALL ALE51_SPMD2(IXQ,FLUX(1,NF1),ALE_CONNECT, FLUX_VOIS,N4_VOIS, ITABM1,NV46)
           ENDIF
-          CALL ALE51_UPWIND2(PM,X,IXQ,FLUX(1,NF1),FLU2(NF1),ALE_CONNECT,
-     .                       ITRIMAT,pDDVOL,QMV(1,NF1),1)
+          CALL ALE51_UPWIND2(PM,X,IXQ,FLUX(1,NF1),FLU2(NF1),ALE_CONNECT, ITRIMAT,pDDVOL,QMV(1,NF1),1)
         ENDIF
       ENDDO
       
       IF(INT22 /= 0)THEN
-          CALL ALE51_UPWIND3_INT22(PM  , IXS      , ITRIMAT, 1,
-     .                             IPARG, ELBUF_TAB, ITASK )
+          CALL ALE51_UPWIND3_INT22(PM  , IXS      , ITRIMAT, 1, IPARG, ELBUF_TAB, ITASK )
       ENDIF
 
 C--------------------

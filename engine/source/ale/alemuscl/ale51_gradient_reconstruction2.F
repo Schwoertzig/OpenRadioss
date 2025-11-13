@@ -58,6 +58,9 @@ C-----------------------------------------------
       USE SEGVAR_MOD
       USE ALE_CONNECTIVITY_MOD
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
+      USE ALE_MOD , ONLY : ALE
+      USE GRADIENT_LIMITATION2_HYPERC_MOD , ONLY : GRADIENT_LIMITATION2_HYPERC
+      USE GRADIENT_LIMITATION2_SUPERBEE_MOD , ONLY : GRADIENT_LIMITATION2_SUPERBEE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -93,6 +96,8 @@ C-----------------------------------------------
       INTEGER :: K, I, II, JJ, NODE_ID, JMIN, JMAX
       INTEGER :: ELEM_ID
       INTEGER :: FIRST,LAST
+      INTEGER :: IMETH !< interface capturing method
+      INTEGER :: NEL   !< number of element in the current group
 C-----------------------------------------------
 C   S o u r c e   L i n e s 
 C----------------------------------------------- 
@@ -229,7 +234,9 @@ C     MPI exchange for gradients
 !$OMP END SINGLE         
       ENDIF
       CALL MY_BARRIER
-      
+
+      IMETH = ALE%INTER_CAPTURING%IMETH ! interface capturing method
+
       DO NG=ITASK+1,NGROUP,NTHREAD  
 C     ALE ON / OFF
          IF (IPARG(76, NG)  ==  1) CYCLE ! --> OFF
@@ -244,8 +251,16 @@ C     ALE ON / OFF
          IF(IPARG(8,NG) == 1)  CYCLE
          IF(IPARG(1,NG)  /= 51) CYCLE
          LFT = 1
+         NEL = LLT
 
-         CALL GRADIENT_LIMITATION2(IXQ, X, TRIMAT)
+         SELECT CASE (IMETH)
+           CASE(2)
+             CALL GRADIENT_LIMITATION2(IXQ, X, TRIMAT)
+           CASE(3)
+             CALL GRADIENT_LIMITATION2_SUPERBEE(TRIMAT,ALE_CONNECT,NUMELQ, NFT,NEL)
+           CASE(4)
+             CALL GRADIENT_LIMITATION2_HYPERC(TRIMAT,ALE_CONNECT,NUMELQ, NFT,NEL)
+         END SELECT
       ENDDO
       CALL MY_BARRIER
  

@@ -1756,6 +1756,11 @@ C-----ALE%REZON
       TABVINT(LVARINT) = ALE%REZON%NUM_NUVAR_MAT
       LVARINT=LVARINT+1
       TABVINT(LVARINT) = ALE%REZON%NUM_NUVAR_EOS
+C-----ALE%INTERFACE_CAPTURING
+      LVARINT=LVARINT+1
+      TABVINT(LVARINT) = ALE%INTER_CAPTURING%IS_DEFINED
+      LVARINT=LVARINT+1
+      TABVINT(LVARINT) = ALE%INTER_CAPTURING%IMETH
 C----------------------------------------------------------------
 C    warning to radioss developers : Check LVARINT < LMXVINT
 C----------------------------------------------------------------
@@ -2120,9 +2125,18 @@ C     KINETIC ENERGY
       RVARINT = RVARINT + 1
       TABVREA(RVARINT) = ENCIN
       RVARINT = RVARINT + 1
-      TABVREA(RVARINT) = ENROT         
-C      
-      LVARREA =RVARINT
+      TABVREA(RVARINT) = ENROT
+C-----ALE%INTERFACE_CAPTURING
+      RVARINT = RVARINT + 1
+      TABVREA(RVARINT) = ALE%INTER_CAPTURING%BETA
+      RVARINT = RVARINT + 1
+      TABVREA(RVARINT) = ALE%INTER_CAPTURING%KAPPA
+C
+C-----------------------
+C
+C---- end
+C
+      LVARREA = RVARINT
 C----------------------------------------------------------------
 C    warning to radioss developers : Check LVARREA < LMXVREA
 C--------------------------------------

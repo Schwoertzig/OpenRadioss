@@ -238,13 +238,22 @@ C-----------------------------------------------
           INTEGER :: NUM_NUVAR_EOS
         END TYPE ALE_REZON_
 
+        !ALE REZONING (variable to rezone)
+        TYPE ALE_INTERFACE_CAPTURING_
+          INTEGER :: IS_DEFINED
+          INTEGER :: IMETH !< method identifier : 1::upwind,2:muscl,3:spuerbee,4:hyper-c,5:depres-lagoutiere
+          my_real :: beta  !< formulation parameter (depending on imeth value)
+          my_real :: kappa !< formulation parameter (depending on imeth value)
+        END TYPE ALE_INTERFACE_CAPTURING_
+
         ! GENERAL DATA STRUCTURE USED IN SOURCE CODE
         TYPE ALE_
-          TYPE(ALE_GRID_)   :: GRID
-          TYPE(ALE_UPWIND_) :: UPWIND
-          TYPE(ALE_GLOBAL_) :: GLOBAL
-          TYPE(ALE_SUB_)    :: SUB
-          TYPE(ALE_REZON_)  :: REZON
+          TYPE(ALE_GRID_)                :: GRID
+          TYPE(ALE_UPWIND_)              :: UPWIND
+          TYPE(ALE_GLOBAL_)              :: GLOBAL
+          TYPE(ALE_SUB_)                 :: SUB
+          TYPE(ALE_REZON_)               :: REZON
+          TYPE(ALE_INTERFACE_CAPTURING_) :: INTER_CAPTURING
         contains
           procedure, pass :: init
         END TYPE ALE_
@@ -319,6 +328,9 @@ C-----------------------------------------------
           !---ALE%REZON
           this%REZON%NUM_NUVAR_MAT = 0
           this%REZON%NUM_NUVAR_EOS = 0
+          !---ALE%INTERFACE_CAPTURING
+          this%INTER_CAPTURING%IS_DEFINED = 0
+          this%INTER_CAPTURING%IMETH = 2
         end subroutine
 
       END MODULE ALE_MOD

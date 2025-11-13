@@ -49,6 +49,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE MESSAGE_MOD
       USE ALEMUSCL_MOD , only : ALEMUSCL_Param
+      USE ALE_MOD , ONLY : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -102,6 +103,8 @@ C-----------------------------------------------
          
          ALEMUSCL_Param%IALEMUSCL = IALEMUSCL
          ALEMUSCL_Param%Beta = BETA
+
+         IF(BETA <= EM20) ALE%INTER_CAPTURING%IMETH = 1 !UPWIND
          
          IF (IRESP == 1) THEN
             ! Not available in single precision

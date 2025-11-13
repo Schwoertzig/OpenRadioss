@@ -1943,6 +1943,7 @@ C-----------------------
        IF (KEY2(1:5) == 'MUSCL') THEN
           IF(KEY3(1:3)=='OFF')THEN
               ALEMUSCL_Param%I_MUSCL_OFF = 1
+              ALE%INTER_CAPTURING%IMETH = 1 ! upwind
           ELSEIF(KEY3(1:2)=='ON')THEN
               ALEMUSCL_Param%I_MUSCL_OFF = 0
               ALEMUSCL_Param%IALEMUSCL = 1
