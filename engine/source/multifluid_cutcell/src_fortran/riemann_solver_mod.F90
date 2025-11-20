@@ -1,10 +1,11 @@
-#include "my_real.inc"
 module riemann_solver_mod
+  use precision_mod, only : wp                            !provides kind for eigther single or double precision (wp means working precision)
+  implicit none
 contains
   function fl(pL, aL, gamma, p_star)
     implicit none
-    my_real :: pL, aL, gamma, p_star
-    my_real :: fl
+    real(kind=wp) :: pL, aL, gamma, p_star
+    real(kind=wp) :: fl
     if (p_star > pL) then
       ! Left shock
       fl = 2 * aL / sqrt(2 * gamma * (gamma - 1)) * (1 - p_star / pL) / sqrt(1 + (gamma + 1) / (gamma - 1) * p_star / pL) !Leveque (14.52)
@@ -17,8 +18,8 @@ contains
   ! Gradient of function fl
   function Dfl(pL, aL, gamma, p_star)
     implicit none
-    my_real :: pL, aL, gamma, p_star
-    my_real :: Dfl
+    real(kind=wp) :: pL, aL, gamma, p_star
+    real(kind=wp) :: Dfl
     if (p_star > pL) then
       ! Left shock
       Dfl = -2 * aL / sqrt(2 * gamma * (gamma - 1)) / sqrt(1 + (gamma + 1) / (gamma - 1) * p_star / pL) &
@@ -31,8 +32,8 @@ contains
 
   function fr(pR, aR, gamma, p_star)
     implicit none
-    my_real :: pR, aR, gamma, p_star
-    my_real ::  fr
+    real(kind=wp) :: pR, aR, gamma, p_star
+    real(kind=wp) ::  fr
     if (p_star > pR) then
       ! Right shock
       fr = 2 * aR / sqrt(2 * gamma * (gamma - 1)) * (1 - p_star / pR) / sqrt(1 + (gamma + 1) / (gamma - 1) * p_star / pR) !Leveque (14.55)
@@ -45,8 +46,8 @@ contains
   ! Gradient of function fr
   function Dfr(pR, aR, gamma, p_star)
     implicit none
-    my_real :: pR, aR, gamma, p_star
-    my_real ::  Dfr
+    real(kind=wp) :: pR, aR, gamma, p_star
+    real(kind=wp) ::  Dfr
     if (p_star > pR) then
       ! Left shock
       Dfr = -2 * aR / sqrt(2 * gamma * (gamma - 1)) / sqrt(1 + (gamma + 1) / (gamma - 1) * p_star / pR) &
@@ -60,10 +61,10 @@ contains
   ! Function to solve for pressure in the star region
   function phi(pL, aL, uL, pR, aR, uR, gamma, p_star)
     implicit none 
-    my_real :: pL, aL, uL 
-    my_real :: pR, aR, uR 
-    my_real :: gamma, p_star
-    my_real :: phi
+    real(kind=wp) :: pL, aL, uL 
+    real(kind=wp) :: pR, aR, uR 
+    real(kind=wp) :: gamma, p_star
+    real(kind=wp) :: phi
 
     phi = fl(pL, aL, gamma, p_star) + fr(pR, aR, gamma, p_star) + uL - uR
   end function phi
@@ -71,10 +72,10 @@ contains
   ! Gradient of function phi
   function Dphi(pL, aL, uL, pR, aR, uR, gamma, p_star)
     implicit none 
-    my_real :: pL, aL, uL 
-    my_real :: pR, aR, uR 
-    my_real :: gamma, p_star
-    my_real :: Dphi
+    real(kind=wp) :: pL, aL, uL 
+    real(kind=wp) :: pR, aR, uR 
+    real(kind=wp) :: gamma, p_star
+    real(kind=wp) :: Dphi
    
     Dphi = Dfl(pL, aL, gamma, p_star) + Dfr(pR, aR, gamma, p_star)
   end function Dphi
@@ -83,12 +84,12 @@ contains
   ! Use a Newton method to find the root
   function find_root(pL, aL, uL, pR, aR, uR, gamma, eps) result(p)
     implicit none 
-    my_real :: pL, aL, uL 
-    my_real :: pR, aR, uR 
-    my_real :: gamma, eps
-    my_real :: p 
+    real(kind=wp) :: pL, aL, uL 
+    real(kind=wp) :: pR, aR, uR 
+    real(kind=wp) :: gamma, eps
+    real(kind=wp) :: p 
 
-    my_real :: p_prev, res
+    real(kind=wp) :: p_prev, res
 
     p = pL
     p_prev = pR
@@ -105,17 +106,17 @@ contains
                                   normalVecy, normalVecz, us, vsL, vsR, ps)
     implicit none
 
-    my_real :: gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR
+    real(kind=wp) :: gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR
     integer :: wave_type
-    my_real :: normalVecy, normalVecz
-    my_real :: us, vsL, vsR, ps
+    real(kind=wp) :: normalVecy, normalVecz
+    real(kind=wp) :: us, vsL, vsR, ps
 
-    my_real, parameter :: prec_root_find = 1e-10
+    real(kind=wp), parameter :: prec_root_find = 1e-10
 
-    my_real :: uL, uR, vL, vR, aL, aR
-    my_real :: SL, SR
-    my_real :: p_star, u_star
-    my_real :: rho_starL, rho_starR, v_starL, v_starR
+    real(kind=wp) :: uL, uR, vL, vR, aL, aR
+    real(kind=wp) :: SL, SR
+    real(kind=wp) :: p_star, u_star
+    real(kind=wp) :: rho_starL, rho_starR, v_starL, v_starR
 
     uL = velyL*normalVecy + velzL*normalVecz
     uR = velyR*normalVecy + velzR*normalVecz

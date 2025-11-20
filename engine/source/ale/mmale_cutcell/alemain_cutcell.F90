@@ -28,7 +28,7 @@
 ! ======================================================================================================================
 !! \brief Main Subroutine called by the resol loop to treat ALE MULTIMAT with cut-cell interface tracking
 !! \details ...
-        subroutine  alemain_cutcell(nixq,numelq,ixq, numnod, x, ale_connect, ncycle, &
+        subroutine  alemain_cutcell(nixtg, nixq, numeltg, numelq, ixtg, ixq, numnod, x, ale_connect, ncycle, &
                                     ityptstt, neltstt, t1s, tt, &
                                     ngroup, ngrnod, igrnod, nparg, iparg, dt_scale, dt1, dt2t, multi_cutcell)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@
           use ale_mod , only : ALE
           use debug_mod , only : ITAB_DEBUG
           use multi_cutcell_mod, only : multi_cutcell_struct, allocate_multi_cutcell_type
-          use multi_cutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell
+          use multicutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -55,8 +55,11 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           ! input
           integer,intent(in) :: nixq                                    !< array size for ixq array
+          integer,intent(in) :: nixtg                                   !< array size for ixtg array
+          integer,intent(in) :: numeltg                                 !< number of tri in the input file
           integer,intent(in) :: numelq                                  !< number of quad in the input file
           integer,intent(in) :: ixq(nixq,numelq)                        !< elem connectivity (1:7 : mat_id,n1,n2,n3,n4,pid,user_id for each elem 1:numelq)
+          integer,intent(in) :: ixtg(nixtg,numeltg)                     !< elem connectivity (1:6 : mat_id,n1,n2,n3,n4,pid,user_id for each elem 1:numetg)
           integer,intent(in) :: numnod                                  !< number of nodes in the input file
           integer,intent(in) :: ngroup                                  !< number of groups (elem buffer data structure)
           integer,intent(in) :: nparg                                   !< array size for IPARG data structure
@@ -90,7 +93,8 @@
           real(kind=WP) :: result_density !< temp
           real(kind=WP) :: gamma
           integer :: sign !Not used for now
-          integer :: nb_phase !TODO should be input
+          integer :: nb_phase, n2d !TODO should be input
+          integer(kind=8) :: nb_polygon
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Precondition
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -142,26 +146,22 @@
                  ! -----------------------------------------------
                  gamma = 1.4
                  sign = 1 !not used for now
+                 n2d = 2 ! 2D simulation
 
                  if (dt1>0) then
-                  call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, itab, ALE_CONNECT, &
-                         multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
-                         gamma, dt1, dt_scale, sign, dt2t, multi_cutcell%sound_speed)
-                 
-                    multi_cutcell%rho = multi_cutcell%grid(:,1)%lambdanp1_per_cell*multi_cutcell%phase_rho(:,1) + &
-                                        multi_cutcell%grid(:,2)%lambdanp1_per_cell*multi_cutcell%phase_rho(:,2)
-                    multi_cutcell%pres = multi_cutcell%grid(:,1)%lambdanp1_per_cell*multi_cutcell%phase_pres(:,1) + &
-                                        multi_cutcell%grid(:,2)%lambdanp1_per_cell*multi_cutcell%phase_pres(:,2)
-                    multi_cutcell%vel(2,:) = multi_cutcell%grid(:,1)%lambdanp1_per_cell*multi_cutcell%phase_vely(:,1) + &
-                                        multi_cutcell%grid(:,2)%lambdanp1_per_cell*multi_cutcell%phase_vely(:,2)
-                    multi_cutcell%etot = 0.5*(multi_cutcell%vel(2,:)*multi_cutcell%vel(2,:)+multi_cutcell%vel(3,:)*multi_cutcell%vel(3,:)) &
-                                          + multi_cutcell%pres/((gamma-1)*multi_cutcell%rho)
+                  call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
+                         multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
+                         multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
+                         gamma, dt1, dt_scale, sign, &
+                         multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot, &
+                         dt2t, multi_cutcell%sound_speed)
                  else
                   !Initialization
                   nb_phase = 2
                   call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
-                  call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, itab, ALE_CONNECT, &
-                              ALE%solver%multimat%nb, ALE%solver%multimat%list(:)%surf_id, igrnod, multi_cutcell%grid)
+                  nb_polygon = ALE%solver%multimat%nb
+                  call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
+                              nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid)
                  end if
                    
 
@@ -181,15 +181,15 @@
                  ! ... todo
 
                  ! example of USAGE
-                 result_density = em01
-                 do ng=1,ngroup
-                   nel = iparg(2,ng)
-                   nft = iparg(3,ng) ! shift
-                   do ii=1,nel
-                     elem_iid = ii+nft
-                     elbuf(ng)%gbuf%rho(ii) = result_density ! affect density for elem_iid here
-                   end do
-                 enddo
+                 !result_density = em01
+                 !do ng=1,ngroup
+                 !  nel = iparg(2,ng)
+                 !  nft = iparg(3,ng) ! shift
+                 !  do ii=1,nel
+                 !    elem_iid = ii+nft
+                 !    elbuf(ng)%gbuf%rho(ii) = result_density ! affect density for elem_iid here
+                 !  end do
+                 !enddo
 
 
 

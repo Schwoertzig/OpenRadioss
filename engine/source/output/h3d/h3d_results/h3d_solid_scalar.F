@@ -124,7 +124,7 @@ c
      .                    IR_INPUT        ,IS_INPUT     ,IT_INPUT    ,IUVAR_INPUT ,H3D_PART    ,
      .                    IS_WRITTEN_SOLID,INFO1        ,KEYWORD     ,FANI_CELL   ,
      .                    MULTI_FVM       , NG          ,IDMDS       ,IMDSVAR     ,
-     .                    ID           ,MAT_PARAM ,MODE ,MUTLI_CUTCELL )
+     .                    ID           ,MAT_PARAM ,MODE ,MULTI_CUTCELL )
 
 
  900    CONTINUE   ! NG

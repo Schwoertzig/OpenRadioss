@@ -84,4 +84,4 @@
             deallocate(multi_cutcell_var%phase_vely)
             deallocate(multi_cutcell_var%phase_velz)
         end subroutine deallocate_multi_cutcell_type
-      end module multi_fvm_mod
+      end module multi_cutcell_mod

@@ -1,4 +1,3 @@
-#include "my_real.inc"
 #define NOT_FUSED 0 
 #define FUSED 1
 #define TARGET_FUSED 2
@@ -6,14 +5,17 @@
 #define PROBLEMATIC_UNSOLVED 4
 
 module multicutcell_solver_mod
+  use FV_fluxes, only: FV_flux_hllc_Euler
+  use precision_mod, only : wp                            !provides kind for eigther single or double precision (wp means working precision)
+  implicit none
   contains
 
   subroutine primal_to_conservative(gamma, vely, velz, rho, p, W)
     use grid2D_struct_multicutcell_mod
   
     implicit none
-    my_real :: gamma
-    my_real, intent(in) :: vely, velz, rho, p 
+    real(kind=wp) :: gamma
+    real(kind=wp), intent(in) :: vely, velz, rho, p 
     type(ConservativeState2D), intent(out) :: W
   
     W%rho = rho
@@ -26,8 +28,8 @@ module multicutcell_solver_mod
     use grid2D_struct_multicutcell_mod
   
     implicit none
-    my_real :: gamma
-    my_real, intent(out) :: vely, velz, rho, p 
+    real(kind=wp) :: gamma
+    real(kind=wp), intent(out) :: vely, velz, rho, p 
     type(ConservativeState2D), intent(in) :: W
   
     rho = W%rho
@@ -63,84 +65,6 @@ module multicutcell_solver_mod
     end if
   end subroutine adjacency_edge
 
-  subroutine hllc_flux(gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, normalVec, rho, rhovy, rhovz, rhoE)
-    use grid2D_struct_multicutcell_mod
-    use polygon_mod
-
-    implicit none
-
-    my_real :: gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR
-    type(Point2D) :: normalVec
-    my_real :: rho, rhovy, rhovz, rhoE
-    my_real :: velpyL, velpzL, velpyR, velpzR !Projected velocities
-    my_real :: rhoEL, rhoER, SL, SR, S_star
-    my_real :: rho_star, rhou_star, rhov_star, rhoE_star
-    my_real :: aL, aR
-
-    velpyL = velyL*normalVec%y + velzL*normalVec%z
-    velpyR = velyR*normalVec%y + velzR*normalVec%z
-    velpzL = -velyL*normalVec%y + velzL*normalVec%z
-    velpzR = -velyR*normalVec%y + velzR*normalVec%z
-
-    !Compute left and right speeds of sound
-    aL = sqrt(gamma * pL / rhoL)
-    aR = sqrt(gamma * pR / rhoR)
-  
-    !Compute conservative variables
-    rhoEL = 0.5*rhoL*(velpyL*velpyL + velpzL*velpzL) + pL/(gamma-1) !energy
-    rhoER = 0.5*rhoR*(velpyR*velpyR + velpzr*velpzr) + pR/(gamma-1)
-  
-    !Compute wave speeds
-    SL = min(velpyL - aL, velpyR - aR)
-    SR = max(velpyL + aL, velpyR + aR)
-  
-    !Compute the contact wave speed
-    S_star = (pR - pL + rhoL * velpyL * (SL - velpyL) - rhoR * velpyR * (SR - velpyR)) / &
-              (rhoL * (SL - velpyL) - rhoR * (SR - velpyR)) !Equation (37) in Toro slides
-  
-    !Compute the HLLC flux
-    if (0 <= SL) then
-      !return flux(UL, normalVec)
-      rho   = rhoL * velpyL
-      rhovy = rhoL * velyL * velpyL + pL * normalVec%y
-      rhovz = rhoL * velzL * velpzL + pL * normalVec%z
-      rhoE  = velpzL * (0.5 * rhoL * (velyL*velyL + velzL*velzL) + gamma / (gamma - 1) * pL)
-    elseif (SL <= 0 .and. 0 <= S_star) then
-      ! Compute the left and right star region states: Equation (39) in Toro slides
-      rho_star  = rhoL * (SL - velpyL) / (SL - S_star)
-      rhou_star = rho_star * S_star
-      rhov_star = rho_star * velpzL
-      rhoE_star = (SL - velpyL) / (SL - S_star) * (rhoEL + rhoL * (S_star - velpyL) * (S_star + pL / (rhoL * (SL - velpyL))))
-    
-      ! Compute the fluxes in the star region
-      rho   = rhoL * velpyL + SL * (rho_star - rhoL)
-      rhovy = rhoL * velyL * velpyL + pL * normalVec%y + &
-              SL*((rhou_star - rhoL * velpyL) * normalVec%y - (rhov_star - rhoL * velpzL) * normalVec%z)
-      rhovz = rhoL * velzL * velpzL + pL * normalVec%z + &
-              SL*((rhou_star - rhoL * velpyL) * normalVec%z + (rhov_star - rhoL * velpzL) * normalVec%y)
-      rhoE  = velpzL * (0.5 * rhoL * (velyL*velyL + velzL*velzL) + gamma / (gamma - 1) * pL) + SL*(rhoE_star - rhoEL)
-    elseif (S_star <= 0 .and. 0 <= SR) then
-      ! Compute the left and right star region states: Equation (39) in Toro slides
-      rho_star  = rhoR * (SR - velpyR) / (SR - S_star)
-      rhou_star = rho_star * S_star
-      rhov_star = rho_star * velpzR
-      rhoE_star = (SR - velpyR) / (SR - S_star) * (rhoER + rhoR * (S_star - velpyR) * (S_star + pR / (rhoR * (SR - velpyR))))
-    
-      ! Compute the fluxes in the star region
-      rho   = rhoR * velpyR + SR * (rho_star - rhoR)
-      rhovy = rhoR * velyR * velpyR + pR * normalVec%y + &
-              SR*((rhou_star - rhoR * velpyR) * normalVec%y - (rhov_star - rhoR * velpzR) * normalVec%z)
-      rhovz = rhoR * velzR * velpzR + pR * normalVec%z + &
-              SR*((rhou_star - rhoR * velpyR) * normalVec%z + (rhov_star - rhoR * velpzR) * normalVec%y)
-      rhoE  = velpzR * (0.5 * rhoR * (velyR*velyR + velzR*velzR) + gamma / (gamma - 1) * pR) + SR*(rhoE_star - rhoER)
-    else
-      rho   = rhoR * velpyR
-      rhovy = rhoR * velyR * velpyR + pR * normalVec%y
-      rhovz = rhoR * velzR * velpzR + pR * normalVec%z
-      rhoE  = velpzR * (0.5 * rhoR * (velyR*velyR + velzR*velzR) + gamma / (gamma - 1) * pR)
-    end if
-  end subroutine hllc_flux
-  
   subroutine fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, final_target_cells, cell_type)
     use grid2D_struct_multicutcell_mod
     use integer_LL_mod
@@ -150,7 +74,7 @@ module multicutcell_solver_mod
     integer :: NUMELQ, NUMELTG
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
     type(grid2D_struct_multicutcell), dimension(:, :) :: grid
-    my_real :: threshold
+    real(kind=wp) :: threshold
     integer(kind=8), dimension(:, :) :: final_target_cells
     integer(kind=8), dimension(:, :) :: cell_type
 
@@ -165,7 +89,7 @@ module multicutcell_solver_mod
     integer(kind=8) :: other_face, other_edge
     logical :: global_fusion_happened, fusion_happened
     integer(kind=8) :: size_list
-    my_real :: max_lambda
+    real(kind=wp) :: max_lambda
     integer(kind=8) :: i_max_lambd, rand_cell
 
     nb_cell = size(grid, 1)
@@ -347,7 +271,7 @@ module multicutcell_solver_mod
     call integer_LL_destroy(cells_to_be_merged)
   end subroutine fuse_cells
   
-  subroutine compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
+  subroutine multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
     use grid2D_struct_multicutcell_mod
     use ALE_CONNECTIVITY_MOD
 
@@ -356,13 +280,13 @@ module multicutcell_solver_mod
     !Dummy arguments
     integer, intent(in) :: NUMELQ, NUMELTG
     integer, dimension(:,:), intent(in) :: IXQ, IXTG
-    my_real, dimension(:,:), intent(in) :: X
+    real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
-    my_real :: gamma
-    my_real, dimension(:,:) :: vely
-    my_real, dimension(:,:) :: velz
-    my_real, dimension(:,:) :: rho
-    my_real, dimension(:,:) :: p
+    real(kind=wp) :: gamma
+    real(kind=wp), dimension(:,:) :: vely
+    real(kind=wp), dimension(:,:) :: velz
+    real(kind=wp), dimension(:,:) :: rho
+    real(kind=wp), dimension(:,:) :: p
     type(ConservativeFlux2D), dimension(:, :) :: fx
 
     !Local variables
@@ -375,7 +299,7 @@ module multicutcell_solver_mod
     nb_regions = size(vely, 2)
 
     do i=1,nb_cell
-      call compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i, normals, nb_edges)
+      call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i, normals, nb_edges)
       do j=1,nb_edges
         call adjacency_edge(ALE_CONNECT, i, j, other_face, other_edge) 
         do k = 1,nb_regions
@@ -386,7 +310,7 @@ module multicutcell_solver_mod
           !normalVector = grid.λ_per_edge[e, r]
           !norm_vec = norm(normalVector)
           if (other_face > -1) then
-            call hllc_flux(gamma, rho(i, k), rho(other_face, k), &
+            call FV_flux_hllc_Euler(gamma, rho(i, k), rho(other_face, k), &
                                 vely(i, k), vely(other_face, k), velz(i, k), velz(other_face, k), &
                                 p(i, k), p(other_face, k), &
                                 normals(j), &
@@ -401,7 +325,7 @@ module multicutcell_solver_mod
         end do
       end do
     end do
-  end subroutine compute_fluxes
+  end subroutine multicutcell_compute_fluxes
   
   function max_nb_edges_in_cell(NUMELQ, NUMELTG)
     integer :: NUMELQ, NUMELTG
@@ -418,7 +342,7 @@ module multicutcell_solver_mod
   end function max_nb_points_in_cell
 
   subroutine compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid)
-    use polygon_mod
+    use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
   
     IMPLICIT NONE
@@ -426,7 +350,7 @@ module multicutcell_solver_mod
     ! INPUT argument
     integer :: NUMELQ, NUMELTG, NUMNOD
     integer, dimension(:,:) :: IXQ, IXTG
-    my_real, dimension(:,:) :: X
+    real(kind=wp), dimension(:,:) :: X
     ! IN/OUTPUT argument
     type(grid2D_struct_multicutcell), dimension(:, :) :: grid
 
@@ -459,8 +383,8 @@ module multicutcell_solver_mod
     end do
   end subroutine compute_close_cells
 
-  subroutine compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt)
-    use polygon_mod
+  subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt)
+    use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
   
     IMPLICIT NONE
@@ -468,19 +392,19 @@ module multicutcell_solver_mod
     ! INPUT argument
     integer :: NUMELQ, NUMELTG, NUMNOD
     integer, dimension(:,:) :: IXQ, IXTG
-    my_real, dimension(:,:) :: X
-    my_real :: dt
+    real(kind=wp), dimension(:,:) :: X
+    real(kind=wp) :: dt
     ! IN/OUTPUT argument
     type(grid2D_struct_multicutcell), dimension(:, :) :: grid
 
     !Local variables
     integer(kind=8) :: nb_cell, nb_regions, nb_edges
     integer(kind=8) :: i, j, k
-    my_real, dimension(:), allocatable :: ptr_lambdas_arr
-    my_real, dimension(:), allocatable :: ptr_big_lambda_n, ptr_big_lambda_np1
+    real(kind=wp), dimension(:), allocatable :: ptr_lambdas_arr
+    real(kind=wp), dimension(:), allocatable :: ptr_big_lambda_n, ptr_big_lambda_np1
     type(Point3D) :: mean_normal
     logical :: is_narrowband
-    my_real, dimension(4) :: ys, zs
+    real(kind=wp), dimension(4) :: ys, zs
 
     nb_cell = size(grid, 1)
     nb_regions = size(grid, 2)
@@ -521,23 +445,23 @@ module multicutcell_solver_mod
     deallocate(ptr_big_lambda_np1)
 
     call compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid)
-  end subroutine compute_lambdas
+  end subroutine multicutcell_compute_lambdas
 
-  subroutine compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i_cell, normals, nb_normals)
-    use polygon_mod
+  subroutine multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i_cell, normals, nb_normals)
+    use polygon_cutcell_mod
 
     IMPLICIT NONE
 
     integer(kind=8), intent(in) :: i_cell
     integer, intent(in) :: NUMELQ, NUMELTG
     integer, dimension(:,:), intent(in) :: IXQ, IXTG
-    my_real, dimension(:,:), intent(in) :: X
+    real(kind=wp), dimension(:,:), intent(in) :: X
     type(Point2D), dimension(4) :: normals
     integer(kind=8), intent(out) :: nb_normals
 
     integer(kind=8) :: j 
     type(Point2D) :: P1, P2, P3, P4
-    my_real :: norm
+    real(kind=wp) :: norm
     
     if (NUMELQ > 0) then
       nb_normals = 4
@@ -588,18 +512,18 @@ module multicutcell_solver_mod
       normals(j)%y = normals(j)%y / norm
       normals(j)%z = normals(j)%z / norm
     end do
-  end subroutine compute_normals
+  end subroutine multicutcell_compute_normals
 
   subroutine compute_all_id_pt_cell(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
     use grid2D_struct_multicutcell_mod
-    use polygon_mod
+    use polygon_cutcell_mod
   
     IMPLICIT NONE
   
     ! INPUT argument
     integer :: NUMELQ, NUMELTG, NUMNOD
     integer, dimension(:,:) :: IXQ, IXTG
-    my_real, dimension(:,:) :: X
+    real(kind=wp), dimension(:,:) :: X
     type(grid2D_struct_multicutcell), dimension(:, :) :: grid
     integer(kind=8) :: nb_pts_clipped
     ! OUTPUT argument
@@ -608,7 +532,7 @@ module multicutcell_solver_mod
     !Dummy arguments
     type(Point2D), dimension(4) :: normals
     type(Point2D) :: pt, pt_grid
-    my_real :: d
+    real(kind=wp) :: d
     integer(kind=8) :: nb_normals
     integer(kind=8) :: nb_cell
     integer(kind=8) :: i, j, k
@@ -621,7 +545,7 @@ module multicutcell_solver_mod
 
       do j = 1,nb_cell
         if (any(grid(j, :)%is_narrowband)) then
-          call compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, j, normals, nb_normals)
+          call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, j, normals, nb_normals)
 
           is_inside = .true.
           do k=1,nb_normals
@@ -652,32 +576,32 @@ module multicutcell_solver_mod
   subroutine compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell,&
                                     normalVecy, normalVecz, normalVecEdgey, normalVecEdgez, &
                                     vec_move_clippedy, vec_move_clippedz, pressure_edge)
-    use polygon_mod
+    use polygon_cutcell_mod
     use riemann_solver_mod
 
     implicit none
-    my_real :: gamma
-    my_real, dimension(:,:)       :: rho
-    my_real, dimension(:,:)       :: vely
-    my_real, dimension(:,:)       :: velz
-    my_real, dimension(:,:)       :: p
+    real(kind=wp) :: gamma
+    real(kind=wp), dimension(:,:)       :: rho
+    real(kind=wp), dimension(:,:)       :: vely
+    real(kind=wp), dimension(:,:)       :: velz
+    real(kind=wp), dimension(:,:)       :: p
     integer(kind=8)               :: nb_pts_clipped
     integer(kind=8), dimension(:) :: id_pt_cell
-    my_real, dimension(:)         :: normalVecy
-    my_real, dimension(:)         :: normalVecz
-    my_real, dimension(:)         :: normalVecEdgey
-    my_real, dimension(:)         :: normalVecEdgez
-    my_real, dimension(:)         :: vec_move_clippedy
-    my_real, dimension(:)         :: vec_move_clippedz
-    my_real, dimension(:)         :: pressure_edge
+    real(kind=wp), dimension(:)         :: normalVecy
+    real(kind=wp), dimension(:)         :: normalVecz
+    real(kind=wp), dimension(:)         :: normalVecEdgey
+    real(kind=wp), dimension(:)         :: normalVecEdgez
+    real(kind=wp), dimension(:)         :: vec_move_clippedy
+    real(kind=wp), dimension(:)         :: vec_move_clippedz
+    real(kind=wp), dimension(:)         :: pressure_edge
 
     integer(kind=8) :: eL, eR, k, i
     type(Point2D) :: pt
-    my_real :: rhoL, velyL, velzL, pL
-    my_real :: rhoR, velyR, velzR, pR
-    my_real :: us, vsL, vsR, ps
-    my_real :: uLEdge, vLEdgeL, vLEdgeR, pEdgeL
-    my_real :: uREdge, vREdgeL, vREdgeR, pEdgeR
+    real(kind=wp) :: rhoL, velyL, velzL, pL
+    real(kind=wp) :: rhoR, velyR, velzR, pR
+    real(kind=wp) :: us, vsL, vsR, ps
+    real(kind=wp) :: uLEdge, vLEdgeL, vLEdgeR, pEdgeL
+    real(kind=wp) :: uREdge, vREdgeL, vREdgeR, pEdgeR
 
     do k = 1,nb_pts_clipped
       call get_clipped_ith_vertex_fortran(k, pt)
@@ -722,9 +646,10 @@ module multicutcell_solver_mod
     !return vec_move_clipped
   end subroutine compute_vec_move_clipped
 
-  subroutine update_fluid_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ITAB, ALE_CONNECT, &
-                          grid, vely, velz, rho, p, gamma, dt, threshold, sign, dt_next, sound_speed)
-    use polygon_mod
+  subroutine update_fluid_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ALE_CONNECT, &
+                          grid, vely, velz, rho, p, gamma, dt, threshold, sign, &
+                          full_rho, full_pres, full_vel, full_etot, dt_next, sound_speed)
+    use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
     use ALE_CONNECTIVITY_MOD
   
@@ -733,20 +658,21 @@ module multicutcell_solver_mod
     ! INPUT arguments
     integer, intent(in) :: N2D, NUMELQ, NUMELTG, NUMNOD
     integer, dimension(:,:), intent(in) :: IXQ, IXTG
-    integer, dimension(:), intent(in) :: ITAB
-    my_real, dimension(:,:), intent(in) :: X
+    real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
-    my_real, intent(in) :: threshold, dt, gamma
+    real(kind=wp), intent(in) :: threshold, dt, gamma
     integer, intent(in) :: sign
     ! IN/OUTPUT arguments
     type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
-    my_real, dimension(:,:) :: vely
-    my_real, dimension(:,:) :: velz
-    my_real, dimension(:,:) :: rho
-    my_real, dimension(:,:) :: p
+    real(kind=wp), dimension(:,:) :: vely
+    real(kind=wp), dimension(:,:) :: velz
+    real(kind=wp), dimension(:,:) :: rho
+    real(kind=wp), dimension(:,:) :: p
     ! OUTPUT arguments
-    my_real, intent(out) :: dt_next
-    my_real, dimension(:), intent(out) :: sound_speed 
+    real(kind=wp), intent(out) :: dt_next
+    real(kind=wp), dimension(:), intent(out) :: sound_speed 
+    real(kind=wp), dimension(:), intent(out) :: full_rho, full_pres, full_etot
+    real(kind=wp), dimension(:, :), intent(out) :: full_vel 
   
     !Local variables
     integer(kind=8) :: nb_pts
@@ -754,32 +680,32 @@ module multicutcell_solver_mod
     integer(kind=8) :: nb_cell, nb_regions, nb_edges
     integer(kind=8) :: ind_targ
     type(Point2D) :: pressure_mean_normal
-    my_real :: mean_normal_time
-    !my_real :: lambdan
-    my_real :: lambdanp1
+    real(kind=wp) :: mean_normal_time
+    !real(kind=wp) :: lambdan
+    real(kind=wp) :: lambdanp1
     type(ConservativeState2D), dimension(:, :), allocatable :: W
     type(ConservativeState2D), dimension(:, :), allocatable :: dW
     type(ConservativeFlux2D), dimension(:, :), allocatable :: fx
-    my_real, dimension(:,:), allocatable :: lambdan_prev
-    !my_real, dimension(:), allocatable :: areas
+    real(kind=wp), dimension(:,:), allocatable :: lambdan_prev
+    !real(kind=wp), dimension(:), allocatable :: areas
     integer(kind=8), dimension(:, :), allocatable :: target_cells
     integer(kind=8), dimension(:, :), allocatable :: cell_type
-    my_real, dimension(:), allocatable :: normalVecy
-    my_real, dimension(:), allocatable :: normalVecz
-    my_real, dimension(:), allocatable :: normalVecEdgey
-    my_real, dimension(:), allocatable :: normalVecEdgez
-    my_real :: min_pos_Se
-    my_real, dimension(:), allocatable :: vec_move_clippedy
-    my_real, dimension(:), allocatable :: vec_move_clippedz
-    my_real, dimension(:), allocatable :: pressure_edge
+    real(kind=wp), dimension(:), allocatable :: normalVecy
+    real(kind=wp), dimension(:), allocatable :: normalVecz
+    real(kind=wp), dimension(:), allocatable :: normalVecEdgey
+    real(kind=wp), dimension(:), allocatable :: normalVecEdgez
+    real(kind=wp) :: min_pos_Se
+    real(kind=wp), dimension(:), allocatable :: vec_move_clippedy
+    real(kind=wp), dimension(:), allocatable :: vec_move_clippedz
+    real(kind=wp), dimension(:), allocatable :: pressure_edge
     integer(kind=8) :: nb_pts_clipped
     integer(kind=8) :: nb_edge_clipped
-    my_real :: dx
-    my_real :: pressure_mean_normal_time
+    real(kind=wp) :: dx
+    real(kind=wp) :: pressure_mean_normal_time
     type(Point2D) :: mean_normal
     integer(kind=2) :: odd_k
     integer(kind=8), dimension(:), allocatable :: id_pt_cell
-    my_real minimal_length, maximal_length, minimal_angle
+    real(kind=wp) :: minimal_length, maximal_length, minimal_angle, largest_speed_wave
     
     dx = sqrt(minval(grid(:, 1)%area))
     nb_cell = NUMELQ+NUMELTG !size(vely, 1)
@@ -836,11 +762,11 @@ module multicutcell_solver_mod
   
     call nb_pts_clipped_fortran(nb_pts)
 
-    call compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) 
+    call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) 
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
     
-    call compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
+    call multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
     
     !Compute right hand side for non-fused or target cells
     grid(:, :)%lambdanp1_per_cell_target = 0.
@@ -910,23 +836,28 @@ module multicutcell_solver_mod
         call conservative_to_primal(gamma, vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
       end do
     end do
+
+    !Compute global variables for output
+    full_rho = grid(:,1)%lambdanp1_per_cell*rho(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*rho(:,2)
+    full_pres = grid(:,1)%lambdanp1_per_cell*p(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*p(:,2)
+    full_vel(2,:) = grid(:,1)%lambdanp1_per_cell*vely(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*vely(:,2)
+    full_vel(3,:) = grid(:,1)%lambdanp1_per_cell*velz(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*velz(:,2)
+    full_etot = 0.5*(full_vel(2,:)*full_vel(2,:)+full_vel(3,:)*full_vel(3,:)) &
+                          + full_pres/((gamma-1)*full_rho)
   
     !Compute next dt
-    sound_speed = sqrt(gamma * p / rho)
+    sound_speed = sqrt(gamma * full_pres / full_rho)
     largest_speed_wave = -1.
     do i = 1,nb_cell
       do k = 1,nb_regions
-        largest_speed_wave = max(largest_speed_wave, max(abs(vely(i, k)), abs(velz(i, k))) + sound_speed(i, k))
+        largest_speed_wave = max(largest_speed_wave, max(abs(vely(i, k)), abs(velz(i, k))) + sound_speed(i))
       end do
     end do
     dt_next = threshold * dx / largest_speed_wave
-
-    !Compute global variables for output
-    do i = 1,nb_cell
-      do k = 1,nb_regions
-        
-      end do
-    end do
   
     !Deallocate local memory
     deallocate(lambdan_prev)
@@ -941,11 +872,11 @@ module multicutcell_solver_mod
     deallocate(vec_move_clippedz)
     deallocate(id_pt_cell)
   
-  end subroutine update_fluid
+  end subroutine update_fluid_multicutcell
 
   !(y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
-  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ITAB, ALE_CONNECT, &
-                              nb_id_polygon, list_id_polygon, igrnode, grid)
+  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ALE_CONNECT, &
+                              nb_id_polygon, list_id_polygon, ngrnod, igrnode, grid)
     use grid2D_struct_multicutcell_mod
     use ALE_CONNECTIVITY_MOD
     use groupdef_mod , only : group_
@@ -953,24 +884,23 @@ module multicutcell_solver_mod
     implicit none
     integer, intent(in) :: N2D, NUMELQ, NUMELTG, NUMNOD
     integer, intent(in), dimension(:,:) :: IXQ, IXTG
-    integer, intent(in), dimension(:) :: ITAB
-    my_real, intent(in), dimension(:,:) :: X
+    real(kind=wp), intent(in), dimension(:,:) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
     integer(kind=8), intent(in) :: nb_id_polygon
-    my_real, intent(in) :: x_polygon(3,NUMNOD)
     integer, intent(in) :: list_id_polygon(nb_id_polygon)
+    integer,intent(in) :: ngrnod                                  !< number of group of nodes(array size for igrnod)
     type(group_), dimension(ngrnod), intent(in)  :: igrnode
     type(grid2D_struct_multicutcell), dimension(:, :), allocatable, intent(out) :: grid
 
     !DUMMY ARGUMENTS
     integer nb_cell, nb_regions, nb_pts_poly
     integer i, k
-    my_real, dimension(:), allocatable :: vec_move_clippedy, vec_move_clippedz
-    my_real :: dt, minimal_length, minimal_angle, maximal_length
-    my_real, dimension(:), allocatable :: y_polygon, z_polygon
+    real(kind=wp), dimension(:), allocatable :: vec_move_clippedy, vec_move_clippedz
+    real(kind=wp) :: dt, minimal_length, minimal_angle, maximal_length
+    real(kind=wp), dimension(:), allocatable :: y_polygon, z_polygon
     integer(kind=8) :: limits_polygon(nb_id_polygon + 1)
     integer :: polyg_id, nb_pts
-    integer, dimension(:) :: entities
+    integer, dimension(:), allocatable :: entities
 
     dt = 1.0
     minimal_length = -1.
@@ -985,13 +915,13 @@ module multicutcell_solver_mod
     call launch_grb() !C call
     do i=1,nb_cell
       do k=1,nb_regions
-        grid(i,k) = makegrid(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, i)
+        grid(i,k) = makegrid(NUMELQ, NUMELTG, IXQ, IXTG, X, i)
       end do
     end do
 
     if (nb_id_polygon > 0) then
       nb_pts_poly = 0
-      do i=1:nb_id_polygon
+      do i=1,nb_id_polygon
         polyg_id = list_id_polygon(i)
         nb_pts_poly = nb_pts_poly + igrnode(polyg_id)%nentity
       end do
@@ -999,13 +929,15 @@ module multicutcell_solver_mod
       allocate(z_polygon(nb_pts_poly))
 
       limits_polygon(1) = 0
-      do i=2:nb_id_polygon
+      do i=2,nb_id_polygon
         polyg_id = list_id_polygon(i)
         nb_pts = igrnode(polyg_id)%nentity
-        entities = igrnod(polyg_id)%entity(1:nb_pts)
+        allocate(entities(nb_pts))
+        entities = igrnode(polyg_id)%entity(1:nb_pts)
         limits_polygon(i+1) = limits_polygon(i) + nb_pts
         y_polygon(limits_polygon(i)+1:limits_polygon(i+1)) = X(2, entities)
         z_polygon(limits_polygon(i)+1:limits_polygon(i+1)) = X(3, entities)
+        deallocate(entities)
       end do
     end if
 
@@ -1017,12 +949,12 @@ module multicutcell_solver_mod
     vec_move_clippedz(:) = 0.
 
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, minimal_length, maximal_length, minimal_angle) !initialize clipped3D in C.
-    call compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) !initialize lambda fields, close_cell and is_narrowband in grid
-  end
+    call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) !initialize lambda fields, close_cell and is_narrowband in grid
+  end subroutine initialize_solver_multicutcell
 
   subroutine deallocate_solver_multicutcell()
     call end_grb() !C call
-  end
+  end subroutine deallocate_solver_multicutcell
 
 
 end module multicutcell_solver_mod

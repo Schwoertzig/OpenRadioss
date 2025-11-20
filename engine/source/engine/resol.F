@@ -676,6 +676,7 @@ C-----------------------------------------------
               USE ECND_MOD
               USE MULTI_FVM_MOD
               USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT, deallocate_multi_cutcell_type !TODO : define and add this structure
+              USE MULTICUTCELL_SOLVER_MOD, ONLY : DEALLOCATE_SOLVER_MULTICUTCELL
               USE H3D_MOD
               USE PBLAST_MOD
               USE GROUPDEF_MOD
@@ -4173,7 +4174,7 @@ C===============================================================================
                 ! DT1         : current time step (input)
                 ! DT2TT       : solver computed minimal time step (output)
                 ! DTFAC1(102) : Courant number for ALE CFL (/DT/ALE)
-                CALL ALEMAIN_CUTCELL(NIXQ,NUMELQ,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
+                CALL ALEMAIN_CUTCELL(NIXTG,NIXQ,NUMELTG,NUMELQ,IXTG,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
      .                               ITYPTSTT, NELTSTT, T1S, TT,
      .                               NGROUP,NGRNOD,IGRNOD,NPARG,IPARG,DTFAC1(102),DT1,DT2TT,MULTI_CUTCELL)
                 IF(DT2TT<DT2T)THEN

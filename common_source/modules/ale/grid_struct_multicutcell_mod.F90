@@ -1,7 +1,7 @@
 #include "my_real.inc"
 
 module grid2D_struct_multicutcell_mod
-  use polygon_mod
+  use polygon_cutcell_mod, only : Point2D
 
   type grid2D_struct_multicutcell
     logical                     :: close_cells !Determine whether a cell is close to the interface
@@ -45,9 +45,9 @@ module grid2D_struct_multicutcell_mod
       area = abs(area/2.0)  !The midpoint formula requires a halving.
   end function compute_area
 
-  function makegrid(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, i_cell) result(grid)
+  function makegrid(NUMELQ, NUMELTG, IXQ, IXTG, X, i_cell) result(grid)
     implicit none
-    integer :: N2D, NUMELQ, NUMELTG, NUMNOD, i_cell
+    integer :: N2D, NUMELQ, NUMELTG, i_cell
     integer, dimension(:,:) :: IXQ, IXTG
     my_real, dimension(:,:) :: X
     type(grid2D_struct_multicutcell) :: grid
@@ -57,7 +57,7 @@ module grid2D_struct_multicutcell_mod
 
     if (NUMELQ > 0) then
       grid%area = compute_area(4, X(2:3, IXQ(2:5, i_cell)))
-    else
+    elseif (NUMELTG>0) then
       grid%area = compute_area(3, X(2:3, IXTG(2:4, i_cell)))
     end if
 
