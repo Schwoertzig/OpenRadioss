@@ -70,10 +70,12 @@ contains
   end function phi
 
   ! Gradient of function phi
-  function Dphi(pL, aL, uL, pR, aR, uR, gamma, p_star)
+  !function Dphi(pL, aL, uL, pR, aR, uR, gamma, p_star)
+  function Dphi(pL, aL, pR, aR, gamma, p_star)
     implicit none 
-    real(kind=wp) :: pL, aL, uL 
-    real(kind=wp) :: pR, aR, uR 
+    real(kind=wp) :: pL, aL 
+    real(kind=wp) :: pR, aR 
+    !real(kind=wp) :: uL, uR 
     real(kind=wp) :: gamma, p_star
     real(kind=wp) :: Dphi
    
@@ -96,7 +98,8 @@ contains
     do while (abs(p - p_prev) > eps)
       res = phi(pL, aL, uL, pR, aR, uR, gamma, p)
       p_prev = p
-      p = p - res / Dphi(pL, aL, uL, pR, aR, uR, gamma, p)
+      !p = p - res / Dphi(pL, aL, uL, pR, aR, uR, gamma, p)
+      p = p - res / Dphi(pL, aL, pR, aR, gamma, p)
     end do
   end function find_root
 

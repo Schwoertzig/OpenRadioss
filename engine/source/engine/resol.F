@@ -675,7 +675,7 @@ C-----------------------------------------------
               USE ALEMUSCL_MOD
               USE ECND_MOD
               USE MULTI_FVM_MOD
-              USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT, deallocate_multi_cutcell_type !TODO : define and add this structure
+              USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT, DEALLOCATE_MULTI_CUTCELL_TYPE !TODO : define and add this structure
               USE MULTICUTCELL_SOLVER_MOD, ONLY : DEALLOCATE_SOLVER_MULTICUTCELL
               USE H3D_MOD
               USE PBLAST_MOD
@@ -4176,7 +4176,7 @@ C===============================================================================
                 ! DTFAC1(102) : Courant number for ALE CFL (/DT/ALE)
                 CALL ALEMAIN_CUTCELL(NIXTG,NIXQ,NUMELTG,NUMELQ,IXTG,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
      .                               ITYPTSTT, NELTSTT, T1S, TT,
-     .                               NGROUP,NGRNOD,IGRNOD,NPARG,IPARG,DTFAC1(102),DT1,DT2TT,MULTI_CUTCELL)
+     .                               NGRNOD,IGRNOD,DTFAC1(102),DT1,DT2TT,MULTI_CUTCELL)
                 IF(DT2TT<DT2T)THEN
                    DT2T   = DT2TT
                    ITYPTST= ITYPTSTT

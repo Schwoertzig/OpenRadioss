@@ -30,7 +30,7 @@
 !! \details ...
         subroutine  alemain_cutcell(nixtg, nixq, numeltg, numelq, ixtg, ixq, numnod, x, ale_connect, ncycle, &
                                     ityptstt, neltstt, t1s, tt, &
-                                    ngroup, ngrnod, igrnod, nparg, iparg, dt_scale, dt1, dt2t, multi_cutcell)
+                                    ngrnod, igrnod, dt_scale, dt1, dt2t, multi_cutcell)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -61,9 +61,6 @@
           integer,intent(in) :: ixq(nixq,numelq)                        !< elem connectivity (1:7 : mat_id,n1,n2,n3,n4,pid,user_id for each elem 1:numelq)
           integer,intent(in) :: ixtg(nixtg,numeltg)                     !< elem connectivity (1:6 : mat_id,n1,n2,n3,n4,pid,user_id for each elem 1:numetg)
           integer,intent(in) :: numnod                                  !< number of nodes in the input file
-          integer,intent(in) :: ngroup                                  !< number of groups (elem buffer data structure)
-          integer,intent(in) :: nparg                                   !< array size for IPARG data structure
-          integer,intent(in) :: iparg(nparg,ngroup)                     !< parameter for groups (used with elbuf)
           integer,intent(in) :: ncycle                                  !< resol cycle number (time loop)
           real(kind=wp),intent(in) :: x(3,numnod)                       !< node coordinates
           real(kind=wp),intent(in) :: tt                                !< current time
@@ -149,7 +146,7 @@
                  n2d = 2 ! 2D simulation
 
                  if (dt1>0) then
-                  call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
+                  call update_fluid_multicutcell(n2d, numelq, numeltg, ixq, ixtg, x, ALE_CONNECT, &
                          multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
                          multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
                          gamma, dt1, dt_scale, sign, &
@@ -160,7 +157,7 @@
                   nb_phase = 2
                   call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
                   nb_polygon = ALE%solver%multimat%nb
-                  call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
+                  call initialize_solver_multicutcell(n2d, numelq, numeltg, ixq, ixtg, x, &
                               nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid)
                  end if
                    
