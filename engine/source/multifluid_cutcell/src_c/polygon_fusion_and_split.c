@@ -229,7 +229,7 @@ void polygons_fusion(const Polygon2D* old_p, const GrB_Matrix* original_edges, c
     indices_sorted = alloc_empty_vec_uint();
 
     for(i=0; i<pts_intersec->size; i++){
-        push_back_vec_pts2D((*p)->vertices, get_ith_elem_vec_pts2D(pts_intersec, i));
+        push_back_vec_pts2D(&((*p)->vertices), get_ith_elem_vec_pts2D(pts_intersec, i));
     } 
 
     *size_faces_to_fuse = former_nb_faces;
@@ -261,8 +261,8 @@ void polygons_fusion(const Polygon2D* old_p, const GrB_Matrix* original_edges, c
         GxB_Matrix_extractTuples_Vector(I_vec_f_k, pot_ind_faces, extr_vals_f_k, f_k, GrB_NULL);
         GrB_Vector_extractElement(&i_face2, pot_ind_faces, 0);
 
-        push_back_unique_vec_uint((*faces_to_fuse)[i_face1], &i_face2);
-        push_back_unique_vec_uint((*faces_to_fuse)[i_face2], &i_face1);
+        push_back_unique_vec_uint(&((*faces_to_fuse)[i_face1]), &i_face2);
+        push_back_unique_vec_uint(&((*faces_to_fuse)[i_face2]), &i_face1);
 
         GrB_extract(ej, GrB_NULL, GrB_NULL, *((*p)->edges), GrB_ALL, 1, ie1, GrB_NULL); 
         GrB_reduce(&sum_col1, GrB_NULL, GrB_PLUS_MONOID_INT8, ej, GrB_NULL);
@@ -343,7 +343,7 @@ void polygons_fusion(const Polygon2D* old_p, const GrB_Matrix* original_edges, c
                 k += former_nb_pts;
                 pt = get_ith_elem_vec_pts2D((*p)->vertices, k);
                 res = compute_barycentric_coord(*pt, *pt1, *pt2);
-                push_back_vec_double(thetas, &res);
+                push_back_vec_double(&thetas, &res);
             }
 
             sort_vec_double(thetas, thetas, indices_sorted);
@@ -404,7 +404,7 @@ void polygons_fusion(const Polygon2D* old_p, const GrB_Matrix* original_edges, c
             infogrb = GrB_Matrix_resize(*((*p)->edges), nb_rows, nb_cols + indices_sorted->size/2);
             infogrb = GxB_Matrix_concat(*((*p)->edges), (GrB_Matrix[]){copy_mat, new_edges}, 1, 2, GrB_NULL);
             for(j=0; j<indices_sorted->size/2; j++){
-                push_back_vec_int((*p)->status_edge, get_ith_elem_vec_int((*p)->status_edge, i));
+                push_back_vec_int(&((*p)->status_edge), get_ith_elem_vec_int((*p)->status_edge, i));
                 //push_back_vec_double((*p)->pressure_edge, get_ith_elem_vec_double((*p)->pressure_edge, i));
             }
 
@@ -498,7 +498,7 @@ void create_new_faces_split(const Polygon2D* old_p, Vector_uint** faces_to_split
                 set_ith_elem_vec_uint(forbidden_edges, 0, &ie);
 
                 astar(p->vertices, p->edges, i_pts1, i_pts2, forbidden_edges, listEdges, listNodes);
-                push_back_vec_uint(listEdges, &ie);
+                push_back_vec_uint(&(listEdges), &ie);
                 sort_vec_uint(listEdges);
 
                 //old_face = p.faces[:, i]
@@ -535,7 +535,7 @@ void create_new_faces_split(const Polygon2D* old_p, Vector_uint** faces_to_split
                         GxB_Matrix_concat(*(p->faces), (GrB_Matrix[]){copy_mat, concat_face}, 1, 2, GrB_NULL);
 
                         GrB_Matrix_ncols(&nb_faces, *(p->faces));
-                        push_back_vec_int(p->phase_face, &zero);
+                        push_back_vec_int(&(p->phase_face), &zero);
                         extr_p = extract_ith_face2D(p, nb_faces-1);
                         surf_vect = surfaces_poly2D(extr_p);
                         GrB_Vector_extractElement(&surf, surf_vect, 0);
@@ -612,7 +612,7 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
     GrB_Matrix_ncols(&former_nb_faces, *(p->faces));
 
     for(i=0; i<pts_intersec->size; i++){
-        push_back_vec_pts2D(p->vertices, get_ith_elem_vec_pts2D(pts_intersec, i));
+        push_back_vec_pts2D(&(p->vertices), get_ith_elem_vec_pts2D(pts_intersec, i));
     } 
 
     GrB_Matrix_new(&f_k, GrB_INT8, 1, former_nb_faces);
@@ -647,8 +647,8 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
         infogrb = GxB_Matrix_extractTuples_Vector(I_vec_f_k, pot_ind_faces, extr_vals_f_k, f_k, GrB_NULL);
         infogrb = GrB_Vector_extractElement(&i_face, pot_ind_faces, 0);
 
-        push_back_vec_uint((*faces_to_split)[i_face], &ie1);
-        push_back_vec_uint((*faces_to_split)[i_face], &ie2);
+        push_back_vec_uint(&((*faces_to_split)[i_face]), &ie1);
+        push_back_vec_uint(&((*faces_to_split)[i_face]), &ie2);
 
         //sum_col1 = sum(p.edges[:, ie1])
         GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, ie1, GrB_NULL); 
@@ -730,7 +730,7 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
                 k += former_nb_pts;
                 pt = get_ith_elem_vec_pts2D(p->vertices, k);
                 res = compute_barycentric_coord(*pt, *pt1, *pt2);
-                push_back_vec_double(thetas, &res);
+                push_back_vec_double(&thetas, &res);
             }
 
             sort_vec_double(thetas, thetas, indices_sorted);
@@ -791,7 +791,7 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
             infogrb = GrB_Matrix_resize(*(p->edges), nb_rows_copy, nb_cols_copy + indices_sorted->size/2);
             infogrb = GxB_Matrix_concat(*(p->edges), (GrB_Matrix[]){copy_mat, new_edges}, 1, 2, GrB_NULL);
             for(j=0; j<indices_sorted->size/2; j++){
-                push_back_vec_int(p->status_edge, get_ith_elem_vec_int(p->status_edge, i));
+                push_back_vec_int(&(p->status_edge), get_ith_elem_vec_int(p->status_edge, i));
                 //push_back_vec_double(p->pressure_edge, get_ith_elem_vec_double(p->pressure_edge, i));
             }
 

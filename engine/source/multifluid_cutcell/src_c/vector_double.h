@@ -10,7 +10,7 @@ typedef struct {
     uint64_t size, capacity;
 } Vector_double;
 
-void push_back_vec_double(Vector_double* v, const my_real* point);
+void push_back_vec_double(Vector_double** v_ptr, const my_real* point);
 void double_capacity_vec_double(Vector_double* v);
 Vector_double* alloc_empty_vec_double();
 Vector_double* alloc_with_init_vec_double(const my_real* points, uint64_t size);

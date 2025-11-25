@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 Vector_double* alloc_empty_vec_double(){
     return alloc_with_capacity_vec_double(1);
@@ -31,10 +32,10 @@ void double_capacity_vec_double(Vector_double* v){
     v->data = (my_real*) realloc(v->data, v->capacity*sizeof(my_real));
 }
 
-void push_back_vec_double(Vector_double* v, const my_real* point){
-    if ((v->size == 0) || (v->data == NULL)){
-        free(v->data);
-        *v = *alloc_with_init_vec_double(point, 1);
+void push_back_vec_double(Vector_double** v_ptr, const my_real* point){
+    Vector_double* v = *v_ptr;
+    if ((v->capacity == 0) || (v->data == NULL)){
+        *v_ptr = alloc_with_init_vec_double(point, 1);
     }
     else if (v->size >= v->capacity)
     {
@@ -63,7 +64,7 @@ my_real* get_ith_elem_vec_double(const Vector_double* v, uint64_t i){
         return v->data + i;
     } else {
         p = (my_real*) malloc(sizeof(my_real));
-        *p = 0.0/0.0;
+        *p = nan("");
         return p;
     }
 }

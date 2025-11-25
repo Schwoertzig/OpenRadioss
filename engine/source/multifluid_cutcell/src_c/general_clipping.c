@@ -1,5 +1,6 @@
 #include "general_clipping.h"
 #include "my_real.h"
+#include <math.h>
 
 void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt, int8_t sign_taken, Vector_points3D* pts_copy, GrB_Matrix* new_edges_in){
     GrB_Index i;
@@ -86,7 +87,7 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
 
                 newPoint = find_intersection3D(*x1, distances[I_index[0]], *x2, distances[I_index[1]]);
 
-                push_back_vec_pts3D(pts_copy, &newPoint);
+                push_back_vec_pts3D(&pts_copy, &newPoint);
                 infogrb = GrB_Matrix_setElement(addPoints, -val_be_i, countPoint, be_i);
                 countPoint += 1;
             }
@@ -222,7 +223,7 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
 
         if (mark_cells > 0){
             for(i = 0; i<nb_open_supercells; i++){
-                push_back_vec_int(status_cell, &mark_cells); 
+                push_back_vec_int(&status_cell, &mark_cells); 
             }
         }
 
@@ -274,7 +275,7 @@ static form_struct twoform4D(Point4D p1, Point4D p2){
 //Compute 3-forms of a 2-form S and a vector p, depending on ambient dimension
 static form_struct threeform3D(Point3D p, form_struct S){
     if (S.n != 3)
-        return (form_struct){(my_real[]){0./0.}, 0};
+        return (form_struct){(my_real[]){nan("")}, 0};
     else{
         my_real val[] = {S.v[0]*p.x + S.v[1]*p.y + S.v[2]*p.t};
         return (form_struct){val, 1};
@@ -287,7 +288,7 @@ static form_struct threeform3D_vec(Point3D p, GrB_Vector S){
 
     GrB_Vector_size(&size_S, S);
     if (size_S != 3)
-        return (form_struct){(my_real[]){0./0.}, 0};
+        return (form_struct){(my_real[]){nan("")}, 0};
     else{
         GrB_Vector_extractElement(&Sv0, S, 0);
         GrB_Vector_extractElement(&Sv1, S, 1);
@@ -299,7 +300,7 @@ static form_struct threeform3D_vec(Point3D p, GrB_Vector S){
 
 static form_struct threeform4D(Point4D p, form_struct S){
     if (S.n!=6)
-        return (form_struct){(my_real[]){0./0.}, 0};
+        return (form_struct){(my_real[]){nan("")}, 0};
     else{
         my_real vals[] = {p.y*S.v[6] - p.z*S.v[5] + p.t*S.v[4], 
                         -p.x*S.v[6] + p.z*S.v[3] - p.t*S.v[2], 
@@ -312,7 +313,7 @@ static form_struct threeform4D(Point4D p, form_struct S){
 //Compute 4-forms of a 3-form V and a vector p, depending on ambient dimension
 static form_struct fourform4D(Point4D p, form_struct V){
     if (V.n != 4)
-        return (form_struct){(my_real[]){0./0.}, 0};
+        return (form_struct){(my_real[]){nan("")}, 0};
     else{
         my_real val[] = {V.v[0]*p.x + V.v[1]*p.y + V.v[2]*p.z + V.v[3]*p.t};
         return (form_struct){val, 1};

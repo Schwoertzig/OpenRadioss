@@ -95,7 +95,7 @@ Polygon2D* polygon2D_from_vertices(const my_real* x_v, unsigned long int n_x, co
     infogrb = GrB_Matrix_new(faces, GrB_INT8, nb_edges, nb_faces);
 
     ptSW = (Point2D){x_v[0], y_v[0]};
-    push_back_vec_pts2D(vertices, &ptSW);
+    push_back_vec_pts2D(&vertices, &ptSW);
     curr_face = 0;
     curr_pt = 0;
     curr_edge = 0;
@@ -264,12 +264,12 @@ Polygon2D* polygon_from_consecutive_points(const my_real *x_v, const my_real* y_
 
     for(i=0; i<nb_pts; i++){
         pt = (Point2D){x_v[i], y_v[i]};
-        push_back_vec_pts2D(vertices, &pt);
-        push_back_vec_int(status_edge, &zero);
+        push_back_vec_pts2D(&vertices, &pt);
+        push_back_vec_int(&status_edge, &zero);
     }
     zero = 2;
     for(i=0; i<nb_faces; i++){
-        push_back_vec_int(phase_face, &zero);
+        push_back_vec_int(&phase_face, &zero);
     }
 
     for(i=0; i<(nb_edges-1); i++){
@@ -594,10 +594,10 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
             infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
             if(size_pt_indices>0){
                 infogrb = GrB_Vector_extractElement(&val, pt_indices, 0);
-                push_back_unique_vec_uint(ind_kept_pts, &val);
+                push_back_unique_vec_uint(&ind_kept_pts, &val);
                 
                 infogrb = GrB_Vector_extractElement(&val, pt_indices, 1);
-                push_back_unique_vec_uint(ind_kept_pts, &val);
+                push_back_unique_vec_uint(&ind_kept_pts, &val);
             }
         }
 
@@ -664,6 +664,7 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
     dealloc_vec_uint(ind_kept_pts);free(ind_kept_pts);
     dealloc_vec_int(new_status_edge);free(new_status_edge);
     dealloc_vec_pts2D(new_vertices);free(new_vertices);
+    dealloc_vec_int(new_phase_face);free(new_phase_face);
     GrB_free(&new_edges);
     GrB_free(&new_faces);
     GrB_free(&grb_ind_kept_pts);
@@ -732,25 +733,25 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
         GrB_Vector_extractElement(&indpt1, pt_indices, 0);
         GrB_Vector_extractElement(&indpt2, pt_indices, 1);
 
-        push_back_unique_vec_uint(pts_kept_inds, &indpt1);
-        push_back_unique_vec_uint(pts_kept_inds, &indpt2);
+        push_back_unique_vec_uint(&pts_kept_inds, &indpt1);
+        push_back_unique_vec_uint(&pts_kept_inds, &indpt2);
     }
 
     //Build the new list of vertices
     new_vertices = alloc_with_capacity_vec_pts2D(pts_kept_inds->size);
     for (i=0; i<pts_kept_inds->size; i++){
         indpt1 = *get_ith_elem_vec_uint(pts_kept_inds, i);
-        push_back_vec_pts2D(new_vertices, get_ith_elem_vec_pts2D(p->vertices, indpt1));
+        push_back_vec_pts2D(&new_vertices, get_ith_elem_vec_pts2D(p->vertices, indpt1));
     }
     //Build the new list of status of each edge
     new_status_edge = alloc_with_capacity_vec_int(length_edge_ind);
     for (i=0; i<length_edge_ind; i++){
         indpt1 = edge_indices[i];
-        push_back_vec_int(new_status_edge, get_ith_elem_vec_int(p->status_edge, indpt1));
+        push_back_vec_int(&new_status_edge, get_ith_elem_vec_int(p->status_edge, indpt1));
     }
 
     new_phase_face = alloc_with_capacity_vec_int(1);
-    push_back_vec_int(new_phase_face, get_ith_elem_vec_int(p->phase_face, extr_index));
+    push_back_vec_int(&new_phase_face, get_ith_elem_vec_int(p->phase_face, extr_index));
 
     //Build the new array describing the edges
     GrB_Matrix_new(new_edges, GrB_INT8, pts_kept_inds->size, length_edge_ind);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 Array_double* alloc_empty_arr_double(){
     Array_double* v = (Array_double*)malloc(sizeof(Array_double));
@@ -56,7 +57,7 @@ double* get_ijth_elem_arr_double(const Array_double* v, const uint64_t i, const 
         return v->data + i*v->ncols + j;
     } else {
         p = (my_real*) malloc(sizeof(my_real));
-        *p = 0.0/0.0;
+        *p = nan("");
         return p;
     }
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 Array_int* alloc_empty_arr_int(){
     Array_int* v = (Array_int*)malloc(sizeof(Array_int));
@@ -56,7 +57,7 @@ int64_t* get_ijth_elem_arr_int(const Array_int* v, const uint64_t i, const uint6
         return v->data + i*v->ncols + j;
     } else {
         p = (int64_t*) malloc(sizeof(int64_t));
-        *p = 0.0/0.0;
+        *p = nan("");
         return p;
     }
 }

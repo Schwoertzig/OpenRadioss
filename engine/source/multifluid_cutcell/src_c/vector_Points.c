@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 //----------------------------------------------------------------------------------------
 //                                 2D POINTS
@@ -44,10 +45,10 @@ void double_capacity_vec_pts2D(Vector_points2D* v){
     v->points = (Point2D*) realloc(v->points, v->capacity*sizeof(Point2D));
 }
 
-void push_back_vec_pts2D(Vector_points2D* v, const Point2D* point){
-    if ((v->size == 0) || (v->points == NULL)){
-        free(v->points);
-        *v = *alloc_with_init_vec_pts2D(point, 1);
+void push_back_vec_pts2D(Vector_points2D** v_ptr, const Point2D* point){
+    Vector_points2D* v = *v_ptr;
+    if ((v->capacity == 0) || (v->points == NULL)){
+        *v_ptr = alloc_with_init_vec_pts2D(point, 1);
     }
     else if (v->size >= v->capacity)
     {
@@ -78,8 +79,8 @@ Point2D* get_ith_elem_vec_pts2D(const Vector_points2D* v, uint64_t i){
         return v->points + i;
     } else {
         p = (Point2D*) malloc(sizeof(Point2D));
-        p->x = 0.0/0.0;
-        p->y = 0.0/0.0;
+        p->x = nan("");
+        p->y = nan("");
         return p;
     }
 }
@@ -165,10 +166,10 @@ void double_capacity_vec_pts3D(Vector_points3D* v){
     v->points = (Point3D*) realloc(v->points, v->capacity*sizeof(Point3D));
 }
 
-void push_back_vec_pts3D(Vector_points3D* v, const Point3D* point){
-    if ((v->size == 0) || (v->points == NULL)){
-        free(v->points);
-        *v = *alloc_with_init_vec_pts3D(point, 1);
+void push_back_vec_pts3D(Vector_points3D** v_ptr, const Point3D* point){
+    Vector_points3D* v = *v_ptr;
+    if ((v->capacity == 0) || (v->points == NULL)){
+        *v_ptr = alloc_with_init_vec_pts3D(point, 1);
     }
     else if (v->size >= v->capacity)
     {
@@ -199,9 +200,9 @@ Point3D* get_ith_elem_vec_pts3D(const Vector_points3D* v, uint64_t i){
         return v->points + i;
     } else {
         p = (Point3D*) malloc(sizeof(Point3D));
-        p->x = 0.0/0.0;
-        p->y = 0.0/0.0;
-        p->t = 0.0/0.0;
+        p->x = nan("");
+        p->y = nan("");
+        p->t = nan("");
         return p;
     }
 }
@@ -288,10 +289,11 @@ void double_capacity_vec_pts4D(Vector_points4D* v){
     v->points = (Point4D*) realloc(v->points, v->capacity*sizeof(Point4D));
 }
 
-void push_back_vec_pts4D(Vector_points4D* v, const Point4D* point){
-    if ((v->size == 0) || (v->points == NULL)){
+void push_back_vec_pts4D(Vector_points4D** v_ptr, const Point4D* point){
+    Vector_points4D* v = *v_ptr;
+    if ((v->capacity == 0) || (v->points == NULL)){
         free(v->points);
-        *v = *alloc_with_init_vec_pts4D(point, 1);
+        *v_ptr = alloc_with_init_vec_pts4D(point, 1);
     }
     else if (v->size >= v->capacity)
     {
@@ -322,10 +324,10 @@ Point4D* get_ith_elem_vec_pts4D(const Vector_points4D* v, uint64_t i){
         return v->points + i;
     } else {
         p = (Point4D*) malloc(sizeof(Point4D));
-        p->x = 0.0/0.0;
-        p->y = 0.0/0.0;
-        p->z = 0.0/0.0;
-        p->t = 0.0/0.0;
+        p->x = nan("");
+        p->y = nan("");
+        p->z = nan("");
+        p->t = nan("");
         return p;
     }
 }

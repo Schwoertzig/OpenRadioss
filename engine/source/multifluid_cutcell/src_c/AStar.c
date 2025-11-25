@@ -24,13 +24,13 @@ static void build_path_to_start(uint64_t start_ind, uint64_t end_node, Dict_Int_
     uint64_t curr_node;
     Dict_Int_Treenode *s;
 
-    push_back_vec_uint(listNodes, &end_node);
+    push_back_vec_uint(&listNodes, &end_node);
     curr_node = end_node;
     while (curr_node != start_ind){
         HASH_FIND_INT(closedList_nodes, &curr_node, s);
-        push_back_vec_uint(listEdges, &(s->tneg.edge_with_parent));
+        push_back_vec_uint(&listEdges, &(s->tneg.edge_with_parent));
         curr_node = s->tneg.parent;
-        push_back_vec_uint(listNodes, &curr_node);
+        push_back_vec_uint(&listNodes, &curr_node);
     }
 }
 
@@ -66,16 +66,16 @@ static void list_all_neighbours(uint64_t curr_node, const GrB_Matrix* edges, con
         GrB_Vector_extractElement(&i_e, pot_ind_edges, i);
         //if !(i_e ∈ closedList_edges)
         if (!is_in_vec_uint(closedList_edges, &i_e)){
-            push_back_vec_uint(ind_edges, &i_e);
+            push_back_vec_uint(&ind_edges, &i_e);
             //pot_neigh = findall(x->x!=0, edges[:, i_e])
             infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *edges, GrB_ALL, 1, i_e, GrB_NULL); 
             infogrb = GxB_Vector_extractTuples_Vector(nz_ej, extr_vals_ej, ej, GrB_NULL);
             infogrb = GrB_Vector_extractElement(&pot_neigh1, nz_ej, 0);
             infogrb = GrB_Vector_extractElement(&pot_neigh2, nz_ej, 1);
             if (pot_neigh1 == curr_node)
-                push_back_vec_uint(neighbours, &pot_neigh2);
+                push_back_vec_uint(&neighbours, &pot_neigh2);
             else
-                push_back_vec_uint(neighbours, &pot_neigh1);
+                push_back_vec_uint(&neighbours, &pot_neigh1);
         }
     }
 
@@ -152,7 +152,7 @@ void astar(const Vector_points2D *vertices, const GrB_Matrix *edges, uint64_t st
 
         for(i=0; i<ind_edges->size; i++){
             i_e = *get_ith_elem_vec_uint(ind_edges, i);
-            push_back_unique_vec_uint(closedList_edges, &i_e);
+            push_back_unique_vec_uint(&closedList_edges, &i_e);
         }
     }
 

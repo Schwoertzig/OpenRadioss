@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 //----------------------------------------------------------------------------------------
 //                                 2D POINTS
@@ -64,8 +65,8 @@ Point2D* get_ijth_elem_arr_pts2D(const Array_points2D* v, const uint64_t i, cons
         return v->points + i*v->ncols + j;
     } else {
         p = (Point2D*) malloc(sizeof(Point2D));
-        p->x = 0.0/0.0;
-        p->y = 0.0/0.0;
+        p->x = nan("");
+        p->y = nan("");
         return p;
     }
 }
@@ -177,9 +178,9 @@ Point3D* get_ijth_elem_arr_pts3D(const Array_points3D* v, const uint64_t i, cons
         return v->points + i*v->ncols + j;
     } else {
         p = (Point3D*) malloc(sizeof(Point3D));
-        p->x = 0.0/0.0;
-        p->y = 0.0/0.0;
-        p->t = 0.0/0.0;
+        p->x = nan("");
+        p->y = nan("");
+        p->t = nan("");
         return p;
     }
 }
@@ -291,10 +292,10 @@ Point4D* get_ijth_elem_arr_pts4D(const Array_points4D* v, const uint64_t i, cons
         return v->points + i*v->ncols + j;
     } else {
         p = (Point4D*) malloc(sizeof(Point4D));
-        p->x = 0.0/0.0;
-        p->y = 0.0/0.0;
-        p->z = 0.0/0.0;
-        p->t = 0.0/0.0;
+        p->x = nan("");
+        p->y = nan("");
+        p->z = nan("");
+        p->t = nan("");
         return p;
     }
 }

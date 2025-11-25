@@ -31,10 +31,10 @@ void double_capacity_vec_indices_intersec(Vector_indices_intersec* v){
     v->data = (Indices_intersection*) realloc(v->data, v->capacity*sizeof(Indices_intersection));
 }
 
-void push_back_vec_indices_intersec(Vector_indices_intersec* v, const Indices_intersection* point){
-    if ((v->size == 0) || (v->data == NULL)){
-        free(v->data);
-        *v = *alloc_with_init_vec_indices_intersec(point, 1);
+void push_back_vec_indices_intersec(Vector_indices_intersec** v_ptr, const Indices_intersection* point){
+    Vector_indices_intersec* v = *v_ptr;
+    if ((v->capacity == 0) || (v->data == NULL)){
+        *v_ptr = alloc_with_init_vec_indices_intersec(point, 1);
     }
     else if (v->size >= v->capacity)
     {
@@ -48,13 +48,14 @@ void push_back_vec_indices_intersec(Vector_indices_intersec* v, const Indices_in
     }
 }
 
-void push_back_unique_vec_indices_intersec(Vector_indices_intersec* v, const Indices_intersection* point){
+void push_back_unique_vec_indices_intersec(Vector_indices_intersec** v_ptr, const Indices_intersection* point){
     uint64_t i;
     int8_t isin;
+    Vector_indices_intersec* v = *v_ptr;
 
     if ((v->size == 0) || (v->data == NULL)){
         free(v->data);
-        *v = *alloc_with_init_vec_indices_intersec(point, 1);
+        *v_ptr = alloc_with_init_vec_indices_intersec(point, 1);
         return;
     }
     if (v->size >= v->capacity)

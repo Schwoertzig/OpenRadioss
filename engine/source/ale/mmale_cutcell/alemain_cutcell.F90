@@ -146,7 +146,7 @@
                  n2d = 2 ! 2D simulation
 
                  if (dt1>0) then
-                  call update_fluid_multicutcell(n2d, numelq, numeltg, ixq, ixtg, x, ALE_CONNECT, &
+                  call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
                          multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
                          multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
                          gamma, dt1, dt_scale, sign, &
@@ -157,7 +157,7 @@
                   nb_phase = 2
                   call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
                   nb_polygon = ALE%solver%multimat%nb
-                  call initialize_solver_multicutcell(n2d, numelq, numeltg, ixq, ixtg, x, &
+                  call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
                               nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid)
                  end if
                    

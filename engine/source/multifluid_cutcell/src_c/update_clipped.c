@@ -76,7 +76,7 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
     GrB_Vector inds_pts_edge0, inds_pts_edge1;
     int64_t ind_pt_del, ind_pt1, ind_pt2, curr_i;
     int64_t signed_ie0, signed_ie1, signed_i_f;
-    Vector_int64 *list_inds_del1, *list_inds_del2, *list_inds_del;
+    Vector_int64 *list_inds_del1, *list_inds_del2, *list_inds_del, *set_del_edges;
     int8_t sign_f, sign_e;
     Point2D barycenter;
 
@@ -114,6 +114,7 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
     list_inds_del1 = alloc_with_capacity_vec_int64(1);
     list_inds_del2 = alloc_with_capacity_vec_int64(1);
     list_inds_del = alloc_with_capacity_vec_int64(1);
+    set_del_edges = alloc_with_capacity_vec_int64(1);
 
     for (i_f=0 ; i_f<nb_faces ; i_f++){ //for each face
         infogrb = GrB_extract(fj, GrB_NULL, GrB_NULL, *(p->faces), GrB_ALL, 1, i_f, GrB_NULL); //Get indices of edges composing face i_f
@@ -220,7 +221,7 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
                     ind_pt1 = curr_i;
                     break;
                 }
-                push_back_vec_int64(list_inds_del1, &curr_i);
+                push_back_vec_int64(&list_inds_del1, &curr_i);
                 signed_ie0 = *get_ijth_elem_arr_int(*list_del_pts, ind_pt1, 0);
             }
 
@@ -239,7 +240,7 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
                         ind_pt2 = curr_i;
                         break;
                     }
-                    push_back_vec_int64(list_inds_del2, &curr_i);
+                    push_back_vec_int64(&list_inds_del2, &curr_i);
                     signed_ie0 = *get_ijth_elem_arr_int(*list_del_pts, ind_pt2, 0);
                 }
             }
@@ -250,10 +251,10 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
                     set_ith_elem_vec_int64(list_inds_del, 0, get_ith_elem_vec_int64(list_inds_del1, 0));
                     list_inds_del->size = 1;
                     for(i_f = 1; i_f<list_inds_del1->size; i_f++){
-                        push_back_unique_vec_int64(list_inds_del, get_ith_elem_vec_int64(list_inds_del1, i_f));
+                        push_back_unique_vec_int64(&list_inds_del, get_ith_elem_vec_int64(list_inds_del1, i_f));
                     }
                     for(i_f = 0; i_f<list_inds_del2->size; i_f++){
-                        push_back_unique_vec_int64(list_inds_del, get_ith_elem_vec_int64(list_inds_del2, i_f));
+                        push_back_unique_vec_int64(&list_inds_del, get_ith_elem_vec_int64(list_inds_del2, i_f));
                     }
 
                     barycenter = (Point2D){0., 0.};
@@ -268,13 +269,25 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
                     }
                     barycenter.x /= list_inds_del->size;
                     barycenter.y /= list_inds_del->size;
-                    push_back_vec_pts2D(p->vertices, &barycenter);
+                    push_back_vec_pts2D(&(p->vertices), &barycenter);
 
-                    signed_i_f = *get_ijth_elem_arr_int(*list_changed_edges, *get_ith_elem_vec_int64(list_inds_del, 0), 0);
-                    for(i_f = 0; i_f < list_inds_del->size; i_f++){
-                        i_e = *get_ith_elem_vec_int64(list_inds_del, i_f);
-                        set_ijth_elem_arr_int(*list_changed_edges, i_e, 0, &signed_i_f);
-                        set_ijth_elem_arr_int(*list_changed_edges, i_e, 1, &signed_i_f);
+                    //signed_i_f = *get_ijth_elem_arr_int(*list_changed_edges, *get_ith_elem_vec_int64(list_inds_del, 0), 0);
+                    //for(i_f = 0; i_f < list_inds_del->size; i_f++){
+                    //    i_e = *get_ith_elem_vec_int64(list_inds_del, i_f);
+                    //    set_ijth_elem_arr_int(*list_changed_edges, i_e, 0, &signed_i_f);
+                    //    set_ijth_elem_arr_int(*list_changed_edges, i_e, 1, &signed_i_f);
+                    //}
+                    set_del_edges->size = 0;
+                    for (i_e=0; i_e<list_inds_del->size; i_e++){
+                        signed_i_f = *get_ijth_elem_arr_int(*list_changed_edges, i_e, 0);
+                        push_back_unique_vec_int64(&set_del_edges, &signed_i_f);
+                        signed_i_f = *get_ijth_elem_arr_int(*list_changed_edges, i_e, 1);
+                        push_back_unique_vec_int64(&set_del_edges, &signed_i_f);
+                    }
+                    for (i_e=0; i_e<list_inds_del->size; i_e++){
+                        signed_i_f = *get_ith_elem_vec_int64(list_inds_del, i_e);
+                        set_ijth_elem_arr_int(*list_changed_edges, signed_i_f, 0, get_ith_elem_vec_int64(set_del_edges, signed_i_f));
+                        set_ijth_elem_arr_int(*list_changed_edges, signed_i_f, 1, get_ith_elem_vec_int64(set_del_edges, signed_i_f));
                     }
                 } else {
                     if (list_inds_del1->size > 1){
@@ -324,6 +337,7 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
     dealloc_vec_int64(list_inds_del1); free(list_inds_del1);
     dealloc_vec_int64(list_inds_del2); free(list_inds_del2);
     dealloc_vec_int64(list_inds_del); free(list_inds_del);
+    dealloc_vec_int64(set_del_edges); free(set_del_edges);
     GxB_Iterator_free(&iterator);
 }
 
@@ -356,7 +370,7 @@ static void split_edge(Polygon2D* p, uint64_t i_e, const Point2D *new_pt){
     //pts_indices = rowvals(p.edges)
     //inds_pts_edge = pts_indices[nzrange(p.edges, i_e)]
 
-    push_back_vec_pts2D(p->vertices, new_pt);
+    push_back_vec_pts2D(&(p->vertices), new_pt);
     ind_new_pt = p->vertices->size;
 
     infogrb = GrB_Matrix_removeElement(*(p->edges), i_e0_pt0, i_e);
@@ -388,7 +402,7 @@ static void split_edge(Polygon2D* p, uint64_t i_e, const Point2D *new_pt){
 
     //push!(p.pressure_edge, p.pressure_edge[i_e]) //TODO Report this
     //push!(p.status_edge, p.status_edge[i_e]) //TODO Report this
-    push_back_vec_int(p->status_edge, get_ith_elem_vec_int(p->status_edge, i_e));
+    push_back_vec_int(&(p->status_edge), get_ith_elem_vec_int(p->status_edge, i_e));
 
     GrB_Vector_free(&ej);
     GrB_Vector_free(&extr_vals_ej);
@@ -509,8 +523,8 @@ static void backpropagate_pts(Polygon2D *pn, Vector_points2D* vertices_tnp1,\
         new_pt.y = (1-theta)*(ptp->y) + theta*ptn->y;
 
         split_edge(pn, ie, &new_pt);
-        push_back_vec_pts2D(vertices_tnp1, get_ith_elem_vec_pts2D(pts_intersec, i));
-        push_back_vec_int8(pt_in_or_out, &mark8);
+        push_back_vec_pts2D(&vertices_tnp1, get_ith_elem_vec_pts2D(pts_intersec, i));
+        push_back_vec_int8(&pt_in_or_out, &mark8);
 
         GrB_Matrix_nrows(&nb_pts, *(pn->edges));
         GrB_Vector_resize(ej, nb_pts);
@@ -539,8 +553,8 @@ static void backpropagate_pts(Polygon2D *pn, Vector_points2D* vertices_tnp1,\
         new_pt.y = (1-theta)*(ptp->y) + theta*ptn->y;
 
         split_edge(pn, ie, &new_pt);
-        push_back_vec_pts2D(vertices_tnp1, get_ith_elem_vec_pts2D(pts_intersec, i));
-        push_back_vec_int8(pt_in_or_out, &mark8);
+        push_back_vec_pts2D(&vertices_tnp1, get_ith_elem_vec_pts2D(pts_intersec, i));
+        push_back_vec_int8(&pt_in_or_out, &mark8);
     }
 
     GrB_free(&ej);
@@ -850,6 +864,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     Vector_int *status_faces;
     const uint64_t nb_pts = fn->vertices->size;
     Vector_points3D *new_vertices = alloc_with_capacity_vec_pts3D(2*nb_pts);
+    Polyhedron3D* p;
     
     pt3D = (Point3D*)malloc(sizeof(Point3D));
     for (i = 0; i<nb_pts; i++){
@@ -1046,6 +1061,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
         }
     }
 
+    p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces);
 
     free(pt3D);
     GrB_Matrix_free(&emptyNE);
@@ -1058,8 +1074,15 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     GrB_free(&fj);
     GrB_free(&extr_vals_fj);
     GrB_free(&edge_indices);
+    dealloc_vec_int(status_faces); free(status_faces);
+    dealloc_vec_pts3D(new_vertices); free(new_vertices);
+    GrB_Matrix_free(new_edges); free(new_edges);
+    GrB_Matrix_free(new_faces); free(new_faces);
+    GrB_Matrix_free(new_volume); free(new_volume);
+    free(I_index);
+    free(J_index);
 
-    return new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces);
+    return p;
 }
 
 //Compute the polyhedron in space-time given the polygon at time tn+dt.
@@ -1301,7 +1324,10 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
 /// @param split [IN] flag to triangulate (or not) faces in time linking the edges at time t^n and t^{n+1}.
 Polyhedron3D* build_space2D_time_cell(const Polygon2D *fn, const my_real *vsx, const my_real* vsy, uint64_t size_vs, const my_real dt, bool split, Array_int *list_del_pts){
     Vector_points2D* vertices_tnp1 = build_vertices_tnp1(fn, vsx, vsy, size_vs, dt, list_del_pts);
-    return build_space_time_cell_given_tnp1_vertices(fn, vertices_tnp1, dt, split);
+    Polyhedron3D* p = build_space_time_cell_given_tnp1_vertices(fn, vertices_tnp1, dt, split);
+    
+    dealloc_vec_pts2D(vertices_tnp1); free(vertices_tnp1);
+    return p;
 }
 
 //Detect all edges too long and split it in the middle.

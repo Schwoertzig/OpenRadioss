@@ -7,6 +7,7 @@
 #include "Point.h"
 #include "stdbool.h"
 #include "vector_indices_intersection.h"
+#include <math.h>
 
 #define SIGN(x) ((x)>0 ? 1 : -1)
 
@@ -56,8 +57,8 @@ static Point2D intersection_edges(Edge2D e1, Edge2D e2, bool all_inclusive){// a
 
     //If both distances have the same sign : no intersection possible.
     if ((d1>0 && d2>0) || (d1<0 && d2<0)){
-        pt.x = 0./0.;
-        pt.y = 0./0.;
+        pt.x = nan("");
+        pt.y = nan("");
         return pt;
     } else {
         //Compute the intersection between the lines supported by e1 and e2
@@ -96,8 +97,8 @@ static Point2D intersection_edges(Edge2D e1, Edge2D e2, bool all_inclusive){// a
         }
 
         if (!check_inside_box_e1) {
-            pt.x = 0./0.;
-            pt.y = 0./0.;
+            pt.x = nan("");
+            pt.y = nan("");
         }
         
         return pt;
@@ -150,9 +151,9 @@ void find_all_self_intersection(Polygon2D *p, Vector_points2D* IntersecList, Vec
             if ((e2.ext1.x < e1.ext2.x) || ((e2.ext1.x == e1.ext2.x) && (e2.ext1.y < e1.ext2.y))){//at least, they have common x-range.
                 pt = intersection_edges(e1, e2, false);
                 if (!isnan(pt.x)) {
-                    push_back_vec_pts2D(IntersecList, &pt);
-                    push_back_vec_uint(edge_intersect1, &indpermi);
-                    push_back_vec_uint(edge_intersect2, &indpermj);
+                    push_back_vec_pts2D(&IntersecList, &pt);
+                    push_back_vec_uint(&edge_intersect1, &indpermi);
+                    push_back_vec_uint(&edge_intersect2, &indpermj);
                 }
             } else {
                 break;
@@ -494,9 +495,9 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
         ei1 = *get_ith_elem_vec_uint(edge_intersect1, i);
         ei2 = *get_ith_elem_vec_uint(edge_intersect2, i);
         i_inters = (Indices_intersection){ei2, i};
-        push_back_unique_vec_indices_intersec(edge_list_intersect[ei1], &i_inters);
+        push_back_unique_vec_indices_intersec(&(edge_list_intersect[ei1]), &i_inters);
         i_inters = (Indices_intersection){ei1, i};
-        push_back_unique_vec_indices_intersec(edge_list_intersect[ei2], &i_inters);
+        push_back_unique_vec_indices_intersec(&(edge_list_intersect[ei2]), &i_inters);
     }
 
     for (i=0; i<nb_edges; i++){
@@ -519,7 +520,7 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
                 il_subarray->size = 0;
                 for(j=0; j<s->size; j++){
                     i_inters = *get_ith_elem_vec_indices_intersec(s, j);
-                    push_back_vec_pts2D(il_subarray, get_ith_elem_vec_pts2D(IntersecList, i_inters.i_pt));
+                    push_back_vec_pts2D(&il_subarray, get_ith_elem_vec_pts2D(IntersecList, i_inters.i_pt));
                 }
                 // /!\ This function only returns local indices to the subarray!
                 find_closest_point_to_edge_intersection(il_subarray, *pt1, *pt2, &i_e_inters1, &i_e_inters2);
@@ -548,9 +549,9 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
                     if ((!is_in_vec_uint(edge_intersect1_split, &i)) && (!is_in_vec_uint(edge_intersect2_split, &i))){
                     //(i ∉ edge_intersect1_split) && (i ∉ edge_intersect2_split)
                         i_inters = *get_ith_elem_vec_indices_intersec(s, j);
-                        push_back_vec_pts2D(IntersecList_split, get_ith_elem_vec_pts2D(IntersecList, i_inters.i_pt));
-                        push_back_vec_uint(edge_intersect1_split, &(i_inters.i_e));
-                        push_back_vec_uint(edge_intersect2_split, &i);
+                        push_back_vec_pts2D(&IntersecList_split, get_ith_elem_vec_pts2D(IntersecList, i_inters.i_pt));
+                        push_back_vec_uint(&edge_intersect1_split, &(i_inters.i_e));
+                        push_back_vec_uint(&edge_intersect2_split, &i);
                     }
                 }
                 phase = *get_ith_elem_vec_int(p->phase_face, curr_face);
@@ -573,9 +574,9 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
                     if ((!is_in_vec_uint(edge_intersect1_fuse, &i)) && (!is_in_vec_uint(edge_intersect2_fuse, &i))){
                     //(i ∉ edge_intersect1_fuse) && (i ∉ edge_intersect2_fuse)
                         i_inters = *get_ith_elem_vec_indices_intersec(s, j);
-                        push_back_vec_pts2D(IntersecList_fuse, get_ith_elem_vec_pts2D(IntersecList, i_inters.i_pt));
-                        push_back_vec_uint(edge_intersect1_fuse, &(i_inters.i_e));
-                        push_back_vec_uint(edge_intersect2_fuse, &i);
+                        push_back_vec_pts2D(&IntersecList_fuse, get_ith_elem_vec_pts2D(IntersecList, i_inters.i_pt));
+                        push_back_vec_uint(&edge_intersect1_fuse, &(i_inters.i_e));
+                        push_back_vec_uint(&edge_intersect2_fuse, &i);
                     }
                 }
                 phase = *get_ith_elem_vec_int(p->phase_face, curr_face);

@@ -45,9 +45,9 @@ static Point3D* first_point_of_ith_face(const Polyhedron3D *p, GrB_Index i){
     GrB_Matrix_ncols(&nb_faces, *(p->faces));
     if (i>=nb_faces){
         pt = (Point3D*)malloc(sizeof(Point3D));
-        pt->x = 0./0.;
-        pt->y = 0./0.;
-        pt->t = 0./0.;
+        pt->x = nan("");
+        pt->y = nan("");
+        pt->t = nan("");
     } else {
         infogrb = GrB_Matrix_nrows(&nrows, *(p->faces));
         infogrb = GrB_Vector_new(&whole_vec, GrB_INT8, nrows);

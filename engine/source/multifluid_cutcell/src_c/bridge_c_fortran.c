@@ -76,8 +76,9 @@ void build_clipped_from_pts_fortran_(const my_real* x_v, const my_real* y_v, con
         }
     } else {
         clipped = new_Polygon2D();
-        dealloc_Polygon2D(copy_clipped); free(copy_clipped);
     }
+    
+    dealloc_Polygon2D(copy_clipped); free(copy_clipped);
 }
 
 void compute_lambdas2d_fortran_(const my_real *dt, \
@@ -86,9 +87,9 @@ void compute_lambdas2d_fortran_(const my_real *dt, \
                         my_real *ptr_big_lambda_np1,\
                         Point3D *mean_normal, bool *is_narrowband)
 {
-    Array_double *lambdas = alloc_empty_arr_double();
-    Vector_double *Lambda_n = alloc_empty_vec_double();
-    Vector_double *Lambda_np1 = alloc_empty_vec_double();
+    Array_double *lambdas;
+    Vector_double *Lambda_n;
+    Vector_double *Lambda_np1;
 
     compute_lambdas2D(grid, clipped3D, *dt, &lambdas, &Lambda_n, &Lambda_np1, mean_normal, is_narrowband);
 

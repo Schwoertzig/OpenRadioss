@@ -87,7 +87,7 @@ Polyhedron3D* Polyhedron3D_from_vertices(const my_real* x_v, unsigned long int n
     infogrb = GrB_Matrix_new(volumes, GrB_INT8, nb_faces, nb_volumes);
 
     ptSWB = (Point3D){x_v[0], y_v[0], z_v[0]};
-    push_back_vec_pts3D(vertices, &ptSWB);
+    push_back_vec_pts3D(&vertices, &ptSWB);
     curr_face = 0;
     curr_pt = 0;
     curr_edge = 0;
@@ -897,16 +897,16 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
 
             for(j_f=0; j_f<size_grb_edge_indices; j_f++){
                 infogrb = GrB_Vector_extractElement(&j, grb_edge_indices, j_f);
-                push_back_unique_vec_uint(edge_indices, &j);
+                push_back_unique_vec_uint(&edge_indices, &j);
                 infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
                 infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
                 infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
                 if(size_pt_indices>0){
                     infogrb = GrB_Vector_extractElement(&val, pt_indices, 0);
-                    push_back_unique_vec_uint(ind_kept_pts, &val);
+                    push_back_unique_vec_uint(&ind_kept_pts, &val);
                     
                     infogrb = GrB_Vector_extractElement(&val, pt_indices, 1);
-                    push_back_unique_vec_uint(ind_kept_pts, &val);
+                    push_back_unique_vec_uint(&ind_kept_pts, &val);
                 }
             }
         }
@@ -966,8 +966,10 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
         }
     }
 
-    if(*res_p)
+    if(*res_p){
         dealloc_Polyhedron3D(*res_p);
+        free(*res_p);
+    }
     *res_p = new_p;
 
     dealloc_Polyhedron3D(copy_p);free(copy_p);

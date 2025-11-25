@@ -309,7 +309,7 @@ module multicutcell_solver_mod
           fx(i, k)%rhoE(j) = 0.
           !normalVector = grid.λ_per_edge[e, r]
           !norm_vec = norm(normalVector)
-          if (other_face > -1) then
+          if (other_face > 0) then
             call FV_flux_hllc_Euler(gamma, rho(i, k), rho(other_face, k), &
                                 vely(i, k), vely(other_face, k), velz(i, k), velz(other_face, k), &
                                 p(i, k), p(other_face, k), &
@@ -349,20 +349,20 @@ module multicutcell_solver_mod
     end if
   end function max_nb_points_in_cell
 
-  subroutine compute_close_cells(NUMELQ, NUMELTG, IXQ, IXTG, grid)
+  subroutine compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
   
     IMPLICIT NONE
   
     ! INPUT argument
-    integer :: NUMELQ, NUMELTG
+    integer :: NUMELQ, NUMELTG, NUMNOD
     integer, dimension(:,:) :: IXQ, IXTG
     ! IN/OUTPUT argument
     type(grid2D_struct_multicutcell), dimension(:, :) :: grid
 
     !Local variables
-    logical, dimension(NUMELQ + NUMELTG) :: is_narrowband_pt
+    logical, dimension(NUMNOD) :: is_narrowband_pt
     integer :: nb_cell, nb_regions, nb_pts_in_cell, i, k
 
     nb_cell = size(grid, 1)
@@ -407,14 +407,14 @@ module multicutcell_solver_mod
     end if
   end subroutine compute_close_cells
 
-  subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, dt)
+  subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
   
     IMPLICIT NONE
   
     ! INPUT argument
-    integer :: NUMELQ, NUMELTG
+    integer :: NUMELQ, NUMELTG, NUMNOD
     integer, dimension(:,:) :: IXQ, IXTG
     real(kind=wp), dimension(:,:) :: X
     real(kind=wp) :: dt
@@ -468,7 +468,7 @@ module multicutcell_solver_mod
     deallocate(ptr_big_lambda_n)
     deallocate(ptr_big_lambda_np1)
 
-    call compute_close_cells(NUMELQ, NUMELTG, IXQ, IXTG, grid)
+    call compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
   end subroutine multicutcell_compute_lambdas
 
   subroutine multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i_cell, normals, nb_normals)
@@ -670,7 +670,7 @@ module multicutcell_solver_mod
     !return vec_move_clipped
   end subroutine compute_vec_move_clipped
 
-  subroutine update_fluid_multicutcell(N2D, NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, &
+  subroutine update_fluid_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ALE_CONNECT, &
                           grid, vely, velz, rho, p, gamma, dt, threshold, sign, &
                           full_rho, full_pres, full_vel, full_etot, dt_next, sound_speed)
     use polygon_cutcell_mod
@@ -680,7 +680,7 @@ module multicutcell_solver_mod
     IMPLICIT NONE
   
     ! INPUT arguments
-    integer, intent(in) :: N2D, NUMELQ, NUMELTG
+    integer, intent(in) :: N2D, NUMELQ, NUMELTG, NUMNOD
     integer, dimension(:,:), intent(in) :: IXQ, IXTG
     real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
@@ -793,7 +793,7 @@ module multicutcell_solver_mod
   
     call nb_pts_clipped_fortran(nb_pts)
 
-    call multicutcell_compute_lambdas(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, dt) 
+    call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) 
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
     
@@ -906,13 +906,13 @@ module multicutcell_solver_mod
   end subroutine update_fluid_multicutcell
 
   !(y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
-  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, IXQ, IXTG, X, &
+  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, &
                               nb_id_polygon, list_id_polygon, ngrnod, igrnode, grid)
     use grid2D_struct_multicutcell_mod
     use groupdef_mod , only : group_
 
     implicit none
-    integer, intent(in) :: N2D, NUMELQ, NUMELTG
+    integer, intent(in) :: N2D, NUMELQ, NUMELTG, NUMNOD
     integer, intent(in), dimension(:,:) :: IXQ, IXTG
     real(kind=wp), intent(in), dimension(:,:) :: X
     integer(kind=8), intent(in) :: nb_id_polygon
@@ -963,7 +963,7 @@ module multicutcell_solver_mod
       allocate(z_polygon(nb_pts_poly))
 
       limits_polygon(1) = 0
-      do i=2,nb_id_polygon
+      do i=1,nb_id_polygon
         polyg_id = list_id_polygon(i)
         nb_pts = igrnode(polyg_id)%nentity
         allocate(entities(nb_pts))
@@ -983,7 +983,7 @@ module multicutcell_solver_mod
     vec_move_clippedz(:) = 0.
 
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, minimal_length, maximal_length, minimal_angle) !initialize clipped3D in C.
-    call multicutcell_compute_lambdas(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, dt) !initialize lambda fields, close_cell and is_narrowband in grid
+    call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) !initialize lambda fields, close_cell and is_narrowband in grid
   end subroutine initialize_solver_multicutcell
 
   subroutine deallocate_solver_multicutcell()

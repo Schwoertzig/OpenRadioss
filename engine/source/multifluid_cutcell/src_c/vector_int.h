@@ -8,7 +8,7 @@ typedef struct {
     uint64_t size, capacity;
 } Vector_int8;
 
-void push_back_vec_int8(Vector_int8* v, const int8_t* point);
+void push_back_vec_int8(Vector_int8** v_ptr, const int8_t* point);
 void double_capacity_vec_int8(Vector_int8* v);
 Vector_int8* alloc_empty_vec_int8();
 Vector_int8* alloc_with_init_vec_int8(const int8_t* points, uint64_t size);
@@ -25,7 +25,7 @@ typedef struct {
     uint64_t size, capacity;
 } Vector_int;
 
-void push_back_vec_int(Vector_int* v, const long int* point);
+void push_back_vec_int(Vector_int** v_ptr, const long int* point);
 void double_capacity_vec_int(Vector_int* v);
 Vector_int* alloc_empty_vec_int();
 Vector_int* alloc_with_init_vec_int(const long int* points, uint64_t size);
@@ -43,8 +43,8 @@ typedef struct {
     uint64_t size, capacity;
 } Vector_uint;
 
-void push_back_vec_uint(Vector_uint* v, const uint64_t* point);
-void push_back_unique_vec_uint(Vector_uint* v, const uint64_t* point);
+void push_back_vec_uint(Vector_uint** v_ptr, const uint64_t* point);
+void push_back_unique_vec_uint(Vector_uint** v_ptr, const uint64_t* point);
 void double_capacity_vec_uint(Vector_uint* v);
 Vector_uint* alloc_empty_vec_uint();
 Vector_uint* alloc_with_init_vec_uint(const uint64_t* points, uint64_t size);
@@ -63,8 +63,8 @@ typedef struct {
     uint64_t size, capacity;
 } Vector_int64;
 
-void push_back_vec_int64(Vector_int64* v, const int64_t* point);
-void push_back_unique_vec_int64(Vector_int64* v, const int64_t* point);
+void push_back_vec_int64(Vector_int64** v_ptr, const int64_t* point);
+void push_back_unique_vec_int64(Vector_int64** v_ptr, const int64_t* point);
 void double_capacity_vec_int64(Vector_int64* v);
 Vector_int64* alloc_empty_vec_int64();
 Vector_int64* alloc_with_init_vec_int64(const int64_t* points, uint64_t size);

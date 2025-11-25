@@ -13,8 +13,8 @@ typedef struct {
     uint64_t size, capacity;
 } Vector_indices_intersec;
 
-void push_back_vec_indices_intersec(Vector_indices_intersec* v, const Indices_intersection* point);
-void push_back_unique_vec_indices_intersec(Vector_indices_intersec* v, const Indices_intersection* point);
+void push_back_vec_indices_intersec(Vector_indices_intersec** v_ptr, const Indices_intersection* point);
+void push_back_unique_vec_indices_intersec(Vector_indices_intersec** v_ptr, const Indices_intersection* point);
 void double_capacity_vec_indices_intersec(Vector_indices_intersec* v);
 Vector_indices_intersec* alloc_empty_vec_indices_intersec();
 Vector_indices_intersec* alloc_with_init_vec_indices_intersec(const Indices_intersection* points, uint64_t size);
