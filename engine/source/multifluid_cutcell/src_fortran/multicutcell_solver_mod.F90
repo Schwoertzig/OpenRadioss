@@ -684,7 +684,7 @@ module multicutcell_solver_mod
     integer, dimension(:,:), intent(in) :: IXQ, IXTG
     real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
-    real(kind=wp), intent(in) :: threshold, dt, gamma
+    real(kind=wp), intent(in) :: threshold, dt, gamma(2)
     integer, intent(in) :: sign
     ! IN/OUTPUT arguments
     type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
@@ -707,6 +707,7 @@ module multicutcell_solver_mod
     real(kind=wp) :: mean_normal_time
     !real(kind=wp) :: lambdan
     real(kind=wp) :: lambdanp1
+    real(kind=wp) :: gamma_k
     type(ConservativeState2D), dimension(:, :), allocatable :: W
     type(ConservativeState2D), dimension(:, :), allocatable :: dW
     type(ConservativeFlux2D), dimension(:, :), allocatable :: fx
@@ -765,7 +766,8 @@ module multicutcell_solver_mod
   
     do i = 1,nb_cell
       do k = 1,nb_regions
-        call primal_to_conservative(gamma, vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
+        gamma_k = gamma(k)
+        call primal_to_conservative(gamma_k, vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
         lambdan_prev(i, k) = grid(i, k)%lambdanp1_per_cell
       end do 
     end do
@@ -780,6 +782,7 @@ module multicutcell_solver_mod
 
     call compute_all_id_pt_cell(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
     pressure_edge(:) = 0.0
+    !to do  : gamma -> gamma(1:2)
     call compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell, &
                                 normalVecy, normalVecz, normalVecEdgey, normalVecEdgez, &
                                 vec_move_clippedy, vec_move_clippedz, pressure_edge)
@@ -796,7 +799,8 @@ module multicutcell_solver_mod
     call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) 
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
-    
+
+    !to do  : gamma -> gamma(1:2)
     call multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
     
     !Compute right hand side for non-fused or target cells
@@ -864,7 +868,8 @@ module multicutcell_solver_mod
           W(i, k)%rhovz = W(target_cells(i, k), k)%rhovz
           W(i, k)%rhoE  = W(target_cells(i, k), k)%rhoE
         end if
-        call conservative_to_primal(gamma, vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
+         gamma_k = gamma(k)
+        call conservative_to_primal(gamma_k, vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
       end do
     end do
 
@@ -877,10 +882,13 @@ module multicutcell_solver_mod
                         grid(:,2)%lambdanp1_per_cell*vely(:,2)
     full_vel(3,:) = grid(:,1)%lambdanp1_per_cell*velz(:,1) + &
                         grid(:,2)%lambdanp1_per_cell*velz(:,2)
+
+    !to do  : gamma -> gamma(1:2)
     full_etot = 0.5*(full_vel(2,:)*full_vel(2,:)+full_vel(3,:)*full_vel(3,:)) &
                           + full_pres/((gamma-1)*full_rho)
   
     !Compute next dt
+    !to do  : gamma -> gamma(1:2)
     sound_speed = sqrt(gamma * full_pres / full_rho)
     largest_speed_wave = -1.
     do i = 1,nb_cell
@@ -989,6 +997,43 @@ module multicutcell_solver_mod
   subroutine deallocate_solver_multicutcell()
     call end_grb() !C call
   end subroutine deallocate_solver_multicutcell
+
+
+
+
+ !initial state
+  subroutine multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
+    use elbufdef_mod
+    use multi_cutcell_mod, only : multi_cutcell_struct
+
+    implicit none
+
+    !DUMMY ARGUMENTS
+    integer, intent(in) :: ngroup,nparg,iparg(nparg,ngroup)
+    type(elbuf_struct_),dimension(ngroup) :: elbuf
+    type(multi_cutcell_struct), intent(inout) :: multi_cutcell        !< element buffer (storage for output files : pressure, density, velocity, ...)
+
+    !LOCAL VARIABLE
+    integer :: imat,elem_iid,nft,nel,ii,ng,mlw
+
+                 do ng=1,ngroup
+                   nel = iparg(2,ng)
+                   nft = iparg(3,ng) ! shift
+                   mlw = iparg(1,ng)
+                   if(mlw /= 20)cycle
+                   do ii=1,nel
+                     elem_iid = ii+nft
+                     do imat=1,2
+                       multi_cutcell%phase_rho(elem_iid,imat) = elbuf(ng)%BUFLY(imat)%LBUF(1,1,1)%rho(ii)
+                       multi_cutcell%phase_pres(elem_iid,imat) = -elbuf(ng)%BUFLY(imat)%LBUF(1,1,1)%sig(ii)
+                     end do
+
+                   end do
+                 enddo
+
+  end subroutine multicutcell_initial_state
+
+
 
 
 end module multicutcell_solver_mod

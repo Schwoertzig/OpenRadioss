@@ -21,6 +21,8 @@
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
       module multimat_method_mod
+
+         use precision_mod , only : WP
        
          type multimat_method_list
            integer mmale
@@ -33,6 +35,7 @@
            integer is_defined_mmale2  ! 0.or.1  "mmale=2: Collocated HLLC + diffuse interface"                                                          <=> MULTI_FVM%IS_USED (law151)
            integer is_defined_mmale3  ! 0.or.1  "mmale=3: Collocated HLLC + lagrangian interface tracking"                                              <=> (2d cutcell bimat)
            integer nb ! number of /ALE/SOLVER/MULTIMAT defined
+           real(kind=WP) :: gamma(21)
            type(multimat_method_list), allocatable, dimension(:) :: list
              contains
                procedure :: destruct => multimat_method_destructor

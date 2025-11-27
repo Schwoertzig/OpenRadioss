@@ -178,6 +178,10 @@ C
           MT2=NINT(PM(22,MID))
           ML1=NINT(PM(19,MT1))
           ML2=NINT(PM(19,MT2))
+          IF(ALE%SOLVER%MULTIMAT%is_defined_mmale3 /= 0)then
+            ALE%SOLVER%MULTIMAT%gamma(1) = MAT_PARAM(MT1)%EOS%UPARAM(1)
+            ALE%SOLVER%MULTIMAT%gamma(2) = MAT_PARAM(MT2)%EOS%UPARAM(1)
+          endif
         ELSE
           JMULT=0
           ML1=0

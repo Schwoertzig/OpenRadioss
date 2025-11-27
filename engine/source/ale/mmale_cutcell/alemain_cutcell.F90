@@ -30,7 +30,8 @@
 !! \details ...
         subroutine  alemain_cutcell(nixtg, nixq, numeltg, numelq, ixtg, ixq, numnod, x, ale_connect, ncycle, &
                                     ityptstt, neltstt, t1s, tt, &
-                                    ngrnod, igrnod, dt_scale, dt1, dt2t, multi_cutcell)
+                                    ngrnod, igrnod, dt_scale, dt1, dt2t, multi_cutcell, &
+                                    ngroup, elbuf, nparg, iparg)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -42,6 +43,8 @@
           use debug_mod , only : ITAB_DEBUG
           use multi_cutcell_mod, only : multi_cutcell_struct, allocate_multi_cutcell_type
           use multicutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell
+          use elbufdef_mod , only : elbuf_struct_
+          use multicutcell_solver_mod , only : multicutcell_initial_state
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -76,6 +79,12 @@
           integer,intent(inout) :: ityptstt                             !< element type imposing the time step (here 2)
           integer,intent(inout) :: neltstt                              !< element user id imposing the time step
           real(kind=WP),intent(inout) :: t1s                            !< simulation time
+
+          ! post-treatment
+          type(elbuf_struct_),dimension(ngroup) :: elbuf
+          integer,intent(in) :: nparg  !< size IPARG
+          integer,intent(in) :: ngroup !< number of group
+          integer,intent(in) :: iparg(nparg,ngroup)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -85,10 +94,8 @@
           integer :: ng       !< loop on groups
           integer :: ii       !< local id in the group
           integer :: elem_iid !< internal id
-          integer :: elem_uid !< user id
           integer :: iad2,lgth, iadj, JJ !< ale_connectivity usage (elem-elem)
-          real(kind=WP) :: result_density !< temp
-          real(kind=WP) :: gamma
+          real(kind=WP) :: gamma(2)
           integer :: sign !Not used for now
           integer :: nb_phase, n2d !TODO should be input
           integer(kind=8) :: nb_polygon
@@ -141,7 +148,8 @@
 
                  ! -------------------------------CALL 2D POC HERE
                  ! -----------------------------------------------
-                 gamma = 1.4
+                 gamma(1) = ALE%SOLVER%MULTIMAT%gamma(1)
+                 gamma(2) = ALE%SOLVER%MULTIMAT%gamma(2)
                  sign = 1 !not used for now
                  n2d = 2 ! 2D simulation
 
@@ -159,6 +167,7 @@
                   nb_polygon = ALE%solver%multimat%nb
                   call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
                               nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid)
+                  call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
                  end if
                    
 
@@ -173,20 +182,52 @@
                  ityptstt = 2 !element type imposing the minimal time step
                  T1S = TT     ! required to go to next cycle
 
-                 ! note : MULTI_CUTCELL%EINT ! is output as internal energy per unit volume (SI:J/m3) :  rho.e = EINT/VOL
-                 !        consequently  MULTI_CUTCELL%EINT / MULTI_CUTCELL%RHO is internal energy density :  e
-                 ! ... todo
 
-                 ! example of USAGE
-                 !result_density = em01
-                 !do ng=1,ngroup
-                 !  nel = iparg(2,ng)
-                 !  nft = iparg(3,ng) ! shift
-                 !  do ii=1,nel
-                 !    elem_iid = ii+nft
-                 !    elbuf(ng)%gbuf%rho(ii) = result_density ! affect density for elem_iid here
-                 !  end do
-                 !enddo
+
+                 ! Retrieving cell data for post-treatment (ANIM / H3D output : resol > sortie_main)
+                 do ng=1,ngroup
+                   nel = iparg(2,ng)
+                   nft = iparg(3,ng) ! shift
+                   do ii=1,nel
+                     elem_iid = ii+nft
+                     !mass density
+                     elbuf(ng)%gbuf%rho(ii) = multi_cutcell%rho(elem_iid)
+                     !stress tensor
+                     elbuf(ng)%gbuf%sig(0*NEL+ii) = -multi_cutcell%pres(elem_iid)
+                     elbuf(ng)%gbuf%sig(1*NEL+ii) = -multi_cutcell%pres(elem_iid)
+                     elbuf(ng)%gbuf%sig(2*NEL+ii) = -multi_cutcell%pres(elem_iid)
+
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,1)
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,2)
+
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%ssp(ii) = multi_cutcell%sound_speed(elem_iid)
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%ssp(ii) = multi_cutcell%sound_speed(elem_iid)
+
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(0*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(1*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(2*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
+                     !
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(0*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(1*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(2*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
+
+                     ! note : MULTI_CUTCELL%EINT ! is output as internal energy per unit volume (SI:J/m3) :  rho.e = EINT/VOL
+                     !        consequently  MULTI_CUTCELL%EINT / MULTI_CUTCELL%RHO is internal energy density :  e
+                     ! + remove kinetic energy
+                     ! ... todo
+                     ! elbuf(ng)%gbuf%eint(ii) = ...
+
+                     !element time step
+                     ! ... todo
+                     !elbuf(ng)%gbuf%dt(ii) = multi_cutcell% (elem_iid)
+
+                     !volume fraction
+                     ! ... todo
+                     !ELBUF_TAB(NG)%BUFLY(1)%LBUF(1,1,1)%VOL(II) =  lambda1 * ELBUF_TAB(NG)%GBUF%VOL(I)
+                     !ELBUF_TAB(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  lambda2 * ELBUF_TAB(NG)%GBUF%VOL(I)
+
+                   end do
+                 enddo
 
 
 
