@@ -282,7 +282,8 @@ module multicutcell_solver_mod
     integer, dimension(:,:), intent(in) :: IXQ, IXTG
     real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
-    real(kind=wp) :: gamma
+    real(kind=wp), dimension(:), INTENT(IN) :: gamma
+    real(kind=wp), dimension(:), INTENT(IN) :: gamma
     real(kind=wp), dimension(:,:) :: vely
     real(kind=wp), dimension(:,:) :: velz
     real(kind=wp), dimension(:,:) :: rho
@@ -310,7 +311,7 @@ module multicutcell_solver_mod
           !normalVector = grid.λ_per_edge[e, r]
           !norm_vec = norm(normalVector)
           if (other_face > 0) then
-            call FV_flux_hllc_Euler(gamma, rho(i, k), rho(other_face, k), &
+            call FV_flux_hllc_Euler(gamma(k), rho(i, k), rho(other_face, k), &
                                 vely(i, k), vely(other_face, k), velz(i, k), velz(other_face, k), &
                                 p(i, k), p(other_face, k), &
                                 normals(j), &
@@ -604,7 +605,7 @@ module multicutcell_solver_mod
     use riemann_solver_mod
 
     implicit none
-    real(kind=wp) :: gamma
+    real(kind=wp), dimension(:) :: gamma
     real(kind=wp), dimension(:,:)       :: rho
     real(kind=wp), dimension(:,:)       :: vely
     real(kind=wp), dimension(:,:)       :: velz
@@ -644,13 +645,13 @@ module multicutcell_solver_mod
         pR = p(i, 2)
 
         !write(*,*), "k = ", k, ", normalVecy = ", normalVecy(k), ", normalVecz = ", normalVecz(k)
-        call solve_riemann_problem(gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
+        call solve_riemann_problem(gamma(1), gamma(2), rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
                                     normalVecy(k), normalVecz(k), &
                                     us, vsL, vsR, ps)
       
-        call solve_riemann_problem(gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
+        call solve_riemann_problem(gamma(1), gamma(2), rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
                                   normalVecEdgey(eL), normalVecEdgez(eL), uLEdge, vLEdgeL, vLEdgeR, pEdgeL)
-        call solve_riemann_problem(gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
+        call solve_riemann_problem(gamma(1), gamma(2), rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
                                   normalVecEdgey(eR), normalVecEdgez(eR), uREdge, vREdgeL, vREdgeR, pEdgeR)
         pressure_edge(eL) = pEdgeL 
         pressure_edge(eR) = pEdgeR 
@@ -684,7 +685,8 @@ module multicutcell_solver_mod
     integer, dimension(:,:), intent(in) :: IXQ, IXTG
     real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
-    real(kind=wp), intent(in) :: threshold, dt, gamma(2)
+    real(kind=wp), intent(in) :: threshold, dt
+    real(kind=wp), dimension(:), intent(in) :: gamma
     integer, intent(in) :: sign
     ! IN/OUTPUT arguments
     type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
@@ -766,8 +768,7 @@ module multicutcell_solver_mod
   
     do i = 1,nb_cell
       do k = 1,nb_regions
-        gamma_k = gamma(k)
-        call primal_to_conservative(gamma_k, vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
+        call primal_to_conservative(gamma(k), vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
         lambdan_prev(i, k) = grid(i, k)%lambdanp1_per_cell
       end do 
     end do
@@ -782,7 +783,6 @@ module multicutcell_solver_mod
 
     call compute_all_id_pt_cell(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
     pressure_edge(:) = 0.0
-    !to do  : gamma -> gamma(1:2)
     call compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell, &
                                 normalVecy, normalVecz, normalVecEdgey, normalVecEdgez, &
                                 vec_move_clippedy, vec_move_clippedz, pressure_edge)
@@ -800,7 +800,6 @@ module multicutcell_solver_mod
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
 
-    !to do  : gamma -> gamma(1:2)
     call multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
     
     !Compute right hand side for non-fused or target cells
@@ -868,8 +867,7 @@ module multicutcell_solver_mod
           W(i, k)%rhovz = W(target_cells(i, k), k)%rhovz
           W(i, k)%rhoE  = W(target_cells(i, k), k)%rhoE
         end if
-         gamma_k = gamma(k)
-        call conservative_to_primal(gamma_k, vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
+        call conservative_to_primal(gamma(k), vely(i, k), velz(i, k), rho(i, k), p(i, k), W(i, k))
       end do
     end do
 
@@ -883,15 +881,17 @@ module multicutcell_solver_mod
     full_vel(3,:) = grid(:,1)%lambdanp1_per_cell*velz(:,1) + &
                         grid(:,2)%lambdanp1_per_cell*velz(:,2)
 
-    !to do  : gamma -> gamma(1:2)
     full_etot = 0.5*(full_vel(2,:)*full_vel(2,:)+full_vel(3,:)*full_vel(3,:)) &
-                          + full_pres/((gamma-1)*full_rho)
+                          + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
+                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2)))))
+                          + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
+                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2)))))
   
     !Compute next dt
-    !to do  : gamma -> gamma(1:2)
-    sound_speed = sqrt(gamma * full_pres / full_rho)
     largest_speed_wave = -1.
     do i = 1,nb_cell
+      sound_speed(i) = grid(i,1)%lambdanp1_per_cell*sqrt(gamma(1) * p(i,1) / rho(i,1)) + &
+                    grid(i,2)%lambdanp1_per_cell*sqrt(gamma(2) * p(i,2) / rho(i,2))
       do k = 1,nb_regions
         largest_speed_wave = max(largest_speed_wave, max(abs(vely(i, k)), abs(velz(i, k))) + sound_speed(i))
       end do
@@ -998,10 +998,37 @@ module multicutcell_solver_mod
     call end_grb() !C call
   end subroutine deallocate_solver_multicutcell
 
+!! \brief List all points of the clipped polygon into y_polygon and z_polygon arrays.
+!! \details The limits_polygons array gives the start index of each polygon in the clipped solid. 
+!!          Its size is nb_polygons+1, with limits_polygons[1]=0 and limits_polygons[nb_polygons+1]=total number of points in the clipped solid.
+!!          For polygon i, its points are stored from index limits_polygons[i]+1 to limits_polygons[i+1] in the y_polygon and z_polygon arrays.
+!! \param y_polygon y coordinates of clipped polygon points
+!! \param z_polygon z coordinates of clipped polygon points
+!! \param limits_polygons Index limits of each polygon in the clipped solid
+  subroutine output_clipped(nb_polygon, limits_polygon, y_polygon, z_polygon)
+    implicit none
+    integer(kind=8), intent(out) :: nb_polygon
+    integer(kind=8), dimension(:), allocatable :: limits_polygon
+    real(kind=wp), dimension(:), allocatable :: y_polygon
+    real(kind=wp), dimension(:), allocatable :: z_polygon
 
+    integer(kind=8) :: nb_pts
 
+    call nb_edge_clipped_fortran(nb_polygon)
+    call nb_pts_clipped_fortran(nb_pts)
+    
+    if(allocated(y_polygon)) deallocate(y_polygon)
+    if(allocated(z_polygon)) deallocate(z_polygon)
+    if(allocated(limits_polygon)) deallocate(limits_polygon)
 
- !initial state
+    allocate(y_polygon(nb_pts))
+    allocate(z_polygon(nb_pts))
+    allocate(limits_polygon(nb_polygon + 1))
+
+    call output_clipped_fortran_(y_polygon, z_polygon, limits_polygon)
+  end subroutine output_clipped
+
+   !initial state
   subroutine multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
     use elbufdef_mod
     use multi_cutcell_mod, only : multi_cutcell_struct
@@ -1032,8 +1059,6 @@ module multicutcell_solver_mod
                  enddo
 
   end subroutine multicutcell_initial_state
-
-
 
 
 end module multicutcell_solver_mod

@@ -215,7 +215,9 @@
                      !        consequently  MULTI_CUTCELL%EINT / MULTI_CUTCELL%RHO is internal energy density :  e
                      ! + remove kinetic energy
                      ! ... todo
-                     ! elbuf(ng)%gbuf%eint(ii) = ...
+                     elbuf(ng)%gbuf%eint(ii) = multi_cutcell%rho(elem_iid) * (multi_cutcell%etot(elem_iid) - 0.5 * &
+                                                  (multi_cutcell%vel(1,elem_iid)*multi_cutcell%vel(1,elem_iid) + &
+                                                   multi_cutcell%vel(2,elem_iid)*multi_cutcell%vel(2,elem_iid)))
 
                      !element time step
                      ! ... todo
@@ -223,8 +225,8 @@
 
                      !volume fraction
                      ! ... todo
-                     !ELBUF_TAB(NG)%BUFLY(1)%LBUF(1,1,1)%VOL(II) =  lambda1 * ELBUF_TAB(NG)%GBUF%VOL(I)
-                     !ELBUF_TAB(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  lambda2 * ELBUF_TAB(NG)%GBUF%VOL(I)
+                     ELBUF_TAB(NG)%BUFLY(1)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 1)%lambdanp1_per_cell
+                     ELBUF_TAB(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 2)%lambdanp1_per_cell
 
                    end do
                  enddo

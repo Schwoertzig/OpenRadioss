@@ -115,6 +115,12 @@ void nb_edge_clipped_fortran_(long long int* signed_nb_edges_solid){
     *signed_nb_edges_solid = ((long long) nb);
 }
 
+void nb_face_clipped_fortran_(long long int* signed_nb_faces_solid){
+    unsigned long nb;
+    GrB_Matrix_ncols(&nb, *(clipped->faces));
+    *signed_nb_faces_solid = ((long long) nb);
+}
+
 void compute_normals_clipped_fortran_(my_real* normalVecx, my_real* normalVecy, \
                                         my_real* normalVecEdgex, my_real* normalVecEdgey, \
                                         my_real* min_pos_Se){
@@ -213,8 +219,121 @@ void update_clipped_fortran_(const my_real* vec_move_clippedy, const my_real* ve
     update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, \
                     *minimal_length, *maximal_length, *minimal_angle);
 }                              
-                               
-                               
-                               
-                               
-                               
+
+
+void output_clipped_fortran_(my_real* x_v_clipped, my_real* y_v_clipped, long long* limits_polygons){ 
+    uint64_t i, j_f, j, k, start, next, end_limits, pt_ind;
+    int8_t val, orient;
+    GrB_Index nb_edges, nb_faces, size_edge_indices, size_pt_indices, nb_pts, nvals;
+    GrB_Index curr_edge;
+    GrB_Info infogrb;
+    Vector_uint* ind_kept_pts;
+    GrB_Vector fj, extr_vals_fj, edge_indices;
+    GrB_Vector ej, extr_vals_ej, pt_indices;
+    GrB_Matrix e_k;
+    GrB_Vector pot_ind_edges, I_vec_e_k, extr_vals_e_k;
+    long long curr_limit;
+
+    GrB_Matrix_ncols(&nb_faces, *(clipped->faces));
+    GrB_Matrix_ncols(&nb_edges, *(clipped->edges));
+    GrB_Matrix_nrows(&nb_pts, *(clipped->edges));
+    
+    ind_kept_pts = alloc_empty_vec_uint();
+    GrB_Vector_new(&fj, GrB_INT8, nb_edges);
+    GrB_Vector_new(&edge_indices, GrB_UINT64, nb_edges);
+    GrB_Vector_new(&extr_vals_fj, GrB_INT8, nb_edges);
+    GrB_Vector_new(&ej, GrB_INT8, nb_pts);
+    GrB_Vector_new(&pt_indices, GrB_UINT64, nb_pts);
+    GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_pts);
+    GrB_Matrix_new(&e_k, GrB_INT8, 1, nb_edges);
+    GrB_Vector_new(&pot_ind_edges, GrB_UINT64, 1);
+    GrB_Vector_new(&I_vec_e_k, GrB_UINT64, 1);
+    GrB_Vector_new(&extr_vals_e_k, GrB_INT8, 1);
+
+    limits_polygons[0] = 0;
+    end_limits = 0;
+
+    for (i=0; i<nb_faces; i++){
+        infogrb = GrB_extract(fj, GrB_NULL, GrB_NULL, *(clipped->faces), GrB_ALL, 1, i, GrB_NULL); //Get indices of edges composing face i
+        infogrb = GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL);
+        infogrb = GrB_Vector_size(&size_edge_indices, edge_indices);
+        ind_kept_pts->size = 0;
+
+        if (size_edge_indices > 0) {
+            size_pt_indices = 0;
+            curr_edge = 0;
+            while ((size_pt_indices == 0) && (curr_edge < size_edge_indices)) {
+                infogrb = GrB_Vector_extractElement(&j, edge_indices, curr_edge);
+                infogrb = GrB_Vector_extractElement(&orient, extr_vals_fj, curr_edge);
+                infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(clipped->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
+                infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
+                infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
+                if(size_pt_indices>0){
+                    infogrb = GrB_Vector_extractElement(&val, extr_vals_ej, 0);
+                    if (orient*val<0){
+                        infogrb = GrB_Vector_extractElement(&start, pt_indices, 0);
+                        infogrb = GrB_Vector_extractElement(&next, pt_indices, 1);
+                    } else {
+                        infogrb = GrB_Vector_extractElement(&start, pt_indices, 1);
+                        infogrb = GrB_Vector_extractElement(&next, pt_indices, 0);
+                    }
+                    push_back_vec_uint(&ind_kept_pts, &start);
+                    push_back_vec_uint(&ind_kept_pts, &next);
+                } else {
+                    curr_edge++;
+                }
+            }
+
+            pt_ind = next;
+            while (pt_ind != start){
+                GrB_extract(e_k, GrB_NULL, GrB_NULL, *(clipped->edges), &pt_ind, 1, GrB_ALL, 1, GrB_NULL); //Extract edges connected to point pt_ind
+                GrB_Matrix_nvals(&nvals, e_k);
+                GrB_Vector_resize(pot_ind_edges, nvals);
+                GrB_Vector_resize(I_vec_e_k, nvals);
+                GrB_Vector_resize(extr_vals_e_k, nvals);
+                GxB_Matrix_extractTuples_Vector(I_vec_e_k, pot_ind_edges, extr_vals_e_k, e_k, GrB_NULL);
+
+                infogrb = GrB_Vector_extractElement(&j, pot_ind_edges, 0); //Get first edge connected to pt_ind
+                if (j == curr_edge){ //Make sure we do not go back
+                    infogrb = GrB_Vector_extractElement(&j, pot_ind_edges, 1);
+                }  
+
+                curr_edge = j;
+                infogrb = GrB_Matrix_extractElement(&orient, *(clipped->faces), j, i);
+                infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(clipped->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
+                infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
+                infogrb = GrB_Vector_extractElement(&val, extr_vals_ej, 0);
+                if (orient*val<0){//Edge oriented from pt_indices[0] to pt_indices[1], we need the end point
+                    infogrb = GrB_Vector_extractElement(&pt_ind, pt_indices, 1);
+                } else { //Edge oriented from pt_indices[1] to pt_indices[0], we need the end point
+                    infogrb = GrB_Vector_extractElement(&pt_ind, pt_indices, 0);
+                }
+                if (pt_ind != start){ //Not yet back to the starting point
+                    push_back_vec_uint(&ind_kept_pts, &pt_ind);
+                }
+            }
+
+            //Rebuild list of vertices in face i only in correct order
+            limits_polygons[end_limits + 1] = limits_polygons[end_limits] + ind_kept_pts->size;
+            curr_limit = limits_polygons[end_limits];
+            for (j_f=0; j_f<ind_kept_pts->size; j_f++){
+                k = *get_ith_elem_vec_uint(ind_kept_pts, j_f);
+                x_v_clipped[curr_limit + j_f] = get_ith_elem_vec_pts2D(clipped->vertices, k)->x;
+                y_v_clipped[curr_limit+ j_f] = get_ith_elem_vec_pts2D(clipped->vertices, k)->y;
+            }
+            end_limits++;
+        }
+    }
+    
+    dealloc_vec_uint(ind_kept_pts); free(ind_kept_pts);
+    GrB_free(&fj);
+    GrB_free(&edge_indices);
+    GrB_free(&extr_vals_fj);
+    GrB_free(&ej);
+    GrB_free(&pt_indices);
+    GrB_free(&extr_vals_ej);
+    GrB_free(&e_k);
+    GrB_free(&pot_ind_edges);
+    GrB_free(&I_vec_e_k);
+    GrB_free(&extr_vals_e_k);
+}

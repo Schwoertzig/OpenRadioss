@@ -59,36 +59,36 @@ contains
   end function Dfr
 
   ! Function to solve for pressure in the star region
-  function phi(pL, aL, uL, pR, aR, uR, gamma, p_star)
+  function phi(pL, aL, uL, gammaL, pR, aR, uR, gammaR, p_star)
     implicit none 
     real(kind=wp) :: pL, aL, uL 
     real(kind=wp) :: pR, aR, uR 
-    real(kind=wp) :: gamma, p_star
+    real(kind=wp) :: gammaL, gammaR, p_star
     real(kind=wp) :: phi
 
-    phi = fl(pL, aL, gamma, p_star) + fr(pR, aR, gamma, p_star) + uL - uR
+    phi = fl(pL, aL, gammaL, p_star) + fr(pR, aR, gammaR, p_star) + uL - uR
   end function phi
 
   ! Gradient of function phi
   !function Dphi(pL, aL, uL, pR, aR, uR, gamma, p_star)
-  function Dphi(pL, aL, pR, aR, gamma, p_star)
+  function Dphi(pL, aL, gammaL, pR, aR, gammaR, p_star)
     implicit none 
     real(kind=wp) :: pL, aL 
     real(kind=wp) :: pR, aR 
     !real(kind=wp) :: uL, uR 
-    real(kind=wp) :: gamma, p_star
+    real(kind=wp) :: gammaL, gammaR, p_star
     real(kind=wp) :: Dphi
    
-    Dphi = Dfl(pL, aL, gamma, p_star) + Dfr(pR, aR, gamma, p_star)
+    Dphi = Dfl(pL, aL, gammaL, p_star) + Dfr(pR, aR, gammaR, p_star)
   end function Dphi
 
 
   ! Use a Newton method to find the root
-  function find_root(pL, aL, uL, pR, aR, uR, gamma, eps) result(p)
+  function find_root(pL, aL, uL, gammaL, pR, aR, uR, gammaR, eps) result(p)
     implicit none 
     real(kind=wp) :: pL, aL, uL 
     real(kind=wp) :: pR, aR, uR 
-    real(kind=wp) :: gamma, eps
+    real(kind=wp) :: gammaL, gammaR, eps
     real(kind=wp) :: p 
 
     real(kind=wp) :: p_prev, res
@@ -96,20 +96,19 @@ contains
     p = pL
     p_prev = pR
     do while (abs(p - p_prev) > eps)
-      res = phi(pL, aL, uL, pR, aR, uR, gamma, p)
+      res = phi(pL, aL, uL, gammaL, pR, aR, uR, gammaR, p)
       p_prev = p
-      !p = p - res / Dphi(pL, aL, uL, pR, aR, uR, gamma, p)
-      p = p - res / Dphi(pL, aL, pR, aR, gamma, p)
+      p = p - res / Dphi(pL, aL, gammaL, pR, aR, gammaR, p)
     end do
   end function find_root
 
   ! Function to solve the Riemann problem for the Euler equations and return wave velocity and flux at the interface
   ! wave-types: 1=left shock, 2=contact discontinuity, 3=right shock
-  subroutine solve_riemann_problem(gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, wave_type, &
+  subroutine solve_riemann_problem(gammaL, gammaR, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, wave_type, &
                                   normalVecy, normalVecz, us, vsL, vsR, ps)
     implicit none
 
-    real(kind=wp) :: gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR
+    real(kind=wp) :: gammaL, gammaR, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR
     integer :: wave_type
     real(kind=wp) :: normalVecy, normalVecz
     real(kind=wp) :: us, vsL, vsR, ps
@@ -127,41 +126,40 @@ contains
     vL = -velyL*normalVecz + velzL*normalVecy
     vR = -velyR*normalVecz + velzR*normalVecy
 
-    !gamma = UL.gamma #TODO: change this to accomodate differents gammas for different materials
 
     ! Compute primitive variables
-    aL = sqrt(gamma * pL / rhoL)
-    aR = sqrt(gamma * pR / rhoR)
+    aL = sqrt(gammaL * pL / rhoL)
+    aR = sqrt(gammaR * pR / rhoR)
 
     ! Find the pressure in the star region
-    p_star = find_root(pL, aL, uL, pR, aR, uR, gamma, prec_root_find)
+    p_star = find_root(pL, aL, uL, gammaL, pR, aR, uR, gammaR, prec_root_find)
 
     ! Compute the velocity in the star region
-    u_star = uL + fl(pL, aL, gamma, p_star)
+    u_star = uL + fl(pL, aL, gammaL, p_star)
 
 
     !Determine left and right shock velocities
-    SL = uL - aL * sqrt((gamma + 1) / (2 * gamma) * p_star / pL + (gamma - 1) / (2 * gamma))
-    SR = uR + aR * sqrt((gamma + 1) / (2 * gamma) * p_star / pR + (gamma - 1) / (2 * gamma))
+    SL = uL - aL * sqrt((gammaL + 1) / (2 * gammaL) * p_star / pL + (gammaL - 1) / (2 * gammaL))
+    SR = uR + aR * sqrt((gammaR + 1) / (2 * gammaR) * p_star / pR + (gammaR - 1) / (2 * gammaR))
 
     ! Compute densities in the star region
     if (p_star > pL) then
       ! Left shock
-      rho_starL = rhoL * ((p_star / pL) + (gamma - 1) / (gamma + 1)) / (((gamma - 1) / (gamma + 1)) * (p_star / pL) + 1)
+      rho_starL = rhoL * ((p_star / pL) + (gammaL - 1) / (gammaL + 1)) / (((gammaL - 1) / (gammaL + 1)) * (p_star / pL) + 1)
       v_starL = SL + rhoL / rho_starL * (vL - SL)
     else
       ! Left rarefaction
-      rho_starL = rhoL * (p_star / pL)**(1 / gamma)
+      rho_starL = rhoL * (p_star / pL)**(1 / gammaL)
       v_starL = vL
     end if
 
     if (p_star > pR) then
       !Right shock
-      rho_starR = rhoR * ((p_star / pR) + (gamma - 1) / (gamma + 1)) / (((gamma - 1) / (gamma + 1)) * (p_star / pR) + 1)
+      rho_starR = rhoR * ((p_star / pR) + (gammaR - 1) / (gammaR + 1)) / (((gammaR - 1) / (gammaR + 1)) * (p_star / pR) + 1)
       v_starR = SR + rhoR / rho_starR * (vR - SR)
     else
       ! Right rarefaction
-      rho_starR = rhoR * (p_star / pR)**(1 / gamma)
+      rho_starR = rhoR * (p_star / pR)**(1 / gammaR)
       v_starR = vR
     end if
 
