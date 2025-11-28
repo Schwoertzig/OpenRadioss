@@ -283,7 +283,6 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
     real(kind=wp), dimension(:), INTENT(IN) :: gamma
-    real(kind=wp), dimension(:), INTENT(IN) :: gamma
     real(kind=wp), dimension(:,:) :: vely
     real(kind=wp), dimension(:,:) :: velz
     real(kind=wp), dimension(:,:) :: rho
@@ -883,7 +882,7 @@ module multicutcell_solver_mod
 
     full_etot = 0.5*(full_vel(2,:)*full_vel(2,:)+full_vel(3,:)*full_vel(3,:)) &
                           + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
-                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2)))))
+                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2))))) &
                           + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
                               grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2)))))
   
@@ -1025,7 +1024,7 @@ module multicutcell_solver_mod
     allocate(z_polygon(nb_pts))
     allocate(limits_polygon(nb_polygon + 1))
 
-    call output_clipped_fortran_(y_polygon, z_polygon, limits_polygon)
+    call output_clipped_fortran(y_polygon, z_polygon, limits_polygon)
   end subroutine output_clipped
 
    !initial state
