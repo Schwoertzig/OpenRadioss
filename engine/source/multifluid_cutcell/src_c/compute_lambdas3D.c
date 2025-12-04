@@ -124,7 +124,7 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
     Point3D *nvpi, *lam;
     int8_t pvij_int;
     long int *psfi;
-    my_real pvij;
+    my_real_c pvij;
     Vector_points3D *norm_vec_poly;
 
     GrB_Matrix_ncols(&nb_edge, *(grid->faces)); //actually number of edges + 2 faces at times tn and tn+dt
@@ -150,7 +150,7 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
                 GrB_Matrix_extractElement(&pvij_int, *(p->volumes), i, j);
                 if (pvij_int != 0){
                     if (*psfi<1){
-                        pvij = (my_real) pvij_int;
+                        pvij = (my_real_c) pvij_int;
                         inplace_xpay_points3D(mean_normal, pvij, nvpi);
                         *is_narrowband = true;
                     }
@@ -188,12 +188,12 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
 /// @param big_lambda_n [OUT] First cell: effective area at time t^n. Second cell: area of grid - effective area. Allocated inside the function.
 /// @param big_lambda_np1 [OUT] First cell: effective area at time t^n+`dt`. Second cell: area of grid - effective area. Allocated inside the function.
 /// @param is_narrowband [OUT] True if the intersection of `grid` and `clipped` is not empty at time t^n or t^n+`dt`, false otherwise.
-void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, const my_real dt, \
+void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, const my_real_c dt, \
                         Array_double **lambdas_arr, Vector_double** big_lambda_n, Vector_double** big_lambda_np1, \
                         Point3D *mean_normal, bool *is_narrowband){
     const unsigned int nb_regions = 2;
-    my_real *val = (my_real*)malloc(sizeof(my_real));
-    my_real nm;
+    my_real_c *val = (my_real_c*)malloc(sizeof(my_real_c));
+    my_real_c nm;
     Point3D *area, *occupied;
     Vector_points3D *occupied_area;
     //Polygon2D *mini_clipped;
@@ -202,7 +202,7 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
     Point3D *pt3D, local_mean_normal, *local_l;
     bool local_narrowband;
     //Vector_points2D *vec_move_grid;
-    my_real *vec_move_gridx = NULL, *vec_move_gridy = NULL;
+    my_real_c *vec_move_gridx = NULL, *vec_move_gridy = NULL;
     Vector_points3D *surfaces = NULL;
     GrB_Index nb_edge, i, j, k;
     //GrB_Index nb_clipped_faces;
@@ -228,8 +228,8 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
     }
 
     *is_narrowband = false;
-    vec_move_gridx = calloc(grid->vertices->size, sizeof(my_real));
-    vec_move_gridy = calloc(grid->vertices->size, sizeof(my_real));
+    vec_move_gridx = calloc(grid->vertices->size, sizeof(my_real_c));
+    vec_move_gridy = calloc(grid->vertices->size, sizeof(my_real_c));
     cell3D = build_space2D_time_cell(grid, vec_move_gridx, vec_move_gridy, grid->vertices->size, dt, false, NULL);
     surfaces = points3D_from_matrix(surfaces_poly3D(cell3D));
 

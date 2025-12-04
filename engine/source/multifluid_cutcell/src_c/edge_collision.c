@@ -38,9 +38,9 @@ static int compare_edges(const void *a, const void *b){
 
 static Point2D intersection_edges(Edge2D e1, Edge2D e2, bool all_inclusive){// all_inclusive = false
     Point2D n, pt;    
-    my_real d1, d2;
-    my_real lambda;
-    my_real bottom, up, left, right;
+    my_real_c d1, d2;
+    my_real_c lambda;
+    my_real_c bottom, up, left, right;
     bool check_inside_box_e1;
 
     Point2D pt1_e1 = e1.ext1;
@@ -168,7 +168,7 @@ void find_all_self_intersection(Polygon2D *p, Vector_points2D* IntersecList, Vec
 }
 
 //Compute the barycentric coordinate of `middle_pt` on edge [pt1, pt2]
-my_real compute_barycentric_coord(Point2D middle_pt, Point2D pt1, Point2D pt2){
+my_real_c compute_barycentric_coord(Point2D middle_pt, Point2D pt1, Point2D pt2){
     Point2D d_mpt1, d_pt12;
 
     d_mpt1.x = middle_pt.x-pt1.x; d_mpt1.y = middle_pt.y-pt1.y;
@@ -179,7 +179,7 @@ my_real compute_barycentric_coord(Point2D middle_pt, Point2D pt1, Point2D pt2){
 
 //Checks all points in pts and finds the two points closest to `pt1` and `pt2`. `ind1` and `ind2` are the indices of the points in `pts`.
 static void find_closest_point_to_edge_intersection(const Vector_points2D *pts, Point2D pt1, Point2D pt2, uint64_t *ind1, uint64_t *ind2){
-    my_real theta;
+    my_real_c theta;
     Point2D* pt;
     uint64_t j;
     Vector_double *thetas = alloc_with_capacity_vec_double(pts->size);
@@ -217,8 +217,8 @@ static uint64_t ray_tracing_intersect(const Polygon2D* p, uint64_t pt_index, con
     Edge2D ray_edge;
     bool swap;
     uint64_t nb_intersect = 0;
-    my_real max_ray;
-    my_real x_min, x_max, y_min, y_max;
+    my_real_c max_ray;
+    my_real_c x_min, x_max, y_min, y_max;
 
     GrB_Matrix_ncols(&nb_edges, *(p->edges));
     GrB_Matrix_nrows(&nb_pts, *(p->edges));
@@ -468,7 +468,7 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
     uint64_t nb_intersect;
     int8_t sign;
     Point2D normalVector_inters, *pt_inters;
-    my_real dpte;
+    my_real_c dpte;
     long int phase, phase1, phase2;
     GrB_Info infogrb;
 

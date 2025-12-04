@@ -1,5 +1,5 @@
 #include "general_clipping.h"
-#include "my_real.h"
+#include "my_real_c.inc"
 #include <math.h>
 
 void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt, int8_t sign_taken, Vector_points3D* pts_copy, GrB_Matrix* new_edges_in){
@@ -16,7 +16,7 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
     GrB_Index size_e, size_v, ind_2;
     unsigned int nb_cut_edges, countPoint;
     int64_t be_i;
-    my_real* distances = (my_real*)malloc(size*sizeof(my_real));
+    my_real_c* distances = (my_real_c*)malloc(size*sizeof(my_real_c));
     bool dist_i;
 
     copy_vec_pts3D(p->vertices, pts_copy);
@@ -241,7 +241,7 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
 }
 
 typedef struct {
-    my_real* v;
+    my_real_c* v;
     unsigned int n;
 } form_struct;
 
@@ -249,21 +249,21 @@ typedef struct {
 //    return (form_struct){NULL, 0};
 //}
 //    
-//static form_struct new_form_struct_init(my_real* v, int n){
+//static form_struct new_form_struct_init(my_real_c* v, int n){
 //    return (form_struct){v, n};
 //}
 
 //Compute 2-forms of two vectors p1 and p2, depending on ambient dimension
 static form_struct twoform2D(Point2D p1, Point2D p2){
-    return (form_struct){(my_real[]){p1.x*p2.y - p2.x*p1.y}, 1};
+    return (form_struct){(my_real_c[]){p1.x*p2.y - p2.x*p1.y}, 1};
 }
 
 static form_struct twoform3D(Point3D p1, Point3D p2){
-    return (form_struct){(my_real[]){p1.y*p2.t - p2.y*p1.t, p1.t*p2.x - p2.t*p1.x, p1.x*p2.y - p2.x*p1.y}, 3};
+    return (form_struct){(my_real_c[]){p1.y*p2.t - p2.y*p1.t, p1.t*p2.x - p2.t*p1.x, p1.x*p2.y - p2.x*p1.y}, 3};
 }
 
 static form_struct twoform4D(Point4D p1, Point4D p2){
-    my_real vals[] = {p1.x*p2.y - p2.y*p1.x, 
+    my_real_c vals[] = {p1.x*p2.y - p2.y*p1.x, 
                      p1.x*p2.z - p2.z*p1.x, 
                      p1.x*p2.t - p2.x*p1.t,
                      p1.y*p2.z - p2.y*p1.z, 
@@ -275,34 +275,34 @@ static form_struct twoform4D(Point4D p1, Point4D p2){
 //Compute 3-forms of a 2-form S and a vector p, depending on ambient dimension
 static form_struct threeform3D(Point3D p, form_struct S){
     if (S.n != 3)
-        return (form_struct){(my_real[]){nan("")}, 0};
+        return (form_struct){(my_real_c[]){nan("")}, 0};
     else{
-        my_real val[] = {S.v[0]*p.x + S.v[1]*p.y + S.v[2]*p.t};
+        my_real_c val[] = {S.v[0]*p.x + S.v[1]*p.y + S.v[2]*p.t};
         return (form_struct){val, 1};
     }
 }
 
 static form_struct threeform3D_vec(Point3D p, GrB_Vector S){
     GrB_Index size_S;    
-    my_real Sv0, Sv1, Sv2;
+    my_real_c Sv0, Sv1, Sv2;
 
     GrB_Vector_size(&size_S, S);
     if (size_S != 3)
-        return (form_struct){(my_real[]){nan("")}, 0};
+        return (form_struct){(my_real_c[]){nan("")}, 0};
     else{
         GrB_Vector_extractElement(&Sv0, S, 0);
         GrB_Vector_extractElement(&Sv1, S, 1);
         GrB_Vector_extractElement(&Sv2, S, 2);
-        my_real val[] = {Sv0*p.x + Sv1*p.y + Sv2*p.t};
+        my_real_c val[] = {Sv0*p.x + Sv1*p.y + Sv2*p.t};
         return (form_struct){val, 1};
     }
 }
 
 static form_struct threeform4D(Point4D p, form_struct S){
     if (S.n!=6)
-        return (form_struct){(my_real[]){nan("")}, 0};
+        return (form_struct){(my_real_c[]){nan("")}, 0};
     else{
-        my_real vals[] = {p.y*S.v[6] - p.z*S.v[5] + p.t*S.v[4], 
+        my_real_c vals[] = {p.y*S.v[6] - p.z*S.v[5] + p.t*S.v[4], 
                         -p.x*S.v[6] + p.z*S.v[3] - p.t*S.v[2], 
                          p.x*S.v[5] - p.y*S.v[3] + p.t*S.v[1], 
                          -p.x*S.v[4] + p.y*S.v[2] - p.z*S.v[1]};
@@ -313,9 +313,9 @@ static form_struct threeform4D(Point4D p, form_struct S){
 //Compute 4-forms of a 3-form V and a vector p, depending on ambient dimension
 static form_struct fourform4D(Point4D p, form_struct V){
     if (V.n != 4)
-        return (form_struct){(my_real[]){nan("")}, 0};
+        return (form_struct){(my_real_c[]){nan("")}, 0};
     else{
-        my_real val[] = {V.v[0]*p.x + V.v[1]*p.y + V.v[2]*p.z + V.v[3]*p.t};
+        my_real_c val[] = {V.v[0]*p.x + V.v[1]*p.y + V.v[2]*p.z + V.v[3]*p.t};
         return (form_struct){val, 1};
     }
 }
@@ -343,7 +343,7 @@ static GrB_Matrix vector_pt3D_to_matrix(const Vector_points3D* vertices){
     GrB_Matrix_new(&mat_vert, GrB_FP64, 3, vertices->size);
     for (i=0; i<vertices->size; i++){
         pt = get_ith_elem_vec_pts3D(vertices, i);
-        //GrB_Col_assign(mat_vert, GrB_NULL, GrB_NULL, (my_real[]){pt->x, pt->y, pt->t}, GrB_ALL, 3, i, GrB_NULL);
+        //GrB_Col_assign(mat_vert, GrB_NULL, GrB_NULL, (my_real_c[]){pt->x, pt->y, pt->t}, GrB_ALL, 3, i, GrB_NULL);
         GrB_Matrix_setElement(mat_vert, pt->x, 0, i);
         GrB_Matrix_setElement(mat_vert, pt->y, 1, i);
         GrB_Matrix_setElement(mat_vert, pt->t, 2, i);
@@ -464,7 +464,7 @@ static GrB_Vector surfaces_poly2D_pef(const Vector_points2D* points, const GrB_M
     GrB_Vector fj, ee0;
     GrB_Vector nz_fj, nz_e0;
     GrB_Vector extr_vals_fj, extr_vals_ee0;
-    my_real newval;
+    my_real_c newval;
     Point2D *x0, *xe, *len_ei;
     form_struct tf;
     int8_t sign;
@@ -649,7 +649,7 @@ static GrB_Vector volumes_poly3D_pefv(const Vector_points3D* points, const GrB_M
     GrB_Index i, j, k, p0, p;
     Point3D *x0, *xe;
     int8_t sign;
-    my_real newval = 0;
+    my_real_c newval = 0;
     const uint64_t nb_pts = points->size;
     GrB_Index nf, nb_edges, size_nz_vj, it;
     form_struct tf;

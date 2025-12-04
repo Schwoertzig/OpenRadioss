@@ -202,7 +202,7 @@ void polygons_fusion(const Polygon2D* old_p, const GrB_Matrix* original_edges, c
     Point2D *pt1, *pt2, *pt;
     Vector_double* thetas;
     Vector_uint *indices_sorted;
-    my_real res;
+    my_real_c res;
     GrB_Info infogrb;
 
     if (old_p != *p)
@@ -460,7 +460,7 @@ void create_new_faces_split(const Polygon2D* old_p, Vector_uint** faces_to_split
     long int zero = 0;
     Polygon2D* extr_p;
     GrB_Vector surf_vect;
-    my_real surf;
+    my_real_c surf;
     GrB_Info infogrb;
     int8_t val;
     uint64_t lek;
@@ -593,7 +593,7 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
     Point2D *pt1, *pt2, *pt;
     Vector_double* thetas;
     Vector_uint *indices_sorted;
-    my_real res;
+    my_real_c res;
     GrB_Info infogrb;
     Polygon2D *p;
 

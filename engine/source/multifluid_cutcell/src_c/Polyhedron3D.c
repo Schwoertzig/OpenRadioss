@@ -55,7 +55,7 @@ Polyhedron3D* new_Polyhedron3D_vefvs(const Vector_points3D* vertices, const GrB_
     return p;
 }
 
-Polyhedron3D* Polyhedron3D_from_vertices(const my_real* x_v, unsigned long int n_x, const my_real* y_v, unsigned long int n_y, const my_real* z_v, unsigned long int n_z){
+Polyhedron3D* Polyhedron3D_from_vertices(const my_real_c* x_v, unsigned long int n_x, const my_real_c* y_v, unsigned long int n_y, const my_real_c* z_v, unsigned long int n_z){
     GrB_Info infogrb;
     GrB_Index nb_pts, nb_edges, nb_faces, nb_volumes;
     uint64_t curr_face, curr_pt, curr_edge, curr_vol, iy, ix, iz;
@@ -65,7 +65,7 @@ Polyhedron3D* Polyhedron3D_from_vertices(const my_real* x_v, unsigned long int n
     uint64_t ind_e_W_up, ind_e_S_up;
     uint64_t ind_e_SW_up, ind_e_SE_up, ind_e_NW_up;
     uint64_t face_W, face_B, face_S, face_E, face_N, face_U;
-    my_real yS, xW, zB;
+    my_real_c yS, xW, zB;
     Point3D ptSWB;
     Vector_points3D* vertices;
     Vector_int* status_face;

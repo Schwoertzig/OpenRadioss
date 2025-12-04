@@ -5,15 +5,15 @@
 #include "AStar.h"
 
 //Project d in [min, max].
-static my_real clamp(my_real d, my_real min, my_real max) {
-  const my_real t = d < min ? min : d;
+static my_real_c clamp(my_real_c d, my_real_c min, my_real_c max) {
+  const my_real_c t = d < min ? min : d;
   return t > max ? max : t;
 }
 
 //Compute the angle formed by the two segments [e1_ext1, e1_ext2] and [e2_ext1, e2_ext2]
-static my_real compute_angle_between_edges2D(Point2D *e1_ext1, Point2D *e1_ext2, Point2D *e2_ext1, Point2D *e2_ext2){
-        my_real n1x, n1y, n2x, n2y;
-        my_real dotp, norm_n1, norm_n2;
+static my_real_c compute_angle_between_edges2D(Point2D *e1_ext1, Point2D *e1_ext2, Point2D *e2_ext1, Point2D *e2_ext2){
+        my_real_c n1x, n1y, n2x, n2y;
+        my_real_c dotp, norm_n1, norm_n2;
         if ((e1_ext1->x == e2_ext1->x) && (e1_ext1->y == e2_ext1->y)){
             n1x = e1_ext2->x - e1_ext1->x;
             n1y = e1_ext2->y - e1_ext1->y;
@@ -40,7 +40,7 @@ static my_real compute_angle_between_edges2D(Point2D *e1_ext1, Point2D *e1_ext2,
         norm_n1 = sqrt(n1x*n1x + n1y*n1y);
         norm_n2 = sqrt(n2x*n2x + n2y*n2y);
 
-    #if (my_real == double)
+    #if (my_real_c == double)
         return acos(clamp(dotp/(norm_n1*norm_n2), -1.0, 1.0));
     #else
        return acosf(clamp(dotp/(norm_n1*norm_n2), -1.0, 1.0));
@@ -54,7 +54,7 @@ list_del_pts : array of size (nb_pts x 2). For each line, indicates if a point m
 list_changed_edges : array of size (nb_pts x 3). Same thing as list_del_pts, but each line registers the two edges connected to this point,
 and the face concerned.
 */
-static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, const my_real *vsy, my_real minimal_length, my_real minimal_angle,\
+static void detect_pts_to_delete(Polygon2D* p, my_real_c dt, const my_real_c *vsx, const my_real_c *vsy, my_real_c minimal_length, my_real_c minimal_angle,\
                                  Array_int **list_del_pts, Array_int **list_changed_edges){
     uint64_t nb_pts = p->vertices->size;
     GrB_Index nb_faces, nb_edges;
@@ -72,7 +72,7 @@ static void detect_pts_to_delete(Polygon2D* p, my_real dt, const my_real *vsx, c
     GrB_Vector extr_vals_fj, extr_vals_ej;
     GrB_Vector nz_e_ipt0, extr_vals_e_ipt0, I_vec;
     Point2D *e1_ext1, *e1_ext2, *e2_ext1, *e2_ext2;
-    my_real alpha, norm_e1, norm_e2;
+    my_real_c alpha, norm_e1, norm_e2;
     GrB_Vector inds_pts_edge0, inds_pts_edge1;
     int64_t ind_pt_del, ind_pt1, ind_pt2, curr_i;
     int64_t signed_ie0, signed_ie1, signed_i_f;
@@ -485,7 +485,7 @@ static void backpropagate_pts(Polygon2D *pn, Vector_points2D* vertices_tnp1,\
     uint64_t i, ie, ipts1, ipts2, iptp, iptn;
     GrB_Index nb_pts;
     GrB_Vector ej, ipts, extr_vals_ej;
-    my_real theta;
+    my_real_c theta;
     Point2D new_pt;
     int8_t mark8 = -2;
     const Point2D *ptp, *ptn;
@@ -567,7 +567,7 @@ static void backpropagate_pts(Polygon2D *pn, Vector_points2D* vertices_tnp1,\
 //Project pt on edge [ext1, ext2]
 static Point2D project_on_edge(const Point2D* pt, const Point2D* ext1, const Point2D* ext2){
     Point2D tangentVec, pt_prime, diffpt;
-    my_real nt, bottom, up, left, right;
+    my_real_c nt, bottom, up, left, right;
 
     tangentVec.x = ext2->x - ext1->x;
     tangentVec.y = ext2->y - ext1->y;
@@ -798,7 +798,7 @@ static void find_pair_intersection(const Polygon2D* p, \
 
 //Computes (pt->x+dt*vsx, pt->y+dt*vsy) for all pt in p->vertices.
 //In other words : computes the points at tn+dt.
-static Vector_points2D* build_vertices_tnp1(const Polygon2D* p, const my_real* vsx, const my_real* vsy, uint64_t size_vs, my_real dt, Array_int* list_del_pts){
+static Vector_points2D* build_vertices_tnp1(const Polygon2D* p, const my_real_c* vsx, const my_real_c* vsy, uint64_t size_vs, my_real_c dt, Array_int* list_del_pts){
     Vector_points2D* vertices_tnp1;
     uint64_t i;
     int64_t ind_pt1, ind_pt2;
@@ -846,7 +846,7 @@ static Vector_points2D* build_vertices_tnp1(const Polygon2D* p, const my_real* v
 
 //Compute the polyhedron in space-time given vertices at time tn+dt.
 //It supposes no intersection occurs at time tn+dt.
-static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* fn, const Vector_points2D* vertices_tnp1, my_real dt, bool split){
+static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* fn, const Vector_points2D* vertices_tnp1, my_real_c dt, bool split){
     uint64_t i, j, ie, size_edge_indices;
     int8_t fne_ptind;
     long int val;
@@ -1089,7 +1089,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
 
 //Compute the polyhedron in space-time given the polygon at time tn+dt.
 //It supposes some intersections occur at time tn+dt and where already treated in fn (at time tn, with all the backpropagation) and at time tn+dt (with all intersection points added, edges modified, etc).
-static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn, const Polygon2D* fnp1, my_real dt,\
+static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn, const Polygon2D* fnp1, my_real_c dt,\
                                                     const Vector_int8* pt_in_or_out_split, const Vector_int8* pt_in_or_out_fuse){
     Vector_points3D* new_vertices;
     uint64_t i, nb_pts1, nb_pts2, nb_pts_in; 
@@ -1324,7 +1324,7 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
 /// @param vs* [IN] Vector translating points of `fn` over time `dt` to form the polygon at time t^{n+1}
 /// @param dt [IN] time-step 
 /// @param split [IN] flag to triangulate (or not) faces in time linking the edges at time t^n and t^{n+1}.
-Polyhedron3D* build_space2D_time_cell(const Polygon2D *fn, const my_real *vsx, const my_real* vsy, uint64_t size_vs, const my_real dt, bool split, Array_int *list_del_pts){
+Polyhedron3D* build_space2D_time_cell(const Polygon2D *fn, const my_real_c *vsx, const my_real_c* vsy, uint64_t size_vs, const my_real_c dt, bool split, Array_int *list_del_pts){
     Vector_points2D* vertices_tnp1 = build_vertices_tnp1(fn, vsx, vsy, size_vs, dt, list_del_pts);
     Polyhedron3D* p = build_space_time_cell_given_tnp1_vertices(fn, vertices_tnp1, dt, split);
     
@@ -1333,10 +1333,10 @@ Polyhedron3D* build_space2D_time_cell(const Polygon2D *fn, const my_real *vsx, c
 }
 
 //Detect all edges too long and split it in the middle.
-static void refine_interface(Polygon2D *p, my_real maximal_length){
+static void refine_interface(Polygon2D *p, my_real_c maximal_length){
     uint64_t i, nb_edges;
     Point2D *ext1, *ext2;
-    my_real norm_e;
+    my_real_c norm_e;
     Point2D new_pt;
 
     GrB_Matrix_ncols(&nb_edges, *(p->edges));
@@ -1382,8 +1382,8 @@ static void coarsen_interface(Polygon2D *p, Array_int *list_changed_edges){
 /// @param minimal_length [IN] minimal length the path linking three consecutive points should have.
 /// @param maximal_length [IN] maximal length an edge should have.
 /// @param minimal_angle [IN] minimal value (in rad) the angle formed by three consecutive points should have.
-void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real* vec_move_solidx, const my_real* vec_move_solidy, my_real dt, \
-                    my_real minimal_length, my_real maximal_length, my_real minimal_angle){
+void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* vec_move_solidx, const my_real_c* vec_move_solidy, my_real_c dt, \
+                    my_real_c minimal_length, my_real_c maximal_length, my_real_c minimal_angle){
     Array_int *list_del_pts,  *list_changed_edges;
     Vector_points2D* vertices_tnp1;
     Polygon2D* solid_new = new_Polygon2D();

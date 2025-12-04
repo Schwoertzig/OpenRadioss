@@ -1,12 +1,12 @@
 #ifndef EDGE_COLLISION_H
 #define EDGE_COLLISION_H
 
-#include "my_real.h"
+#include "my_real_c.inc"
 #include "Polygon2D.h"
 #include "vector_int.h"
 #include "vector_Points.h"
 
-my_real compute_barycentric_coord(Point2D middle_pt, Point2D pt1, Point2D pt2);
+my_real_c compute_barycentric_coord(Point2D middle_pt, Point2D pt1, Point2D pt2);
 void find_all_self_intersection(Polygon2D *p, Vector_points2D* IntersecList, Vector_uint *edge_intersect1, Vector_uint *edge_intersect2);
 
 //All output arrays must be allocated before calling the function.

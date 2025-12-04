@@ -10,7 +10,7 @@
 #define CS_DATE "Mar 6, 2006"	    /* CSparse release date */
 #define CS_COPYRIGHT "Copyright (c) Timothy A. Davis, 2006"
 
-#include "my_real.h"
+#include "my_real_c.inc"
 
 /* --- primary CSparse routines and data structures ------------------------- */
 typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
@@ -20,21 +20,21 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
     int n ;	    /* number of columns */
     int *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
     int *i ;	    /* row indices, size nzmax */
-    my_real *x ;	    /* numerical values, size nzmax */
+    my_real_c *x ;	    /* numerical values, size nzmax */
     int nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
 } cs ;
 
-cs *cs_add (const cs *A, const cs *B, my_real alpha, my_real beta) ;
-int cs_cholsol (const cs *A, my_real *b, int order) ;
+cs *cs_add (const cs *A, const cs *B, my_real_c alpha, my_real_c beta) ;
+int cs_cholsol (const cs *A, my_real_c *b, int order) ;
 int cs_dupl (cs *A) ;
-int cs_entry (cs *T, int i, int j, my_real x) ;
-int cs_lusol (const cs *A, my_real *b, int order, my_real tol) ;
-int cs_gaxpy (const cs *A, const my_real *x, my_real *y) ;
+int cs_entry (cs *T, int i, int j, my_real_c x) ;
+int cs_lusol (const cs *A, my_real_c *b, int order, my_real_c tol) ;
+int cs_gaxpy (const cs *A, const my_real_c *x, my_real_c *y) ;
 cs *cs_multiply (const cs *A, const cs *B) ;
-int cs_qrsol (const cs *A, my_real *b, int order) ;
+int cs_qrsol (const cs *A, my_real_c *b, int order) ;
 cs *cs_transpose (const cs *A, int values) ;
 cs *cs_triplet (const cs *T) ;
-my_real cs_norm (const cs *A) ;
+my_real_c cs_norm (const cs *A) ;
 int cs_print (const cs *A, int brief) ;
 cs *cs_load (FILE *f) ;
 /* utilities */
@@ -63,7 +63,7 @@ typedef struct cs_numeric   /* numeric Cholesky, LU, or QR factorization */
     cs *L ;	    /* L for LU and Cholesky, V for QR */
     cs *U ;	    /* U for LU, R for QR, not used for Cholesky */
     int *Pinv ;	    /* partial pivoting for LU */
-    my_real *B ;	    /* beta [0..n-1] for QR */
+    my_real_c *B ;	    /* beta [0..n-1] for QR */
 } csn ;
 
 typedef struct cs_dmperm_results    /* cs_dmperm or cs_scc output */
@@ -80,22 +80,22 @@ typedef struct cs_dmperm_results    /* cs_dmperm or cs_scc output */
 int *cs_amd (const cs *A, int order) ;
 csn *cs_chol (const cs *A, const css *S) ;
 csd *cs_dmperm (const cs *A) ;
-int cs_droptol (cs *A, my_real tol) ;
+int cs_droptol (cs *A, my_real_c tol) ;
 int cs_dropzeros (cs *A) ;
-int cs_happly (const cs *V, int i, my_real beta, my_real *x) ;
-int cs_ipvec (int n, const int *P, const my_real *b, my_real *x) ;
-int cs_lsolve (const cs *L, my_real *x) ;
-int cs_ltsolve (const cs *L, my_real *x) ;
-csn *cs_lu (const cs *A, const css *S, my_real tol) ;
+int cs_happly (const cs *V, int i, my_real_c beta, my_real_c *x) ;
+int cs_ipvec (int n, const int *P, const my_real_c *b, my_real_c *x) ;
+int cs_lsolve (const cs *L, my_real_c *x) ;
+int cs_ltsolve (const cs *L, my_real_c *x) ;
+csn *cs_lu (const cs *A, const css *S, my_real_c tol) ;
 cs *cs_permute (const cs *A, const int *P, const int *Q, int values) ;
 int *cs_pinv (const int *P, int n) ;
-int cs_pvec (int n, const int *P, const my_real *b, my_real *x) ;
+int cs_pvec (int n, const int *P, const my_real_c *b, my_real_c *x) ;
 csn *cs_qr (const cs *A, const css *S) ;
 css *cs_schol (const cs *A, int order) ;
 css *cs_sqr (const cs *A, int order, int qr) ;
 cs *cs_symperm (const cs *A, const int *Pinv, int values) ;
-int cs_usolve (const cs *U, my_real *x) ;
-int cs_utsolve (const cs *U, my_real *x) ;
+int cs_usolve (const cs *U, my_real_c *x) ;
+int cs_utsolve (const cs *U, my_real_c *x) ;
 int cs_updown (cs *L, int sigma, const cs *C, const int *parent) ;
 /* utilities */
 css *cs_sfree (css *S) ;
@@ -107,15 +107,15 @@ int *cs_counts (const cs *A, const int *parent, const int *post, int ata) ;
 int cs_cumsum (int *p, int *c, int n) ;
 int cs_dfs (int j, cs *L, int top, int *xi, int *pstack, const int *Pinv) ;
 int *cs_etree (const cs *A, int ata) ;
-int cs_fkeep (cs *A, int (*fkeep) (int, int, my_real, void *), void *other) ;
-my_real cs_house (my_real *x, my_real *beta, int n) ;
+int cs_fkeep (cs *A, int (*fkeep) (int, int, my_real_c, void *), void *other) ;
+my_real_c cs_house (my_real_c *x, my_real_c *beta, int n) ;
 int *cs_maxtrans (const cs *A) ;
 int *cs_post (int n, const int *parent) ;
 int cs_reach (cs *L, const cs *B, int k, int *xi, const int *Pinv) ;
 csd *cs_scc (cs *A) ;
-int cs_scatter (const cs *A, int j, my_real beta, int *w, my_real *x, int mark,
+int cs_scatter (const cs *A, int j, my_real_c beta, int *w, my_real_c *x, int mark,
     cs *C, int nz) ;
-int cs_splsolve (cs *L, const cs *B, int k, int *xi, my_real *x,
+int cs_splsolve (cs *L, const cs *B, int k, int *xi, my_real_c *x,
     const int *Pinv) ;
 int cs_tdfs (int j, int k, int *head, const int *next, int *post,
     int *stack) ;

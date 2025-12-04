@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 
-#include "my_real.h"
+#include "my_real_c.inc"
 #include "bridge_c_fortran.h"
 #include "array_double.h"
 #include "vector_double.h"
@@ -35,7 +35,7 @@ void end_grb_(){
 ///  @brief Builds grid given consecutive points with coordinates (x_v, y_v).
 ///  @details If grid is already built, it only changes the coordinates of the points (since this is always the same structure of edges and faces).
 ///  @warning It supposes that all grid cells have the same number of points (usually 3 or 4).
-void build_grid_from_points_fortran_(const my_real* x_v, const my_real* y_v, const long long int *signed_nb_pts){
+void build_grid_from_points_fortran_(const my_real_c* x_v, const my_real_c* y_v, const long long int *signed_nb_pts){
     const unsigned long nb_pts = (unsigned long) *signed_nb_pts;
     Point2D p;
     unsigned long i;
@@ -54,11 +54,11 @@ void build_grid_from_points_fortran_(const my_real* x_v, const my_real* y_v, con
 /// @param x_v array of x-coordinates of size signed_nb_pts
 /// @param y_v array of y-coordinates of size signed_nb_pts 
 /// @param signed_nb_pts size of the arrays (and number of points).
-void build_clipped_from_pts_fortran_(const my_real* x_v, const my_real* y_v, const long long* limits, const long long *nb_polygons){
+void build_clipped_from_pts_fortran_(const my_real_c* x_v, const my_real_c* y_v, const long long* limits, const long long *nb_polygons){
     unsigned long nb_pts;
     int64_t i;
     long long limit1, limit2;
-    const my_real *begin_x, *begin_y;
+    const my_real_c *begin_x, *begin_y;
     Polygon2D* copy_clipped = new_Polygon2D();
     
     if ((*nb_polygons)>0){
@@ -81,10 +81,10 @@ void build_clipped_from_pts_fortran_(const my_real* x_v, const my_real* y_v, con
     dealloc_Polygon2D(copy_clipped); free(copy_clipped);
 }
 
-void compute_lambdas2d_fortran_(const my_real *dt, \
-                        my_real *ptr_lambdas_arr,   \
-                        my_real *ptr_big_lambda_n,  \
-                        my_real *ptr_big_lambda_np1,\
+void compute_lambdas2d_fortran_(const my_real_c *dt, \
+                        my_real_c *ptr_lambdas_arr,   \
+                        my_real_c *ptr_big_lambda_n,  \
+                        my_real_c *ptr_big_lambda_np1,\
                         Point3D *mean_normal, long long *is_narrowband_ptr)
 {
     Array_double *lambdas;
@@ -99,10 +99,10 @@ void compute_lambdas2d_fortran_(const my_real *dt, \
         *is_narrowband_ptr = -1;
     }
 
-    memcpy(ptr_lambdas_arr, lambdas->data, lambdas->ncols*lambdas->nrows*sizeof(my_real));
+    memcpy(ptr_lambdas_arr, lambdas->data, lambdas->ncols*lambdas->nrows*sizeof(my_real_c));
 
-    memcpy(ptr_big_lambda_n, Lambda_n->data, Lambda_n->size*sizeof(my_real));
-    memcpy(ptr_big_lambda_np1, Lambda_np1->data, Lambda_np1->size*sizeof(my_real));
+    memcpy(ptr_big_lambda_n, Lambda_n->data, Lambda_n->size*sizeof(my_real_c));
+    memcpy(ptr_big_lambda_np1, Lambda_np1->data, Lambda_np1->size*sizeof(my_real_c));
 
     dealloc_arr_double(lambdas); free(lambdas);
     dealloc_vec_double(Lambda_n); free(Lambda_n);
@@ -127,9 +127,9 @@ void nb_face_clipped_fortran_(long long int* signed_nb_faces_solid){
     *signed_nb_faces_solid = ((long long) nb);
 }
 
-void compute_normals_clipped_fortran_(my_real* normalVecx, my_real* normalVecy, \
-                                        my_real* normalVecEdgex, my_real* normalVecEdgey, \
-                                        my_real* min_pos_Se){
+void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVecy, \
+                                        my_real_c* normalVecEdgex, my_real_c* normalVecEdgey, \
+                                        my_real_c* min_pos_Se){
 
     Vector_points2D* normals_pts;
     Vector_points2D* normals_edges;
@@ -158,8 +158,8 @@ void compute_normals_clipped_fortran_(my_real* normalVecx, my_real* normalVecy, 
     dealloc_vec_pts2D(normals_edges); free(normals_edges);
 }
 
-void smooth_vel_clipped_fortran_(my_real* vec_move_clippedx, my_real* vec_move_clippedy, my_real* min_pos_Se, my_real *dt){
-    my_real eps;
+void smooth_vel_clipped_fortran_(my_real_c* vec_move_clippedx, my_real_c* vec_move_clippedy, my_real_c* min_pos_Se, my_real_c *dt){
+    my_real_c eps;
     GrB_Matrix smoothing_op, id;
     unsigned long nb_pts = clipped->vertices->size;
     GrB_Index ind_vector[2] = {1, nb_pts};
@@ -219,15 +219,15 @@ void get_clipped_edges_ith_vertex_fortran_(long long *k_signed, long long *signe
     GrB_free(&I_vec_e_k);      
 }                              
                                
-void update_clipped_fortran_(const my_real* vec_move_clippedy, const my_real* vec_move_clippedz, const my_real* dt, \
-                            my_real *minimal_length, my_real *maximal_length, my_real *minimal_angle){
+void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, \
+                            my_real_c *minimal_length, my_real_c *maximal_length, my_real_c *minimal_angle){
 
     update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, \
                     *minimal_length, *maximal_length, *minimal_angle);
 }                              
 
 
-void output_clipped_fortran_(my_real* x_v_clipped, my_real* y_v_clipped, long long* limits_polygons){ 
+void output_clipped_fortran_(my_real_c* x_v_clipped, my_real_c* y_v_clipped, long long* limits_polygons){ 
     uint64_t i, j_f, j, k, start, next, end_limits, pt_ind;
     int8_t val, orient;
     GrB_Index nb_edges, nb_faces, size_edge_indices, size_pt_indices, nb_pts, nvals;

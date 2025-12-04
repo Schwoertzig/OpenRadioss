@@ -1,7 +1,7 @@
 #ifndef ASTAR_H
 #define ASTAR_H
 
-#include "my_real.h"
+#include "my_real_c.inc"
 #include "GraphBLAS.h"
 #include "vector_Points.h"
 #include "vector_int.h"

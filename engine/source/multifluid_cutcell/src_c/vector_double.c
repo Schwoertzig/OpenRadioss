@@ -10,17 +10,17 @@ Vector_double* alloc_empty_vec_double(){
 
 Vector_double* alloc_with_capacity_vec_double(uint64_t size){
     Vector_double* v = (Vector_double*)malloc(sizeof(Vector_double));
-    v->data = (my_real*)malloc(size*sizeof(my_real));
+    v->data = (my_real_c*)malloc(size*sizeof(my_real_c));
     v->size = 0;
     v->capacity = size;
 
     return v;
 }
 
-Vector_double* alloc_with_init_vec_double(const my_real* data, uint64_t size){
+Vector_double* alloc_with_init_vec_double(const my_real_c* data, uint64_t size){
     Vector_double* v = (Vector_double*)malloc(sizeof(Vector_double));
-    v->data = (my_real*)malloc(size*sizeof(my_real));
-    memcpy(v->data, data, size*sizeof(my_real));
+    v->data = (my_real_c*)malloc(size*sizeof(my_real_c));
+    memcpy(v->data, data, size*sizeof(my_real_c));
     v->size = size;
     v->capacity = size;
 
@@ -29,10 +29,10 @@ Vector_double* alloc_with_init_vec_double(const my_real* data, uint64_t size){
 
 void double_capacity_vec_double(Vector_double* v){
     v->capacity *= 2;
-    v->data = (my_real*) realloc(v->data, v->capacity*sizeof(my_real));
+    v->data = (my_real_c*) realloc(v->data, v->capacity*sizeof(my_real_c));
 }
 
-void push_back_vec_double(Vector_double** v_ptr, const my_real* point){
+void push_back_vec_double(Vector_double** v_ptr, const my_real_c* point){
     Vector_double* v = *v_ptr;
     if ((v->capacity == 0) || (v->data == NULL)){
         *v_ptr = alloc_with_init_vec_double(point, 1);
@@ -58,18 +58,18 @@ void dealloc_vec_double(Vector_double* v){
     }
 }
 
-my_real* get_ith_elem_vec_double(const Vector_double* v, uint64_t i){
-    my_real* p;
+my_real_c* get_ith_elem_vec_double(const Vector_double* v, uint64_t i){
+    my_real_c* p;
     if (i<v->size) {
         return v->data + i;
     } else {
-        p = (my_real*) malloc(sizeof(my_real));
+        p = (my_real_c*) malloc(sizeof(my_real_c));
         *p = nan("");
         return p;
     }
 }
 
-void set_ith_elem_vec_double(Vector_double* v, uint64_t i, my_real* d){
+void set_ith_elem_vec_double(Vector_double* v, uint64_t i, my_real_c* d){
     while(i >= v->capacity) double_capacity_vec_double(v);
     if (i >= v->size) v->size = i+1;
     
@@ -86,8 +86,8 @@ void copy_vec_double(const Vector_double* src, Vector_double* dest){
     } else {
         if (dest != NULL){
             free(dest->data);
-            dest->data = (my_real*)malloc(src->capacity*sizeof(my_real));
-            memcpy(dest->data, src->data, src->size*sizeof(my_real));
+            dest->data = (my_real_c*)malloc(src->capacity*sizeof(my_real_c));
+            memcpy(dest->data, src->data, src->size*sizeof(my_real_c));
             dest->size = src->size;
             dest->capacity = src->capacity;
         }
@@ -96,7 +96,7 @@ void copy_vec_double(const Vector_double* src, Vector_double* dest){
 
 void print_vec_double(const Vector_double* v){
     unsigned int i;
-    my_real* vi;
+    my_real_c* vi;
 
     printf("v = [");
     for (i = 0; i<v->size-1; i++){
@@ -108,14 +108,14 @@ void print_vec_double(const Vector_double* v){
 }
 
 typedef struct {
-    my_real r;
+    my_real_c r;
     uint64_t i;
-} Indexed_my_real;
+} Indexed_my_real_c;
 
 
 static int compare_reals(const void*a, const void *b){
-    Indexed_my_real* r1 = (Indexed_my_real*) a;
-    Indexed_my_real* r2 = (Indexed_my_real*) b;
+    Indexed_my_real_c* r1 = (Indexed_my_real_c*) a;
+    Indexed_my_real_c* r2 = (Indexed_my_real_c*) b;
 
     if (r1->r < r2->r){
         return -1;
@@ -132,13 +132,13 @@ static int compare_reals(const void*a, const void *b){
 /// @param permutation_inds [OUT] Sorting permutation.
 void sort_vec_double(const Vector_double* src, Vector_double* sorted_array, Vector_uint* permutation_inds){
     uint64_t i;
-    Indexed_my_real* indxd_arr = (Indexed_my_real*)malloc(src->size*sizeof(Indexed_my_real));
+    Indexed_my_real_c* indxd_arr = (Indexed_my_real_c*)malloc(src->size*sizeof(Indexed_my_real_c));
 
     for(i=0; i<src->size; i++){
-        indxd_arr[i] = (Indexed_my_real){src->data[i], i};
+        indxd_arr[i] = (Indexed_my_real_c){src->data[i], i};
     }
 
-    qsort(indxd_arr, src->size, sizeof(Indexed_my_real), compare_reals);
+    qsort(indxd_arr, src->size, sizeof(Indexed_my_real_c), compare_reals);
 
     for(i=0; i<src->size; i++){
         set_ith_elem_vec_double(sorted_array, i, &(indxd_arr[i].r));

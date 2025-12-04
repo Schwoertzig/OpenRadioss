@@ -5,7 +5,7 @@
 
 # include "csparse.h"
 
-cs *cs_add ( const cs *A, const cs *B, my_real alpha, my_real beta )
+cs *cs_add ( const cs *A, const cs *B, my_real_c alpha, my_real_c beta )
 /*
   Purpose:
 
@@ -19,14 +19,14 @@ cs *cs_add ( const cs *A, const cs *B, my_real alpha, my_real beta )
 */
 {
     int p, j, nz = 0, anz, *Cp, *Ci, *Bp, m, n, bnz, *w, values ;
-    my_real *x, *Bx, *Cx ;
+    my_real_c *x, *Bx, *Cx ;
     cs *C ;
     if (!A || !B) return (NULL) ;	/* check inputs */
     m = A->m ; anz = A->p [A->n] ;
     n = B->n ; Bp = B->p ; Bx = B->x ; bnz = Bp [n] ;
     w = cs_calloc (m, sizeof (int)) ;
     values = (A->x != NULL) && (Bx != NULL) ;
-    x = values ? cs_malloc (m, sizeof (my_real)) : NULL ;
+    x = values ? cs_malloc (m, sizeof (my_real_c)) : NULL ;
     C = cs_spalloc (m, n, anz + bnz, values, 0) ;
     if (!C || !w || (values && !x)) return (cs_done (C, w, x, 0)) ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
@@ -64,7 +64,7 @@ static int cs_wclear (int mark, int lemax, int *w, int n)
 }
 
 /* keep off-diagonal entries; drop diagonal entries */
-static int cs_diag (int i, int j, my_real aij, void *other) 
+static int cs_diag (int i, int j, my_real_c aij, void *other) 
 { 
   return (i != j); 
 }
@@ -102,7 +102,7 @@ int *cs_amd ( const cs *A, int order )
     AT = cs_transpose (A, 0) ;		    /* compute A' */
     if (!AT) return (NULL) ;
     m = A->m ; n = A->n ;
-    dense = CS_MAX (16, 10 * sqrt ((my_real) n)) ;   /* find dense threshold */
+    dense = CS_MAX (16, 10 * sqrt ((my_real_c) n)) ;   /* find dense threshold */
     dense = CS_MIN (n-2, dense) ;
     if (order == 0 && n == m)
     {
@@ -439,10 +439,10 @@ int *cs_amd ( const cs *A, int order )
 /* compute nonzero pattern of L(k,:) */
 static
 int cs_ereach (const cs *A, int k, const int *parent, int *s, int *w,
-    my_real *x, int top)
+    my_real_c *x, int top)
 {
     int i, p, len, *Ap = A->p, *Ai = A->i ;
-    my_real *Ax = A->x ;
+    my_real_c *Ax = A->x ;
     for (p = Ap [k] ; p < Ap [k+1] ; p++)	/* get pattern of L(k,:) */
     {
 	i = Ai [p] ;		    /* A(i,k) is nonzero */
@@ -461,7 +461,7 @@ int cs_ereach (const cs *A, int k, const int *parent, int *s, int *w,
 /* L = chol (A, [Pinv parent cp]), Pinv is optional */
 csn *cs_chol (const cs *A, const css *S)
 {
-    my_real d, lki, *Lx, *x ;
+    my_real_c d, lki, *Lx, *x ;
     int top, i, p, k, n, *Li, *Lp, *cp, *Pinv, *w, *s, *c, *parent ;
     cs *L, *C, *E ;
     csn *N ;
@@ -469,7 +469,7 @@ csn *cs_chol (const cs *A, const css *S)
     n = A->n ;
     N = cs_calloc (1, sizeof (csn)) ;
     w = cs_malloc (3*n, sizeof (int)) ; s = w + n, c = w + 2*n ;
-    x = cs_malloc (n, sizeof (my_real)) ;
+    x = cs_malloc (n, sizeof (my_real_c)) ;
     cp = S->cp ; Pinv = S->Pinv ; parent = S->parent ;
     C = Pinv ? cs_symperm (A, Pinv, 1) : ((cs *) A) ;
     E = Pinv ? C : NULL ;
@@ -513,9 +513,9 @@ csn *cs_chol (const cs *A, const css *S)
 
 
 /* x=A\b where A is symmetric positive definite; b overwritten with solution */
-int cs_cholsol (const cs *A, my_real *b, int order)
+int cs_cholsol (const cs *A, my_real_c *b, int order)
 {
-    my_real *x ;
+    my_real_c *x ;
     css *S ;
     csn *N ;
     int n, ok ;
@@ -523,7 +523,7 @@ int cs_cholsol (const cs *A, my_real *b, int order)
     n = A->n ;
     S = cs_schol (A, order) ;		/* ordering and symbolic analysis */
     N = cs_chol (A, S) ;		/* numeric Cholesky factorization */
-    x = cs_malloc (n, sizeof (my_real)) ;
+    x = cs_malloc (n, sizeof (my_real_c)) ;
     ok = (S && N && x) ;
     if (ok)
     {
@@ -739,7 +739,7 @@ static void cs_unmatched (int m, const int *wi, int *P, int *rr, int set)
 }
 
 /* return 1 if row i is in R2 */
-static int cs_rprune (int i, int j, my_real aij, void *other)
+static int cs_rprune (int i, int j, my_real_c aij, void *other)
 {
     int *rr = (int *) other ;
     return (i >= rr [1] && i < rr [2]) ;
@@ -824,16 +824,16 @@ csd *cs_dmperm (const cs *A)
     return (cs_ddone (D, C, NULL, 1)) ;
 }
 
-static int cs_tol (int i, int j, my_real aij, void *tol)
+static int cs_tol (int i, int j, my_real_c aij, void *tol)
 {
-    return (fabs (aij) > *((my_real *) tol)) ;
+    return (fabs (aij) > *((my_real_c *) tol)) ;
 }
-int cs_droptol (cs *A, my_real tol)
+int cs_droptol (cs *A, my_real_c tol)
 {
     return (cs_fkeep (A, &cs_tol, &tol)) ;    /* keep all large entries */
 }
 
-static int cs_nonzero (int i, int j, my_real aij, void *other)
+static int cs_nonzero (int i, int j, my_real_c aij, void *other)
 {
     return (aij != 0) ;
 }
@@ -855,7 +855,7 @@ int cs_dupl (cs *A)
 */
 {
     int i, j, p, q, nz = 0, n, m, *Ap, *Ai, *w ;
-    my_real *Ax ;
+    my_real_c *Ax ;
     if (!A) return (0) ;			/* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     w = cs_malloc (m, sizeof (int)) ;		/* get workspace */
@@ -886,7 +886,7 @@ int cs_dupl (cs *A)
 }
 
 /* add an entry to a triplet matrix; return 1 if ok, 0 otherwise */
-int cs_entry (cs *T, int i, int j, my_real x)
+int cs_entry (cs *T, int i, int j, my_real_c x)
 {
     if (!T || (T->nz >= T->nzmax && !cs_sprealloc (T, 2*(T->nzmax)))) return(0);
     if (T->x) T->x [T->nz] = x ;
@@ -928,10 +928,10 @@ int *cs_etree (const cs *A, int ata)
 }
 
 /* drop entries for which fkeep(A(i,j)) is false; return nz if OK, else -1 */
-int cs_fkeep (cs *A, int (*fkeep) (int, int, my_real, void *), void *other)
+int cs_fkeep (cs *A, int (*fkeep) (int, int, my_real_c, void *), void *other)
 {
     int j, p, nz = 0, n, *Ap, *Ai ;
-    my_real *Ax ;
+    my_real_c *Ax ;
     if (!A || !fkeep) return (-1) ;	    /* check inputs */
     n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     for (j = 0 ; j < n ; j++)
@@ -951,10 +951,10 @@ int cs_fkeep (cs *A, int (*fkeep) (int, int, my_real, void *), void *other)
 }
 
 /* y = A*x+y */
-int cs_gaxpy (const cs *A, const my_real *x, my_real *y)
+int cs_gaxpy (const cs *A, const my_real_c *x, my_real_c *y)
 {
     int p, j, n, *Ap, *Ai ;
-    my_real *Ax ;
+    my_real_c *Ax ;
     if (!A || !x || !y) return (0) ;	    /* check inputs */
     n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     for (j = 0 ; j < n ; j++)
@@ -968,10 +968,10 @@ int cs_gaxpy (const cs *A, const my_real *x, my_real *y)
 }
 
 /* apply the ith Householder vector to x */
-int cs_happly (const cs *V, int i, my_real beta, my_real *x)
+int cs_happly (const cs *V, int i, my_real_c beta, my_real_c *x)
 {
     int p, *Vp, *Vi ;
-    my_real *Vx, tau = 0 ;
+    my_real_c *Vx, tau = 0 ;
     if (!V || !x) return (0) ;		    /* check inputs */
     Vp = V->p ; Vi = V->i ; Vx = V->x ;
     for (p = Vp [i] ; p < Vp [i+1] ; p++)   /* tau = v'*x */
@@ -988,9 +988,9 @@ int cs_happly (const cs *V, int i, my_real beta, my_real *x)
 
 /* create a Householder reflection [v,beta,s]=house(x), overwrite x with v,
  * where (I-beta*v*v')*x = s*x.  See Algo 5.1.1, Golub & Van Loan, 3rd ed. */
-my_real cs_house (my_real *x, my_real *beta, int n)
+my_real_c cs_house (my_real_c *x, my_real_c *beta, int n)
 {
-    my_real s, sigma = 0 ;
+    my_real_c s, sigma = 0 ;
     int i ;
     if (!x || !beta) return (-1) ;	    /* check inputs */
     for (i = 1 ; i < n ; i++) sigma += x [i] * x [i] ;
@@ -1010,7 +1010,7 @@ my_real cs_house (my_real *x, my_real *beta, int n)
 }
 
 /* x(P) = b, for dense vectors x and b; P=NULL denotes identity */
-int cs_ipvec (int n, const int *P, const my_real *b, my_real *x)
+int cs_ipvec (int n, const int *P, const my_real_c *b, my_real_c *x)
 {
     int k ;
     if (!x || !b) return (0) ;				    /* check inputs */
@@ -1031,7 +1031,7 @@ cs *cs_load ( FILE *f )
 */
 {
     int i, j ;
-    my_real x ;
+    my_real_c x ;
     cs *T ;
     if (!f) return (NULL) ;
     T = cs_spalloc (0, 0, 1, 1, 1) ;
@@ -1041,7 +1041,7 @@ cs *cs_load ( FILE *f )
     }
     return (T) ;
 }
-int cs_lsolve ( const cs *L, my_real *x )
+int cs_lsolve ( const cs *L, my_real_c *x )
 /*
   Purpose:
 
@@ -1059,7 +1059,7 @@ int cs_lsolve ( const cs *L, my_real *x )
 */
 {
     int p, j, n, *Lp, *Li ;
-    my_real *Lx ;
+    my_real_c *Lx ;
     if (!L || !x) return (0) ;				    /* check inputs */
     n = L->n ; Lp = L->p ; Li = L->i ; Lx = L->x ;
     for (j = 0 ; j < n ; j++)
@@ -1072,7 +1072,7 @@ int cs_lsolve ( const cs *L, my_real *x )
     }
     return (1) ;
 }
-int cs_ltsolve ( const cs *L, my_real *x )
+int cs_ltsolve ( const cs *L, my_real_c *x )
 /*
   Purpose:
 
@@ -1090,7 +1090,7 @@ int cs_ltsolve ( const cs *L, my_real *x )
 */
 {
     int p, j, n, *Lp, *Li ;
-    my_real *Lx ;
+    my_real_c *Lx ;
     if (!L || !x) return (0) ;				    /* check inputs */
     n = L->n ; Lp = L->p ; Li = L->i ; Lx = L->x ;
     for (j = n-1 ; j >= 0 ; j--)
@@ -1105,16 +1105,16 @@ int cs_ltsolve ( const cs *L, my_real *x )
 }
 
 /* [L,U,Pinv]=lu(A, [Q lnz unz]). lnz and unz can be guess */
-csn *cs_lu (const cs *A, const css *S, my_real tol)
+csn *cs_lu (const cs *A, const css *S, my_real_c tol)
 {
     cs *L, *U ;
     csn *N ;
-    my_real pivot, *Lx, *Ux, *x,  a, t ;
+    my_real_c pivot, *Lx, *Ux, *x,  a, t ;
     int *Lp, *Li, *Up, *Ui, *Pinv, *xi, *Q, n, ipiv, k, top, p, i, col, lnz,unz;
     if (!A || !S) return (NULL) ;		    /* check inputs */
     n = A->n ;
     Q = S->Q ; lnz = S->lnz ; unz = S->unz ;
-    x = cs_malloc (n, sizeof (my_real)) ;
+    x = cs_malloc (n, sizeof (my_real_c)) ;
     xi = cs_malloc (2*n, sizeof (int)) ;
     N = cs_calloc (1, sizeof (csn)) ;
     if (!x || !xi || !N) return (cs_ndone (N, NULL, xi, x, 0)) ;
@@ -1191,9 +1191,9 @@ csn *cs_lu (const cs *A, const css *S, my_real tol)
 }
 
 /* x=A\b where A is unsymmetric; b overwritten with solution */
-int cs_lusol (const cs *A, my_real *b, int order, my_real tol)
+int cs_lusol (const cs *A, my_real_c *b, int order, my_real_c tol)
 {
-    my_real *x ;
+    my_real_c *x ;
     css *S ;
     csn *N ;
     int n, ok ;
@@ -1201,7 +1201,7 @@ int cs_lusol (const cs *A, my_real *b, int order, my_real tol)
     n = A->n ;
     S = cs_sqr (A, order, 0) ;		/* ordering and symbolic analysis */
     N = cs_lu (A, S, tol) ;		/* numeric LU factorization */
-    x = cs_malloc (n, sizeof (my_real)) ;
+    x = cs_malloc (n, sizeof (my_real_c)) ;
     ok = (S && N && x) ;
     if (ok)
     {
@@ -1331,14 +1331,14 @@ int *cs_maxtrans (const cs *A)   /* returns jmatch [0..m-1]; imatch [0..n-1] */
 cs *cs_multiply (const cs *A, const cs *B)
 {
     int p, j, nz = 0, anz, *Cp, *Ci, *Bp, m, n, bnz, *w, values, *Bi ;
-    my_real *x, *Bx, *Cx ;
+    my_real_c *x, *Bx, *Cx ;
     cs *C ;
     if (!A || !B) return (NULL) ;	/* check inputs */
     m = A->m ; anz = A->p [A->n] ;
     n = B->n ; Bp = B->p ; Bi = B->i ; Bx = B->x ; bnz = Bp [n] ;
     w = cs_calloc (m, sizeof (int)) ;
     values = (A->x != NULL) && (Bx != NULL) ;
-    x = values ? cs_malloc (m, sizeof (my_real)) : NULL ;
+    x = values ? cs_malloc (m, sizeof (my_real_c)) : NULL ;
     C = cs_spalloc (m, n, anz + bnz, values, 0) ;
     if (!C || !w || (values && !x)) return (cs_done (C, w, x, 0)) ;
     Cp = C->p ;
@@ -1362,10 +1362,10 @@ cs *cs_multiply (const cs *A, const cs *B)
 }
 
 /* 1-norm of a sparse matrix = max (sum (abs (A))), largest column sum */
-my_real cs_norm (const cs *A)
+my_real_c cs_norm (const cs *A)
 {
     int p, j, n, *Ap ;
-    my_real *Ax,  norm = 0, s ;
+    my_real_c *Ax,  norm = 0, s ;
     if (!A || !A->x) return (-1) ;		/* check inputs */
     n = A->n ; Ap = A->p ; Ax = A->x ;
     for (j = 0 ; j < n ; j++)
@@ -1380,7 +1380,7 @@ my_real cs_norm (const cs *A)
 cs *cs_permute (const cs *A, const int *Pinv, const int *Q, int values)
 {
     int p, j, k, nz = 0, m, n, *Ap, *Ai, *Cp, *Ci ;
-    my_real *Cx, *Ax ;
+    my_real_c *Cx, *Ax ;
     cs *C ;
     if (!A) return (NULL) ;		/* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
@@ -1440,7 +1440,7 @@ int *cs_post (int n, const int *parent)
 int cs_print (const cs *A, int brief)
 {
     int p, j, m, n, nzmax, nz, *Ap, *Ai ;
-    my_real *Ax ;
+    my_real_c *Ax ;
     if (!A) { printf ("(null)\n") ; return (0) ; }
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     nzmax = A->nzmax ; nz = A->nz ;
@@ -1473,7 +1473,7 @@ int cs_print (const cs *A, int brief)
 }
 
 /* x = b(P), for dense vectors x and b; P=NULL denotes identity */
-int cs_pvec (int n, const int *P, const my_real *b, my_real *x)
+int cs_pvec (int n, const int *P, const my_real_c *b, my_real_c *x)
 {
     int k ;
     if (!x || !b) return (0) ;				    /* check inputs */
@@ -1484,7 +1484,7 @@ int cs_pvec (int n, const int *P, const my_real *b, my_real *x)
 /* sparse QR factorization [V,beta,p,R] = qr (A) */
 csn *cs_qr (const cs *A, const css *S)
 {
-    my_real *Rx, *Vx, *Ax, *Beta, *x ;
+    my_real_c *Rx, *Vx, *Ax, *Beta, *x ;
     int i, k, p, m, n, vnz, p1, top, m2, len, col, rnz, *s, *leftmost, *Ap,
 	*Ai, *parent, *Rp, *Ri, *Vp, *Vi, *w, *Pinv, *Q ;
     cs *R, *V ;
@@ -1495,14 +1495,14 @@ csn *cs_qr (const cs *A, const css *S)
     vnz = S->lnz ; rnz = S->unz ;
     leftmost = Pinv + m + n ;
     w = cs_malloc (m2+n, sizeof (int)) ;
-    x = cs_malloc (m2, sizeof (my_real)) ;
+    x = cs_malloc (m2, sizeof (my_real_c)) ;
     N = cs_calloc (1, sizeof (csn)) ;
     if (!w || !x || !N) return (cs_ndone (N, NULL, w, x, 0)) ;
     s = w + m2 ;				/* size n */
     for (k = 0 ; k < m2 ; k++) x [k] = 0 ;	/* clear workspace x */
     N->L = V = cs_spalloc (m2, n, vnz, 1, 0) ;	/* allocate V */
     N->U = R = cs_spalloc (m2, n, rnz, 1, 0) ;	/* allocate R, m2-by-n */
-    N->B = Beta = cs_malloc (n, sizeof (my_real)) ;
+    N->B = Beta = cs_malloc (n, sizeof (my_real_c)) ;
     if (!R || !V || !Beta) return (cs_ndone (N, NULL, w, x, 0)) ;
     Rp = R->p ; Ri = R->i ; Rx = R->x ;
     Vp = V->p ; Vi = V->i ; Vx = V->x ;
@@ -1556,9 +1556,9 @@ csn *cs_qr (const cs *A, const css *S)
 }
 
 /* x=A\b where A can be rectangular; b overwritten with solution */
-int cs_qrsol (const cs *A, my_real *b, int order)
+int cs_qrsol (const cs *A, my_real_c *b, int order)
 {
-    my_real *x ;
+    my_real_c *x ;
     css *S ;
     csn *N ;
     cs *AT = NULL ;
@@ -1570,7 +1570,7 @@ int cs_qrsol (const cs *A, my_real *b, int order)
     {
 	S = cs_sqr (A, order, 1) ;	/* ordering and symbolic analysis */
 	N = cs_qr (A, S) ;		/* numeric QR factorization */
-	x = cs_calloc (S ? S->m2 : 1, sizeof (my_real)) ;
+	x = cs_calloc (S ? S->m2 : 1, sizeof (my_real_c)) ;
 	ok = (S && N && x) ;
 	if (ok)
 	{
@@ -1588,7 +1588,7 @@ int cs_qrsol (const cs *A, my_real *b, int order)
 	AT = cs_transpose (A, 1) ;	/* Ax=b is underdetermined */
 	S = cs_sqr (AT, order, 1) ;	/* ordering and symbolic analysis */
 	N = cs_qr (AT, S) ;		/* numeric QR factorization of A' */
-	x = cs_calloc (S ? S->m2 : 1, sizeof (my_real)) ;
+	x = cs_calloc (S ? S->m2 : 1, sizeof (my_real_c)) ;
 	ok = (AT && S && N && x) ;
 	if (ok)
 	{
@@ -1628,11 +1628,11 @@ int cs_reach (cs *L, const cs *B, int k, int *xi, const int *Pinv)
 }
 
 /* x = x + beta * A(:,j), where x is a dense vector and A(:,j) is sparse */
-int cs_scatter (const cs *A, int j, my_real beta, int *w, my_real *x, int mark,
+int cs_scatter (const cs *A, int j, my_real_c beta, int *w, my_real_c *x, int mark,
     cs *C, int nz)
 {
     int i, p, *Ap, *Ai, *Ci ;
-    my_real *Ax ;
+    my_real_c *Ax ;
     if (!A || !w || !C) return (-1) ;		/* ensure inputs are valid */
     Ap = A->p ; Ai = A->i ; Ax = A->x ; Ci = C->i ;
     for (p = Ap [j] ; p < Ap [j+1] ; p++)
@@ -1711,10 +1711,10 @@ css *cs_schol (const cs *A, int order)
 }
 
 /* solve Lx=b(:,k), leaving pattern in xi[top..n-1], values scattered in x. */
-int cs_splsolve (cs *L, const cs *B, int k, int *xi, my_real *x, const int *Pinv)
+int cs_splsolve (cs *L, const cs *B, int k, int *xi, my_real_c *x, const int *Pinv)
 {
     int j, jnew, p, px, top, n, *Lp, *Li, *Bp, *Bi ;
-    my_real *Lx, *Bx ;
+    my_real_c *Lx, *Bx ;
     if (!L || !B || !xi || !x) return (-1) ;
     Lp = L->p ; Li = L->i ; Lx = L->x ; n = L->n ;
     Bp = B->p ; Bi = B->i ; Bx = B->x ;
@@ -1820,7 +1820,7 @@ css *cs_sqr (const cs *A, int order, int qr)
 cs *cs_symperm (const cs *A, const int *Pinv, int values)
 {
     int i, j, p, q, i2, j2, n, *Ap, *Ai, *Cp, *Ci, *w ;
-    my_real *Cx, *Ax ;
+    my_real_c *Cx, *Ax ;
     cs *C ;
     if (!A) return (NULL) ;
     n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
@@ -1883,7 +1883,7 @@ int cs_tdfs (int j, int k, int *head, const int *next, int *post, int *stack)
 cs *cs_transpose (const cs *A, int values)
 {
     int p, q, j, *Cp, *Ci, n, m, *Ap, *Ai, *w ;
-    my_real *Cx, *Ax ;
+    my_real_c *Cx, *Ax ;
     cs *C ;
     if (!A) return (NULL) ;
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
@@ -1908,7 +1908,7 @@ cs *cs_transpose (const cs *A, int values)
 cs *cs_triplet (const cs *T)
 {
     int m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj ;
-    my_real *Cx, *Tx ;
+    my_real_c *Cx, *Tx ;
     cs *C ;
     if (!T) return (NULL) ;				/* check inputs */
     m = T->m ; n = T->n ; Ti = T->i ; Tj = T->p ; Tx = T->x ; nz = T->nz ;
@@ -1930,12 +1930,12 @@ cs *cs_triplet (const cs *T)
 int cs_updown (cs *L, int sigma, const cs *C, const int *parent)
 {
     int p, f, j, *Lp, *Li, *Cp, *Ci ;
-    my_real *Lx, *Cx, alpha, beta = 1, delta, gamma, w1, w2, *w, n,  beta2 = 1 ;
+    my_real_c *Lx, *Cx, alpha, beta = 1, delta, gamma, w1, w2, *w, n,  beta2 = 1 ;
     if (!L || !C || !parent) return (0) ;
     Lp = L->p ; Li = L->i ; Lx = L->x ; n = L->n ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     if ((p = Cp [0]) >= Cp [1]) return (1) ;	    /* return if C empty */
-    w = cs_malloc (n, sizeof (my_real)) ;
+    w = cs_malloc (n, sizeof (my_real_c)) ;
     if (!w) return (0) ;
     f = Ci [p] ;
     for ( ; p < Cp [1] ; p++) f = CS_MIN (f, Ci [p]) ;	/* f = min (find (C)) */
@@ -1964,10 +1964,10 @@ int cs_updown (cs *L, int sigma, const cs *C, const int *parent)
 }
 
 /* solve Ux=b where x and b are dense.  x=b on input, solution on output. */
-int cs_usolve (const cs *U, my_real *x)
+int cs_usolve (const cs *U, my_real_c *x)
 {
     int p, j, n, *Up, *Ui ;
-    my_real *Ux ;
+    my_real_c *Ux ;
     if (!U || !x) return (0) ;				    /* check inputs */
     n = U->n ; Up = U->p ; Ui = U->i ; Ux = U->x ;
     for (j = n-1 ; j >= 0 ; j--)
@@ -1992,7 +1992,7 @@ cs *cs_spalloc (int m, int n, int nzmax, int values, int triplet)
     A->nz = triplet ? 0 : -1 ;		    /* allocate triplet or comp.col */
     A->p = cs_malloc (triplet ? nzmax : n+1, sizeof (int)) ;
     A->i = cs_malloc (nzmax, sizeof (int)) ;
-    A->x = values ? cs_malloc (nzmax, sizeof (my_real)) : NULL ;
+    A->x = values ? cs_malloc (nzmax, sizeof (my_real_c)) : NULL ;
     return ((!A->p || !A->i || (values && !A->x)) ? cs_spfree (A) : A) ;
 }
 
@@ -2004,7 +2004,7 @@ int cs_sprealloc (cs *A, int nzmax)
     nzmax = (nzmax <= 0) ? (A->p [A->n]) : nzmax ;
     A->i = cs_realloc (A->i, nzmax, sizeof (int), &oki) ;
     if (A->nz >= 0) A->p = cs_realloc (A->p, nzmax, sizeof (int), &okj) ;
-    if (A->x) A->x = cs_realloc (A->x, nzmax, sizeof (my_real), &okx) ;
+    if (A->x) A->x = cs_realloc (A->x, nzmax, sizeof (my_real_c), &okx) ;
     ok = (oki && okj && okx) ;
     if (ok) A->nzmax = nzmax ;
     return (ok) ;
@@ -2100,10 +2100,10 @@ csd *cs_ddone (csd *D, cs *C, void *w, int ok)
 }
 
 /* solve U'x=b where x and b are dense.  x=b on input, solution on output. */
-int cs_utsolve (const cs *U, my_real *x)
+int cs_utsolve (const cs *U, my_real_c *x)
 {
     int p, j, n, *Up, *Ui ;
-    my_real *Ux ;
+    my_real_c *Ux ;
     if (!U || !x) return (0) ;				    /* check inputs */
     n = U->n ; Up = U->p ; Ui = U->i ; Ux = U->x ;
     for (j = 0 ; j < n ; j++)

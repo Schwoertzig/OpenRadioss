@@ -1,13 +1,13 @@
 #ifndef NODEWITHCOST_ORDSET_H
 #define NODEWITHCOST_ORDSET_H
 
-#include "my_real.h"
+#include "my_real_c.inc"
 #include <stdbool.h>
 #include <stdint.h>
 
 typedef struct {
     uint64_t ind_node;
-    my_real cost, heuristic;
+    my_real_c cost, heuristic;
     //Node_with_cost() = new(-1,0.,0.)
 } Node_with_cost;
 

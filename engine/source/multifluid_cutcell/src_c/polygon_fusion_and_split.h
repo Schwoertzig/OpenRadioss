@@ -1,7 +1,7 @@
 #ifndef POLYGON_FUSION_AND_SPLIT_H
 #define POLYGON_FUSION_AND_SPLIT_H
 
-#include "my_real.h"
+#include "my_real_c.inc"
 #include "Polygon2D.h"
 #include "vector_int.h"
 

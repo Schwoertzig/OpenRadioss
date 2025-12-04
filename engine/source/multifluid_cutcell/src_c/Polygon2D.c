@@ -37,7 +37,7 @@ Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix*
     copy_vec_int(phase_face, p->phase_face);
 
     //p->pressure_edge = alloc_empty_vec_double();
-    //p->pressure_edge->data = (my_real*) calloc(nb_rows, sizeof(my_real)); //all zeros
+    //p->pressure_edge->data = (my_real_c*) calloc(nb_rows, sizeof(my_real_c)); //all zeros
     //p->pressure_edge->capacity = nb_rows;
     //p->pressure_edge->size = nb_rows;
 
@@ -62,20 +62,20 @@ Polygon2D* new_Polygon2D_vefsp(const Vector_points2D* vertices, const GrB_Matrix
 
     //GrB_Matrix_ncols(&nb_rows, *(p->edges));
     //p->pressure_edge = alloc_empty_vec_double();
-    //p->pressure_edge->data = (my_real*) calloc(nb_rows, sizeof(my_real)); //all zeros
+    //p->pressure_edge->data = (my_real_c*) calloc(nb_rows, sizeof(my_real_c)); //all zeros
     //p->pressure_edge->capacity = nb_rows;
     //p->pressure_edge->size = nb_rows;
     
     return p;
 }
 
-Polygon2D* polygon2D_from_vertices(const my_real* x_v, unsigned long int n_x, const my_real* y_v, unsigned long int n_y){
+Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, const my_real_c* y_v, unsigned long int n_y){
     GrB_Info infogrb;
     GrB_Index nb_pts, nb_edges, nb_faces;
     uint64_t curr_face, curr_pt, curr_edge, iy, ix;
     uint64_t ind_pt_SW, ind_pt_SE, ind_pt_NW;
     uint64_t ind_e_W, ind_e_S, ind_e_E, ind_e_N;
-    my_real yS, xW;
+    my_real_c yS, xW;
     Point2D ptSW;
     Vector_points2D* vertices;
     Vector_int* status_edge, *phase_face;
@@ -238,7 +238,7 @@ Polygon2D* polygon2D_from_vertices(const my_real* x_v, unsigned long int n_x, co
     return res_p;
 }
 
-Polygon2D* polygon_from_consecutive_points(const my_real *x_v, const my_real* y_v, unsigned long int nb_pts){
+Polygon2D* polygon_from_consecutive_points(const my_real_c *x_v, const my_real_c* y_v, unsigned long int nb_pts){
     GrB_Info infogrb;
     unsigned long int nb_edges, nb_faces;
     Vector_points2D* vertices;
@@ -447,7 +447,7 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     return res_p;
 }
 
-void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vector_points2D *normals_edges, my_real* min_lgth_nom_edg){
+void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vector_points2D *normals_edges, my_real_c* min_lgth_nom_edg){
     GrB_Index j;
     GrB_Info infogrb;
     GrB_Vector ej, extr_vals_ej;
@@ -457,7 +457,7 @@ void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vec
     Point2D *pt1, *pt2, *pt;
     Point2D normal;
     int8_t sign;
-    my_real normVec;
+    my_real_c normVec;
                                         
     GrB_Matrix_nrows(&nb_pts, *(p->edges));
     GrB_Matrix_ncols(&nb_edges, *(p->edges));
@@ -467,7 +467,7 @@ void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vec
     infogrb = GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_edges);
 
     if (min_lgth_nom_edg){
-        #if (my_real == double)
+        #if (my_real_c == double)
         *min_lgth_nom_edg = __FLT64_MAX__;
         #else
         *min_lgth_nom_edg = __FLT32_MAX__;
