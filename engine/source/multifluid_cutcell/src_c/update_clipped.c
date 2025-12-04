@@ -352,6 +352,7 @@ static void split_edge(Polygon2D* p, uint64_t i_e, const Point2D *new_pt){
     int8_t val;
     GrB_Matrix new_line, new_edge, copy_mat;
     GrB_Index nb_faces, nb_cols, nb_rows;
+    long int i_s;
 
     GrB_Matrix_ncols(&nb_edge, *(p->edges));
     GrB_Matrix_ncols(&nb_faces, *(p->faces));
@@ -402,7 +403,8 @@ static void split_edge(Polygon2D* p, uint64_t i_e, const Point2D *new_pt){
 
     //push!(p.pressure_edge, p.pressure_edge[i_e]) //TODO Report this
     //push!(p.status_edge, p.status_edge[i_e]) //TODO Report this
-    push_back_vec_int(&(p->status_edge), get_ith_elem_vec_int(p->status_edge, i_e));
+    i_s = *get_ith_elem_vec_int(p->status_edge, i_e);
+    push_back_vec_int(&(p->status_edge), &i_s);
 
     GrB_Vector_free(&ej);
     GrB_Vector_free(&extr_vals_ej);
