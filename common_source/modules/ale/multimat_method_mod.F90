@@ -35,7 +35,7 @@
            integer is_defined_mmale2  ! 0.or.1  "mmale=2: Collocated HLLC + diffuse interface"                                                          <=> MULTI_FVM%IS_USED (law151)
            integer is_defined_mmale3  ! 0.or.1  "mmale=3: Collocated HLLC + lagrangian interface tracking"                                              <=> (2d cutcell bimat)
            integer nb ! number of /ALE/SOLVER/MULTIMAT defined
-           real(kind=WP) :: gamma(21)
+           real(kind=WP) :: gamma(21) = 0.
            type(multimat_method_list), allocatable, dimension(:) :: list
              contains
                procedure :: destruct => multimat_method_destructor
@@ -70,6 +70,7 @@
           integer :: i
           integer :: iad
           integer,dimension(:), allocatable :: IBUF
+          real(kind=WP) :: RBUF(21)
           NFIX = 4+3*this%nb
           ALLOCATE (IBUF(NFIX))
           IAD = 1
@@ -90,6 +91,8 @@
           CALL WRITE_I_C(IBUF,NFIX)
           DEALLOCATE(IBUF)
           DEALLOCATE(this%list)
+          RBUF(1:21) = this%gamma(1:21)
+          CALL WRITE_DB(RBUF,21)
         end subroutine multimat_method_write_to_restart        
       
         !read <- RST
@@ -100,6 +103,7 @@
           integer :: iad
           integer :: ILEN4(4)
           integer,allocatable,dimension(:) :: ILEN
+          real(kind=WP) :: RBUF(21)
           call read_i_c(ILEN4, 4)
           this%is_defined_mmale1 = ILEN4(1)
           this%is_defined_mmale2 = ILEN4(2)
@@ -116,6 +120,8 @@
             IAD = IAD + 3                       
           enddo
           deallocate(ILEN)
+          CALL READ_DB(RBUF,21)
+          this%gamma(1:21) = RBUF(1:21)
         end subroutine multimat_method_read_from_restart          
 
 
