@@ -30,7 +30,7 @@ void compute_lambdas2d_fortran_(const my_real *dt, \
                         my_real *ptr_lambdas_arr,    \
                         my_real *ptr_big_lambda_n,   \
                         my_real *ptr_big_lambda_np1, \
-                        Point3D *mean_normal, bool *is_narrowband);
+                        Point3D *mean_normal, long long *is_narrowband);
 void nb_pts_clipped_fortran_(long long int* signed_nb_pts_solid);
 void nb_edge_clipped_fortran_(long long int* signed_nb_edges_solid);
 void compute_normals_clipped_fortran_(my_real* normalVecx, my_real* normalVecy, \
