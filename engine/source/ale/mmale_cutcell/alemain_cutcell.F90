@@ -148,8 +148,8 @@
 
                  ! -------------------------------CALL 2D POC HERE
                  ! -----------------------------------------------
-                 gamma(1) = ALE%SOLVER%MULTIMAT%gamma(1)
-                 gamma(2) = ALE%SOLVER%MULTIMAT%gamma(2)
+                 gamma(1) = 1.4
+                 gamma(2) = 1.667
                  sign = 1 !not used for now
                  n2d = 2 ! 2D simulation
 

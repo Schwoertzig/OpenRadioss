@@ -85,13 +85,19 @@ void compute_lambdas2d_fortran_(const my_real *dt, \
                         my_real *ptr_lambdas_arr,   \
                         my_real *ptr_big_lambda_n,  \
                         my_real *ptr_big_lambda_np1,\
-                        Point3D *mean_normal, bool *is_narrowband)
+                        Point3D *mean_normal, long long *is_narrowband_ptr)
 {
     Array_double *lambdas;
     Vector_double *Lambda_n;
     Vector_double *Lambda_np1;
+    bool is_narrowband;
 
-    compute_lambdas2D(grid, clipped3D, *dt, &lambdas, &Lambda_n, &Lambda_np1, mean_normal, is_narrowband);
+    compute_lambdas2D(grid, clipped3D, *dt, &lambdas, &Lambda_n, &Lambda_np1, mean_normal, &is_narrowband);
+    if (is_narrowband) {
+        *is_narrowband_ptr = 1;
+    } else {
+        *is_narrowband_ptr = -1;
+    }
 
     memcpy(ptr_lambdas_arr, lambdas->data, lambdas->ncols*lambdas->nrows*sizeof(my_real));
 
