@@ -1335,6 +1335,7 @@ static void refine_interface(Polygon2D *p, my_real maximal_length){
     uint64_t i, nb_edges;
     Point2D *ext1, *ext2;
     my_real norm_e;
+    Point2D new_pt;
 
     GrB_Matrix_ncols(&nb_edges, *(p->edges));
     for(i=0; i<nb_edges; i++){
@@ -1342,9 +1343,9 @@ static void refine_interface(Polygon2D *p, my_real maximal_length){
         if ((ext1->x != ext2->x) || (ext1->y != ext2->y)){
             norm_e = sqrt((ext1->x-ext2->x)*(ext1->x-ext2->x) + (ext1->y-ext2->y)*(ext1->y-ext2->y));
             if (norm_e > maximal_length){
-                ext1->x = 0.5*(ext1->x + ext2->x);
-                ext1->y = 0.5*(ext1->y + ext2->y);
-                split_edge(p, i, ext1);
+                new_pt.x = 0.5*(ext1->x + ext2->x);
+                new_pt.y = 0.5*(ext1->y + ext2->y);
+                split_edge(p, i, &new_pt);
             }
         }
     }

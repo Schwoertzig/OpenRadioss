@@ -427,7 +427,7 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:), allocatable :: ptr_lambdas_arr
     real(kind=wp), dimension(:), allocatable :: ptr_big_lambda_n, ptr_big_lambda_np1
     type(Point3D) :: mean_normal
-    logical :: is_narrowband
+    integer(kind=8) :: is_narrowband
     real(kind=wp), dimension(4) :: ys, zs
 
     nb_cell = size(grid, 1)
@@ -456,7 +456,7 @@ module multicutcell_solver_mod
           grid(i,j)%normal_intern_face_space%y = mean_normal%y
           grid(i,j)%normal_intern_face_space%z = mean_normal%z
           grid(i,j)%normal_intern_face_time = mean_normal%t
-          grid(i,j)%is_narrowband = is_narrowband
+          grid(i,j)%is_narrowband = (is_narrowband>0)
           do k=1,nb_edges
             grid(i,j)%lambda_per_edge(k) = ptr_lambdas_arr((k-1)*nb_regions + j)
           end do
@@ -563,6 +563,7 @@ module multicutcell_solver_mod
     logical:: is_inside
 
     nb_cell = NUMELQ+NUMELTG !size(vely, 1)
+    id_pt_cell(:) = -1
     do i = 1,nb_pts_clipped
       call get_clipped_ith_vertex_fortran(i, pt) 
       is_inside = .true.
@@ -806,6 +807,15 @@ module multicutcell_solver_mod
     grid(:, :)%lambdan_per_cell_target = 0.
     
     odd_k = 1
+    do k=1,nb_regions
+      do i = 1,nb_cell
+        dW(i, k)%rho   = 0.0
+        dW(i, k)%rhovy = 0.0
+        dW(i, k)%rhovz = 0.0
+        dW(i, k)%rhoE  = 0.0
+      end do
+    end do
+
     do k=1,nb_regions
       do i = 1,nb_cell
         ind_targ = target_cells(i, k) !TODO problem here when parallel: what if the target cell is in an other region?
