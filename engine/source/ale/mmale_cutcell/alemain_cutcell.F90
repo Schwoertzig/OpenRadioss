@@ -221,7 +221,8 @@
 
                      !element time step
                      ! ... todo
-                     elbuf(ng)%gbuf%dt(ii) = max(abs(multi_cutcell%vel(1,elem_iid)), abs(multi_cutcell%vel(2,elem_iid))) + multi_cutcell%sound_speed(elem_iid)
+                     elbuf(ng)%gbuf%dt(ii) = max(abs(multi_cutcell%vel(1,elem_iid)), abs(multi_cutcell%vel(2,elem_iid))) &
+                                             + multi_cutcell%sound_speed(elem_iid)
 
                      !volume fraction
                      ! ... todo
