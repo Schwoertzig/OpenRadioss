@@ -42,7 +42,7 @@
           use ale_mod , only : ALE
           use debug_mod , only : ITAB_DEBUG
           use multi_cutcell_mod, only : multi_cutcell_struct, allocate_multi_cutcell_type
-          use multicutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell
+          use multicutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell, build_full_states
           use elbufdef_mod , only : elbuf_struct_
           use multicutcell_solver_mod , only : multicutcell_initial_state
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -149,7 +149,7 @@
                  ! -------------------------------CALL 2D POC HERE
                  ! -----------------------------------------------
                  gamma(1) = 1.4
-                 gamma(2) = 1.667
+                 gamma(2) = 1.4
                  sign = 1 !not used for now
                  n2d = 2 ! 2D simulation
 
@@ -168,6 +168,14 @@
                   call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
                               nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid)
                   call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
+                  call build_full_states(multi_cutcell%grid, multi_cutcell%phase_rho, &
+                              multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
+                              gamma, &
+                              multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot)
+                  multi_cutcell%sound_speed = multi_cutcell%grid(:,1)%lambdanp1_per_cell*& 
+                                sqrt(gamma(1) * multi_cutcell%phase_pres(:,1) / multi_cutcell%phase_rho(:,1)) + &
+                                multi_cutcell%grid(:,2)%lambdanp1_per_cell*&
+                                sqrt(gamma(2) * multi_cutcell%phase_pres(:,2) / multi_cutcell%phase_rho(:,2))
                  end if
                    
 

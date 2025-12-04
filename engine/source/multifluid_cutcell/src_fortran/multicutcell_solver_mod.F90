@@ -881,21 +881,9 @@ module multicutcell_solver_mod
     end do
 
     !Compute global variables for output
-    full_rho = grid(:,1)%lambdanp1_per_cell*rho(:,1) + &
-                        grid(:,2)%lambdanp1_per_cell*rho(:,2)
-    full_pres = grid(:,1)%lambdanp1_per_cell*p(:,1) + &
-                        grid(:,2)%lambdanp1_per_cell*p(:,2)
-    full_vel(2,:) = grid(:,1)%lambdanp1_per_cell*vely(:,1) + &
-                        grid(:,2)%lambdanp1_per_cell*vely(:,2)
-    full_vel(3,:) = grid(:,1)%lambdanp1_per_cell*velz(:,1) + &
-                        grid(:,2)%lambdanp1_per_cell*velz(:,2)
-
-    full_etot = 0.5*(full_vel(2,:)*full_vel(2,:)+full_vel(3,:)*full_vel(3,:)) &
-                          + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
-                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2))))) &
-                          + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
-                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2)))))
-  
+    call build_full_states(grid, rho, vely, velz, p, gamma, &
+                              full_rho, full_pres, full_vel, full_etot)
+    
     !Compute next dt
     largest_speed_wave = -1.
     do i = 1,nb_cell
@@ -921,6 +909,37 @@ module multicutcell_solver_mod
     deallocate(id_pt_cell)
   
   end subroutine update_fluid_multicutcell
+
+  subroutine build_full_states(grid, rho, vely, velz, p, gamma, &
+                              full_rho, full_pres, full_vel, full_etot)
+    use grid2D_struct_multicutcell_mod
+    implicit none
+    type(grid2D_struct_multicutcell), dimension(:, :), intent(in) :: grid
+    real(kind=wp), dimension(:,:), intent(in) :: vely
+    real(kind=wp), dimension(:,:), intent(in) :: velz
+    real(kind=wp), dimension(:,:), intent(in) :: rho
+    real(kind=wp), dimension(:,:), intent(in) :: p
+    real(kind=wp), dimension(:), intent(in) :: gamma
+    ! OUTPUT arguments
+    real(kind=wp), dimension(:), intent(out) :: full_rho, full_pres, full_etot
+    real(kind=wp), dimension(:, :), intent(out) :: full_vel 
+
+    full_rho = grid(:,1)%lambdanp1_per_cell*rho(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*rho(:,2)
+    full_pres = grid(:,1)%lambdanp1_per_cell*p(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*p(:,2)
+    full_vel(2,:) = grid(:,1)%lambdanp1_per_cell*vely(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*vely(:,2)
+    full_vel(3,:) = grid(:,1)%lambdanp1_per_cell*velz(:,1) + &
+                        grid(:,2)%lambdanp1_per_cell*velz(:,2)
+
+    full_etot = 0.5*(full_vel(2,:)*full_vel(2,:)+full_vel(3,:)*full_vel(3,:)) &
+                          + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
+                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2))))) &
+                          + (grid(:,1)%lambdanp1_per_cell*(p(:,1)/((gamma(1)*rho(:,1)))) + &
+                              grid(:,2)%lambdanp1_per_cell*(p(:,2)/((gamma(2)*rho(:,2)))))
+
+  end subroutine build_full_states
 
   !(y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
   subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, &
