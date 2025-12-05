@@ -270,12 +270,12 @@ c
                   LBUF%DMGSCL = ONE
               CALL MY_ALLOC(LBUF%TSAIWU,NEL*BUFLY%L_TSAIWU)                   
                   LBUF%TSAIWU = ZERO
-
               CALL MY_ALLOC(LBUF%PIJ,NEL*BUFLY%L_PIJ)              
                   LBUF%PIJ = ZERO
-C-------------initialization even in DP in Starter only---                  
-              CALL MY_ALLOC(LBUF%VOL0DP,NEL)              
+              CALL MY_ALLOC(LBUF%VOL0DP,NEL) !initialization even in DP in Starter only
                   LBUF%VOL0DP = ZERO
+              CALL MY_ALLOC(LBUF%VEL,NEL*BUFLY%L_VEL)
+                  LBUF%VEL = 1.23456789
               ENDDO                                                           
             ENDDO                                                          
            ENDDO 

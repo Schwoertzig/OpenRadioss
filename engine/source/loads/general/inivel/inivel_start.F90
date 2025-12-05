@@ -56,7 +56,7 @@
           time ,    iroddl,   ninivelt,      inivel_t,           &
           nparg,    ngroup,       lens,         iparg,           &
           elbuf_tab,         ms,         in,        weight,           &
-          nxframe,      t_kin)
+          nxframe,      t_kin, numels,numelq,numeltg)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -66,8 +66,9 @@
           use sensor_mod
           USE multi_fvm_mod
           use elbufdef_mod
-          use constant_mod,          only : zero,half
+          use constant_mod,  only : zero,half
           use precision_mod, only : WP
+          use ale_mod , only : ale
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -95,6 +96,9 @@
           integer , intent(in   )                          :: ngrsh3n   !< number tria element group
           integer , intent(in   )                          :: lens      !< dimension of work array itagvel
           integer , intent(in   ) ,dimension(numnod)       :: weight    !< nodal mass weight array (spmd)
+          integer , intent(in   )                          :: numels    !< number of hexa
+          integer , intent(in   )                          :: numelq    !< number of quad
+          integer , intent(in   )                          :: numeltg   !< number of triangle
           integer , dimension(nparg,ngroup), intent(in   ) :: iparg     !< element group data array
           type(inivel_), dimension(ninivelt),intent(inout) :: inivel_t  !< inivel_struc
           type (group_)  , dimension(ngrnod)               :: igrnod    !< node group array
@@ -119,7 +123,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          integer  :: i,j,id,n,ng,itype,nosys,sens_id,iremain,iupdate
+          integer  :: i,j,id,n,ng,itype,nosys,sens_id,iremain,iupdate,submat_id
           integer  :: igrs,igbric,igqd,igtria,isk,ifra,idir,ifm,k1,k2,k3
           integer  :: mtn,nel,nft,ii,n_ini
           integer , dimension(:) , allocatable :: itagvel
@@ -139,6 +143,7 @@
           igtria = 0
           sens_id = -HUGE(sens_id)
           tstart = -HUGE(tstart)
+          submat_id = 0
           igrs = 0
           ifra = 0
           idir = 0
@@ -147,6 +152,7 @@
           do n =1,ninivelt
             itype = inivel_t(n)%itype
             if (itype /=5 ) cycle
+            submat_id = inivel_t(n)%fvm%submat_id
             sens_id = inivel_t(n)%fvm%sensor_id
             tstart = inivel_t(n)%fvm%tstart
             tstart_s = zero
@@ -341,29 +347,61 @@
 !--
                 end do
                case(5)
-                if (igbric > 0) then
-                  igrs = igbric
-                  do j=1,igrbric(igrs)%nentity
-                    nosys=igrbric(igrs)%entity(j)
-                    multi_fvm%vel(1:3, nosys) = vl(1:3)
-                    itagvel(nosys) = 1
-                  end do
-                end if
-                if (igqd > 0) then
-                  igrs = igqd
-                  do j=1,igrquad(igrs)%nentity
-                    nosys=igrquad(igrs)%entity(j)
-                    multi_fvm%vel(1:3, nosys) = vl(1:3)
-                    itagvel(nosys) = 1
-                  end do
-                end if
-                if (igtria > 0) then
-                  igrs = igtria
-                  do j=1,igrsh3n(igrs)%nentity
-                    nosys=igrsh3n(igrs)%entity(j)
-                    multi_fvm%vel(1:3, nosys) = vl(1:3)
-                    itagvel(nosys) = 1
-                  end do
+                if(ALE%SOLVER%MULTIMAT%is_defined_mmale3 == 0)then
+                !law151
+                  if (igbric > 0) then
+                    igrs = igbric
+                    do j=1,igrbric(igrs)%nentity
+                      nosys=igrbric(igrs)%entity(j)
+                      multi_fvm%vel(1:3, nosys) = vl(1:3)
+                      itagvel(nosys) = 1
+                    end do
+                  end if
+                  if (igqd > 0) then
+                    igrs = igqd
+                    do j=1,igrquad(igrs)%nentity
+                      nosys=igrquad(igrs)%entity(j)
+                      multi_fvm%vel(1:3, nosys) = vl(1:3)
+                      itagvel(nosys) = 1
+                    end do
+                  end if
+                  if (igtria > 0) then
+                    igrs = igtria
+                    do j=1,igrsh3n(igrs)%nentity
+                      nosys=igrsh3n(igrs)%entity(j)
+                      multi_fvm%vel(1:3, nosys) = vl(1:3)
+                      itagvel(nosys) = 1
+                    end do
+                  end if
+                else
+                !multimat cutcell
+                  if (igbric > 0) then
+                    igrs = igbric
+                    do j=1,igrbric(igrs)%nentity
+                      nosys=igrbric(igrs)%entity(j)
+                      elbuf_tab(ng)%bufly(submat_id)%lbuf(1,1,1)%vel(nosys) = vl(2)
+                      elbuf_tab(ng)%bufly(submat_id)%lbuf(1,1,1)%vel(numels + nosys) = vl(3)
+                      itagvel(nosys) = 1
+                    end do
+                  end if
+                  if (igqd > 0) then
+                    igrs = igqd
+                    do j=1,igrquad(igrs)%nentity
+                      nosys=igrquad(igrs)%entity(j)
+                      elbuf_tab(ng)%bufly(submat_id)%lbuf(1,1,1)%vel(nosys) = vl(2)
+                      elbuf_tab(ng)%bufly(submat_id)%lbuf(1,1,1)%vel(numelq + nosys) = vl(3)
+                      itagvel(nosys) = 1
+                    end do
+                  end if
+                  if (igtria > 0) then
+                    igrs = igtria
+                    do j=1,igrsh3n(igrs)%nentity
+                      nosys=igrsh3n(igrs)%entity(j)
+                      elbuf_tab(ng)%bufly(submat_id)%lbuf(1,1,1)%vel(nosys) = vl(2)
+                      elbuf_tab(ng)%bufly(submat_id)%lbuf(1,1,1)%vel(numeltg + nosys) = vl(3)
+                      itagvel(nosys) = 1
+                    end do
+                  end if
                 end if
               end select
               inivel_t(n)%itype = -1

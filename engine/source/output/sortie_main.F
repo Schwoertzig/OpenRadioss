@@ -145,10 +145,10 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE TIMER_MOD
-      USE MAT_ELEM_MOD         
+      USE MAT_ELEM_MOD
       USE CLUSTER_MOD
-      USE INTBUFDEF_MOD  
-      USE CRACKXFEM_MOD 
+      USE INTBUFDEF_MOD
+      USE CRACKXFEM_MOD
       USE STACK_MOD
       USE ECND_MOD
       USE MULTI_FVM_MOD
@@ -219,7 +219,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(NODAL_ARRAYS_), INTENT(INOUT) :: NODES
-      TYPE(TIMER_), INTENT(INOUT) :: TIMERS 
+      TYPE(TIMER_), INTENT(INOUT) :: TIMERS
       TYPE(t_ebcs_tab), TARGET, INTENT(IN) :: EBCS_TAB
       LOGICAL LOUT
       INTEGER, INTENT(IN) :: SFANI
@@ -279,9 +279,9 @@ C-----------------------------------------------
       my_real, INTENT(INOUT) :: FSAVSURF(TH_SURF_NUM_CHANNEL,NSURF)
       my_real, DIMENSION(3,NUMNOD), INTENT(IN) :: X_C
       my_real, DIMENSION(3,SZ_NPCONT2), INTENT(INOUT) :: NPCONT2
-C-----------------------------------------------      
+C-----------------------------------------------
       TYPE(OUTPUT_),INTENT(INOUT) :: OUTPUT
-C-----------------------------------------------      
+C-----------------------------------------------
       TYPE (ELBUF_STRUCT_), DIMENSION(NGROUP)      :: ELBUF_TAB
       TYPE (ELBUF_STRUCT_), DIMENSION(NGROUP,NXEL) :: XFEM_TAB
       TYPE (CLUSTER_) ,DIMENSION(NCLUSTER)         :: CLUSTER
@@ -298,8 +298,8 @@ C-----------------------------------------------
       TYPE (SENSORS_)         ,INTENT(INOUT):: SENSORS
       TYPE (t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
       TYPE (DYNAIN_DATABASE), INTENT(INOUT) :: DYNAIN_DATA
-      TYPE(USER_WINDOWS_),INTENT(IN)        :: USER_WINDOWS     
-      TYPE(DT_),        INTENT(INOUT)       :: DT     
+      TYPE(USER_WINDOWS_),INTENT(IN)        :: USER_WINDOWS
+      TYPE(DT_),        INTENT(INOUT)       :: DT
       TYPE (LOADS_)   , INTENT(IN)          :: LOADS
       TYPE (TTABLE),DIMENSION(NTABLE)  ,INTENT(IN) :: TABLE
       TYPE (MATPARAM_STRUCT_) ,DIMENSION(NUMMAT) ,INTENT(IN) :: MAT_PARAM
@@ -332,9 +332,9 @@ C-----------------------------------------------
       my_real,  DIMENSION(:),ALLOCATABLE :: CSEFRIC,CSEFRIC_STAMP,CSEFRICG,CSEFRICG_STAMP
 
       INTEGER :: LEN_TMP_NAME,LEN_TMP_NAME2
-      CHARACTER(len=100) :: TMP_NAME,TMP_NAME2   
+      CHARACTER(len=100) :: TMP_NAME,TMP_NAME2
       CHARACTER FILNAMABF*100,FILNAMABF_TMP*100
-      LOGICAL :: NEED_TO_REINIT_FSAV !< boolean to re-initialize PARTSAV array 
+      LOGICAL :: NEED_TO_REINIT_FSAV !< boolean to re-initialize PARTSAV array
 C=======================================================================
       IF(IPLYXFEM == 0 ) ANIM_PLY = 0
       IF(ICRACK3D > 0 ) ANIM_CRK = 1
@@ -362,7 +362,7 @@ c
         CALL S10MVND(ICNDS10 ,VND   ,VMCDN    )
         CALL CNDMASI2(ICNDS10,NKEND,IMAP2ND,MASI2ND0,MS ,V  ,A   ,
      1                WEIGHT ,MAS_ND ,KEND  )
-        CALL ECRIT(TIMERS,PARTSAV  ,MS      ,VMCDN  ,IN       ,VR     , 
+        CALL ECRIT(TIMERS,PARTSAV  ,MS      ,VMCDN  ,IN       ,VR     ,
      2             DMAS     ,WEIGHT  ,ENINTOT  ,EKINTOT,
      3             A        ,AR      ,FXBIPM ,FXBRPM   ,MONVOL ,
      4             XMOM_SMS ,SENSORS ,QFRICINT ,IPARI  ,
@@ -371,7 +371,7 @@ c
         DEALLOCATE(VMCDN)
       ELSE
         BID = ZERO
-        CALL ECRIT(TIMERS,PARTSAV  ,MS      ,V      ,IN       ,VR     , 
+        CALL ECRIT(TIMERS,PARTSAV  ,MS      ,V      ,IN       ,VR     ,
      2             DMAS     ,WEIGHT  ,ENINTOT  ,EKINTOT,
      3             A        ,AR      ,FXBIPM ,FXBRPM   ,MONVOL ,
      4             XMOM_SMS ,SENSORS ,QFRICINT ,IPARI  ,
@@ -379,10 +379,10 @@ c
      6             BID      ,BID     ,H3D_DATA,DYNAIN_DATA,USER_WINDOWS%USREINT,OUTPUT)
       ENDIF
 C-----------------------
-C     SAVE TOTAL INTERNAL AND KINETIC ENERGY FOR ENERGY SENSOR 
+C     SAVE TOTAL INTERNAL AND KINETIC ENERGY FOR ENERGY SENSOR
 C-----------------------
 c
-      CALL SENSOR_ENERGY_TOTAL(SENSORS ,ENINTOT  ,EKINTOT)  
+      CALL SENSOR_ENERGY_TOTAL(SENSORS ,ENINTOT  ,EKINTOT)
 c
 C---------------------------------------
 C       calculation of flux and rotation
@@ -444,30 +444,30 @@ C----------------------
              ALLOCATE(CSEFRIC(OUTPUT%DATA%NINEFRIC*NUMNOD)) ! friction energy by surface unit
            ELSE
              ALLOCATE(CSEFRIC(0))
-           ENDIF   
+           ENDIF
            IF(OUTPUT%DATA%NINEFRIC_STAMP > 0) THEN
              ALLOCATE(CSEFRIC_STAMP(OUTPUT%DATA%NINEFRIC_STAMP*NUMNODG)) ! friction energy by surface unit
 
            ELSE
-             ALLOCATE(CSEFRIC_STAMP(0)) 
-           ENDIF 
+             ALLOCATE(CSEFRIC_STAMP(0))
+           ENDIF
            IF(H3D_DATA%N_SCAL_CSE_FRIC /=0) THEN
               ALLOCATE(CSEFRICG(NUMNOD)) ! Global friction energy by surface unit
               CSEFRICG = ZERO
               IF(NINTSTAMP /= 0) THEN
                  ALLOCATE(CSEFRICG_STAMP(NUMNODG)) ! Global friction energy by surface unit
               ELSE
-                 ALLOCATE(CSEFRICG_STAMP(0)) 
+                 ALLOCATE(CSEFRICG_STAMP(0))
               ENDIF
            ELSE
               ALLOCATE(CSEFRICG(0))
-              ALLOCATE(CSEFRICG_STAMP(0)) 
+              ALLOCATE(CSEFRICG_STAMP(0))
            ENDIF
       ELSE
          ALLOCATE(CSEFRIC(0))
          ALLOCATE(CSEFRIC_STAMP(0))
          ALLOCATE(CSEFRICG(0))
-         ALLOCATE(CSEFRICG_STAMP(0)) 
+         ALLOCATE(CSEFRICG_STAMP(0))
       ENDIF
 
 
@@ -501,17 +501,17 @@ C       Compute maximum contact force and pressure
 C----------------------------------------------------
       IF(ANIM_V(26)+H3D_DATA%N_VECT_CONT_MAX /=0) THEN
          CALL FCONT_MAX_OUTPUT(OUTPUT%DATA%VECT_CONT,FCONTG,NODGLOB,FCONT_MAX,WEIGHT)
-      ENDIF 
+      ENDIF
       IF(H3D_DATA%N_VECT_PCONT_MAX /=0) THEN
          CALL FCONT_MAX_OUTPUT(OUTPUT%DATA%VECT_PCONT,FNCONTG,NODGLOB,FNCONT_MAX,WEIGHT)
          CALL FCONT_MAX_OUTPUT(OUTPUT%DATA%VECT_PCONT_2,FTCONTG,NODGLOB,FTCONT_MAX,WEIGHT)
-      ENDIF 
+      ENDIF
       IF(H3D_DATA%N_VECT_CONT2_MAX /=0) THEN
          CALL FCONT2_MAX_OUTPUT(OUTPUT%DATA%VECT_CONT2,FCONT2_MAX,WEIGHT)
-      ENDIF 
+      ENDIF
       IF(H3D_DATA%N_VECT_CONT2_MIN /=0) THEN
          CALL FCONT2_MIN_OUTPUT(OUTPUT%DATA%VECT_CONT2,FCONT2_MIN,WEIGHT)
-      ENDIF 
+      ENDIF
       IF(H3D_DATA%N_VECT_PCONT2_MAX /=0) THEN
          CALL FPCONT2_MAX_OUTPUT(OUTPUT%DATA%VECT_PCONT2,FNCONT2_MAX,SZ_NPCONT2,NPCONT2,WEIGHT,
      .                           NPCONT2_MAX,NUMNOD)
@@ -523,7 +523,7 @@ C----------------------------------------------------
      .                           NPCONT2_MIN,NUMNOD)
          CALL FPCONT2_MIN_OUTPUT(OUTPUT%DATA%VECT_PCONT2_2,FTCONT2_MIN,SZ_NPCONT2,NPCONT2,WEIGHT,
      .                           NPCONT2_MIN,NUMNOD)
-      ENDIF 
+      ENDIF
 
       IF ( TRIGGER_ANIM )THEN
        IANIM=IANIM+1
@@ -536,7 +536,7 @@ C      N6 = N5 + NUMELC + NUMELTG + NUMELQ + 6*NUMELS
 C    .         + NUMELT + NUMELP  + NUMELR
 C      N7 = N6 + NUMMAT
 
-!       need to communicate the SKEW array on main proc 
+!       need to communicate the SKEW array on main proc
          CALL SPMD_SD_SKW_ANIM(SKEW,ISKWP)
          NEL3D = NUMELS + NUMSPH + 3*NUMELS16
          NEL2D = NUMELC + NUMELTG + NUMELQ
@@ -664,12 +664,12 @@ c
      Z         STACK      ,SPH2SOL   ,STIFN       ,STIFR       ,IGRNOD    ,
      1         H3D_DATA   ,SUBSET    ,MULTI_FVM   ,KNOTLOCPC   ,KNOTLOCEL ,
      2         FCONT_MAX  ,OUTPUT%DATA%VECT_PCONT2  ,OUTPUT%DATA%VECT_PCONT2_2    ,GLOB_THERM  ,
-     .         DRAPE_SH4N, DRAPE_SH3N, DRAPEG,OUTPUT    )
+     .         DRAPE_SH4N, DRAPE_SH3N, DRAPEG,OUTPUT,MULTI_CUTCELL    )
 c
        ENDIF
        IF(OUTPUT%DTANIM_FCT_ID > 0) THEN
           ! missing python here
-          OUTPUT%DTANIM  =  FINTER(OUTPUT%DTANIM_FCT_ID,TT+DT2,NPC,TF,DYDX)   
+          OUTPUT%DTANIM  =  FINTER(OUTPUT%DTANIM_FCT_ID,TT+DT2,NPC,TF,DYDX)
        ENDIF
       IF((TT>=OUTPUT%TANIM .AND.TT<=OUTPUT%TANIM_STOP)) OUTPUT%TANIM=OUTPUT%TANIM+OUTPUT%DTANIM
       IF ((TSTOP<OUTPUT%TANIM).AND.(OUTPUT%TANIM<TSTOP+EM06*TSTOP)
@@ -684,8 +684,8 @@ C-----------------------------------------------
 C     H3D FILE
 C-----------------------------------------------
       IF (ILASTH3D==1.OR.(TT>=H3D_DATA%TH3D.AND.TT<=H3D_DATA%TH3D_STOP) .OR. H3D_DATA%MH3D ==1 .OR.
-     .   (MSTOP == 1  .AND. ICTLSTOP == 0 .AND. H3D_DATA%IH3D/= 0) .OR. 
-     .   (MSTOP == 2  .AND. H3D_DATA%IH3D/= 0) .OR. 
+     .   (MSTOP == 1  .AND. ICTLSTOP == 0 .AND. H3D_DATA%IH3D/= 0) .OR.
+     .   (MSTOP == 2  .AND. H3D_DATA%IH3D/= 0) .OR.
      .   (DT2<=ZERO .AND. H3D_DATA%IH3D/= 0) )THEN
 
          H3D_DATA%IH3D=H3D_DATA%IH3D+1
@@ -823,7 +823,7 @@ c
       IF(ALLOCATED(CSEFRICG_STAMP)) DEALLOCATE(CSEFRICG_STAMP)
 
       IF(H3D_DATA%DTH3D_FCT_ID > 0) THEN
-          H3D_DATA%DTH3D  =  FINTER(H3D_DATA%DTH3D_FCT_ID,TT+DT2,NPC,TF,DYDX)  
+          H3D_DATA%DTH3D  =  FINTER(H3D_DATA%DTH3D_FCT_ID,TT+DT2,NPC,TF,DYDX)
        ENDIF
 
       IF(TT>=H3D_DATA%TH3D) H3D_DATA%TH3D = H3D_DATA%TH3D + H3D_DATA%DTH3D
@@ -947,10 +947,10 @@ C
        CALL GENDYNAIN(X        ,ELBUF_TAB, ELBUF  ,IXC      ,IXTG     ,
      2                IPARG    ,IPM      , IGEO   ,ITAB     ,IPART    ,
      3                PM       ,GEO      , IPART(K3),IPART(K8),LENG   ,
-     4                LENGC    ,LENGTG   , WEIGHT ,NODGLOB  ,THKE     ,               
-     5                NPBY     ,LPBY     , STACK  ,DRAPE_SH4N ,DRAPE_SH3N , 
-     6                DYNAIN_DATA,DRAPEG ,MAT_PARAM) 
-             
+     4                LENGC    ,LENGTG   , WEIGHT ,NODGLOB  ,THKE     ,
+     5                NPBY     ,LPBY     , STACK  ,DRAPE_SH4N ,DRAPE_SH3N ,
+     6                DYNAIN_DATA,DRAPEG ,MAT_PARAM)
+
        IF(TT>=DYNAIN_DATA%TDYNAIN)DYNAIN_DATA%TDYNAIN=DYNAIN_DATA%TDYNAIN+DYNAIN_DATA%DTDYNAIN
        IF ((TSTOP<DYNAIN_DATA%TDYNAIN).AND.(DYNAIN_DATA%TDYNAIN<TSTOP+EM06*TSTOP)
      .     .AND.(TSTOP+EM06*TSTOP<DYNAIN_DATA%TDYNAIN+DYNAIN_DATA%DTDYNAIN)) THEN
@@ -979,7 +979,7 @@ C----------------------
             IF (MULTI_FVM%IS_USED .AND. H3D_DATA%N_VECT_CONT > 0)CALL ANICON0(OUTPUT%DATA%FANI_CELL%F18,NUMELS+NUMELQ) !/H3D/ELEM/VECT/CONT
         ENDIF
         IF(NINTSTAMP/=0.AND.ANIM_V(4)+OUTP_V(4)+H3D_DATA%N_VECT_CONT >0)THEN
-            CALL ANICON2(FCONTG,NCONT,INDEXCONT)     
+            CALL ANICON2(FCONTG,NCONT,INDEXCONT)
         ENDIF
         IF(NINTER/=0.AND.ANIM_V(12)+OUTP_V(12)+H3D_DATA%N_VECT_PCONT>0)THEN
             CALL ANICON0(OUTPUT%DATA%VECT_PCONT,NUMNOD)
@@ -991,7 +991,7 @@ C----------------------
             CALL ANICON0(FTCONTG,NUMNODG)
           ELSE
             CALL ANICON2(FNCONTG,NCONT,INDEXCONT)
-            CALL ANICON2(FTCONTG,NCONT,INDEXCONT)  
+            CALL ANICON2(FTCONTG,NCONT,INDEXCONT)
           ENDIF
         ENDIF
 
@@ -1010,15 +1010,15 @@ C
             WRITE(ISTDO,*)' ** ERROR : TH VERSION OLDER THAN 41 IS ',
      *                    'NO MORE SUPPORTED'
       ELSE
-c check if an update of any output (TH,tha,thb,abf,..) is done  
-c in this case set flag to 1    
+c check if an update of any output (TH,tha,thb,abf,..) is done
+c in this case set flag to 1
         THUPDT = 0
         IF(TT>=OUTPUT%TH%THIS) THEN
             THUPDT = 1
         ELSEIF(NABFILE/=0)THEN
             IF(TT>=TABFIS(1)) THUPDT = 1
         ENDIF
-        IF(THUPDT==0)THEN    
+        IF(THUPDT==0)THEN
             DO I=1,9
                 IF(TT>=OUTPUT%TH%THIS1(I)) THEN
                     THUPDT = 1
@@ -1041,8 +1041,8 @@ C         To have double points
             ITHFLAG = 1
             CALL HIST2(PM   ,D    ,X     ,V   ,A    ,
      2                 IXS  ,ELBUF,WA(N2),IPARG,SENSORS%SENSOR_TAB,
-     4                 FSAV ,FLSW ,SKEW,ELBUF_TAB,CLUSTER,                                 
-     5                 PARTSAV,ACCELM,NSENSOR  ,MAT_PARAM, 
+     4                 FSAV ,FLSW ,SKEW,ELBUF_TAB,CLUSTER,
+     5                 PARTSAV,ACCELM,NSENSOR  ,MAT_PARAM,
      6                 WEIGHT,IPART,IGRSURF,EBCS_TAB,
      7                 OUTPUT%TH%ITHGRPA, OUTPUT%TH%ITHBUFA, SUBSET,GEO  ,
      8                 KXX   ,IXR,
@@ -1061,7 +1061,7 @@ C         To have double points
      N                 ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFA,
      Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START)
 
-            IF (SIZE_MES==1 .AND.AFORM(1)==3 .AND.ISPMD==0 ) 
+            IF (SIZE_MES==1 .AND.AFORM(1)==3 .AND.ISPMD==0 )
      *          CALL file_size(MULTITHFILESIZE(1))
 
 
@@ -1071,7 +1071,7 @@ C         To have double points
             IFILABF = 12
             CALL ABFHIST2(PM   ,D    ,X     ,V   ,A    ,
      2                  IXS  ,ELBUF,WA(N2),IPARG,
-     4                  FSAV ,FLSW ,SKEW,ELBUF_TAB,SENSORS%SENSOR_TAB,                               
+     4                  FSAV ,FLSW ,SKEW,ELBUF_TAB,SENSORS%SENSOR_TAB,
      5                  PARTSAV,ACCELM,LOUT ,NSENSOR  ,MAT_PARAM,
      6                  IPARI,WEIGHT,IPART,IGRSURF,
      7                  OUTPUT%TH%ITHGRPA,OUTPUT%TH%ITHBUFA,SUBSET,GEO  ,

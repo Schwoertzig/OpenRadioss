@@ -91,7 +91,7 @@ C-----------------------------------------------
      .   L_DAM,L_DSUM,L_DGLO,L_EPE,L_EPC,L_XST,L_SSP,L_Z,L_FRAC,L_VISC,
      .   L_THK,L_FOR,L_MOM,L_EPS,L_SMSTR,L_BFRAC,L_DMG,L_FORTH,L_EINTTH,
      .   L_SEQ,L_SIGPLY,L_JAC_I,L_FAC_YLD,L_ABURN,L_MU,L_PLANL,L_EPSDNL,
-     .   L_DMGSCL,L_PIJ,L_VOL0DP,L_TSAIWU
+     .   L_DMGSCL,L_PIJ,L_VOL0DP,L_TSAIWU,L_VEL
        INTEGER  ! failure variables
      .   LF_DAM,LF_DAMMX,LF_DAMINI,LF_TDEL,LF_INDX,LF_OFF
       my_real, 
@@ -398,6 +398,8 @@ c
           IAD = IAD+1 
         L_VOL0DP = NINT(RBUF(IAD+1)) 
           IAD = IAD+1
+        L_VEL = NINT(RBUF(IAD+1))
+          IAD = IAD+1
 c-------
 c
         BUFLY%ILAW      = ILAW             
@@ -490,7 +492,8 @@ c
         BUFLY%L_DMGSCL  = L_DMGSCL
         BUFLY%L_TSAIWU  = L_TSAIWU
         BUFLY%L_PIJ     = L_PIJ 
-        BUFLY%L_VOL0DP  = L_VOL0DP 
+        BUFLY%L_VOL0DP  = L_VOL0DP
+        BUFLY%L_VEL     = L_VEL
 c-------------------------------------------------
         IF (IGTYP == 51 .OR. IGTYP == 52) THEN
           NPTT = ELBUF_STR%BUFLY(IL)%NPTT
@@ -765,10 +768,12 @@ c--------
               IAD = IAD+NEL*L_TSAIWU 
           ALLOCATE(LBUF%PIJ(NEL*L_PIJ)  ,STAT=ERR)              
             LBUF%PIJ(1:NEL*L_PIJ)   = RBUF(IAD+1:IAD+NEL*L_PIJ)               
-              IAD = IAD+NEL*L_PIJ 
-C---------- size of DP ---             
+              IAD = IAD+NEL*L_PIJ
           ALLOCATE(LBUF%VOL0DP(NEL*L_VOL0DP)  ,STAT=ERR)              
               SDP_RBUF = SDP_RBUF + NEL*L_VOL0DP
+          ALLOCATE(LBUF%VEL(NEL*L_VEL)  ,STAT=ERR)
+            LBUF%VEL(1:NEL*L_VEL)   = RBUF(IAD+1:IAD+NEL*L_VEL)
+              IAD = IAD+NEL*L_VEL
 !----------------------------------------------------------
          ENDDO !next IT
         ENDDO !next IS

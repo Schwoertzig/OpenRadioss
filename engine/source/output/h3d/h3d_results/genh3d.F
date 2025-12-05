@@ -1829,7 +1829,7 @@ c
 c
         ALLOCATE(SHELL_SCALAR(NUMELC+NUMELTG))
         ALLOCATE(SHELL_STACK(MAX_SHELL_STACKSIZE))
-        ALLOCATE(SHELL_STACK_P(NUMELCG+NUMELTGG))        
+        ALLOCATE(SHELL_STACK_P(NUMELCG+NUMELTGG))
         ALLOCATE(SHELL_VECTOR(3*(NUMELC+NUMELTG)))
         ALLOCATE(SHELL_TENSOR(3*(NUMELC+NUMELTG)))
         ALLOCATE(SHELL_ID(NUMELC+NUMELTG))
@@ -2425,7 +2425,7 @@ c          IF(ISPMD == 0) print *,'H3D_DATA%OUTPUT_LIST(I)%PART',H3D_DATA%OUTPUT
      .                           IXP            ,IXR      ,PM   , OUTPUT%DATA%SCAL_SPRING,
      .                           ONED_SCALAR    ,ONED_ID  ,ONED_ITY,
      .                           IS_WRITEN_ONED ,IPARTT ,IPARTP,IPARTR,H3D_DATA%OUTPUT_LIST(I)%PART,
-     .                           KEYWORD, X , D   ,IPT, 
+     .                           KEYWORD, X , D   ,IPT,
      .                           NUMELP,  NUMELT,  NUMELR,NIXT,NIXP,
      .                           NIXR,    NGROUP,  ANIM_FE,  MX_ANI,   NPARG,
      .                           NPROPM,  NPROPG,  NUMMAT,   NUMGEO,   NUMNOD,
@@ -2622,7 +2622,7 @@ c         IF(ISPMD == 0)  print *,'H3D_DATA%OUTPUT_LIST(I)%PART',H3D_DATA%OUTPUT
      .                       SHELL_STACKSIZE)
 
 c
-           
+
             if (ispmd==0) then
                 IS_WRITEN_SHELL_P(1:SHELL_STACKSIZE) =  IS_WRITEN_SHELL(1:SHELL_STACKSIZE)
                 SHELL_STACK_P(1:SHELL_STACKSIZE) =  SHELL_STACK(1:SHELL_STACKSIZE)
@@ -2640,7 +2640,7 @@ c
                ! to fit with P0 order
                CALL H3D_GATHER_ID_VAL(IS_WRITEN_SHELL,SHELL_STACK,SHELL_STACKSIZE,
      *           IS_WRITEN_SHELL_P,SHELL_STACK_P,NUMELCG+NUMELTGG,
-     *           SHELL_STACKSIZE_P0,GATHER_SIZE,SH_TRIA_SPMD_OFFSETS,NSPMD,ISPMD,IT_SPMD)      
+     *           SHELL_STACKSIZE_P0,GATHER_SIZE,SH_TRIA_SPMD_OFFSETS,NSPMD,ISPMD,IT_SPMD)
 
                CALL STOPTIME(TIMERS,MACRO_TIMER_SPMDH3D)
             ENDIF
@@ -2850,7 +2850,7 @@ c          IF(ISPMD == 0)  print *,'solid scalar',N_OUTP_DATA,'IFUNC',IFUNC,'INF
      .                      STACK     ,SOLID_ID  ,SOLID_ITY     ,IPARTS       ,LAYER      ,
      .                      IR        ,IS        ,IT            ,IUVAR        ,H3D_DATA%OUTPUT_LIST(I)%PART,
      .                      IS_WRITEN_SOLID,INFO1,KEYWORD       ,OUTPUT%DATA%FANI_CELL    ,
-     .                      H3D_DATA, MULTI_FVM)
+     .                      H3D_DATA, MULTI_FVM, MULTI_CUTCELL)
 c
             IF (NSPMD > 1 ) THEN
               CALL STARTIME(TIMERS,MACRO_TIMER_SPMDH3D)

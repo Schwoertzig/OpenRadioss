@@ -108,7 +108,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER :: I,J,K,N,NRB,KPRI,KROT,NNOD,NOSYS,ITYPE,ID,ISK,IGR,IGRS,NBVEL
+      INTEGER :: I,J,K,N,NRB,KPRI,KROT,NNOD,NOSYS,ITYPE,ID,ISK,IGR,IGRS,NBVEL,ISUBMAT
       INTEGER :: USER_UNIT_ID,SUB_INDEX,IDIR,SENS_ID,NINIT,SENSID
       INTEGER :: IDGRBRICK, IDGRQUAD, IDGRTRIA, IDGRBRICK_LOC, IDGRQUAD_LOC, IDGRTRIA_LOC
       INTEGER :: NOD_COUNT,NODINIVEL,CPT,SUB_ID
@@ -136,6 +136,7 @@ C-----------------------------------------------
       IS_AVAILABLE = .FALSE.
       NBVEL = 0
       ISK = 0
+      ISUBMAT = 0
       IFRA = 0
       IFM = 0
       K1 = 0
@@ -316,6 +317,7 @@ C--------------------------------------------------
           CALL HM_GET_INTV('grqd_ID', IDGRQUAD, IS_AVAILABLE, LSUBMODEL)
           CALL HM_GET_INTV('grtria_ID', IDGRTRIA, IS_AVAILABLE, LSUBMODEL)
           CALL HM_GET_INTV('skew_ID', ISK, IS_AVAILABLE, LSUBMODEL)
+          CALL HM_GET_INTV('submat_id', ISUBMAT, IS_AVAILABLE, LSUBMODEL)
           IF(N2D /= 0 .AND. ISK == 0)THEN
             IF(VL1 /= 0)THEN
               !2D plane strain warning about X-velocity
@@ -328,6 +330,7 @@ C--------------------------------------------------
             INIVEL_T(NINIT)%ID = ID
             INIVEL_T(NINIT)%ITYPE = ITYPE
             INIVEL_T(NINIT)%FVM%SKEW_ID = ISK
+            INIVEL_T(NINIT)%FVM%SUBMAT_ID = ISUBMAT
             INIVEL_T(NINIT)%FVM%GRBRIC_ID = IDGRBRICK
             INIVEL_T(NINIT)%FVM%GRQD_ID   = IDGRQUAD
             INIVEL_T(NINIT)%FVM%GRTRIA_ID = IDGRTRIA

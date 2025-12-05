@@ -222,20 +222,25 @@
                      ! note : MULTI_CUTCELL%EINT ! is output as internal energy per unit volume (SI:J/m3) :  rho.e = EINT/VOL
                      !        consequently  MULTI_CUTCELL%EINT / MULTI_CUTCELL%RHO is internal energy density :  e
                      ! + remove kinetic energy
-                     ! ... todo
                      elbuf(ng)%gbuf%eint(ii) = multi_cutcell%rho(elem_iid) * (multi_cutcell%etot(elem_iid) - 0.5 * &
                                                   (multi_cutcell%vel(1,elem_iid)*multi_cutcell%vel(1,elem_iid) + &
                                                    multi_cutcell%vel(2,elem_iid)*multi_cutcell%vel(2,elem_iid)))
 
                      !element time step
-                     ! ... todo
                      elbuf(ng)%gbuf%dt(ii) = max(abs(multi_cutcell%vel(1,elem_iid)), abs(multi_cutcell%vel(2,elem_iid))) &
                                              + multi_cutcell%sound_speed(elem_iid)
 
                      !volume fraction
-                     ! ... todo
                      ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 1)%lambdanp1_per_cell
                      ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 2)%lambdanp1_per_cell
+
+                     !velocity-phase1
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,1)
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(numelq+ii) = multi_cutcell%phase_velz(elem_iid,1)
+                     !velocity-phase2
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,2)
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(numelq+ii) = multi_cutcell%phase_velz(elem_iid,2)
+
 
                    end do
                  enddo

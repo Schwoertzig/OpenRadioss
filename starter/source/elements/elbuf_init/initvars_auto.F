@@ -433,6 +433,7 @@ c         local material variables
           IF (BUFLY%L_EPSDNL == 0) BUFLY%L_EPSDNL = MTAG%L_EPSDNL
           IF (BUFLY%L_DMGSCL == 0) BUFLY%L_DMGSCL = MTAG%L_DMGSCL
           IF (BUFLY%L_TSAIWU == 0) BUFLY%L_TSAIWU = MTAG%L_TSAIWU
+          IF (BUFLY%L_VEL    == 0) BUFLY%L_VEL    = MLAW_TAG(GMAT)%L_VEL
         ENDIF ! GMAT > 0
 c       layer property variables
         IF(IGTYP > 0) THEN

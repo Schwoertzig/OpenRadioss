@@ -141,6 +141,7 @@ C
       ENDIF
 C---- Definition of internal variables (Elementary storage)
       MTAG%L_FRAC = 1   ! percentage of phase
+      IF(ALE%SOLVER%MULTIMAT%LIST(1)%MMALE == 3) MTAG%L_VEL = 2 ! independent velocity phase
 C-----------
       ! MATPARAM keywords
       CALL INIT_MAT_KEYWORD(MATPARAM,"INCOMPRESSIBLE")

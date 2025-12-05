@@ -1060,6 +1060,7 @@ c            Lloc = lloc + bufly%l_Vol0dp
             LLOC = LLOC + BUFLY%L_EPSDNL
             LLOC = LLOC + BUFLY%L_DMGSCL
             LLOC = LLOC + BUFLY%L_TSAIWU
+            LLOC = LLOC + BUFLY%L_VEL
             BUFLEN = BUFLEN + (LLOC * NEL + NPAR_LBUF) * NPG       
           ENDDO
 c          print*,'      local=',(LLOC * NEL + NPAR_LBUF) * NPG
@@ -1940,6 +1941,7 @@ c
             LLOC = LLOC + BUFLY%L_EPSDNL
             LLOC = LLOC + BUFLY%L_DMGSCL
             LLOC = LLOC + BUFLY%L_TSAIWU
+            LLOC = LLOC + BUFLY%L_VEL
 c
             BUFLEN = BUFLEN + (LLOC * NEL + NPAR_LBUF) * NIP_LAY 
             IF(IDRAPE > 0 .AND. (IGTYP == 51 .OR. IGTYP == 52)) THEN
@@ -2438,6 +2440,7 @@ c
             LLOC = LLOC + BUFLY%L_EPSDNL
             LLOC = LLOC + BUFLY%L_DMGSCL
             LLOC = LLOC + BUFLY%L_TSAIWU
+            LLOC = LLOC + BUFLY%L_VEL
 c
             BUFLEN = BUFLEN + (LLOC * NEL + NPAR_LBUF) * NIP_LAY
           ENDDO
