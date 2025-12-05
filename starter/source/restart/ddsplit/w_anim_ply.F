@@ -50,7 +50,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,K,P,ELEM,ND,NDSZ_L,ELSZ_L,ELPL,NCOUNT,EMPL
+      INTEGER I, K, ELEM, ND, NDSZ_L, ELSZ_L, ELPL, NCOUNT, EMPL
       INTEGER, DIMENSION(:), ALLOCATABLE :: ELNUM,ELEMIPT,ELEMXFEMID,
      *                                      NODNUM,NODEXTN,
      .                                      NODTAG,ELEMTAG,PLYSIZNG
@@ -131,7 +131,7 @@ C Ply shells
         CALL WRITE_I_C(ELNUM     , ELSZ_L)
         CALL WRITE_I_C(ELEMIPT   , ELSZ_L)
         CALL WRITE_I_C(ELEMXFEMID, ELSZ_L)
-C noeuds ply
+C ply nodes
         CALL WRITE_I_C(NDSZ_L    , 1     )
         CALL WRITE_I_C(NODNUM    , NDSZ_L)
         CALL WRITE_I_C(NODEXTN   , NDSZ_L)

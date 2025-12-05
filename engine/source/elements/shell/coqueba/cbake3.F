@@ -43,6 +43,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod      ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    stack_mod      ../engine/share/modules/stack_mod.F
 !||====================================================================
        SUBROUTINE CBAKE3 (
@@ -59,7 +60,8 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD   
       USE STACK_MOD
-      USE DRAPE_MOD         
+      USE DRAPE_MOD  
+      use element_mod , only : nixc       
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
@@ -99,11 +101,11 @@ C-----------------------------------------------
       INTEGER 
      .   NPLAT,NLAY,IPLAT(MVSIZ)
       INTEGER 
-     .   I, J,J1,J2, IR, IS, NEL,  IUN,  MX,L_DIRA ,L_DIRB ,
-     .   EP,NG,NPG,NNOD,IREP,PT1,PT2,PT3,LENF,LENM,NPTR,NPTS,
-     .   PT0,PTF,PTM,PTE,PTEP,PTS,PPTF,PPTM,PPTE,PPTEP,PPTS
+     .   I, J,J1,J2, IR, IS, NEL,  IUN,L_DIRA ,L_DIRB ,
+     .   NG,NPG,NNOD,IREP,LENF,LENM,NPTR,NPTS,
+     .   PTF,PTM
       INTEGER  MAT(MVSIZ), PID(MVSIZ), NGL(MVSIZ)
-      INTEGER  MPT,IORTH,IBID,IDRIL
+      INTEGER  MPT,IORTH,IDRIL
       PARAMETER (NPG = 4)
       PARAMETER (NNOD = 4)
       MY_REAL 
@@ -117,9 +119,9 @@ C-----------------------------------------------
      .      VASTN(MVSIZ,4*NNOD),AREA(MVSIZ),
      .      CDET(MVSIZ),THK2(MVSIZ)
       INTEGER 
-     .   NEL8,NEL5,NEL3,NPTM,IGTYP,PTMAT,NBM_S,NBDIR,NB16A
+     .   NEL8,NEL5,NEL3,NPTM,IGTYP
       MY_REAL 
-     .   SIGY(MVSIZ),VOL0(MVSIZ),THK0(MVSIZ),
+     .   VOL0(MVSIZ),THK0(MVSIZ),
      .   X13(MVSIZ) ,Y13(MVSIZ), X24(MVSIZ) ,HZ(MVSIZ),
      .   VOLG(MVSIZ),Y24(MVSIZ),HM(MVSIZ,4),HF(MVSIZ,4),HC(MVSIZ,2),
      .   HMOR(MVSIZ,2),HFOR(MVSIZ,2),HMFOR(MVSIZ,6),GS(MVSIZ)

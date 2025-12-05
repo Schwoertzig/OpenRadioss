@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    szforc3                ../engine/source/elements/solid/solidez/szforc3.F
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE S11DEFO3(
      1   PM,         V,          VEUL,       X,
@@ -40,6 +41,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

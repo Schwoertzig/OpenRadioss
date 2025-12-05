@@ -155,6 +155,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_mat127                           ../starter/source/materials/mat/mat127/hm_read_mat127.F90
 !||    hm_read_mat128                           ../starter/source/materials/mat/mat128/hm_read_mat128.F90
 !||    hm_read_mat129                           ../starter/source/materials/mat/mat129/hm_read_mat129.F90
+!||    hm_read_mat130                           ../starter/source/materials/mat/mat130/hm_read_mat130.F90
 !||    hm_read_mat133                           ../starter/source/materials/mat/mat133/hm_read_mat133.F90
 !||    hm_read_mat134                           ../starter/source/materials/mat/mat134/hm_read_mat134.F90
 !||    hm_read_mat163                           ../starter/source/materials/mat/mat163/hm_read_mat163.F90
@@ -175,6 +176,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    init_bcs_nrf                             ../starter/source/boundary_conditions/init_bcs_nrf.F90
 !||    init_inivol                              ../starter/source/initial_conditions/inivol/init_inivol.F90
 !||    init_inivol_2d_polygons                  ../starter/source/initial_conditions/inivol/init_inivol_2D_polygons.F90
+!||    init_rwall_penalty                       ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
 !||    initemp_shell                            ../starter/source/materials/therm/initemp_shell.F90
 !||    inivel_dt2                               ../engine/source/loads/general/inivel/inivel_dt2.F90
 !||    inivel_start                             ../engine/source/loads/general/inivel/inivel_start.F90
@@ -206,6 +208,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    m5in2                                    ../starter/source/initial_conditions/detonation/m5in2.F
 !||    m5in2t                                   ../starter/source/initial_conditions/detonation/m5in2t.F
 !||    m5in3                                    ../starter/source/initial_conditions/detonation/m5in3.F
+!||    margin_reduction                         ../starter/source/interfaces/inter3d1/margin.F90
 !||    mat25_crasurv_c                          ../engine/source/materials/mat/mat025/mat25_crasurv_c.F90
 !||    mat25_crasurv_s                          ../engine/source/materials/mat/mat025/mat25_crasurv_s.F90
 !||    mat25_tsaiwu_c                           ../engine/source/materials/mat/mat025/mat25_tsaiwu_c.F90
@@ -262,6 +265,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    redef_seatbelt                           ../engine/source/tools/seatbelts/redef_seatbelt.F90
 !||    retractor_table_inv                      ../engine/source/tools/seatbelts/retractor_table_inv.F90
 !||    retractor_table_inv2                     ../engine/source/tools/seatbelts/retractor_table_inv2.F90
+!||    rgwal0_pen                               ../engine/source/constraints/general/rwall/rgwall_pen.F90
+!||    rwall_fpen                               ../engine/source/constraints/general/rwall/rgwall_pen.F90
 !||    s10get_x0                                ../engine/source/elements/solid/solide10/s10get_x0.F90
 !||    s20temp                                  ../starter/source/elements/solid/solide20/s20temp.F90
 !||    s6chour_ctl                              ../engine/source/elements/thickshell/solide6c/s6chour_ctl.F90
@@ -301,6 +306,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sigeps128c                               ../engine/source/materials/mat/mat128/sigeps128c.F90
 !||    sigeps128s                               ../engine/source/materials/mat/mat128/sigeps128s.F90
 !||    sigeps129s                               ../engine/source/materials/mat/mat129/sigeps129s.F90
+!||    sigeps130                                ../engine/source/materials/mat/mat130/sigeps130.F90
 !||    sigeps133                                ../engine/source/materials/mat/mat133/sigeps133.F90
 !||    sigeps134s                               ../engine/source/materials/mat/mat134/sigeps134s.F90
 !||    sigeps163                                ../engine/source/materials/mat/mat163/sigeps163.F90
@@ -368,14 +374,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         my_real, parameter ::  THIRTY            = 30.
         my_real, parameter ::  THIRTY2           = 32.
         my_real, parameter ::  THIRTY6           = 36.
-        my_real, parameter ::  FOURTY            = 40.
-        my_real, parameter ::  FOURTY5           = 45.
-        my_real, parameter ::  FOURTY8           = 48.
+        my_real, parameter ::  FORTY             = 40.
+        my_real, parameter ::  FORTY5            = 45.
+        my_real, parameter ::  FORTY8            = 48.
         my_real, parameter ::  FIFTY             = 50.
         my_real, parameter ::  FIFTY4            = 54.
         my_real, parameter ::  SIXTY4            = 64.
         my_real, parameter ::  EIGHTY            = 80.
-        my_real, parameter ::  NINTY             = 90.
+        my_real, parameter ::  NINETY            = 90.
         my_real, parameter ::  EIGHTY16          = 96.
         my_real, parameter ::  EIGHTY19          = 99.
         my_real, parameter ::  HUNDRED           = 100.
@@ -509,11 +515,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         my_real, parameter ::  TWO_THIRD    = TWO/THREE
         my_real, parameter ::  THREE_HALF     = THREE/TWO
         my_real, parameter ::  THREE_OVER_4    = THREE/FOUR
-        my_real, parameter ::  TRHEE_OVER_14 = THREE/FOURTEEN
-        my_real, parameter ::  TSEIZE    = THREE/SIXTEEN
+        my_real, parameter ::  THREE_OVER_14 = THREE/FOURTEEN
+        my_real, parameter ::  THREE_OVER_16 = THREE/SIXTEEN
         my_real, parameter ::  FOUR_OVER_3    = FOUR/THREE
         my_real, parameter ::  FOUR_OVER_5     = FOUR/FIVE
-        my_real, parameter ::  QNEUF     = FOUR/NINE
+        my_real, parameter ::  FOUR_OVER_9 = FOUR/NINE
         my_real, parameter ::  FIVE_OVER_3    = FIVE/THREE
         my_real, parameter ::  FIVE_OVER_4   = FIVE/FOUR
         my_real, parameter ::  FIVE_OVER_6      = FIVE/SIX
@@ -523,7 +529,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         my_real, parameter ::  SEVEN_OVER_9    = SEVEN/NINE
         my_real, parameter ::  NINE_OVER_2  = NINE/TWO
         my_real, parameter ::  NINE_OVER_10  = NINE/TEN
-        my_real, parameter ::  NSEIZE    = NINE/SIXTEEN
+        my_real, parameter ::  NINE_OVER_16 = NINE/SIXTEEN
         my_real, parameter ::  NINE_OVER_20    = NINE/TWENTY
         my_real, parameter ::  ZEP11     = ZEP1 + ZEP01
         my_real, parameter ::  ZEP12     = ZEP1 + ZEP02
@@ -584,10 +590,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         my_real, parameter ::  ZEP931    = ZEP93  + EM03
         my_real, parameter ::  ZEP015    = ZEP15 / TEN
         my_real, parameter ::  ZEP015625 = ONE / SIXTY4
-        my_real, parameter ::  ZEP025    = ONE / FOURTY
+        my_real, parameter ::  ZEP025    = ONE / FORTY
         my_real, parameter ::  ZEP037    = ZEP03 + SEVENEM3
         my_real, parameter ::  ZEP072169 = ZEP07 + TWOEM3 + EM04 + SIXEM5 + NINEEM6
-        my_real, parameter ::  ZEP075    = THREE / FOURTY
+        my_real, parameter ::  ZEP075    = THREE / FORTY
         my_real, parameter ::  ONEP01    = ONE + ZEP01
         my_real, parameter ::  ONEP001   = ONE + EM03
         my_real, parameter ::  ONEP0001  = ONE + EM04
@@ -729,7 +735,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         my_real, parameter ::  NINEP38  = NINE + ZEP3 + ZEP08
         my_real, parameter ::  NINEP793 = NINE + ZEP7 + ZEP09 + THREEEM3
         my_real, parameter ::  ELEVENP5     = ELEVEN     + ZEP5
-        my_real, parameter ::  ONZEP225   = ELEVEN  + ZEP2 + ZEP02+FIVEEM3
+        my_real, parameter ::  ELEVEN_P225 = ELEVEN  + ZEP2 + ZEP02+FIVEEM3
         my_real, parameter ::  TWELVEP6    = TWELVE    + ZEP6
         my_real, parameter ::  FOURTEENP2 = FOURTEEN + ZEP2
         my_real, parameter ::  SIXTEENP5    = SIXTEEN    + ZEP5
@@ -742,7 +748,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         my_real, parameter ::  NINEP637EM5 = 9637. * EM08
         my_real, parameter ::  ONEP3EM5     = ONEP3  * EM05
         my_real, parameter ::  ZEP426667 = HUNDRED28 / THREE100
-        my_real, parameter ::  ZEP222    = TEN / FOURTY5
+        my_real, parameter ::  ZEP222    = TEN / FORTY5
         my_real, parameter ::  ZEP00666666667 = TWO / THREE100
         my_real, parameter ::  ZEP01666666667 = FIVE / THREE100
         my_real, parameter ::  ZEP444    = HUNDRED / TWOHUNDRED25

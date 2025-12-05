@@ -52,6 +52,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod        ../engine/share/modules/drape_mod.F
 !||    dt_mod           ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod     ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod   ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod     ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -86,7 +87,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      O            NODEDGE,CRKEDGE, STACK ,DRAPE_SH4N,NLOC_DMG,
      P            INDX_DRAPE, IGRE ,DT, NCYCLE,SNPC,  STF  ,
      P            GLOB_THERM  ,IDEL7NOK ,USERL_AVAIL,
-     Q            MAXFUNC ,SBUFMAT)
+     Q            MAXFUNC ,SBUFMAT,IPART     ,LIPART1)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -102,6 +103,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE DT_MOD
       use glob_therm_mod
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
@@ -138,6 +140,9 @@ C-----------------------------------------------
      .        IPARG(*),IXFEM,INOD_CRK(*),IEL_CRK(*),IADC_CRK(4,*),
      .        ELCUTC(2,*),NODEDGE(2,*),INDX_DRAPE(SCDRAPE)
       INTEGER, INTENT(IN) :: IGRE, NCYCLE
+      integer, intent(in) :: LIPART1      
+      INTEGER, DIMENSION(LIPART1, NPART), INTENT(IN)     :: IPART
+     
 C     REAL OR REAL*8
       my_real
      .   F11(MVSIZ),F12(MVSIZ),F13(MVSIZ),F14(MVSIZ),
@@ -174,14 +179,14 @@ C   L O C A L   V A R I A B L E S
 C--------------------------------
       LOGICAL PLAT(MVSIZ)
       INTEGER 
-     .   I,J,NEL,MX,NNOD,NPG,IBID,ISROT,IXLAY,NXLAY,NLAYER,NPTT,
-     .   IR,IS,IT,IPT,NG,L_DIRA,L_DIRB,J1,J2,IXFEM2,IPTHK,
+     .   I,NEL,NNOD,NPG,IBID,ISROT,IXLAY,NXLAY,NLAYER,NPTT,
+     .   IR,IS,IT,NG,L_DIRA,L_DIRB,J1,J2,IXFEM2,IPTHK,
      .   IORTH,ILEV,IGMAT,IGTYP,IREP,IMAT,
      .   ACTIFXFEM, SEDRAPE,NUMEL_DRAPE
       INTEGER  MAT(MVSIZ),PID(MVSIZ),NGL(MVSIZ),FWAVE(MVSIZ)
       PARAMETER (NNOD = 4)
       my_real 
-     .  RH0(MVSIZ),LL(MVSIZ),VL13(MVSIZ,3),VL24(MVSIZ,3),VLHI(MVSIZ,3),
+     .  LL(MVSIZ),VL13(MVSIZ,3),VL24(MVSIZ,3),VLHI(MVSIZ,3),
      .  RLXYZ(MVSIZ,8),X13(MVSIZ),X24(MVSIZ),Y13(MVSIZ),Y24(MVSIZ),
      .  MX13(MVSIZ),MX23(MVSIZ),MX34(MVSIZ),MY13(MVSIZ),MY23(MVSIZ),
      .  MY34(MVSIZ),Z1(MVSIZ),Z2(MVSIZ)
@@ -504,7 +509,8 @@ C-----------------------------
      R       INDX_DRAPE, THKE     ,SEDRAPE     ,NUMEL_DRAPE,DT   ,
      Q       NCYCLE    ,SNPC      ,STF         ,NXLAYMAX  ,IDEL7NOK  ,
      S       USERL_AVAIL ,MAXFUNC ,NPTTOT      ,SBUFMAT   ,SDIR_A    ,
-     T       SDIR_B   ,GBUF%FOR_G ,SSP_EQ )
+     T       SDIR_B   ,GBUF%FOR_G ,SSP_EQ ,
+     X       IPART    ,LIPART1    ,IPARTC  )
 C-----------------------------
         IF ((ITASK==0).AND.(IMON_MAT==1)) CALL STOPTIME(TIMERS,35)
 C--------------------------

@@ -47,6 +47,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    alefvm_mod                           ../common_source/modules/ale/alefvm_mod.F
 !||    ebcs_mod                             ../common_source/modules/boundary_conditions/ebcs_mod.F90
 !||    elbufdef_mod                         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                          ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod                          ../engine/share/resol/initbuf.F
 !||    matparam_def_mod                     ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    message_mod                          ../engine/share/message_module/message_mod.F
@@ -79,6 +80,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
       USE MULTI_MUSCL_FLUXES_COMPUTATION_MOD , ONLY : MULTI_MUSCL_FLUXES_COMPUTATION
       USE OUTPUT_MOD , ONLY : OUTPUT_
+      use element_mod , only : nixs,nixq,nixtg
 C-----------------------------------------------
 C     I m p l i c i t   T y p e s
 C-----------------------------------------------

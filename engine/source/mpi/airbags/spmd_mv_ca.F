@@ -61,7 +61,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER LOC_PROC,I,J,II,P,L,SIZ,NB,IJ,RADVOIS,
+      INTEGER LOC_PROC,I,II,P,L,SIZ,NB,IJ,RADVOIS,
      .        MSGTYP,MSGOFF,MSGOFF2,IERROR, ICOMRC,
      .        ICOMSD(NSPMD),REQ_S(NSPMD),IGAS,
      .        STATUS(MPI_STATUS_SIZE)
@@ -86,7 +86,7 @@ C-----------------------------------------------
         END DO
         DO I=1,NAV
           II = ICBAG(1,I)
-C si pmain
+C if pmain
           IF(FR_MV(NSPMD+2,II)==LOC_PROC)THEN
             NB = NB + 1
             BUFS(L+1)=II
@@ -135,7 +135,7 @@ C
             ICOMRC = 0
             DO I=1,NAV
               II = ICBAG(1,I)
-C si pmain
+C if pmain
               IF(FR_MV(NSPMD+2,II)==P.AND.
      +           FR_MV(LOC_PROC,II)==0)THEN
                 ICOMRC = 1
@@ -185,7 +185,7 @@ C
           DO P = 1, NSPMD
             ICOMSD(P) = 0
           END DO
-C si pmain
+C if pmain
           L = 0
           DO I=1,NAV
             II = ICBAG(1,I)

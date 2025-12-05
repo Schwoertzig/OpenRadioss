@@ -43,11 +43,11 @@ C            A R G U M E N T S
 C-----------------------------------------------
 C     KXIG3D(NIXIG3D,NUMELIG3D)  TABLEAU CONECS+PID+No ElEMENTS         E
 C     GEO(NPROPG,NUMGEO) array of the characteristics of the PID
-C     INUM(8,NUMELIG3D)    TABLEAU DE TRAVAIL                         E/S
-C     ITR1(NSELR)       TABLEAU DE TRAVAIL                            E/S
-C     EADD(NUMELIG3D)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
-C     INDEX(NUMELIG3D)     TABLEAU DE TRAVAIL                         E/S
-C     ITRI(4,NUMELIG3D)    TABLEAU DE TRAVAIL                         E/S
+C     INUM(8,NUMELIG3D)    WORKING ARRAY                         E/S
+C     ITR1(NSELR)       WORKING ARRAY                            E/S
+C     EADD(NUMELIG3D)      ARRAY OF ADRESSES IN IDAM CHGT DAMIER   S
+C     INDEX(NUMELIG3D)     WORKING ARRAY                         E/S
+C     ITRI(4,NUMELIG3D)    WORKING ARRAY                         E/S
 C     IPARTIG3D(NUMELIG3D)    TABLEAU PART                            E/S
 C     CEP(NUMELIG3D)    TABLEAU PROC                                  E/S
 C     XEP(NUMEX)    TABLEAU PROC                                      E/S
@@ -77,8 +77,8 @@ C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
       INTEGER 
-     .        I, K, NG, ISSN, NPN, NN, N, MID, PID ,
-     .        II, J, II2,JJ2,JJ, II3, JJ3, L,NGROU,
+     .        I, K, NN, MID, PID ,
+     .        II, J, II2,JJ2,JJ, II3, JJ3,
      .        MODE, WORK(70000),NCTRL,MLN,JALE_FROM_MAT,JALE_FROM_PROP
       EXTERNAL MY_SHIFTL,MY_SHIFTR,MY_AND
       INTEGER MY_SHIFTL,MY_SHIFTR,MY_AND

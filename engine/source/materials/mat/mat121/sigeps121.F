@@ -83,7 +83,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J,IRES,Ifail,NINDX,NINDX2,INDX(NEL),INDX2(NEL),
      .        IPOS(NEL),IAD(NEL),ILEN(NEL),IR,IS,IT
-      my_real DTMIN,Xscale_FAIL,Yscale_FAIL,S1,S2,Q,S11,
+      my_real DTMIN,Xscale_FAIL,Yscale_FAIL,Q,S11,
      .        S22,R_INTER,DFDEPSD(NEL),FAIL(NEL),SEQ(NEL),
      .        I1,I2,I3,R,PSI,S33
 C=======================================================================
@@ -204,7 +204,7 @@ c
      .               SIGNYY(I)*SIGNZX(I)*SIGNZX(I)-SIGNZZ(I)*SIGNXY(I)*SIGNXY(I)+
      .               TWO*SIGNXY(I)*SIGNZX(I)*SIGNYZ(I)
                 Q  = (THREE*I2 - I1*I1)/NINE
-                R  = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/CINQUANTE4     ! (2*I3^3-9*I1*I2+27*I3)/54
+                R  = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/FIFTY4     ! (2*I3^3-9*I1*I2+27*I3)/54
                 R_INTER = MIN(R/SQRT(MAX(EM20,(-Q**3))),ONE)
                 PSI = ACOS(MAX(R_INTER,-ONE))
                 S11 = TWO*SQRT(-Q)*COS(PSI/THREE)+THIRD*I1
@@ -237,7 +237,7 @@ c
      .               SIGNYY(I)*SIGNZX(I)*SIGNZX(I)-SIGNZZ(I)*SIGNXY(I)*SIGNXY(I)+
      .               TWO*SIGNXY(I)*SIGNZX(I)*SIGNYZ(I)
                 Q  = (THREE*I2 - I1*I1)/NINE
-                R  = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/CINQUANTE4     ! (2*I3^3-9*I1*I2+27*I3)/54
+                R  = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/FIFTY4     ! (2*I3^3-9*I1*I2+27*I3)/54
                 R_INTER = MIN(R/SQRT(MAX(EM20,(-Q**3))),ONE)
                 PSI = ACOS(MAX(R_INTER,-ONE))
                 S11 = TWO*SQRT(-Q)*COS(PSI/THREE)+THIRD*I1

@@ -36,6 +36,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sum_6_float       ../engine/source/system/parit.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE RBYPID(IPARG   ,IPARI       ,MS    ,IN     ,
      .                  IXS     ,IXQ  ,IXC   ,IXT   ,IXP    ,
@@ -49,6 +50,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD            
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -81,16 +83,16 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, II, NG, ITY, NEL, NFT, IAD, IGOF, N, NI, LSKYRBKG,
-     .   M, ISPH, NALL,MLW, K, PMAIN, TAG, L,
+      INTEGER I, II, NG, ITY, NEL, NFT, IAD, IGOF, N, NI,
+     .   M, ISPH, NALL,MLW, K, PMAIN, TAG,
      .   MX,ICOMM(NSPMD+2),ISTRAIN,NPT,IHBE, ID
 C     REAL
       my_real
      .   XMOM, YMOM, ZMOM,II1,II2,II3,II4,II5,II6,II7,II8,II9,
      .   IG1,IG2,IG3,IG4,IG5,IG6,IG7,IG8,IG9,
      .   XXMOM, YYMOM, ZZMOM, WA1, WA2, WA3, 
-     .   TSUM(100),
-     .   FSKYRBK(NSKYRBK0*10+1),
+     .   
+     .   
      .   F1(NSN), F2(NSN), F3(NSN), F4(NSN),
      .   F5(NSN), F6(NSN), OFF_OLD
       DOUBLE PRECISION RBF6(6,6)

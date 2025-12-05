@@ -101,6 +101,7 @@
 !||    sigeps127              ../engine/source/materials/mat/mat127/sigeps127.F90
 !||    sigeps128s             ../engine/source/materials/mat/mat128/sigeps128s.F90
 !||    sigeps129s             ../engine/source/materials/mat/mat129/sigeps129s.F90
+!||    sigeps130              ../engine/source/materials/mat/mat130/sigeps130.F90
 !||    sigeps133              ../engine/source/materials/mat/mat133/sigeps133.F90
 !||    sigeps134s             ../engine/source/materials/mat/mat134/sigeps134s.F90
 !||    sigeps163              ../engine/source/materials/mat/mat163/sigeps163.F90
@@ -178,6 +179,7 @@
 !||    sigeps127_mod          ../engine/source/materials/mat/mat127/sigeps127.F90
 !||    sigeps128s_mod         ../engine/source/materials/mat/mat128/sigeps128s.F90
 !||    sigeps129s_mod         ../engine/source/materials/mat/mat129/sigeps129s.F90
+!||    sigeps130_mod          ../engine/source/materials/mat/mat130/sigeps130.F90
 !||    sigeps133_mod          ../engine/source/materials/mat/mat133/sigeps133.F90
 !||    sigeps134s_mod         ../engine/source/materials/mat/mat134/sigeps134s.F90
 !||    sigeps163_mod          ../engine/source/materials/mat/mat163/sigeps163.F90
@@ -256,6 +258,7 @@
           use sigeps127_mod
           use sigeps128s_mod
           use sigeps129s_mod
+          use sigeps130_mod
           use sigeps133_mod , only : sigeps133
           use sigeps134s_mod
           use sigeps163_mod
@@ -2071,6 +2074,22 @@
               sigy     ,et       ,defp     ,dpla     ,epsd     ,ssp      ,  &
               lbuf%temp,el_temp  ,off      ,tt       ,iexpan   ,amu      ,  &
               sensors  )
+!
+          else if (mtn == 130) then
+            idev = 1
+            call mstrain_rate(nel    ,israte ,asrate ,epsd     ,idev     ,     &
+              ep1      ,ep2      ,ep3      ,ep4      ,ep5      ,ep6      )
+            call sigeps130( &
+              nel      ,nuvar    ,uvar     ,matparam ,et       ,tt       ,     &    
+              epsd     ,sigy     ,ssp      ,nvartmp  ,vartmp   ,ngl      ,     &
+              de1      ,de2      ,de3      ,de4      ,de5      ,de6      ,     &
+              es1      ,es2      ,es3      ,es4      ,es5      ,es6      ,     &
+              ep1      ,ep2      ,ep3      ,ep4      ,ep5      ,ep6      ,     &
+              so1      ,so2      ,so3      ,so4      ,so5      ,so6      ,     &
+              s1       ,s2       ,s3       ,s4       ,s5       ,s6       ,     &
+              sv1      ,sv2      ,sv3      ,sv4      ,sv5      ,sv6      ,     &
+              rho0     ,rho      ,iresp    ,off      ,dt1      ,deltax   ,     &
+              asrate   ,l_dmg    ,lbuf%dmg )
 !
           else if (mtn == 133) then
             call sigeps133( &

@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    myqsort_int                                ../common_source/tools/sort/myqsort_int.F
 !||--- uses       -----------------------------------------------------
 !||    array_mod                                  ../common_source/modules/array_mod.F
+!||    element_mod                                ../common_source/modules/elements/element_mod.F90
 !||    get_hashtable_for_neighbour_segment_mod    ../engine/source/interfaces/interf/get_hashtable_for_neighbour_segment.F90
 !||    init_hashtable_for_neighbour_segment_mod   ../engine/source/interfaces/interf/init_hashtable_for_neighbour_segment.F90
 !||    intbufdef_mod                              ../common_source/modules/interfaces/intbufdef_mod.F90
@@ -68,6 +69,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         USE ARRAY_MOD
         use init_hashtable_for_neighbour_segment_mod , only : init_hashtable_for_neighbour_segment
         use get_hashtable_for_neighbour_segment_mod , only : get_hashtable_for_neighbour_segment
+        use element_mod , only : nixs,nixc,nixq,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -855,8 +857,8 @@ C-----------------------------------------------
         call init_hashtable_for_neighbour_segment( npari,ninter,ipari,shoot_struct )
         do nin=1,ninter
           ity = ipari(7,nin) ! get the interface id
-          idel = ipari(17,i) ! get the idel option
-          erosion_state = ipari(100,i) ! get the erosion state          
+          idel = ipari(17,nin) ! get the idel option
+          erosion_state = ipari(100,nin) ! get the erosion state          
           if(ity==25.and.(idel/=0.or.erosion_state/=0)) then
             call get_hashtable_for_neighbour_segment( nin,npari,ninter,ipari,intbuf_tab,shoot_struct )
           endif

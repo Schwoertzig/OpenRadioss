@@ -27,8 +27,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    ancmsg                 ../starter/source/output/message/message.F
 !||    i7trivox1              ../starter/source/interfaces/inter3d1/i7trivox1.F
+!||    margin_reduction       ../starter/source/interfaces/inter3d1/margin.F90
 !||--- uses       -----------------------------------------------------
 !||    front_mod              ../starter/share/modules1/front_mod.F
+!||    margin_reduction_mod   ../starter/source/interfaces/inter3d1/margin.F90
 !||    message_mod            ../starter/share/message_module/message_mod.F
 !||    tri7box                ../starter/share/modules1/tri7box.F
 !||====================================================================
@@ -52,6 +54,7 @@ C-----------------------------------------------
       USE FRONT_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use intbufdef_mod 
+      use margin_reduction_mod , only : margin_reduction
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -163,7 +166,7 @@ C-----------------------------------------------
 C-----
       DD=ZERO
       DO 10 L=1,NRTM
-C      CONNECIVITES ELEMENT
+C      ELEMENT CONNECTIVITIES
        N1=IRECT(1,L)
        N2=IRECT(2,L)
        N3=IRECT(3,L)
@@ -191,6 +194,9 @@ C      LONGUEUR COTE 4
        DD=DD+ (DD1+DD2+DD3+DD4)
   10  CONTINUE
       DD0=DD/NRTM/FOUR
+      IF(NRTM >0 .AND. NRTM <= 3 .AND. .not. IS_USED_WITH_LAW151) THEN
+        call margin_reduction(X,NUMNOD,IRECT,NRTM,NSV,NSN,DRAD,GAP,DGAPLOAD,BUMULT,STFN,DD0)
+      ENDIF
       DD =DD0
 C      DD = MAX(DD0,ONEP251*GAP)
 C      DD = MAX(DD ,ONEP251*DRAD)
@@ -206,7 +212,7 @@ C 1st passage with margin x2 to find more candidates (amounts to taking bmul0 = 
 C      IF(IDDLEVEL==0) MARGE_ST = 2*MARGE_ST
       IF(IDDLEVEL==0) MARGE_ST = MARGE
       TZINF_ST = MARGE_ST + MAX(GAP+DGAPLOAD,DRAD)
-C     MIS A ZERO POUR FAIRE SEARCH COMPLET CYCLE 0 ENGINE
+C     SET TO ZERO TO PERFORM COMPLETE SEARCH CYCLE 0 ENGINE
       DIST = ZERO     
 C     TEST TO BY-PASS SECOND SEARCH
 C     IF(IDDLEVEL==1 .AND. MARGE >= MARGE_ST) GOTO 999 !
@@ -463,7 +469,7 @@ C------------------
           RETURN
         ENDIF
 C     I_MEM = 1 ==> PAS ASSEZ DE MEMOIRE PILE
-C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
         IF(I_MEM==1)THEN
           I_MEM = 0
           GO TO 100

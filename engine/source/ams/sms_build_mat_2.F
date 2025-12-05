@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_list_sms     ../engine/source/mpi/ams/spmd_sms.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod     ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    intstamp_mod      ../engine/share/modules/intstamp_mod.F
 !||    message_mod       ../engine/share/message_module/message_mod.F
@@ -69,6 +70,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD 
       USE INTBUFDEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -135,12 +137,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, KN, IKN, JJ, KK, II, IJ, IK, N, M, NN, P, LOC_PROC
+      INTEGER I, J, K, JJ, KK, II, IJ, IK, N, M, NN, P, LOC_PROC
       INTEGER NG, ITY, NEL, NFT, ISOLNOD,MLW,LFT, LLT,
      .        KAD, NPT, IHBE, ICNOD, ISTRA, IEXPAN, IE, J1,
      .        ILOC4(4), IG, IGTYP, IERROR, IPERM1(6), IPERM2(6),IPENTA6(6)
-      INTEGER MSR, NSN, KI, KJ, KL, NSR
-      INTEGER SIZE, LENR, IAD, L, JI
+      INTEGER MSR, NSN, KI, KJ
+      INTEGER  IAD, L, JI
       INTEGER,DIMENSION(:),ALLOCATABLE :: TAGA
       INTEGER,DIMENSION(:),ALLOCATABLE :: NAD_SMS
       INTEGER,DIMENSION(:),ALLOCATABLE :: KADI_SMS
@@ -148,11 +150,11 @@ C-----------------------------------------------
       INTEGER,DIMENSION(:),ALLOCATABLE :: TAG8
       INTEGER,DIMENSION(:),ALLOCATABLE :: NAD_SMS_0
       INTEGER NTY, ILAGM, N1, N2, N3, N4,
-     .        NMN,ILEV, KSN, KMULT
+     .        ILEV, KSN, KMULT
       my_real
-     .        MELE4, MELE12, XN, LTIJ, MSLV,
-     .        IXX, IYY, IZZ, XX, YY, ZZ, MAS, 
-     .        VRX, VRY, VRZ, V1, V2, V3, GX, GY, GZ, XNOD,
+     .        MELE4, MELE12, LTIJ,
+     .              
+     .           XNOD,
      .        FAC_SCAL_I,FAC_SCAL_J
       my_real, dimension(:,:),ALLOCATABLE ::  AWORK
 C-----
@@ -204,7 +206,7 @@ C
 C
       CALL MY_BARRIER()
 C
-C     si /DT/INTER/AMS sans /DT/AMS
+C     if /DT/INTER/AMS without /DT/AMS
       IF(IDTMINS/=2)GO TO 100
 C
 !$OMP DO SCHEDULE(DYNAMIC,1)
@@ -520,7 +522,7 @@ C             Mvertex = Mass/32, Medge=7*Mass/48
 C
 C             A: Supposed lambda(M) > Mvertex+10dm
 C
-             MELE4 = MELE4*SEVEN/FOURTY8
+             MELE4 = MELE4*SEVEN/FORTY8
             END IF
            END IF
 

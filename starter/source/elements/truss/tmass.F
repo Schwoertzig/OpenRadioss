@@ -60,13 +60,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,IP,I1,I2,J,K
+      INTEGER I, IP, I1, I2
       my_real
      .   XX,YY,ZZ,XY,YZ,ZX
       my_real
      .   AL(MVSIZ),
      .   RHO(MVSIZ),EMS(MVSIZ),
-     .   E,STI(MVSIZ),DX,DY,DZ
+     .   STI(MVSIZ)
 C
 C---------------------------------------------------------------------
       DO I=LFT,LLT

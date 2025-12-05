@@ -26,15 +26,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    lectur         ../starter/source/starter/lectur.F
 !||--- calls      -----------------------------------------------------
 !||    reordr         ../starter/source/elements/solid_2d/quad/reordr.F
-!||    usr2sys        ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE LCE16Q3(IXQ    ,ISEL  ,PM     ,IPOINT ,ITAB ,ITABM1,
      .                   ICODE  ,IPARTQ,IGRQUAD,IPM    ,IGEO )
 C--------------------------------------------------------
 C     READING 2D ELEMENTS
-C     VERSION NUMEROTATION DES NOEUDS LIBRE/MARS 90/DIM
-C     LECTURE FORMAT IDENTIQUE AUX COQUES
+C     NODE NUMBERING VERSION FREE/MARS 90/DIM
+C     READING FORMAT IDENTICAL TO SHELLS
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -64,13 +63,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, MT, MLAW, JTUR, ICODT, I1, I2, INEW
+      INTEGER I, J, MT, MLAW, JTUR, I1, I2, INEW
       INTEGER IC,IC1,IC2,IC3,IC4,MID,PID
       CHARACTER MESS*40, MESS2*40
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS
       DATA MESS/'2D SOLID ELEMENTS DEFINITION            '/
       DATA MESS2/'2D SOLID ELEMENTS SELECTION FOR TH PLOT '/
 C

@@ -978,6 +978,7 @@ C
 !||--- called by ------------------------------------------------------
 !||    spmd_i7fcom_poff    ../engine/source/mpi/forces/spmd_i7fcom_poff.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    h3d_mod             ../engine/share/modules/h3d_mod.F
 !||    output_mod          ../common_source/modules/output/output_mod.F90
 !||====================================================================
@@ -990,6 +991,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE H3D_MOD
       USE OUTPUT_MOD
+      use element_mod , only :nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2754,6 +2756,7 @@ C
 !||--- called by ------------------------------------------------------
 !||    spmd_i7fcom_pon    ../engine/source/mpi/forces/spmd_i7fcom_pon.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    h3d_mod            ../engine/share/modules/h3d_mod.F
 !||    output_mod         ../common_source/modules/output/output_mod.F90
 !||====================================================================
@@ -2765,6 +2768,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE H3D_MOD
       USE OUTPUT_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

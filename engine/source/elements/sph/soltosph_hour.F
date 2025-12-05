@@ -21,14 +21,17 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    sig_heph1   ../engine/source/elements/sph/soltosph_hour.F
+!||    sig_heph1     ../engine/source/elements/sph/soltosph_hour.F
 !||--- called by ------------------------------------------------------
-!||    soltosphp   ../engine/source/elements/sph/soltosph.F
+!||    soltosphp     ../engine/source/elements/sph/soltosph.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SIG_HEPH1(
      1   JR0,     JS0,     JT0,     GSIG,
      2   FHOUR,   SIG_HEPH,PM,      IXS,
      3   II,      NEL,     LFT,     LLT)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -53,9 +56,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,  J
+      INTEGER I
       my_real
-     .   COEF,NU1,NU2,NU3,SXX,SYY,SZZ,SXY,SXZ,SYZ
+     .   NU1,NU2,NU3
 C-----------------------------------------------
 
 C-----------------------------------------------

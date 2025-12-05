@@ -26,12 +26,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    agrad0                 ../engine/source/ale/agrad0.F
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE EGRAD3(IXS,X,ALE_CONNECT,GRAD,VEUL)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

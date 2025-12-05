@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_gather_int    ../engine/source/mpi/generic/spmd_gather_int.F
 !||    spmd_gatherv_int   ../engine/source/mpi/generic/spmd_gatherv_int.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    message_mod        ../engine/share/message_module/message_mod.F
 !||    state_mod          ../common_source/modules/state_mod.F
 !||====================================================================
@@ -40,6 +41,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE STATE_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -46,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod      ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod    ../engine/share/resol/initbuf.F
 !||    stack_mod      ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -66,6 +67,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE STACK_MOD
       USE DRAPE_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixtg,nixp,nixr
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1065,7 +1067,7 @@ C-----------------------------------------------
       INTEGER I,J,K,EP,ID,JD,JDL,L,JJ,NN(MVSIZ),NELD
       my_real
      .   KIJD(ND,ND,MVSIZ),OFFD(MVSIZ)
-C---- s'il y a des elms degeneres--------------
+C---- if there is des elms degeneres--------------
       NELD=0
       DO EP = 1,NEL
           IF (NI(EP)==NJ(EP).AND.OFF(EP)>ZERO.AND.NI(EP)>0) THEN
@@ -1300,9 +1302,11 @@ C----6---------------------------------------------------------------7---------8
       RETURN
       END
 !||====================================================================
-!||    impksout   ../engine/source/implicit/imp_glob_k.F
+!||    impksout      ../engine/source/implicit/imp_glob_k.F
 !||--- calls      -----------------------------------------------------
-!||    writeks    ../engine/source/implicit/imp_glob_k.F
+!||    writeks       ../engine/source/implicit/imp_glob_k.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE IMPKSOUT( IXS,NFT,NEL,IUGEO,
      1                   K11   ,K12   ,K13    ,K14    ,K15   ,
@@ -1313,6 +1317,7 @@ C----6---------------------------------------------------------------7---------8
      6                   K48   ,K55   ,K56    ,K57    ,K58   ,
      7                   K66   ,K67   ,K68    ,K77    ,K78   ,
      8                   K88   )
+      use element_mod , only : nixs
 C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -1425,13 +1430,16 @@ C-----------------------------------------------
 C
 C  | --- new routine -----
 !||====================================================================
-!||    impkcout   ../engine/source/implicit/imp_glob_k.F
+!||    impkcout      ../engine/source/implicit/imp_glob_k.F
 !||--- calls      -----------------------------------------------------
-!||    writekc    ../engine/source/implicit/imp_glob_k.F
+!||    writekc       ../engine/source/implicit/imp_glob_k.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE IMPKCOUT( IXC,NFT,NEL,IUGEO,
      1                    KE11   ,KE12   ,KE13   ,KE14   ,KE22 ,
      2                    KE23   ,KE24   ,KE33   ,KE34   ,KE44 )
+      use element_mod , only : nixc
 C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -2678,7 +2686,7 @@ C-----------------------------------------------
       INTEGER I,J,K,EP,ID,JD,JDL,L,JJ,NN(MVSIZ),NELD,N,N1,N2
       my_real
      .   KIJD(ND,ND,MVSIZ),OFFD(MVSIZ)
-C---- s'il y a des elms degeneres--------------
+C---- if there is des elms degeneres--------------
       NELD=0
       DO EP = 1,NEL
           IF (NI(EP)==NJ(EP).AND.OFF(EP)>ZERO.AND.NI(EP)>0) THEN
@@ -2851,6 +2859,7 @@ C
 !||--- uses       -----------------------------------------------------
 !||    drape_mod            ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod          ../engine/share/resol/initbuf.F
 !||    stack_mod            ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -2871,6 +2880,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE STACK_MOD
       USE DRAPE_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3057,6 +3067,7 @@ C----6---------------------------------------------------------------7---------8
 !||--- uses       -----------------------------------------------------
 !||    drape_mod      ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod    ../engine/share/resol/initbuf.F
 !||    stack_mod      ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -3078,6 +3089,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE STACK_MOD
       USE DRAPE_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

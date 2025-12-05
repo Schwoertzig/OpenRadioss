@@ -71,6 +71,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    dt_mod              ../engine/source/modules/dt_mod.F
 !||    dttherm_mod         ../engine/source/time_step/dttherm.F90
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod        ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod      ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod        ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -111,7 +112,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      S   DRAPE_SH4N,  NEL,         NLOC_DMG,    INDX_DRAPE,
      T   IGRE,        JTUR,        DT,          NCYCLE,
      U   SNPC,        STF,         GLOB_THERM,  IDEL7NOK,
-     U   USERL_AVAIL, MAXFUNC,     SBUFMAT)
+     U   USERL_AVAIL, MAXFUNC,     SBUFMAT,IPART     ,LIPART1)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -128,6 +129,7 @@ C-----------------------------------------------
       USE DT_MOD
       use glob_therm_mod
       use dttherm_mod
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
@@ -160,7 +162,7 @@ C-----------------------------------------------
       INTEGER,INTENT(IN)    :: SNPC        ! Size of NPC
       INTEGER JFT,JLT,NFT,NPT,MTN,IPRI,ITHK,NELTST,
      .   ITYPTST ,ISTRAIN ,IPLA,NVC,JSMS,ITASK,IEXPAN,IXFEM,
-     .   IOFC,IHBE,KFTS,ISMSTR,IFAILURE,JTHE,ISUBSTACK,NEL,N1,N2,N3,N4
+     . IOFC,IHBE,KFTS,ISMSTR,IFAILURE,JTHE,ISUBSTACK,NEL
       INTEGER IXC(NIXC,*),IADC(4,*),IPARTC(*),NPF(*),IGEO(NPROPGI,*),
      .   IPM(NPROPMI,*),INDXOF(MVSIZ),GRTH(*),IGRTH(*),IPARG(*),ITAB(*),
      .   KNOD2ELC(*),XEDGE4N(4,*),
@@ -194,18 +196,22 @@ C     real or real*8
       TYPE (MAT_ELEM_)   ,INTENT(INOUT) :: MAT_ELEM
       TYPE (DT_)         ,INTENT(IN)    :: DT
       type (glob_therm_) ,intent(inout) :: glob_therm
+      integer, intent(in) :: LIPART1
+ 
+      INTEGER, DIMENSION(LIPART1,NPART), INTENT(IN)     :: IPART
+
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
 C   L O C A L   V A R I A B L E S
 C--------------------------------
       LOGICAL PLAT(MVSIZ)
       INTEGER 
-     .   I,J,IR,IS,MX,NNOD,NUPAR,NLAY,NXLAY,ILAY,NPG,IXEL,IFAILWAVE,
+     . I,J,IR,IS,NNOD,NLAY,NXLAY,ILAY,NPG,IXEL,IFAILWAVE,
      .   IBID,ISROT,NG,IXFEM2,L_DIRA,L_DIRB,J1,J2,IORTH,IGTYP,IGMAT,IXLAY,
      .   NPTTOT,IREP,IPOUT,IDRAPE,NPTT,IT,ACTIFXFEM,SEDRAPE,NUMEL_DRAPE
       INTEGER  MAT(MVSIZ),PID(MVSIZ),NGL(MVSIZ),FWAVE_EL(NEL)
       PARAMETER (NNOD = 4)
       my_real 
-     .  RH0(MVSIZ),LL(MVSIZ),
+     . LL(MVSIZ),
      .  VL13(MVSIZ,3), VL24(MVSIZ,3), VLHI(MVSIZ,3), RLXYZ(MVSIZ,8),
      .  X13(MVSIZ),  X24(MVSIZ),  Y13(MVSIZ),  Y24(MVSIZ),
      .  MX13(MVSIZ), MX23(MVSIZ), MX34(MVSIZ),
@@ -222,7 +228,7 @@ C--------------------------------
      .  ALPE(MVSIZ),YM(MVSIZ) ,BID,FACN(MVSIZ,2),
      .  LXYZ(MVSIZ,8),DD(MVSIZ,6),DB(MVSIZ,12),AMU(MVSIZ),
      .  GSR(MVSIZ), A11SR(MVSIZ), A12SR(MVSIZ), NUSR(MVSIZ),
-     .  SHFSR(MVSIZ),PX2(MVSIZ),PY1(MVSIZ),PY2(MVSIZ),PX1(MVSIZ),
+     . SHFSR(MVSIZ),PX2(MVSIZ),PY1(MVSIZ),PY2(MVSIZ),
      .  DIE(MVSIZ), TEMPEL(MVSIZ),THEM(MVSIZ,4),
      .  R11(MVSIZ),R12(MVSIZ),R13(MVSIZ),
      .  R21(MVSIZ),R22(MVSIZ),R23(MVSIZ),
@@ -262,7 +268,7 @@ C--- variables for the non-local
       INTEGER :: NDDL, K, INOD(4),NC1(MVSIZ), NC2(MVSIZ), NC3(MVSIZ), NC4(MVSIZ),
      .           IPOS(4), L_NLOC, IMAT, INLOC,IINT
       my_real, DIMENSION(:,:), ALLOCATABLE :: VAR_REG
-      my_real, DIMENSION(:), POINTER :: BPRELD,DNL,UVAR
+      my_real, DIMENSION(:), POINTER :: DNL, UVAR
 C---
       INTEGER, DIMENSION(NEL) :: OFFLY
       INTEGER, ALLOCATABLE, DIMENSION(:) :: ELCRKINI
@@ -270,9 +276,9 @@ C---
       my_real, DIMENSION(:) ,POINTER     :: DIR_A,DIR_B,CRKDIR,CRKLEN,DADV
       TARGET :: DIRA,DIRB
 C-----
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF
-      TYPE(L_BUFEL_) ,POINTER :: LBUF
+ 
       TYPE(L_BUFEL_DIR_) ,POINTER :: LBUF_DIR
       INTEGER SDIR_A    ! Size of DIR_A
       INTEGER SDIR_B    ! Size of DIR_B
@@ -615,7 +621,8 @@ C-----------------------------------------------
      R      INDX_DRAPE,THKE      ,SEDRAPE     ,NUMEL_DRAPE,DT    ,
      Q      NCYCLE    ,SNPC      ,STF         ,NXLAYMAX  ,IDEL7NOK  ,
      S      USERL_AVAIL ,MAXFUNC ,NPTTOT      ,SBUFMAT   ,SDIR_A    ,
-     T      SDIR_B   ,GBUF%FOR_G ,SSP_EQ      )
+     T      SDIR_B   ,GBUF%FOR_G ,SSP_EQ    ,
+     X    IPART      ,LIPART1   ,IPARTC   )
 
 C-----------------------------------------------
 c        

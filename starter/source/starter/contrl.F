@@ -457,7 +457,7 @@ C----------------------------------------------
 C-----
       IF(INSH==1)INER_9_12 = TWELVE      
       IF(INSH==2)INER_9_12 = SIXTEEN      
-      IF(INSH==3)INER_9_12 = FOURTY8  
+      IF(INSH==3)INER_9_12 = FORTY8  
       IF(INSH==4)INER_9_12 = THIRTY     
       IF(INSH==5)INER_9_12 = NINE 
 !   default values in def_solid/def_shell      
@@ -1056,7 +1056,7 @@ C----------------------------------------------------------
       DO I = 1, HM_NUMMAT
          MAT_NUMBER    = I 
          CALL HM_OPTION_READ_KEY(LSUBMODEL,KEYWORD2    = KEY)
-         IF ((KEY(1:5) == 'LAW13' .AND. 
+         IF ((KEY(1:5) == 'LAW13'  .AND. KEY(1:6) /= 'LAW130' .AND.
      .        KEY(1:6) /= 'LAW131' .AND. KEY(1:6) /= 'LAW132' .AND. 
      .        KEY(1:6) /= 'LAW133' .AND. KEY(1:6) /= 'LAW134' .AND.
      .        KEY(1:6) /= 'LAW135' .AND. KEY(1:6) /= 'LAW136' .AND.

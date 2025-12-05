@@ -37,6 +37,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c                       ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod                    ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                     ../common_source/modules/elements/element_mod.F90
 !||    inoutfile_mod                   ../common_source/modules/inoutfile_mod.F
 !||    matparam_def_mod                ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    message_mod                     ../engine/share/message_module/message_mod.F
@@ -67,6 +68,7 @@ C-----------------------------------------------
       USE INOUTFILE_MOD
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
       USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
+      use element_mod , only : nixs,nixq,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -99,9 +101,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, N, JJ,J, IPRT0, IPRT, K, STAT_NUMELS_1, KK, INOD
-      INTEGER NG, NEL, NFT, LFT, LLT, ITY, ISOLNOD, IOFF,NPT
-      INTEGER NUM_CENTROIDS, MLW,IFORM,NBMAT,NB2,ISUBMAT,NNOD,NNOD2
+      INTEGER I, N, JJ, J, IPRT, K, KK, INOD
+      INTEGER NG, NEL, NFT, LFT, LLT, ITY, ISOLNOD, NPT
+      INTEGER NUM_CENTROIDS, MLW, NBMAT, NB2, ISUBMAT, NNOD
       INTEGER NUVAR
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
       my_real MIN_X,MIN_Y,MIN_Z,MAX_X,MAX_Y,MAX_Z,P0(3),P0_INF(3),P0_SUP(3),LENGTH
@@ -112,7 +114,7 @@ C-----------------------------------------------
       my_real DOTPROD,TOL,XYZ(3),VEL(3),DIST,VECT(3)
       CHARACTER FILNAM*2048, SHORTNAME*128, CHSTAT*4
       INTEGER XMIN_CELL_ID,YMIN_CELL_ID,ZMIN_CELL_ID,XMAX_CELL_ID,YMAX_CELL_ID,ZMAX_CELL_ID
-      INTEGER IS_ITY_1, IS_ITY_2, IS_ITY_7, LAST_CELL,FIRST_CELL,IMAT,NPAR,IADBUF
+      INTEGER IS_ITY_1, IS_ITY_2, IS_ITY_7, IMAT, NPAR, IADBUF
       INTEGER, POINTER,DIMENSION(:) :: IPART_PTR
       my_real, POINTER,DIMENSION(:) :: UPARAM
       TYPE(BUF_MAT_)  ,POINTER :: MBUF  

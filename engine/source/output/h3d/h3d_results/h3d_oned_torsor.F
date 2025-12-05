@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    h3d_write_torsor       ../engine/source/output/h3d/h3d_results/h3d_write_torsor.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||====================================================================
       SUBROUTINE H3D_ONED_TORSOR(
@@ -38,6 +39,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
        USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+       use element_mod , only : nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -66,8 +68,8 @@ C-----------------------------------------------
 C     REAL
       my_real
      .   OFF, FAC, A1, A2, A3, THK
-      REAL R4(18)
-      INTEGER I, NG, NEL, NFT, IAD, ITY, LFT, NPT, IPT,M,
+ 
+      INTEGER I, NG, NEL, NFT, IAD, ITY, LFT, M, 
      .        IADD, N, J, LLT, MLW, NB1, NB2, NB3, NB4, NB5, 
      .        NB6, NB7, NB8, NB9, NB10, NB11, NB12, ISTRAIN,
      .        IPID, I1, I2, IAD2, NS1, NS2  , IALEL, ISTRE,

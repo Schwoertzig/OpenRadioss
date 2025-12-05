@@ -123,6 +123,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod          ../engine/share/modules/drape_mod.F
 !||    dsgraph_mod        ../engine/share/modules/dsgraph_mod.F
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod     ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod       ../common_source/modules/groupdef_mod.F
 !||    h3d_mod            ../engine/share/modules/h3d_mod.F
@@ -195,6 +196,7 @@ C-----------------------------------------------
         USE SKEW_MOD
         use glob_therm_mod
         use python_funct_mod, only: python_
+        use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -297,9 +299,9 @@ C
         DOUBLE PRECISION,INTENT(INOUT) :: WFEXT, WFEXT_MD
 C
 C---D_IMP: dUn+1,i,DD : ddU,i+1
-C---R_IMP[1:R02,2:RRR(R_OLD),3:RU0,4:E02,5:DE_OLD,6:EIMP,7,8,9:pour line-search]
+C---R_IMP[1:R02,2:RRR(R_OLD),3:RU0,4:E02,5:DE_OLD,6:EIMP,7,8,9:for line-search]
 C---R_IMP[10: BFAC,DTFAC,11:U2,12:RFAC,13:|FEXT|;14,16:new line-search;17:actual R02;18:GAP;19:TSTART;
-C---R_IMP[21:rel res disp.,22:rel res force,23:rel res energy,24:cumul arc length]
+C---R_IMP[21:rel res disp.,22:relative residual \1,23:relative residual \1,24:cumulative arc length]
 C---------20-25:libre
 C---I_IMP[1:IT(TOTAL),2:ITC,3:IT0(IT_OLD),4:IWAIT,5:IDIV,6:NDDLI0,7:1ercontact(used only w/ IREFI=4),
 C---8:num. of diverging, 9:ICONT_OLD 10:Isign (Riks);11: Ichang(solver);12: IDIV_OLD;13: NDDLI(SMP) or NDDLI_G(SPMD)
@@ -1477,7 +1479,7 @@ citask0          IF (ITASK == 0) THEN
               R_IMP(1) = MIN(R_IMP(1),RF_MAX*RF_MAX)
               IF (INCONV==1) I_IMP(12)=1
             END IF
-C--------case of converge with 0 iteration-------
+C--------case of converge with 0 iterations-------
             IF (ISMDISP>0) THEN
               CALL CP_REAL_HP(NNDL,X_A,X_C)
             ELSE
@@ -3099,6 +3101,7 @@ C------------------------------------------
 !||    drape_mod          ../engine/share/modules/drape_mod.F
 !||    dsgraph_mod        ../engine/share/modules/dsgraph_mod.F
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod       ../common_source/modules/groupdef_mod.F
 !||    h3d_mod            ../engine/share/modules/h3d_mod.F
 !||    imp_worki          ../engine/share/modules/impbufdef_mod.F
@@ -3148,6 +3151,7 @@ C-----------------------------------------------
         USE TH_SURF_MOD , ONLY : TH_SURF_
         USE SKEW_MOD , ONLY : SKEW_
         USE GROUPDEF_MOD
+        use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4706,7 +4710,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER N,I,J,K,ND
         INTEGER, DIMENSION(:) ,POINTER     :: IDDL,NDOF,IKC
-C-------------mis  zero Fint des noeuds dependants------------
+C-------------mis  zero Fint des nodes dependants------------
         IDDL => IMPBUF_TAB%IDDL
         NDOF => IMPBUF_TAB%NDOF
         IKC => IMPBUF_TAB%IKC
@@ -5009,7 +5013,7 @@ C---------------lin_solv--------
           IF(ALLOCATED(IE_BC4)) DEALLOCATE(IE_BC4)
           IF(ALLOCATED(IE_BC3)) DEALLOCATE(IE_BC3)
         END IF
-C------    faire---
+C------    to perform---
 c      IF (NINTER>0) THEN
 c       IF(ALLOCATED(INTBUF_TAB_CP)) DEALLOCATE(INTBUF_TAB_CP)
 c       IF(ALLOCATED(INTBUF_TAB_IMP)) DEALLOCATE(INTBUF_TAB_IMP)
@@ -5984,7 +5988,7 @@ C     REAL
      .    U(*),F(*),D(3,*),DR(3,*),FEXT(3,*),MEXT(3,*),FINT(3,*),
      .    R01 ,MINT(3,*),VQ(3,3),R_IMP(*),DD(3,*),DDR(3,*)
 C-----------------------------------------------
-c FUNCTION: print-out solver info such as maximum residual, relative residuals, line-search coeff, tolerance
+c FUNCTION: print-out solver info such as maximum residual, relative residuals, line-search coefficient, tolerance
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -6402,7 +6406,7 @@ C-----------------------------------------------
      .     ,'Diverged step','Diverged step','Diverged step'
      .     ,'Diverged step','Diverged step','Diverged step'
         WRITE(ISOLTPL,1003)
-        WRITE(ISOLTPL,1004) 2,2,2,'Cumulative iterations','Line search coeff'
+        WRITE(ISOLTPL,1004) 2,2,2,'Cumulative iterations','Line search coefficient'
         WRITE(ISOLTPL,1002) 'On',1,50,1,3,50,1,'Line search coefficient',1
      .     ,'Line search coefficient','Line search coefficient','Line search coefficient'
      .     ,'Line search coefficient','Line search coefficient','Line search coefficient'
@@ -7132,7 +7136,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
-C-----Calcul NCONT0, Communication is necessary
+C-----Calculation NCONT0, Communication is necessary
         IF (TT == ZERO.AND.INCONV==1) THEN
           DO N = 1,NINTER
             ITY   =IPARI(7,N)
@@ -7272,7 +7276,7 @@ C-------int2,RBE3,rby speciale (Fext seulement)----------
      1                     NDOF  ,IDDL   ,B    )
           ENDDO
         ENDIF
-C-------int2,rby speciale (elems deleted)----------
+C-------int2,rby speciale (elements deleted)----------
         DO I=1,NINT2
           N=IINT2(I)
           CALL I2_IMPR2(IPARI(1,N),INTBUF_TAB(N) ,AC    ,ACR  ,
@@ -7475,6 +7479,7 @@ C------------------------------------------
 !||    spmd_sum_s     ../engine/source/mpi/implicit/imp_spmd.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    imp_spbrm      ../engine/share/modules/impbufdef_mod.F
 !||====================================================================
       SUBROUTINE SPBRM_PRE(ITAB ,
@@ -7485,6 +7490,7 @@ C   M o d u l e s
 C-----------------------------------------------
         USE ELBUFDEF_MOD
         USE IMP_SPBRM
+        use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7549,7 +7555,7 @@ C----- put N1,N2,N3 (sys_id) in E_REF(1:3),  E_REF(4)=E_REF(3)
           END DO
           IF (ILSKEW >0)  LSKEW_G=1
 C--- ending routine
-          RETURN
+        RETURN
         END IF
         NBC = 0
         DO I =1,NUMNOD
@@ -7754,9 +7760,12 @@ C
 !||    spb_refsh4id   ../engine/source/implicit/imp_solv.F
 !||--- called by ------------------------------------------------------
 !||    spbrm_pre      ../engine/source/implicit/imp_solv.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SPB_REFSH4ID(JFT,JLT,NEL,IXC,X,XC,YC,ZC,IE,
      +                        XMIN0,YMIN0,ZMIN0,DMIN)
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7852,9 +7861,12 @@ C
 !||    spb_refsh3id   ../engine/source/implicit/imp_solv.F
 !||--- called by ------------------------------------------------------
 !||    spbrm_pre      ../engine/source/implicit/imp_solv.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SPB_REFSH3ID(JFT,JLT,NEL,IXTG,X,XC,YC,ZC,IE,
      +                        XMIN0,YMIN0,ZMIN0,DMIN)
+      use element_mod , only : nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7962,6 +7974,7 @@ C
 !||    transvl2g      ../engine/source/implicit/imp_solv.F
 !||    velrot         ../engine/source/constraints/general/rbe2/rbe2v.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    imp_spbrm      ../engine/share/modules/impbufdef_mod.F
 !||====================================================================
       SUBROUTINE SPB_RM_RIG(
@@ -7972,6 +7985,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
         USE IMP_SPBRM
+        use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -8177,6 +8191,7 @@ C------------------------------------------
 !||--- calls      -----------------------------------------------------
 !||    spmd_min_s     ../engine/source/mpi/implicit/imp_spmd.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    imp_spbrm      ../engine/share/modules/impbufdef_mod.F
 !||====================================================================
       SUBROUTINE SPB_IEREF_BC(
@@ -8186,6 +8201,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
         USE IMP_SPBRM
+        use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -8429,13 +8445,14 @@ C
         RETURN
       END
 !||====================================================================
-!||    spb_ieref3   ../engine/source/implicit/imp_solv.F
+!||    spb_ieref3    ../engine/source/implicit/imp_solv.F
 !||--- called by ------------------------------------------------------
-!||    spb_rm_rig   ../engine/source/implicit/imp_solv.F
+!||    spb_rm_rig    ../engine/source/implicit/imp_solv.F
 !||--- calls      -----------------------------------------------------
-!||    spmd_min_s   ../engine/source/mpi/implicit/imp_spmd.F
+!||    spmd_min_s    ../engine/source/mpi/implicit/imp_spmd.F
 !||--- uses       -----------------------------------------------------
-!||    imp_spbrm    ../engine/share/modules/impbufdef_mod.F
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
+!||    imp_spbrm     ../engine/share/modules/impbufdef_mod.F
 !||====================================================================
       SUBROUTINE SPB_IEREF3(
      1    X         ,IXC       ,IXTG      ,NDOF      ,IDDL      ,
@@ -8444,6 +8461,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
         USE IMP_SPBRM
+        use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

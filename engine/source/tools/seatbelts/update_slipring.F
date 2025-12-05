@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    shell_reactivation   ../engine/source/tools/seatbelts/shell_reactivation.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||    message_mod          ../engine/share/message_module/message_mod.F
 !||    seatbelt_mod         ../common_source/modules/seatbelt_mod.F
 !||====================================================================
@@ -42,6 +43,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE SEATBELT_MOD
       USE MESSAGE_MOD
+      use element_mod , only : nixc,nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

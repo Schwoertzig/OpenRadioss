@@ -30,6 +30,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    getuloc       ../engine/source/elements/solid/solide8s/getuloc.F
 !||    s8sav3_imp    ../engine/source/elements/solid/solide8s/s8sav3_imp.F
 !||    s8xref_imp    ../engine/source/elements/solid/solide8s/s8xref_imp.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SRCOOR3_IMP(X   ,IXS   ,V     ,W     ,GAMA0 ,GAMA  ,
      .   X1    ,X2    ,X3    ,X4    ,X5    ,X6    ,X7    ,X8    ,
@@ -50,6 +52,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .   ULZ1  ,ULZ2  ,ULZ3  ,ULZ4  ,ULZ5  ,ULZ6  ,ULZ7  ,ULZ8  ,
      .   XGAX  ,XGAY  ,XGAZ  ,XGXA2 ,XGYA2 ,XGZA2 ,XGXYA ,XGYZA ,
      .   XGZXA ,IPARG)  
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

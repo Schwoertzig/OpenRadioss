@@ -53,6 +53,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod        ../engine/share/modules/drape_mod.F
 !||    dt_mod           ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod     ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod   ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod     ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -86,7 +87,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      N            ISUBSTACK,UXINT_MEAN,UYINT_MEAN,UZINT_MEAN,NLEVXF,
      O            NODEDGE,CRKEDGE,DRAPE_SH4N,IPRI  ,NLOC_DMG,INDX_DRAPE, IGRE,
      P            DT     ,SNPC      ,  STF   ,GLOB_THERM, 
-     Q            USERL_AVAIL,MAXFUNC,SBUFMAT)
+     Q            USERL_AVAIL,MAXFUNC,SBUFMAT,IPART    )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -102,6 +103,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE DT_MOD
       use glob_therm_mod
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -167,11 +169,14 @@ C     REAL
       TYPE (SENSORS_) ,INTENT(INOUT) :: SENSORS
       TYPE (DT_), INTENT(IN) :: DT
       type (glob_therm_) ,intent(inout) :: glob_therm
+     
+      INTEGER, DIMENSION(LIPART1, NPART), INTENT(IN)     :: IPART
+     
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,IGTYP,ICSEN,IXLAY,NXLAY,NLAYER,IFLAG,IUN,NPG,NPTT,IBID,
-     .   IR,IS,IT,IPT,NG,L_DIRA,L_DIRB,J1,J2,ILEV,IGMAT,IPTHK,IREP,
+      INTEGER I,IGTYP,ICSEN,IXLAY,NXLAY,NLAYER,IUN,NPG,NPTT,IBID,
+     .   IR,IS,IT,NG,L_DIRA,L_DIRB,J1,J2,ILEV,IGMAT,IPTHK,IREP,
      .   ACTIFXFEM,SEDRAPE,NUMEL_DRAPE
       INTEGER MAT(MVSIZ),PID(MVSIZ),NDT(MVSIZ),NGL(MVSIZ),FWAVE(MVSIZ)
 C
@@ -182,8 +187,8 @@ C
      .   VX1(MVSIZ),VX2(MVSIZ),VX3(MVSIZ),VX4(MVSIZ),
      .   VY1(MVSIZ),VY2(MVSIZ),VY3(MVSIZ),VY4(MVSIZ),
      .   VZ1(MVSIZ),VZ2(MVSIZ),VZ3(MVSIZ),VZ4(MVSIZ),
-     .   VX13(MVSIZ),VX24(MVSIZ),VY13(MVSIZ),VY24(MVSIZ),
-     .   VZ13(MVSIZ),VZ24(MVSIZ),THK02(MVSIZ), 
+     .   
+     .   THK02(MVSIZ), 
      .   X1G(MVSIZ),X2G(MVSIZ),X3G(MVSIZ),X4G(MVSIZ),
      .   Y1G(MVSIZ),Y2G(MVSIZ),Y3G(MVSIZ),Y4G(MVSIZ),
      .   Z1G(MVSIZ),Z2G(MVSIZ),Z3G(MVSIZ),Z4G(MVSIZ),
@@ -198,8 +203,8 @@ C
      .   VL1(MVSIZ,3),VL2(MVSIZ,3),VL3(MVSIZ,3),VL4(MVSIZ,3),
      .   VRL1(MVSIZ,3),VRL2(MVSIZ,3),VRL3(MVSIZ,3),VRL4(MVSIZ,3), 
      .   DT1C(MVSIZ),DT2C(MVSIZ),ALDT(MVSIZ),ALPE(MVSIZ),VHX(MVSIZ),
-     .   VHY(MVSIZ),DSUB(MVSIZ,3,4),DRSUB(MVSIZ,3,4),TSUB(MVSIZ),
-     .   DTCSUB(MVSIZ),AREAS(MVSIZ),A_I(MVSIZ)
+     .   VHY(MVSIZ),
+     .   DTCSUB(MVSIZ),A_I(MVSIZ)
       my_real 
      .   H1(MVSIZ),H2(MVSIZ),H3(MVSIZ),VOL0(MVSIZ),VOL00(MVSIZ),
      .   H11(MVSIZ),H12(MVSIZ),H13(MVSIZ),H14(MVSIZ),  
@@ -471,7 +476,8 @@ C-----------------------------
      R    INDX_DRAPE ,THKE, SEDRAPE  ,NUMEL_DRAPE,DT   ,
      Q    NCYCLE     ,SNPC      ,  STF,NXLAYMAX ,
      S    IDEL7NOK   ,USERL_AVAIL ,MAXFUNC  ,NPTTOT    ,SBUFMAT,
-     T    SDIR_A     ,SDIR_B   ,GBUF%FOR_G,SSP_EQ )
+     T    SDIR_A     ,SDIR_B   ,GBUF%FOR_G,SSP_EQ,
+     X    IPART      ,LIPART1  ,IPARTC   )
 C-----------------------------
         IF ((ITASK==0).AND.(IMON_MAT==1)) CALL STOPTIME(TIMERS,35)
 C-----------------------------

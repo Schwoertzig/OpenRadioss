@@ -21,17 +21,20 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i21lagm   ../engine/source/interfaces/int17/i21lagm.F
+!||    i21lagm       ../engine/source/interfaces/int17/i21lagm.F
 !||--- called by ------------------------------------------------------
-!||    i17main   ../engine/source/interfaces/int17/i17main.F
+!||    i17main       ../engine/source/interfaces/int17/i17main.F
 !||--- calls      -----------------------------------------------------
-!||    i21lll    ../engine/source/interfaces/int17/i21lagm.F
+!||    i21lll        ../engine/source/interfaces/int17/i21lagm.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE I21LAGM(X    ,V     ,LLL     ,JLL   ,SLL   ,
      2                  XLL   ,CANDN ,CANDE   ,I_STOK,IXS   ,
      3                  IXS20 ,IADLL ,EMINX   ,NSV   ,NELEM ,
      4                  NC    ,N_MUL_MX,ITASK ,A     ,ITIED ,
      5                  NINT  ,NKMAX ,EMINXS  ,COMNTAG)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,11 +62,11 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,IK,IE,IS,IC,NK,III(MVSIZ,21),LLT,NFT,LE,FIRST,LAST,
+      INTEGER I,K,IE,IS,IC,III(MVSIZ,21),LLT,NFT,LE,FIRST,LAST,
      .        I20
       my_real
      .   XX(MVSIZ,21),YY(MVSIZ,21),ZZ(MVSIZ,21),
-     .   AA,XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,DIST
+     .   DIST
 C-----------------------------------------------
 C
 C
@@ -97,9 +100,9 @@ C
 C        NC: number of contacts
 C        NK: Number of node for contact (8+1.16+1.8+8.16+16)
 C
-C        IC : numero du contact (1,NC)
-C        IK : numero de noeud local a un contact (1,NK)
-C        I  : numero global du noeud (1,NUMNOD)
+C        IC : contact number (1,NC)
+C        IK : local node number for a contact (1,NK)
+C        I  : global node number (1,NUMNOD)
 C
 C        IADLL(NC)        : IAD = IADLL(IC)
 C        LLL(NC*(21,63))  : I  = LLL(IAD+1,2...IADNEXT-1)
@@ -145,7 +148,7 @@ C       test if inside the box
 C-----------------------------------------------------------------------
         IF(DIST.LE .0.)THEN
 c
-c      print *, "dans la boite",XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX
+c      print *, "in la boite",XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX
 c
           LLT = LLT+1
           III(LLT,21)=IS
@@ -240,7 +243,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,IK,NK,I1,I2,I3,I4,IAD,NN
+      INTEGER I,IK,NK,IAD,NN
       my_real
      .   VX,VY,VZ,VN,AA
       my_real
@@ -249,7 +252,7 @@ C-----------------------------------------------
      .   NX(MVSIZ), NY(MVSIZ), NZ(MVSIZ),
      .   NI(MVSIZ,21) 
 C-----------------------------------------------
-C      calcul de r,s,t
+C      calculation de r,s,t
 C-----------------------------------------------
 c
 c      print *, "XX(1,1),XX(1,9)",XX(1,1),XX(1,9)

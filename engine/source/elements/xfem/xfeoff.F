@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod     ../engine/share/modules/crackxfem_mod.F
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE XFEOFF(XFEM_TAB ,
      .                  IPARG    ,IXC      ,NGROUC   ,IGROUC  ,IEL_CRK ,
@@ -46,6 +47,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE CRACKXFEM_MOD
       USE ELBUFDEF_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -72,8 +74,8 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,IG,NG,JFT,JLT,NEL,NF1,IXFEM,IADXFEM,NXLAY,OFF,
-     .  STEP,ITG1,ITG2,FLAG,SIZE,LSDRC,ACTIFXFEM
+      INTEGER IG,NG,JFT,JLT,NEL,IXFEM,NXLAY,OFF,
+     .  ITG1,ITG2,FLAG,SIZE,LSDRC,ACTIFXFEM
 C=======================================================================
 C activation of new group if crack advancing or new crack initiate
 c-----------------------------------------------------------------------

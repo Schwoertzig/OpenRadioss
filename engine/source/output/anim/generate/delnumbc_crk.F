@@ -54,9 +54,8 @@ C-----------------------------------------------
      .   INDX_CRK(*),INUM(*)
       INTEGER NBF_L,NBF
 C-----------------------------------------------
-      INTEGER I,N,II,IE,NG,ITY,NEL,NFT,IXFEM,IDCMAX,CRKS,RBUF,ELEM,ICRK,
+      INTEGER I, N, II, NG, ITY, NEL, NFT, IXFEM, IDCMAX, CRKS, RBUF, ELEM, ICRK, 
      .   NEL_CRK,NLEVXF
-      my_real OFF
 C=======================================================================
 c
       IF (NSPMD > 1) CALL SPMD_MAX_XFE_I(IDCMAX)
@@ -88,7 +87,7 @@ C-----------------------------------------------
                 ENDIF
               ENDDO
 C-----------------------------------------------
-C            COQUES 3 NOEUDS
+C            3-NODE SHELLS
 C-----------------------------------------------
             ELSEIF (ITY == 7) THEN
               DO I=1,NEL

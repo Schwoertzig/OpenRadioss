@@ -1,4 +1,3 @@
-
 !Copyright>        OpenRadioss
 !Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
 !Copyright>
@@ -21,6 +20,7 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+
 !||====================================================================
 !||    m36init_mod   ../starter/source/materials/mat/mat036/m36init.F90
 !||--- called by ------------------------------------------------------

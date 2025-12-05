@@ -127,8 +127,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J1, J , K0,NBINTER,K1S,K, NI, IL, IE, IG, PP, PPL
-      INTEGER NISKYL,NISKYL1,ISIGN
+      INTEGER I, J, K0, NBINTER, K1S, K, NI, IL, IE, PP, PPL
+ 
       INTEGER JSUB,KSUB,NSUB,JJ,KK,ISS1,ISS2,IMS1,IMS2,ITYPSUB
       INTEGER TAGIP(MVSIZ)
       my_real
@@ -138,15 +138,15 @@ C-----------------------------------------------
      .   FY1(MVSIZ), FY2(MVSIZ), FY3(MVSIZ), FY4(MVSIZ),
      .   FZ1(MVSIZ), FZ2(MVSIZ), FZ3(MVSIZ), FZ4(MVSIZ),
      .   FXT(MVSIZ), FYT(MVSIZ), FZT(MVSIZ),
-     .   PENE(MVSIZ),MASMIN(MVSIZ),DIST(MVSIZ),
-     .   VIS2(MVSIZ), DTMI(MVSIZ),
-     .   VNX, VNY, VNZ, AA, VMAX,S2,
-     .   V2, FM2, DT1INV, VISCA,  FAC,  FF,
-     .   FX, FY, FZ, F2, MAS2, DTMI0,DTI,
-     .   FACM1, ECONTT, ECONVT, A2,MASM,
-     .   FSAV1, FSAV2, FSAV3, FSAV4, FSAV5, FSAV6, FSAV7, FSAV8,
+     . PENE(MVSIZ),DIST(MVSIZ),
+     . VIS2(MVSIZ),
+     . VMAX,S2,
+     . DT1INV, FAC, FF,
+     . FX, FY, FZ, MAS2,DTI,
+     . ECONTT, ECONVT,MASM,
+     . FSAV1, FSAV2, FSAV3, FSAV4, FSAV5, FSAV6, FSAV8,
      .   FSAV9, FSAV10, FSAV11, FSAV12, FSAV13, FSAV14, FSAV15,
-     .   FSAV22, FSAV23, FSAV24,DGAPLOAD,
+     . DGAPLOAD,
      .   FSAVSUB1(24,NISUB), IMPX, IMPY, IMPZ,FTN ,FN , FT,BETA
       my_real
      .   PREC
@@ -155,10 +155,7 @@ C-----------------------------------------------
      .   KT(MVSIZ),C(MVSIZ),CF(MVSIZ),
      .   K1(MVSIZ),K2(MVSIZ),K3(MVSIZ),K4(MVSIZ),
      .   C1(MVSIZ),C2(MVSIZ),C3(MVSIZ),C4(MVSIZ),
-     .   CX,CY,CFI,AUX,AAA,GAPP
-      DOUBLE PRECISION
-     .   FX6(6,MVSIZ), FY6(6,MVSIZ), FZ6(6,MVSIZ)
-      INTEGER :: S_ADDSUBFIE,S_LISUBSFIE,P
+     . CX,CY,CFI,AUX,GAPP
 C
       INTEGER BITGET
       EXTERNAL BITGET
@@ -523,53 +520,55 @@ C---------------------------------
               IF(ITYPSUB == 1 ) THEN  ! Defining specific inter
                 ISS1 = BITGET(INFLG_SUBE(JJ),0)
                 ISS2 = BITGET(INFLG_SUBE(JJ),1)
-                KSUB=LISUBE(KK)
-                DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                  IMS1 = BITGET(INFLG_SUBE(KK),0)
-                  IMS2 = BITGET(INFLG_SUBE(KK),1)
-                  IF(KSUB==JSUB)THEN
-                    IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
-     .                       (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                      KK=KK+1
-                      KSUB=LISUBE(KK)
-                      CYCLE
-                    END IF
-                    IMPX=FXI(I)*DT12
-                    IMPY=FYI(I)*DT12
-                    IMPZ=FZI(I)*DT12
-C
-                    IF(IMS2 > 0)THEN
-                      FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
-                      FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
-                      FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
-                      FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
-                    ELSE
-                      FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
-                      FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
-                      FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
-                      FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
-                    END IF
-C
-                    IF(ISENSINT(JSUB+1)/=0) THEN
-                      IF(IMS2 > 0)THEN
-                        FSAVPARIT(JSUB+1,1,I) =  -FXI(I)
-                        FSAVPARIT(JSUB+1,2,I) =  -FYI(I)
-                        FSAVPARIT(JSUB+1,3,I) =  -FZI(I)
-                      ELSE
-                        FSAVPARIT(JSUB+1,1,I) =  FXI(I)
-                        FSAVPARIT(JSUB+1,2,I) =  FYI(I)
-                        FSAVPARIT(JSUB+1,3,I) =  FZI(I)
-                      END IF
-                    ENDIF
-C
-                    FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
-                    FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
-                    FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
-C
-                  ENDIF
-                  KK=KK+1
+                IF(KK<ADDSUBE(IE+1)) THEN
                   KSUB=LISUBE(KK)
-                ENDDO
+                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                    IMS1 = BITGET(INFLG_SUBE(KK),0)
+                    IMS2 = BITGET(INFLG_SUBE(KK),1)
+                    IF(KSUB==JSUB)THEN
+                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+     .                       (IMS2 == 1 .AND. ISS1 == 1)))  THEN
+                        KK=KK+1
+                        IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                        CYCLE
+                      END IF
+                      IMPX=FXI(I)*DT12
+                      IMPY=FYI(I)*DT12
+                      IMPZ=FZI(I)*DT12
+C
+                      IF(IMS2 > 0)THEN
+                        FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
+                        FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
+                        FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
+                        FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
+                      ELSE
+                        FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
+                        FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
+                        FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
+                        FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
+                      END IF
+C
+                      IF(ISENSINT(JSUB+1)/=0) THEN
+                        IF(IMS2 > 0)THEN
+                          FSAVPARIT(JSUB+1,1,I) =  -FXI(I)
+                          FSAVPARIT(JSUB+1,2,I) =  -FYI(I)
+                          FSAVPARIT(JSUB+1,3,I) =  -FZI(I)
+                        ELSE
+                          FSAVPARIT(JSUB+1,1,I) =  FXI(I)
+                          FSAVPARIT(JSUB+1,2,I) =  FYI(I)
+                          FSAVPARIT(JSUB+1,3,I) =  FZI(I)
+                        END IF
+                      ENDIF
+C
+                      FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
+                      FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
+                      FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
+C
+                    ENDIF
+                    KK=KK+1
+                    KSUB=LISUBE(KK)
+                  ENDDO
+                ENDIF
                 JJ=JJ+1
 
               ELSEIF(ITYPSUB == 2 ) THEN   ! Inter =0 : collecting forces from all inter with only 1 surface
@@ -601,51 +600,53 @@ C
 
                 ISS2 = BITGET(INFLG_SUBE(JJ),0)
                 ISS1 = BITGET(INFLG_SUBE(JJ),1)
-                KSUB=LISUBE(KK)
-                DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                  IMS2 = BITGET(INFLG_SUBE(KK),0)
-                  IMS1 = BITGET(INFLG_SUBE(KK),1)
-                  IF(KSUB==JSUB)THEN
-                    IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+                IF(KK<ADDSUBE(IE+1)) THEN
+                  KSUB=LISUBE(KK)
+                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                    IMS2 = BITGET(INFLG_SUBE(KK),0)
+                    IMS1 = BITGET(INFLG_SUBE(KK),1)
+                    IF(KSUB==JSUB)THEN
+                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
      .                      (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                      KK=KK+1
-                      KSUB=LISUBE(KK)
-                      CYCLE
-                    END IF
-
-                    IF(IMS2 > 0)THEN
-                      FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
-                      FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
-                      FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
-                      FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
-                    ELSE
-                      FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
-                      FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
-                      FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
-                      FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
-                    ENDIF
-
-                    FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
-                    FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
-                    FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
-
-                    IF(ISENSINT(JSUB+1)/=0) THEN
-                      IF(IMS2 > 0)THEN
-                        FSAVPARIT(JSUB+1,1,I) =  -FXI(I)
-                        FSAVPARIT(JSUB+1,2,I) =  -FYI(I)
-                        FSAVPARIT(JSUB+1,3,I) =  -FZI(I)
-                      ELSE
-                        FSAVPARIT(JSUB+1,1,I) =  FXI(I)
-                        FSAVPARIT(JSUB+1,2,I) =  FYI(I)
-                        FSAVPARIT(JSUB+1,3,I) =  FZI(I)
+                        KK=KK+1
+                        IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                        CYCLE
                       END IF
-                    ENDIF
+
+                      IF(IMS2 > 0)THEN
+                         FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
+                         FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
+                         FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
+                         FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
+                      ELSE
+                         FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
+                         FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
+                         FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
+                         FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
+                      ENDIF
+
+                      FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
+                      FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
+                      FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
+
+                      IF(ISENSINT(JSUB+1)/=0) THEN
+                        IF(IMS2 > 0)THEN
+                          FSAVPARIT(JSUB+1,1,I) =  -FXI(I)
+                          FSAVPARIT(JSUB+1,2,I) =  -FYI(I)
+                          FSAVPARIT(JSUB+1,3,I) =  -FZI(I)
+                        ELSE
+                          FSAVPARIT(JSUB+1,1,I) =  FXI(I)
+                          FSAVPARIT(JSUB+1,2,I) =  FYI(I)
+                          FSAVPARIT(JSUB+1,3,I) =  FZI(I)
+                        END IF
+                      ENDIF
 
 C
-                  ENDIF
-                  KK=KK+1
-                  KSUB=LISUBE(KK)
-                ENDDO
+                    ENDIF
+                    KK=KK+1
+                    KSUB=LISUBE(KK)
+                  ENDDO
+                ENDIF
                 JJ=JJ+1
               ENDIF
             END DO
@@ -722,54 +723,56 @@ C            WRITE(6,*) "JJ=",JJ
                   ASSERT(JSUB <= NISUB)
                   ISS1 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),0)
                   ISS2 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),1)
-                  KSUB=LISUBE(KK)
-                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                    ASSERT(KSUB <= NISUB)
-                    IMS1 = BITGET(INFLG_SUBE(KK),0)
-                    IMS2 = BITGET(INFLG_SUBE(KK),1)
-                    IF(KSUB==JSUB)THEN
-                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
-     .                        (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                        KK=KK+1
-                        KSUB=LISUBE(KK)
-                        CYCLE
-                      END IF
-                      IMPX=FXI(I)*DT12
-                      IMPY=FYI(I)*DT12
-                      IMPZ=FZI(I)*DT12
-C
-                      IF(IMS2 > 0)THEN
-                        FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
-                        FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
-                        FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
-                        FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
-                      ELSE
-                        FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
-                        FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
-                        FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
-                        FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
-                      END IF
-C
-                      IF(ISENSINT(JSUB+1)/=0) THEN
-                        IF(IMS2 > 0)THEN
-                          FSAVPARIT(JSUB+1,1,I) =  -FXI(I)
-                          FSAVPARIT(JSUB+1,2,I) =  -FYI(I)
-                          FSAVPARIT(JSUB+1,3,I) =  -FZI(I)
-                        ELSE
-                          FSAVPARIT(JSUB+1,1,I) =  FXI(I)
-                          FSAVPARIT(JSUB+1,2,I) =  FYI(I)
-                          FSAVPARIT(JSUB+1,3,I) =  FZI(I)
-                        END IF
-                      ENDIF
-C
-                      FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
-                      FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
-                      FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
-C
-                    ENDIF
-                    KK=KK+1
+                  IF(KK<ADDSUBE(IE+1)) THEN
                     KSUB=LISUBE(KK)
-                  ENDDO
+                    DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                      ASSERT(KSUB <= NISUB)
+                      IMS1 = BITGET(INFLG_SUBE(KK),0)
+                      IMS2 = BITGET(INFLG_SUBE(KK),1)
+                      IF(KSUB==JSUB)THEN
+                        IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+     .                        (IMS2 == 1 .AND. ISS1 == 1)))  THEN
+                          KK=KK+1
+                          IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                          CYCLE
+                        END IF
+                        IMPX=FXI(I)*DT12
+                        IMPY=FYI(I)*DT12
+                        IMPZ=FZI(I)*DT12
+C
+                        IF(IMS2 > 0)THEN
+                          FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
+                          FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
+                          FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
+                          FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
+                        ELSE
+                          FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
+                          FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
+                          FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
+                          FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
+                        END IF
+C
+                        IF(ISENSINT(JSUB+1)/=0) THEN
+                          IF(IMS2 > 0)THEN
+                            FSAVPARIT(JSUB+1,1,I) =  -FXI(I)
+                            FSAVPARIT(JSUB+1,2,I) =  -FYI(I)
+                            FSAVPARIT(JSUB+1,3,I) =  -FZI(I)
+                          ELSE
+                            FSAVPARIT(JSUB+1,1,I) =  FXI(I)
+                            FSAVPARIT(JSUB+1,2,I) =  FYI(I)
+                            FSAVPARIT(JSUB+1,3,I) =  FZI(I)
+                          END IF
+                        ENDIF
+C
+                        FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
+                        FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
+                        FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
+C
+                      ENDIF
+                      KK=KK+1
+                      IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                    ENDDO
+                  ENDIF
                   JJ=JJ+1
 
                 ELSEIF(ITYPSUB == 2 ) THEN   ! Inter =0 : collecting forces from all inter with only secnd surface
@@ -801,43 +804,45 @@ C
 
                   ISS2 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),0)
                   ISS1 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),1)
-                  KSUB=LISUBE(KK)
-                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                    IMS2 = BITGET(INFLG_SUBE(KK),0)
-                    IMS1 = BITGET(INFLG_SUBE(KK),1)
-                    IF(KSUB==JSUB)THEN
-                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
-     .                       (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                        KK=KK+1
-                        KSUB=LISUBE(KK)
-                        CYCLE
-                      END IF
-
-                      IMPX=FXI(I)*DT12
-                      IMPY=FYI(I)*DT12
-                      IMPZ=FZI(I)*DT12
-
-                      IF(IMS2 > 0)THEN
-                        FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
-                        FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
-                        FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
-                        FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
-                      ELSE
-                        FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
-                        FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
-                        FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
-                        FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
-                      ENDIF
-
-                      FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
-                      FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
-                      FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
-
-C
-                    ENDIF
-                    KK=KK+1
+                  IF(KK<ADDSUBE(IE+1)) THEN
                     KSUB=LISUBE(KK)
-                  ENDDO
+                    DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                      IMS2 = BITGET(INFLG_SUBE(KK),0)
+                      IMS1 = BITGET(INFLG_SUBE(KK),1)
+                      IF(KSUB==JSUB)THEN
+                        IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+     .                         (IMS2 == 1 .AND. ISS1 == 1)))  THEN
+                          KK=KK+1
+                          IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                          CYCLE
+                        END IF
+
+                        IMPX=FXI(I)*DT12
+                        IMPY=FYI(I)*DT12
+                        IMPZ=FZI(I)*DT12
+
+                        IF(IMS2 > 0)THEN
+                          FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)-IMPX
+                          FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)-IMPY
+                          FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)-IMPZ
+                          FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)-FNI(I)*DT12
+                        ELSE
+                          FSAVSUB1(1,JSUB)=FSAVSUB1(1,JSUB)+IMPX
+                          FSAVSUB1(2,JSUB)=FSAVSUB1(2,JSUB)+IMPY
+                          FSAVSUB1(3,JSUB)=FSAVSUB1(3,JSUB)+IMPZ
+                          FSAVSUB1(11,JSUB)=FSAVSUB1(11,JSUB)+FNI(I)*DT12
+                        ENDIF
+
+                        FSAVSUB1(8,JSUB) =FSAVSUB1(8,JSUB) +ABS(IMPX)
+                        FSAVSUB1(9,JSUB) =FSAVSUB1(9,JSUB) +ABS(IMPY)
+                        FSAVSUB1(10,JSUB)=FSAVSUB1(10,JSUB)+ABS(IMPZ)
+
+C  
+                      ENDIF
+                      KK=KK+1
+                      IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                    ENDDO
+                  ENDIF
                   JJ=JJ+1
 
                 ENDIF
@@ -949,46 +954,48 @@ C---------------------------------
               IF(ITYPSUB == 1 ) THEN  ! Defining specific inter
                 ISS1 = BITGET(INFLG_SUBE(JJ),0)
                 ISS2 = BITGET(INFLG_SUBE(JJ),1)
-                KSUB=LISUBE(KK)
-                DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                  IMS1 = BITGET(INFLG_SUBE(KK),0)
-                  IMS2 = BITGET(INFLG_SUBE(KK),1)
-                  IF(KSUB==JSUB)THEN
-                    IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+                IF(KK<ADDSUBE(IE+1)) THEN
+                  KSUB=LISUBE(KK)
+                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                    IMS1 = BITGET(INFLG_SUBE(KK),0)
+                    IMS2 = BITGET(INFLG_SUBE(KK),1)
+                    IF(KSUB==JSUB)THEN
+                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
      .                       (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                      KK=KK+1
-                      KSUB=LISUBE(KK)
-                      CYCLE
-                    END IF
-                    IMPX=FXT(I)*DT12
-                    IMPY=FYT(I)*DT12
-                    IMPZ=FZT(I)*DT12
+                        KK=KK+1
+                        IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                        CYCLE
+                      END IF
+                      IMPX=FXT(I)*DT12
+                      IMPY=FYT(I)*DT12
+                      IMPZ=FZT(I)*DT12
 C                 main side :
-                    FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
-                    FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
-                    FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
+                      FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
+                      FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
+                      FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
 C
-                    IMPX=FXI(I)*DT12
-                    IMPY=FYI(I)*DT12
-                    IMPZ=FZI(I)*DT12
-                    FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
-                    FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
-                    FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
+                      IMPX=FXI(I)*DT12
+                      IMPY=FYI(I)*DT12
+                      IMPZ=FZI(I)*DT12
+                      FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
+                      FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
+                      FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
 C
-                    IF(ISENSINT(JSUB+1)/=0) THEN
-                      FSAVPARIT(JSUB+1,4,I) =  FXT(I)
-                      FSAVPARIT(JSUB+1,5,I) =  FYT(I)
-                      FSAVPARIT(JSUB+1,6,I) =  FZT(I)
-                    ENDIF
+                      IF(ISENSINT(JSUB+1)/=0) THEN
+                        FSAVPARIT(JSUB+1,4,I) =  FXT(I)
+                        FSAVPARIT(JSUB+1,5,I) =  FYT(I)
+                       FSAVPARIT(JSUB+1,6,I) =  FZT(I)
+                      ENDIF
 C
-                    FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
+                      FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
      .                              +SQRT(IMPX*IMPX+IMPY*IMPY+IMPZ*IMPZ)
 c     .                              +XP(I)*IMPY-YP(I)*IMPX
 C
-                  ENDIF
-                  KK=KK+1
-                  KSUB=LISUBE(KK)
-                ENDDO
+                    ENDIF
+                    KK=KK+1
+                    IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                  ENDDO
+                ENDIF
                 JJ=JJ+1
 
 
@@ -1025,59 +1032,61 @@ c     .                              +XP(I)*IMPY-YP(I)*IMPX
 
                 ISS2 = BITGET(INFLG_SUBE(JJ),0)
                 ISS1 = BITGET(INFLG_SUBE(JJ),1)
-                KSUB=LISUBE(KK)
-                DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                  IMS2 = BITGET(INFLG_SUBE(KK),0)
-                  IMS1 = BITGET(INFLG_SUBE(KK),1)
-                  IF(KSUB==JSUB)THEN
-                    IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+                IF(KK<ADDSUBE(IE+1)) THEN
+                  KSUB=LISUBE(KK)
+                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                    IMS2 = BITGET(INFLG_SUBE(KK),0)
+                    IMS1 = BITGET(INFLG_SUBE(KK),1)
+                    IF(KSUB==JSUB)THEN
+                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
      .                       (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                      KK=KK+1
-                      KSUB=LISUBE(KK)
-                      CYCLE
-                    END IF
+                        KK=KK+1
+                        IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                        CYCLE
+                      END IF
 
-                    IMPX=FXT(I)*DT12
-                    IMPY=FYT(I)*DT12
-                    IMPZ=FZT(I)*DT12
+                      IMPX=FXT(I)*DT12
+                      IMPY=FYT(I)*DT12
+                      IMPZ=FZT(I)*DT12
 
-                    IF(IMS2 > 0) THEN
-                      FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)-IMPX
-                      FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)-IMPY
-                      FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)-IMPZ
-                    ELSE
-C                 main side :
-                      FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
-                      FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
-                      FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
-                    ENDIF
-C
-                    IMPX=FXI(I)*DT12
-                    IMPY=FYI(I)*DT12
-                    IMPZ=FZI(I)*DT12
-                    FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
-                    FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
-                    FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
-C
-                    IF(ISENSINT(JSUB+1)/=0) THEN
                       IF(IMS2 > 0) THEN
-                        FSAVPARIT(JSUB+1,4,I) =  -FXT(I)
-                        FSAVPARIT(JSUB+1,5,I) =  -FYT(I)
-                        FSAVPARIT(JSUB+1,6,I) =  -FZT(I)
+                        FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)-IMPX
+                        FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)-IMPY
+                        FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)-IMPZ
                       ELSE
-                        FSAVPARIT(JSUB+1,4,I) =  FXT(I)
-                        FSAVPARIT(JSUB+1,5,I) =  FYT(I)
-                        FSAVPARIT(JSUB+1,6,I) =  FZT(I)
+C                 main side :
+                        FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
+                        FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
+                        FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
                       ENDIF
-                    ENDIF
 C
-                    FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
+                      IMPX=FXI(I)*DT12
+                      IMPY=FYI(I)*DT12
+                      IMPZ=FZI(I)*DT12
+                      FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
+                      FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
+                      FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
+C
+                      IF(ISENSINT(JSUB+1)/=0) THEN
+                        IF(IMS2 > 0) THEN
+                          FSAVPARIT(JSUB+1,4,I) =  -FXT(I)
+                          FSAVPARIT(JSUB+1,5,I) =  -FYT(I)
+                          FSAVPARIT(JSUB+1,6,I) =  -FZT(I)
+                        ELSE
+                          FSAVPARIT(JSUB+1,4,I) =  FXT(I)
+                          FSAVPARIT(JSUB+1,5,I) =  FYT(I)
+                          FSAVPARIT(JSUB+1,6,I) =  FZT(I)
+                        ENDIF
+                      ENDIF
+C
+                      FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
      .                              +SQRT(IMPX*IMPX+IMPY*IMPY+IMPZ*IMPZ)
 c     .                              +XP(I)*IMPY-YP(I)*IMPX
-                  ENDIF
-                  KK=KK+1
-                  KSUB=LISUBE(KK)
-                ENDDO
+                    ENDIF
+                    KK=KK+1
+                     IF(KK<ADDSUBE(IE+1))KSUB=LISUBE(KK)
+                  ENDDO
+                ENDIF
                 JJ=JJ+1
 
               ENDIF
@@ -1140,46 +1149,48 @@ c     .                              +XP(I)*IMPY-YP(I)*IMPX
                 IF(ITYPSUB == 1 ) THEN  ! Defining specific inter
                   ISS1 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),0)
                   ISS2 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),1)
-                  KSUB=LISUBE(KK)
-                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                    IMS1 = BITGET(INFLG_SUBE(KK),0)
-                    IMS2 = BITGET(INFLG_SUBE(KK),1)
-                    IF(KSUB==JSUB)THEN
-                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+                  IF(KK<ADDSUBE(IE+1)) THEN  
+                     KSUB=LISUBE(KK)
+                    DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                      IMS1 = BITGET(INFLG_SUBE(KK),0)
+                      IMS2 = BITGET(INFLG_SUBE(KK),1)
+                      IF(KSUB==JSUB)THEN
+                        IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
      .                         (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                        KK=KK+1
-                        KSUB=LISUBE(KK)
-                        CYCLE
-                      END IF
-                      IMPX=FXT(I)*DT12
-                      IMPY=FYT(I)*DT12
-                      IMPZ=FZT(I)*DT12
+                          KK=KK+1
+                          IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                          CYCLE
+                        END IF
+                        IMPX=FXT(I)*DT12
+                        IMPY=FYT(I)*DT12
+                        IMPZ=FZT(I)*DT12
 C                 main side :
-                      FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
-                      FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
-                      FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
+                        FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
+                        FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
+                        FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
 C
-                      IMPX=FXI(I)*DT12
-                      IMPY=FYI(I)*DT12
-                      IMPZ=FZI(I)*DT12
-                      FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
-                      FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
-                      FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
+                        IMPX=FXI(I)*DT12
+                        IMPY=FYI(I)*DT12
+                        IMPZ=FZI(I)*DT12
+                        FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
+                        FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
+                        FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
 C
-                      IF(ISENSINT(JSUB+1)/=0) THEN
-                        FSAVPARIT(JSUB+1,4,I) =  FXT(I)
-                        FSAVPARIT(JSUB+1,5,I) =  FYT(I)
-                        FSAVPARIT(JSUB+1,6,I) =  FZT(I)
-                      ENDIF
+                        IF(ISENSINT(JSUB+1)/=0) THEN
+                          FSAVPARIT(JSUB+1,4,I) =  FXT(I)
+                          FSAVPARIT(JSUB+1,5,I) =  FYT(I)
+                          FSAVPARIT(JSUB+1,6,I) =  FZT(I)
+                        ENDIF
 C
-                      FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
+                        FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
      .                                +SQRT(IMPX*IMPX+IMPY*IMPY+IMPZ*IMPZ)
 c     .                            +XP(I)*IMPY-YP(I)*IMPX
 C
-                    ENDIF
-                    KK=KK+1
-                    KSUB=LISUBE(KK)
-                  ENDDO
+                      ENDIF
+                      KK=KK+1
+                      IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                    ENDDO
+                  ENDIF
                   JJ=JJ+1
 
 
@@ -1217,60 +1228,62 @@ c     .                              +XP(I)*IMPY-YP(I)*IMPX
 
                   ISS2 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),0)
                   ISS1 = BITGET(INFLG_SUBSFIE(NIN)%P(JJ),1)
-                  KSUB=LISUBE(KK)
-                  DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
-                    IMS2 = BITGET(INFLG_SUBE(KK),0)
-                    IMS1 = BITGET(INFLG_SUBE(KK),1)
-                    IF(KSUB==JSUB)THEN
-                      IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
+                  IF(KK<ADDSUBE(IE+1)) THEN
+                    KSUB=LISUBE(KK)
+                    DO WHILE((KSUB<=JSUB).AND.(KK<ADDSUBE(IE+1)))
+                      IMS2 = BITGET(INFLG_SUBE(KK),0)
+                      IMS1 = BITGET(INFLG_SUBE(KK),1)
+                      IF(KSUB==JSUB)THEN
+                        IF(.NOT.((IMS1 == 1 .AND. ISS2 == 1).OR.
      .                       (IMS2 == 1 .AND. ISS1 == 1)))  THEN
-                        KK=KK+1
-                        KSUB=LISUBE(KK)
-                        CYCLE
-                      END IF
+                          KK=KK+1
+                          IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                          CYCLE
+                        END IF
 
-                      IMPX=FXT(I)*DT12
-                      IMPY=FYT(I)*DT12
-                      IMPZ=FZT(I)*DT12
-                      IF(IMS2 > 0 ) THEN
-C                 main side :
-                        FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)-IMPX
-                        FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)-IMPY
-                        FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)-IMPZ
-                      ELSE
-C                 main side :
-                        FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
-                        FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
-                        FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
-                      ENDIF
-C
-                      IMPX=FXI(I)*DT12
-                      IMPY=FYI(I)*DT12
-                      IMPZ=FZI(I)*DT12
-                      FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
-                      FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
-                      FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
-C
-                      IF(ISENSINT(JSUB+1)/=0) THEN
+                        IMPX=FXT(I)*DT12
+                        IMPY=FYT(I)*DT12
+                        IMPZ=FZT(I)*DT12
                         IF(IMS2 > 0 ) THEN
-                          FSAVPARIT(JSUB+1,4,I) =  -FXT(I)
-                          FSAVPARIT(JSUB+1,5,I) =  -FYT(I)
-                          FSAVPARIT(JSUB+1,6,I) =  -FZT(I)
+C                 main side :
+                          FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)-IMPX
+                          FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)-IMPY
+                          FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)-IMPZ
                         ELSE
-                          FSAVPARIT(JSUB+1,4,I) =  FXT(I)
-                          FSAVPARIT(JSUB+1,5,I) =  FYT(I)
-                          FSAVPARIT(JSUB+1,6,I) =  FZT(I)
+C                 main side :
+                          FSAVSUB1(4,JSUB)=FSAVSUB1(4,JSUB)+IMPX
+                          FSAVSUB1(5,JSUB)=FSAVSUB1(5,JSUB)+IMPY
+                          FSAVSUB1(6,JSUB)=FSAVSUB1(6,JSUB)+IMPZ
                         ENDIF
-                      ENDIF
 C
-                      FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
+                        IMPX=FXI(I)*DT12
+                        IMPY=FYI(I)*DT12
+                        IMPZ=FZI(I)*DT12
+                        FSAVSUB1(12,JSUB)=FSAVSUB1(12,JSUB)+ABS(IMPX)
+                        FSAVSUB1(13,JSUB)=FSAVSUB1(13,JSUB)+ABS(IMPY)
+                        FSAVSUB1(14,JSUB)=FSAVSUB1(14,JSUB)+ABS(IMPZ)
+C 
+                        IF(ISENSINT(JSUB+1)/=0) THEN
+                          IF(IMS2 > 0 ) THEN
+                            FSAVPARIT(JSUB+1,4,I) =  -FXT(I)
+                            FSAVPARIT(JSUB+1,5,I) =  -FYT(I)
+                            FSAVPARIT(JSUB+1,6,I) =  -FZT(I)
+                          ELSE
+                            FSAVPARIT(JSUB+1,4,I) =  FXT(I)
+                            FSAVPARIT(JSUB+1,5,I) =  FYT(I)
+                            FSAVPARIT(JSUB+1,6,I) =  FZT(I)
+                          ENDIF
+                        ENDIF
+C
+                        FSAVSUB1(15,JSUB)= FSAVSUB1(15,JSUB)
      .                                +SQRT(IMPX*IMPX+IMPY*IMPY+IMPZ*IMPZ)
 c     .                              +XP(I)*IMPY-YP(I)*IMPX
 C
-                    ENDIF
-                    KK=KK+1
-                    KSUB=LISUBE(KK)
-                  ENDDO
+                      ENDIF
+                      KK=KK+1
+                      IF(KK<ADDSUBE(IE+1)) KSUB=LISUBE(KK)
+                    ENDDO
+                  ENDIF
                   JJ=JJ+1
 
                 ENDIF

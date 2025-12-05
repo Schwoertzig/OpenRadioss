@@ -58,6 +58,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sum_6_float        ../engine/source/system/parit.F
 !||--- uses       -----------------------------------------------------
 !||    ams_work_mod       ../engine/source/modules/ams_work_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    intstamp_mod       ../engine/share/modules/intstamp_mod.F
 !||    sensor_mod         ../common_source/modules/sensor_mod.F90
 !||    sms_pcg_proj       ../engine/share/modules/sms_mod.F
@@ -97,6 +98,7 @@ C-----------------------------------------------
         USE SENSOR_MOD
         USE SMS_PCG_PROJ
         USE ams_work_mod
+        use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -169,7 +171,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-        INTEGER I, IT, TOTIT, NLIM, N, L, K, LLT, IDOWN, J, IFLAG, IACT,
+        INTEGER I, IT, TOTIT, NLIM, N, L, K, LLT, IDOWN, IFLAG, IACT, 
      .          NCPRIA, M, MSR, IAD, NSN, KI, NRBDIM
         my_real
      .     ALPHA, BETA, TOLN,
@@ -1742,7 +1744,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER I,J,K,I3,I2,I1,K3,K2,K1,N, LOC_PROC, M, KK,
      .          KMV,KMV3,KMV2,KMV1
-        INTEGER SIZE, LENR, JAD, DIR, L, LLT,
+        INTEGER SIZE, LENR, L, 
      .          IAD_SEND(NSPMD+1),IAD_RECV(NSPMD+1),
      .          REQ_R(NSPMD),REQ_S(NSPMD)
         my_real
@@ -2560,7 +2562,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER I,J,K,N, LOC_PROC, M, KK, KMV
-        INTEGER SIZE, LENR, JAD, DIR, L, LLT
+        INTEGER SIZE, LENR, L
         my_real
      .     L_K
 C-----------------------------

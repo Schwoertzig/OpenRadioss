@@ -84,12 +84,12 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       LOGICAL :: IS_AVAILABLE,IS_ENCRYPTED,IS_EOS, EOS_EMBEDDED
-      INTEGER JTUR, I, EMPTY_LINE,COUNT,IEOS,LAW6_OPT
+      INTEGER COUNT, IEOS
       my_real
      .   YOUNG, ANU, CA, CB, CN, EPSM, SIGM, BULK,
-     .   PMIN, E0, G, FAC_L, FAC_T, FAC_M, FAC_C,
-     .   BID2 ,BID3 ,BID4 ,BID5 ,
-     .   BID2_,BID3_,BID4_,BID5_,
+     .   PMIN, E0, G,
+     .   
+     .   
      .   C0,C1,C2,C3,C4,C5,PSH,RHO0,RHOR
 C-----------------------------------------------
 C   S o u r c e   L i n e s
@@ -151,7 +151,7 @@ C-----------------------------------------------
         CALL HM_GET_FLOATV('MAT_PSH'      ,PSH      ,IS_AVAILABLE, LSUBMODEL, UNITAB)
         ! allocate EoS data structure
         MATPARAM%IEOS = 1
-        MATPARAM%EOS%NUPARAM = 6
+        MATPARAM%EOS%NUPARAM = 7
         MATPARAM%EOS%NIPARAM = 0
         MATPARAM%EOS%NFUNC = 0
         MATPARAM%EOS%NTABLE = 0
@@ -162,6 +162,7 @@ C-----------------------------------------------
         MATPARAM%EOS%UPARAM(4) = C3
         MATPARAM%EOS%UPARAM(5) = C4
         MATPARAM%EOS%UPARAM(6) = C5
+        MATPARAM%EOS%UPARAM(7) = ZERO
         MATPARAM%EOS%PSH = PSH
         MATPARAM%EOS%E0 = E0
         BULK  = C1                                                                                  

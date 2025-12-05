@@ -66,8 +66,8 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER :: NIN
         INTEGER :: INACTI,IFQ,NSN,NSNROLD,INACIMP
-        INTEGER :: I,N,K,NN,NI,ITIED
-        INTEGER :: I_STOK,CAND_T,CAND_TF
+        INTEGER :: ITIED
+        INTEGER :: I_STOK
         INTEGER :: NUM_IMP
         INTEGER :: KK
 C-----------------------------------------------
@@ -108,7 +108,7 @@ C-----------------------------------------------
                 ENDIF
 
 C=============================================
-C     LES NOEUDS DELETES DEVIENNENT NSN+NSNROLD+1 
+C     LES NODES DELETES DEVIENNENT NSN+NSNROLD+1 
 C=============================================
 C------for travelling nodes detected in imp_solv----- 
                 I_STOK = INTBUF_TAB(NIN)%I_STOK(1)

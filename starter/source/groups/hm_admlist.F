@@ -72,7 +72,7 @@ C-----------------------------------------------
       INTEGER I, J, NOLD, K, IWORK(70000)
       INTEGER LELT, LELT1, LELT2, NE, KE, IP, LEVEL, NLEV,
      .        LELTMP, NELTMP(NSONTREE**(LEVELMAX+1))
-      LOGICAL IS_AVAILABLE, IS_ENCRYPTED
+      LOGICAL IS_AVAILABLE
 C-----------------------------------------------
 C CONSTITUTION OF LIST
 C-----------------------------------------------
@@ -105,7 +105,7 @@ C-----------------------
       ENDDO
       NEL=K
 C-----------------------
-C TRI DE IX EN ORDRE CROISSANT si KK = 0
+C SORT IX IN ASCENDING ORDER if KK = 0
 C-----------------------
       IF(KK==0)THEN
         DO I=1,NUMEL

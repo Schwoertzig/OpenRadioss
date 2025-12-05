@@ -61,6 +61,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    init_bcs_nrf                    ../starter/source/boundary_conditions/init_bcs_nrf.F90
 !||    init_bcs_wall                   ../starter/source/boundary_conditions/init_bcs_wall.F90
 !||    init_inivol                     ../starter/source/initial_conditions/inivol/init_inivol.F90
+!||    init_rwall_penalty              ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
 !||    init_seatbelt_rbodies           ../starter/source/tools/seatbelts/init_seatbelt_rbodies.F90
 !||    inivoid                         ../starter/source/elements/initia/inivoid.F
 !||    inspcnd                         ../starter/source/elements/sph/inspcnd.F
@@ -125,6 +126,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    init_bcs_nrf_mod                ../starter/source/boundary_conditions/init_bcs_nrf.F90
 !||    init_bcs_wall_mod               ../starter/source/boundary_conditions/init_bcs_wall.F90
 !||    init_inivol_mod                 ../starter/source/initial_conditions/inivol/init_inivol.F90
+!||    init_rwall_penalty_mod          ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
 !||    init_seatbelt_rbodies_mod       ../starter/source/tools/seatbelts/init_seatbelt_rbodies.F90
 !||    inivol_def_mod                  ../starter/share/modules1/inivol_mod.F
 !||    message_mod                     ../starter/share/message_module/message_mod.F
@@ -190,7 +192,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      L                  KNOD2ELC   ,NOD2ELC       ,DR               ,SLRBODY        ,DRAPEG    ,
      M                  IPARI      ,INTBUF_TAB    ,INTERFACES       ,MAT_PARAM      ,NPRELOAD_A,
      N                  PRELOAD_A  ,FAIL_FRACTAL  ,FAIL_BROKMANN    ,DEFAULTS       ,NDAMP_FREQ_RANGE,
-     L                  DAMPR      ,IBEAM_VECTOR  ,RBEAM_VECTOR     ,IKINE)
+     O                  DAMPR      ,IBEAM_VECTOR  ,RBEAM_VECTOR     ,IKINE          ,LSIGI     ,
+     P                  LSIGSP     ,SRNOISE       ,NPRW             ,LPRW           , RWSTIF_PEN,
+     M                  SLN_PEN )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------                     
@@ -233,6 +237,7 @@ C-----------------------------------------------
       USE INIT_BCS_NRF_MOD , ONLY : INIT_BCS_NRF
       use init_inivol_mod , only : INIT_INIVOL
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
+      use init_rwall_penalty_mod , only : init_rwall_penalty
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -338,6 +343,14 @@ C
       INTEGER,INTENT(IN) :: IBEAM_VECTOR(NUMELP)
       my_real,INTENT(IN) :: RBEAM_VECTOR(3,NUMELP)
       INTEGER,INTENT(IN) :: IKINE(3*NUMNOD)
+      INTEGER,INTENT(IN) :: LSIGI
+      INTEGER,INTENT(IN) :: LSIGSP
+      INTEGER,INTENT(IN) :: SRNOISE
+!
+      INTEGER,INTENT(IN) :: SLN_PEN
+      INTEGER, DIMENSION(NNPRW*NRWALL),INTENT(IN) :: NPRW
+      INTEGER, DIMENSION(SLPRW),INTENT(IN)        :: LPRW
+      my_real, DIMENSION(SLN_PEN), INTENT(INOUT)  :: RWSTIF_PEN
 C
       TYPE (ELBUF_STRUCT_), TARGET, DIMENSION(NGROUP) :: ELBUF_TAB
       TYPE (ELBUF_STRUCT_), TARGET, DIMENSION(NGROUP,NXEL) :: XFEM_TAB
@@ -1047,35 +1060,33 @@ C Case total strain
 
          ELSEIF( (ISOLNOD == 6) .AND. (IGTYP == 14 .OR. IGTYP == 6))THEN
              !for the moment, there is no orthotropic penta solid element (IGTYP == 6)
-             JHBE=IPARG(23,NG)
-
-
-             IF(JHBE /=24)  THEN
-             CALL ANCMSG(MSGID=3110,             
-     .       MSGTYPE=MSGERROR,       
-     .       ANMODE=ANINFO,                                 
-     .       I1=JHBE)      ! PROPERTY TITLE)      
+             JHBE  = IPARG(23,NG)
+             NFT   = IPARG(3,NG)
+             IPROP = IXS(10,NFT+1)
+             IF (JHBE /= 24)  THEN
+               CALL ANCMSG(
+     .           MSGID=3107,             
+     .           MSGTYPE=MSGERROR,       
+     .           ANMODE=ANINFO_BLIND_1,                                 
+     .           I1=IGEO(1,IPROP),
+     .           I2=IPART(LIPART1*(IPART(I15A)-1)+4),
+     .           PRMOD=MSG_CUMU)
              ENDIF
           CALL S6ZINIT3(
-     .             ELBUF_TAB(NG),MS       ,IXS      ,PM         ,X    ,
-     .             DETONATORS   ,GEO      ,ALE_CONNECTIVITY      ,IPARG(1,NG),
-     .             DTELEM       ,SIGI     ,NEL      ,SKEW       ,IGEO       ,
-     .             STIFN        ,PARTSAV  ,V        ,IPART(I15A),MSS,
-     .             IPART        ,GLOB_THERM,
-     .             SIGSP        ,NSIGI    ,IPM      ,IUSER      ,NSIGS   ,
-     .             VOLNOD       ,BVOLNOD  ,VNS      ,BNS        ,PTSOL   ,
-     .             BUFMAT       ,MCP      ,MCPS     ,TEMP    ,
-     .             NPC          ,PLD      ,STRSGLOB(NF1),STRAGLOB(NF1),MSSA    ,
-     .             FAIL_INI     ,ILOADP   ,FACLOAD  ,RNOISE  ,
-     .             PERTURB      ,MAT_PARAM,DEFAULTS%SOLID,
-     .             NPROPM       ,NPROPG   ,NPROPGI  ,NPROPMI   ,
-     .             LSKEW        ,SIZLOADP ,LFACLOAD ,
-     .             NIXS         ,NPERTURB , 
-     .             NUMMAT       ,NUMSOL   ,    LIPART1  ,
-     .             I7STIFS      ,ISORTH   ,ISTRAIN   ,
-     .             JTHE         ,MTN      ,NFT)
-
-
+     .      ELBUF_TAB(NG),NIXS ,NUMELS   ,IXS      ,NUMNOD    ,MS       ,
+     .      NPROPM   ,NUMMAT   ,PM       ,X        ,DETONATORS,NPROPG   ,
+     .      NUMGEO   ,GEO      ,ALE_CONNECTIVITY   ,NPARG     ,      
+     .      IPARG(1,NG),NEL    ,DTELEM   ,NSIGS    ,LSIGI     ,SIGI     ,
+     .      LSKEW    ,NUMSKW   ,SKEW     ,NPROPGI  ,IGEO      ,STIFN    ,
+     .      NPSAV    ,NPART    ,PARTSAV  ,V        ,IPART(I15A),MSS     ,
+     .      LIPART1  ,IPART    ,GLOB_THERM,NSIGI   ,LSIGSP    ,SIGSP    ,
+     .      NPROPMI  ,IPM      ,IUSER    ,VOLNOD   ,BVOLNOD   ,VNS      ,
+     .      BNS      ,PTSOL    ,SBUFMAT  ,BUFMAT   ,MCP       ,MCPS     ,
+     .      TEMP     ,SNPC     ,NPC      ,STF      ,PLD       ,STRSGLOB(NF1),
+     .      STRAGLOB(NF1),MSSA ,FAIL_INI ,SIZLOADP ,NLOADP    ,ILOADP   ,
+     .      LFACLOAD ,FACLOAD  ,NPERTURB ,SRNOISE  ,RNOISE    ,PERTURB  ,
+     .      MAT_PARAM,DEFAULTS%SOLID     ,NUMSOL   ,I7STIFS   ,ISORTH   ,
+     .      ISTRAIN  ,JTHE     ,MTN      ,NFT      )
          ELSEIF(ISOLNOD == 10 .OR.(ISOLNOD == 4 .AND.ISROT == 1))THEN
           KK1=1+NUMELS*NIXS
           CALL S10INIT3(ELBUF_TAB(NG),
@@ -1585,8 +1596,16 @@ C
 C
        ENDIF
       END DO ! End loop on element group NG
-
-
+!
+      !<-----------------------------------------------------------------------
+      !< Print /PENTA6 error message if any
+      !<-----------------------------------------------------------------------
+      CALL ANCMSG(MSGID=3107,
+     .            MSGTYPE=MSGERROR,
+     .            ANMODE=ANINFO_BLIND_1,
+     .            PRMOD=MSG_PRINT)
+      !<-----------------------------------------------------------------------
+!
 C-----------
 !DETONATION TIMES WITH SHADOWING EFFECTS
 !FAST MARCHING METHOD
@@ -1714,6 +1733,19 @@ C---------------------------------------------------------------
         IF(INTERFACES%PARAMETERS%ISTIF_DT > 0) THEN
           CALL DTNODA_STIFINT( MS   ,STIFN ,INTERFACES%PARAMETERS%DT_STIFINT)
         ENDIF
+!--------------------------------------------
+! RWALL penalty stiffness initialization
+!--------------------------------------------
+        IF (SLN_PEN>0) THEN
+           CALL INIT_RWALL_PENALTY(ELBUF_TAB,                                              
+     1             numnod,  nparg,  ngroup,  iparg,   nummat,                    
+     2             nrwall,  nnprw,    nprw,   lprw,    slprw,                    
+     3             numelc,numeltg,  numels,numels8, numels10,                    
+     4           numels16,numels20,    ixc,   ixtg,      ixs,                    
+     5              ixs10,   ixs16,  ixs20,    ixt,      ixp,                    
+     6                ixr,  numelt, numelp, numelr,    stifn,
+     7                mat_param,SLN_PEN,RWSTIF_PEN)
+        END IF
 C--------------------------------------------
 C Laser impact
 C--------------------------------------------

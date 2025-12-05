@@ -24,6 +24,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    cbacoorpinch   ../engine/source/elements/shell/coqueba/cbacoorpinch.F
 !||--- called by ------------------------------------------------------
 !||    cbaforc3       ../engine/source/elements/shell/coqueba/cbaforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
        SUBROUTINE CBACOORPINCH( 
      1                         TNPG    ,VPINCHXYZ ,VPINCH ,
@@ -31,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3                         NPLAT   ,IPLAT     ,THK    ,DT1C,
      4                         FACP    ,LC        ,
      5                         VPINCHT1,VPINCHT2)
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------

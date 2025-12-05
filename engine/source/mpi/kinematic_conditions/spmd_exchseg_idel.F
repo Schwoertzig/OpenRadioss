@@ -28,6 +28,7 @@ C
 !||    chkload               ../engine/source/interfaces/chkload.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    nodal_arrays_mod      ../common_source/modules/nodal_arrays.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
@@ -39,6 +40,7 @@ C
      5    OFQ   ,LINDEX,IXP    ,IXR    ,IXT    ,
      6    GEO   ,IAD_ELEM)
        USE nodal_arrays_mod
+       use element_mod , only : nixs,nixq,nixc,nixp,nixr,nixt,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -74,9 +76,9 @@ C-----------------------------------------------
 #ifdef MPI
       INTEGER MSGOFF2 ,MSGOFF3, MSGTYP, LOC_PROC,
      .        IERROR,I, IDEB, LEN, N1, N2, N3, N4,
-     .        K, IX, LFT, LLT, II, NN, J, IOFF,
-     .        JD(50), KD(50), NG, IDEL, ITYP, NBEL,
-     .        ITY, MLW, NEL, NFT, KAD, NPT, ISTRA, IHBE,
+     .        K, IX, II, NN, J, IOFF,
+     .           NBEL,
+     .            
      .        REQ_S2(NSPMD),REQ_S3(NSPMD),STATUS(MPI_STATUS_SIZE),
      .        REQ_R1(NSPMD)
       INTEGER, DIMENSION(:), ALLOCATABLE ::  BUFR, BUFS2

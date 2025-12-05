@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    i17tri         ../engine/source/interfaces/int17/i17tri.F
 !||    my_barrier     ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    icontact_mod   ../engine/share/modules/icontact_mod.F
 !||====================================================================
        SUBROUTINE I17BUCE_PENA(
@@ -42,6 +43,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ICONTACT_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -54,7 +56,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NME, NMES, NOINT,IDT,ITASK,MX_CAND,
+      INTEGER NME, NMES, NOINT,ITASK,MX_CAND,
      .        ESH_T, I_STOK_GLOB, NIN, NMESR, NB_N_B 
       INTEGER CAND_E(*),CAND_N(*),IXS(NIXS,*),IXS16(8,*),
      .        LWAT,NELEM(*),NELES(*),IXS20(12,*)
@@ -70,8 +72,8 @@ C-----------------------------------------------
 C
       INTEGER I_ADD_MAX
       PARAMETER (I_ADD_MAX = 1001)
-      INTEGER I, J, K, L, CONT,I_STOK   ,
-     .        IP0, IP1, IP2, IP21, IP22, IP31, MAXSIZ,
+      INTEGER     CONT   ,
+     .              MAXSIZ,
      .        NMES_F,NMES_L, MAXSIZS, I_ADD
       INTEGER IERR1,IERR2
       my_real
@@ -170,6 +172,7 @@ C
 !||    my_barrier      ../engine/source/system/machine.F
 !||    spmd_tri17box   ../engine/source/mpi/interfaces/spmd_tri17box.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    icontact_mod    ../engine/share/modules/icontact_mod.F
 !||    message_mod     ../engine/share/message_module/message_mod.F
 !||====================================================================
@@ -186,6 +189,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ICONTACT_MOD
       USE MESSAGE_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -201,7 +205,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NME, NMES, NOINT,IDT,ITASK,MX_CAND,
+      INTEGER NME, NMES, NOINT,ITASK,MX_CAND,
      .        ESH_T, I_STOK_GLOB, NIN, NMESR 
       INTEGER CAND_E(*),CAND_N(*),IXS(NIXS,*),IXS16(8,*),
      .        LWAT,NELEM(*),NELES(*),IXS20(12,*),
@@ -218,8 +222,8 @@ C-----------------------------------------------
 C
       INTEGER I_ADD_MAX
       PARAMETER (I_ADD_MAX = 1001)
-      INTEGER I, J, K, L, CONT,NB_N_B,I_STOK   ,
-     .        IP0, IP1, IP2, IP21, IP22, IP31, MAXSIZ,
+      INTEGER I, J, K, L, CONT,NB_N_B   ,
+     .              MAXSIZ,
      .        NMES_F,NMES_L, MAXSIZS, I_ADD
       INTEGER IERR1,IERR2
       my_real

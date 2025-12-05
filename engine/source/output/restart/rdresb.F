@@ -45,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    fxfluxrrest                  ../engine/source/constraints/thermic/fxfluxrrest.F
 !||    fxtemprrest                  ../engine/source/output/restart/rdresb.F
 !||    get_nrbe3pen_l               ../engine/source/output/restart/restart_rbe3pen.F90
+!||    get_nrwallpen_l              ../engine/source/output/restart/restart_rwallpen.F90
 !||    group_ini                    ../engine/source/groups/group_ini.F
 !||    imprrest                     ../engine/source/output/restart/rdresb.F
 !||    init_global_node_id          ../common_source/modules/nodal_arrays.F90
@@ -86,6 +87,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    read_nloc_struct             ../engine/source/output/restart/read_nloc_struct.F
 !||    read_pcyl                    ../engine/source/output/restart/read_pcyl.F
 !||    read_rrbe3pen                ../engine/source/output/restart/restart_rbe3pen.F90
+!||    read_rrwallpen               ../engine/source/output/restart/restart_rwallpen.F90
 !||    read_sensors                 ../engine/source/output/restart/read_sensors.F
 !||    read_th_restart              ../engine/source/output/th/read_th_restart.F
 !||    read_units                   ../common_source/comm/write_units.F
@@ -114,6 +116,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod                    ../engine/share/modules/drape_mod.F
 !||    ebcs_mod                     ../common_source/modules/boundary_conditions/ebcs_mod.F90
 !||    ecnd_mod                     ../engine/share/modules/ecdn_mod.F
+!||    element_mod                  ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod               ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    h3d_mod                      ../engine/share/modules/h3d_mod.F
 !||    interfaces_mod               ../common_source/modules/interfaces/interfaces_mod.F90
@@ -137,7 +140,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    read_bcs_wall_mod            ../engine/source/output/restart/read_bcs_wall.F90
 !||    read_inivel_mod              ../engine/source/output/restart/read_inivel.F90
 !||    restart_rbe3pen_mod          ../engine/source/output/restart/restart_rbe3pen.F90
+!||    restart_rwallpen_mod         ../engine/source/output/restart/restart_rwallpen.F90
 !||    restmod                      ../engine/share/modules/restart_mod.F
+!||    rwall_mod                    ../common_source/modules/constraints/rwall_mod.F90
 !||    seatbelt_mod                 ../common_source/modules/seatbelt_mod.F
 !||    sensor_mod                   ../common_source/modules/sensor_mod.F90
 !||    skew_mod                     ../common_source/modules/skew_mod.F90
@@ -156,7 +161,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                   SKEWS            ,RFLOW      ,LIFLOW       ,LRFLOW           ,IMPL_S0    ,
      .                   FORNEQS      ,UNITAB           ,
      .                   STACK            ,DRAPE_SH4N ,DRAPE_SH3N   ,DRAPEG           ,NDRAPE     ,
-     .                   GLOB_THERM       ,PBLAST     ,ELEMENT      ,NODES            ,RBE3)
+     .                   GLOB_THERM       ,PBLAST     ,ELEMENT      ,NODES            ,RBE3       ,
+     .                   RWALL            )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -206,6 +212,9 @@ C-----------------------------------------------
       use rbe3_mod
       use restart_rbe3pen_mod, only : get_nrbe3pen_l,read_rrbe3pen
       use checksum_output_option_mod
+      use element_mod , only : nixc
+      use rwall_mod
+      use restart_rwallpen_mod, only : get_nrwallpen_l,read_rrwallpen
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -270,6 +279,7 @@ C-----------------------------------------------
       TYPE(connectivity_)   ,INTENT(INOUT)                 :: ELEMENT
       TYPE(nodal_arrays_)   ,INTENT(INOUT)                 :: NODES
       TYPE(RBE3_)           ,INTENT(INOUT)                 :: RBE3
+      TYPE(RWALL_)          ,INTENT(INOUT)                 :: RWALL
       INTEGER, INTENT(IN) :: LIFLOW
       INTEGER, INTENT(IN) :: LRFLOW
       my_real, INTENT(INOUT) :: FORNEQS(3,NUMNOD)
@@ -614,9 +624,9 @@ c        CALL READ_I_C(INBUF,SINBUF)
         !read new structure INTBUF_TAB
         CALL INTBUF_INI(INTERFACES%INTBUF_TAB)
 
-        CALL READ_I_C(NPRW,SNPRW)
+        CALL READ_I_C(RWALL%NPRW,RWALL%NNPRW*RWALL%NRWALL)
 
-        CALL READ_I_C(LPRW,SLPRW)
+        CALL READ_I_C(RWALL%LPRW,RWALL%SZ_LPRW)
 
         CALL READ_I_C(ICONX,SICONX)
 
@@ -706,7 +716,7 @@ C
 
         CALL READ_I_C(FR_RBY,SFR_RBY)
 
-        CALL READ_I_C(FR_WALL,SFR_WALL)
+        CALL READ_I_C(RWALL%FR_WALL,SFR_WALL)
 
         CALL READ_I_C(FR_RBY2,SFR_RBY2)
 
@@ -1167,9 +1177,13 @@ C--------------------------------------
 
         CALL READ_CLUSTER(CLUSTER)
 
-        CALL READ_DB(RWBUF,SRWBUF)
+        CALL READ_DB(RWALL%RWBUF,RWALL%nrwlp*RWALL%nrwall)
 
-        CALL READ_DB(RWSAV,SRWSAV)
+        CALL READ_DB(RWALL%RWSAV,RWALL%SZ_RWSAV)
+
+        CALL get_nrwallpen_l(RWALL%nrwall,RWALL%nnprw,RWALL%nprw,RWALL%nrwall_pen,RWALL%pen%lnspen)
+
+        CALL read_rrwallpen(RWALL%nrwall_pen,RWALL%pen,RWALL%pen%lnspen)
 
         CALL READ_DB(RBY,SRBY)
 

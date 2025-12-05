@@ -144,6 +144,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    crackxfem_mod                        ../engine/share/modules/crackxfem_mod.F
 !||    drape_mod                            ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod                         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                          ../common_source/modules/elements/element_mod.F90
 !||    fvbag_mod                            ../engine/share/modules/fvbag_mod.F
 !||    glob_therm_mod                       ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod                         ../common_source/modules/groupdef_mod.F
@@ -243,6 +244,7 @@ C-----------------------------------------------
         USE PBLAST_MOD 
         USE h3d_gather_id_val_mod
         USE SPMD_MOD
+        use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
         USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

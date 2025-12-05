@@ -160,17 +160,13 @@ C--------------------------------------------------
           CALL HM_GET_INTV('node2',N1,IS_AVAILABLE,LSUBMODEL)
           CALL HM_GET_INTV('SUBMODEL',ITRANSSUB,IS_AVAILABLE,LSUBMODEL)
           CALL HM_GET_INTV('skew_ID',ISK0,IS_AVAILABLE,LSUBMODEL)
+          IF( ISK0 == 0 .AND. SUB_INDEX /= 0 ) ISK0 = LSUBMODEL(SUB_INDEX)%SKEW
 C--------------------------------------------------
 C EXTRACT DATAS (REAL VALUES)
 C--------------------------------------------------
           CALL HM_GET_FLOATV('translation_x',TX,IS_AVAILABLE,LSUBMODEL,UNITAB)
           CALL HM_GET_FLOATV('translation_y',TY,IS_AVAILABLE,LSUBMODEL,UNITAB)
           CALL HM_GET_FLOATV('translation_z',TZ,IS_AVAILABLE,LSUBMODEL,UNITAB)
-C--------------------------------------------------
-C APPLY //SUBMODEL TRANSFORMATIONs
-C--------------------------------------------------
-          IF(SUB_ID /= 0)
-     .          CALL SUBROTVECT(TX,TY,TZ,RTRANS,SUB_ID,LSUBMODEL)
 c---------------------
           IF (ITRANSSUB /= 0) CYCLE
 c---------------------
@@ -199,7 +195,7 @@ c---------------------
                 ENDIF
               ENDDO
               IF(.NOT. IS_FOUND)THEN
-                CALL ANCMSG(MSGID=3112,
+                CALL ANCMSG(MSGID=3117,
      .                      MSGTYPE=MSGERROR,
      .                      ANMODE=ANINFO,
      .                      I1= ID,
@@ -207,8 +203,8 @@ c---------------------
      .                      I2= ISK0)
               ENDIF
           ENDIF
-
           IF (N0 > 0 .OR. N1 > 0) THEN
+            ISK = 0
             I0 = USRTOS(N0,ITABM1)
             I1 = USRTOS(N1,ITABM1)
             IF (I0 == 0) THEN
@@ -235,12 +231,7 @@ c---------------------
             TY = TY * FAC_L 
             TZ = TZ * FAC_L 
           ENDIF
-          !DO J=1,IGRNOD(IGS)%NENTITY
-          !  IS=IGRNOD(IGS)%ENTITY(J)
-          !  X(1,IS)=X(1,IS)+TX
-          !  X(2,IS)=X(2,IS)+TY
-          !  X(3,IS)=X(3,IS)+TZ
-          !ENDDO
+
           CALL transform_translate_in_local_skew(
      .                 IGRNOD(IGS)%ENTITY ,IGRNOD(IGS)%NENTITY ,X    ,NUMNOD   , ISK  ,
      .                 TX                 ,TY                  ,TZ   ,SKEW     , LSKEW,
@@ -855,6 +846,9 @@ C
           CALL HM_GET_INTV('GR_SURF',IGSURF,IS_AVAILABLE,LSUBMODEL)
           
           CALL HM_GET_INTV('skew_ID',ISK0,IS_AVAILABLE,LSUBMODEL)
+
+          IF( ISK0 == 0 .AND. SUB_INDEX /= 0 ) ISK0 = LSUBMODEL(SUB_INDEX)%SKEW
+          
           CALL HM_GET_STRING('Dir',DIR,ncharfield,IS_AVAILABLE)
           DO K = 1,LFIELD
             IF(DIR(K:K) == 'X'.OR.DIR(K:K) == 'x')IDIR = 1

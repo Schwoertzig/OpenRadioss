@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    check_active_elem_edge          ../engine/source/interfaces/interf/check_active_elem_edge.F
 !||    my_barrier                      ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod                     ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod                   ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    shooting_node_mod               ../engine/share/modules/shooting_node_mod.F90
 !||====================================================================
@@ -48,6 +49,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !$ENDCOMMENT
         USE INTBUFDEF_MOD
         USE SHOOTING_NODE_MOD
+        use element_mod , only : nixs,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

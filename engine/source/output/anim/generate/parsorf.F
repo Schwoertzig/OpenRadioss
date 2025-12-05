@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c          ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE PARSORF(ELBUF_TAB,
      .                   X      ,D     ,IADD   ,CDG   ,IPARG    ,
@@ -41,6 +42,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      use element_mod , only : nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -76,8 +78,8 @@ C-----------------------------------------------
 C     REAL
       my_real
      .   OFF
-      INTEGER II(4),IE,NG, ITY, LFT, LLT, KPT, N, I, J, 
-     .        IPRT, NEL, IAD, NPAR, NFT, IMID,IALEL,MTN,
+      INTEGER II(4),IE,NG, ITY, LFT, LLT, N, I, J, 
+     .        IPRT, NEL, IAD, NPAR, NFT,MTN,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,
      .        JJ,K,NAX1D
       INTEGER NP((NB1D+NANIM1D_L)*2),BUF,GBUF

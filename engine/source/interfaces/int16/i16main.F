@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    i8lagm          ../engine/source/interfaces/int16/i8lagm.F
 !||    my_barrier      ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod    ../common_source/modules/groupdef_mod.F
 !||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
 !||====================================================================
@@ -47,6 +48,7 @@ C   M o d u l e s
 C----------------------------------------------- 
       USE INTBUFDEF_MOD
       USE GROUPDEF_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C
@@ -54,7 +56,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  
@@ -99,8 +101,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NSN,NME,NAD,EAD,
-     .        NME_T,ESH_T,IGN,IGE,MULTIMP,NOINT,I,MX_CAND,itri 
+      INTEGER NSN,NME,
+     .        NME_T,ESH_T,IGN,IGE,MULTIMP,NOINT,MX_CAND,itri 
 C     REAL
       my_real
      .   STARTT, STOPT,XX,XY,XZ,TZINF,MINBOX

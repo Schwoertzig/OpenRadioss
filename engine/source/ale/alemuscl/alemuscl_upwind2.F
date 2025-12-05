@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
 !||    alemuscl_mod           ../common_source/modules/ale/alemuscl_mod.F
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod         ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22tri_mod             ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    segvar_mod             ../engine/share/modules/segvar_mod.F
@@ -47,6 +48,7 @@ C-----------------------------------------------
       USE ALEMUSCL_MOD , only:ALEMUSCL_Buffer
       USE SEGVAR_MOD
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only :nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -48,6 +48,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    my_barrier         ../engine/source/system/machine.F
 !||    rby_decond         ../engine/source/tools/lagmul/lag_rby_cond.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    extend_array_mod   ../common_source/tools/memory/extend_array.F90
 !||    groupdef_mod       ../common_source/modules/groupdef_mod.F
 !||    h3d_mod            ../engine/share/modules/h3d_mod.F
@@ -81,6 +82,7 @@ C-----------------------------------------------
       USE nodal_arrays_mod
       USE extend_array_mod
       USE OUTPUT_MOD
+      use element_mod , only : nixs
 C----------------------------------------------- 
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -121,11 +123,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER N,I,N_MULT,N_MUL_MX,NKMAX,LENH,NH,NTY,NCR,
+      INTEGER N,N_MULT,N_MUL_MX,NKMAX,NH,NTY,NCR,
      .        IP0,IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP8A,IP8B,IP9,IP10,
      .        IP11,IP12,IP13,IP14,IP15,IP16,IP17,IP18,IP19,IP20,
-     .        J1,J2,J3,J4,J5,K,N1,N2,N3,N4,N5,N6,LWAT,ISKIP,NCF_S,NCF_E,
-     .        INUM,IDDL,ISKW,ITYP,NB_JLT,NB_JLT_NEW,NB_STOK_N,
+     .        J1,J2,J3,J4,J5,K,N2,N3,N4,N5,N6,LWAT,ISKIP,NCF_S,NCF_E,
+     .        INUM,IDDL,ISKW,NB_JLT,NB_JLT_NEW,NB_STOK_N,
      .        NUM_ISTOCK,KINDEX2,
      .        ILAGM, ISENS
       my_real TS
@@ -427,6 +429,7 @@ C
 !||    spmd_gg_mult       ../engine/source/mpi/lag_multipliers/spmd_lag.F
 !||    spmd_sg_mult       ../engine/source/mpi/lag_multipliers/spmd_lag.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    extend_array_mod   ../common_source/tools/memory/extend_array.F90
 !||    h3d_mod            ../engine/share/modules/h3d_mod.F
 !||    intbufdef_mod      ../common_source/modules/interfaces/intbufdef_mod.F90
@@ -458,6 +461,7 @@ C-----------------------------------------------
       USE H3D_MOD
       USE extend_array_mod
       use output_mod
+      use element_mod , only : nixs
 C======================================================================|
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -499,14 +503,14 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER N,I,N_MULT,N_MUL_MX,NKMAX,LENH,NH,NTY,NCR,
+      INTEGER N,N_MULT,N_MUL_MX,NKMAX,NH,NTY,NCR,
      .        IP0,IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP8A,IP8B,IP9,IP10,
      .        IP11,IP12,IP13,IP14,IP15,IP16,IP17,IP18,IP19,IP20,
-     .        J1,J2,J3,J4,J5,K,N1,N2,N3,N4,N5,N6,LWAT,ISKIP,
+     .        J1,J2,J3,J4,J5,K,N2,N3,N4,N5,N6,LWAT,ISKIP,
      .        NCF_S,NCF_E,
-     .        INUM,IDDL,ISKW,ITYP,NB_JLT,NB_JLT_NEW,NB_STOK_N,
+     .        INUM,IDDL,ISKW,NB_JLT,NB_JLT_NEW,NB_STOK_N,
      .        NUM_ISTOCK,KINDEX2,
-     .        ILAGM,IK0,N_IK, NNODMAX, ISIZ, LRBUF, NLAGF,
+     .        ILAGM,IK0,N_IK, ISIZ, LRBUF, NLAGF,
      .        INDEXLAG(NUMNODG)
       my_real
      .        LAGCOM(2*NBNCL+4*NBIKL),

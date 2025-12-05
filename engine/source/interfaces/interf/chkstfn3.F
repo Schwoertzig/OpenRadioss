@@ -251,15 +251,18 @@ C
       END
 C
 !||====================================================================
-!||    chkinit      ../engine/source/interfaces/interf/chkstfn3.F
+!||    chkinit       ../engine/source/interfaces/interf/chkstfn3.F
 !||--- called by ------------------------------------------------------
-!||    resol_init   ../engine/source/engine/resol_init.F
+!||    resol_init    ../engine/source/engine/resol_init.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHKINIT(
      2   IXS        ,IXQ        ,IXC        ,IXT      ,IXP      ,
      3   IXR        ,IXTG       ,IXS10    ,IXS20    ,
      4   IXS16      ,IXTG1      ,GEO        ,ADDCNEL  ,CNEL     ,
      5   ADSKY      ,IPARG      )
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -555,6 +558,7 @@ C
 !||    spmd_r2r_tagel       ../engine/source/mpi/r2r/spmd_r2r.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod         ../common_source/modules/groupdef_mod.F
 !||    nodal_arrays_mod     ../common_source/modules/nodal_arrays.F90
 !||    rad2r_mod            ../engine/share/modules/rad2r.F
@@ -579,6 +583,7 @@ C-----------------------------------------------
       USE REMESH_MOD
       USE GROUPDEF_MOD
       USE SHOOTING_NODE_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1262,6 +1267,7 @@ C
 !||    spmd_init_idel      ../engine/source/mpi/interfaces/spmd_init_idel.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod       ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    nodal_arrays_mod    ../common_source/modules/nodal_arrays.F90
 !||====================================================================
@@ -1278,6 +1284,7 @@ C-----------------------------------------------
       USE nodal_arrays_mod
       USE ELBUFDEF_MOD
       USE INTBUFDEF_MOD    
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1914,6 +1921,7 @@ C
 !||    i25_remove_global_segment   ../engine/source/interfaces/interf/chkstfn3.F
 !||    my_barrier                  ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod                 ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod                ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE CHKMSR3N(
@@ -1927,6 +1935,7 @@ C
      8    INDSEGLO ,IBUFSEGLO)
 C-----------------------------------------------
        USE MY_ALLOC_MOD
+       use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2115,6 +2124,8 @@ C
 !||    i24_remove_global_segment   ../engine/source/interfaces/interf/chkstfn3.F
 !||    i25_remove_global_segment   ../engine/source/interfaces/interf/chkstfn3.F
 !||    my_barrier                  ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod                 ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHKMSR3NB(
      1    NMN  ,MSR   ,ITAG  ,ITASK,IRECT   ,
@@ -2124,6 +2135,7 @@ C
      5    OFC  ,OFT   ,OFTG  ,OFUR ,NINDG   ,
      6    BUFS ,NINDEX,TAGEL ,NG,MSEGLO,
      7    MVOISIN,INDSEGLO,IBUFSEGLO)
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2290,11 +2302,13 @@ C
       END
 C
 !||====================================================================
-!||    chk20msr3n   ../engine/source/interfaces/interf/chkstfn3.F
+!||    chk20msr3n    ../engine/source/interfaces/interf/chkstfn3.F
 !||--- called by ------------------------------------------------------
-!||    chkstfn3n    ../engine/source/interfaces/interf/chkstfn3.F
+!||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
-!||    my_barrier   ../engine/source/system/machine.F
+!||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK20MSR3N(
      1    NMN  ,MSR   ,ITAG  ,ITASK,IRECT   ,
@@ -2303,6 +2317,7 @@ C
      4    NTY  ,ITAB  ,ITABM1,CNEL ,ADDCNEL ,
      5    OFC  ,OFT   ,OFTG  ,OFUR ,NINDG   ,
      6    BUFS ,NINDEX,NLG   ,TAGEL)
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2452,6 +2467,8 @@ C
 !||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
 !||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK20MSR3NB(
      1    NMN  ,MSR   ,ITAG  ,ITASK,IRECT   ,
@@ -2460,6 +2477,7 @@ C
      4    NTY  ,ITAB  ,ITABM1,CNEL ,ADDCNEL ,
      5    OFC  ,OFT   ,OFTG  ,OFUR ,NINDG   ,
      6    BUFS ,NINDEX,NLG   ,TAGEL)
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2605,11 +2623,13 @@ C
       END
 
 !||====================================================================
-!||    chk11msr3n   ../engine/source/interfaces/interf/chkstfn3.F
+!||    chk11msr3n    ../engine/source/interfaces/interf/chkstfn3.F
 !||--- called by ------------------------------------------------------
-!||    chkstfn3n    ../engine/source/interfaces/interf/chkstfn3.F
+!||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
-!||    my_barrier   ../engine/source/system/machine.F
+!||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK11MSR3N(
      1    NMN    ,MSR     ,ITAG  ,ITASK  ,IRECT  ,
@@ -2620,6 +2640,7 @@ C
      6    ADDCNEL,OFC     ,OFT   ,OFTG   ,OFUR   ,
      7    OFR    ,OFP     ,NINDG ,BUFS   ,NINDEX ,
      8    TAGEL  )
+      use element_mod , only : nixs,nixq,nixc,nixtg,nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2681,6 +2702,8 @@ C
 !||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
 !||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK11MSR3NB(
      1    NMN    ,MSR   ,ITAG  ,ITASK   ,IRECT ,
@@ -2691,6 +2714,7 @@ C
      6    ADDCNEL,OFC   ,OFT   ,OFTG    ,OFUR  ,
      7    OFR    ,OFP   ,NINDG ,BUFS    ,NINDEX,
      8    TAGEL  )
+      use element_mod , only : nixs,nixq,nixc,nixtg,nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2755,6 +2779,8 @@ C
 !||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
 !||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK20EMSR3N(
      1    NMN    ,MSR     ,ITAG  ,ITASK  ,IRECT  ,
@@ -2765,6 +2791,7 @@ C
      6    ADDCNEL,OFC     ,OFT   ,OFTG   ,OFUR   ,
      7    OFR    ,OFP     ,NINDG ,BUFS   ,NINDEX ,
      8    NLG    ,TAGEL   )
+      use element_mod , only : nixs,nixq,nixc,nixtg,nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2933,6 +2960,8 @@ C
 !||    chkstfn3n      ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
 !||    my_barrier     ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK20EMSR3NB(
      1    NMN    ,MSR   ,ITAG  ,ITASK   ,IRECT ,
@@ -2943,6 +2972,7 @@ C
      6    ADDCNEL,OFC   ,OFT   ,OFTG    ,OFUR  ,
      7    OFR    ,OFP   ,NINDG ,BUFS    ,NINDEX,
      8    NLG    ,TAGEL )
+      use element_mod , only : nixs,nixq,nixc,nixtg,nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3107,11 +3137,13 @@ C
       END
 C
 !||====================================================================
-!||    chk2msr3n    ../engine/source/interfaces/interf/chkstfn3.F
+!||    chk2msr3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- called by ------------------------------------------------------
-!||    chkstfn3n    ../engine/source/interfaces/interf/chkstfn3.F
+!||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
-!||    my_barrier   ../engine/source/system/machine.F
+!||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK2MSR3N(
      1    NSN    ,NSV  ,ITAG ,ITASK,IRECT,
@@ -3120,6 +3152,7 @@ C
      4    IN     ,SMAS ,SINER,ADM  ,CNEL ,
      5    ADDCNEL,OFC  ,OFT  ,OFTG ,OFUR ,
      6    TAGEL  ,ILEV )
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3230,11 +3263,13 @@ C
       END
 C
 !||====================================================================
-!||    chk2msr3nb   ../engine/source/interfaces/interf/chkstfn3.F
+!||    chk2msr3nb    ../engine/source/interfaces/interf/chkstfn3.F
 !||--- called by ------------------------------------------------------
-!||    chkstfn3n    ../engine/source/interfaces/interf/chkstfn3.F
+!||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
-!||    my_barrier   ../engine/source/system/machine.F
+!||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK2MSR3NB(
      1    NSN    ,NSV  ,ITAG ,ITASK,IRECT,
@@ -3244,6 +3279,7 @@ C
      5    ADDCNEL,OFC  ,OFT  ,OFTG ,OFUR ,
      6    NINDG  ,BUFS ,NINDEX,TAGEL,ITAB  ,
      7    ILEV   )
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3379,11 +3415,13 @@ C
       END
 C
 !||====================================================================
-!||    chk2msr3np   ../engine/source/interfaces/interf/chkstfn3.F
+!||    chk2msr3np    ../engine/source/interfaces/interf/chkstfn3.F
 !||--- called by ------------------------------------------------------
-!||    chkstfn3n    ../engine/source/interfaces/interf/chkstfn3.F
+!||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
-!||    my_barrier   ../engine/source/system/machine.F
+!||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK2MSR3NP(
      1    NSN   ,NSV  ,ITAG   ,ITASK,IRECT ,
@@ -3393,6 +3431,7 @@ C
      5    ITABM1,CNEL ,ADDCNEL,OFC  ,OFT   ,
      6    OFTG  ,OFUR ,NINDG  ,BUFS ,INDEX ,
      7    IDEL  )
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3480,11 +3519,13 @@ C
       END
 C
 !||====================================================================
-!||    chk23msr3n   ../engine/source/interfaces/interf/chkstfn3.F
+!||    chk23msr3n    ../engine/source/interfaces/interf/chkstfn3.F
 !||--- called by ------------------------------------------------------
-!||    chkstfn3n    ../engine/source/interfaces/interf/chkstfn3.F
+!||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
-!||    my_barrier   ../engine/source/system/machine.F
+!||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK23MSR3N(
      1    NMN  ,MSR   ,ITAG  ,ITASK,IRECT   ,
@@ -3493,6 +3534,7 @@ C
      4    NTY  ,ITAB  ,ITABM1,CNEL ,ADDCNEL ,
      5    OFC  ,OFT   ,OFTG  ,OFUR ,NINDG   ,
      6    BUFS ,NINDEX,TAGEL )
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3632,6 +3674,8 @@ C
 !||    chkstfn3n     ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
 !||    my_barrier    ../engine/source/system/machine.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CHK23MSR3NB(
      1    NMN  ,MSR   ,ITAG  ,ITASK,IRECT   ,
@@ -3640,6 +3684,7 @@ C
      4    NTY  ,ITAB  ,ITABM1,CNEL ,ADDCNEL ,
      5    OFC  ,OFT   ,OFTG  ,OFUR ,NINDG   ,
      6    BUFS ,NINDEX,TAGEL )
+      use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sforc3           ../engine/source/elements/solid/solide/sforc3.F
 !||    szforc3          ../engine/source/elements/solid/solidez/szforc3.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod   ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||====================================================================
       SUBROUTINE AMASS3(
@@ -39,6 +40,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE I22BUFBRIC_MOD 
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

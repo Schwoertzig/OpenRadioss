@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    r3coork3       ../engine/source/elements/spring/r3coork3.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE R12KE3(JFT    ,JLT   ,NEL   ,MTN      ,PM    ,
      1                  GEO    ,IXR   ,X     ,ELBUF_TAB,NPF   ,
@@ -44,6 +45,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      use element_mod , only : nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -65,7 +67,7 @@ C-----------------------------------------------
      .         ETAG(*),IDDL(*)  ,NDOF(*)  ,IADK(*) ,JDIK(*)
 
 C     REAL
-      my_real DT2T ,
+      my_real
      .   GEO(NPROPG,*),X(*),TF(*),SKEW(LSKEW,*),
      .   FR_WAVE(*),PM(*),KE11(9,MVSIZ),KE12(9,MVSIZ),KE22(9,MVSIZ),
      .   KE33(9,MVSIZ),KE13(9,MVSIZ),KE23(9,MVSIZ),
@@ -80,9 +82,6 @@ C     REAL
      .     KX(MVSIZ),DKX(MVSIZ),EX(MVSIZ),EY(MVSIZ),EZ(MVSIZ),
      .     EX2(MVSIZ),EY2(MVSIZ),EZ2(MVSIZ),BETA(MVSIZ)
       INTEGER  PID(MVSIZ),NGL(MVSIZ)
-      INTEGER NB1, NB2, NB3, NB4, NB5, NB6, NB7, NB8, NB9, NB10,
-     .   NB11, NB12,  NEL3, NEL4,NB15,  NB16,NBFI
-C
       TYPE(G_BUFEL_)  ,POINTER :: GBUF
 C-----------------------------------------------
       GBUF => ELBUF_TAB%GBUF

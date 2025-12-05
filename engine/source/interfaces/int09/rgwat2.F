@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_extag     ../engine/source/mpi/fluid/spmd_cfd.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod    ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE RGWAT2(
@@ -39,7 +40,8 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD
+      use element_mod , only : nixq             
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -66,7 +68,7 @@ C-----------------------------------------------
       INTEGER I, II, N1, N2, IE, NG, MAT, IFA, LENR, 
      .        IFACE(2,4)
       my_real
-     .  Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4,
+     .  Y1, Y2, Z1, Z2,
      .  NY, NZ, DY, DZ, DD, GRAD, PHI, TEMPE, VOL,
      .  TSTIFE, COEF,EE
       INTEGER :: LLT ,NFT ,MTN ,IAD ,ITY ,NPT ,JALE ,ISMSTR ,JEUL ,JTUR ,JTHE ,JLAG ,JMULT ,JHBE

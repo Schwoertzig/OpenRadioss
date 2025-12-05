@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    srepiso3         ../engine/source/elements/solid/solide/srepiso3.F
 !||    sreploc3         ../engine/source/elements/solid/solide/sreploc3.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod   ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22tri_mod       ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||====================================================================
@@ -61,6 +62,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE I22BUFBRIC_MOD
       USE I22TRI_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

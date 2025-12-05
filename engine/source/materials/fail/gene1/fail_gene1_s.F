@@ -90,7 +90,7 @@ C!-----------------------------------------------
 C!-----------------------------------------------
 C!   L o c a l   V a r i a b l e s
 C!-----------------------------------------------
-      INTEGER I,K,J,INDX(NEL),NINDX,INDX2(NEL),NINDX2,NSTEP,CRIT,NMOD,
+      INTEGER I,J,INDX(NEL),NINDX,INDX2(NEL),NINDX2,NSTEP,CRIT,NMOD,
      .        fct_ISM,fct_IPS,fct_IDg12,fct_IDg13,fct_IDe1c,fct_IDel,
      .        NCRIT(NEL),IPOS(NEL,2),Ismooth,Istrain,IR,IS,IT,
      .        ILAY,tab_IDfld,Itab,NCS,INDX3(NEL),NINDX3,IPMAX(NEL),IPMIN(NEL),
@@ -249,7 +249,7 @@ c
           I3  = E1*E2*E3 - E1*E52 - E2*E62 - E3*E42 + TWO*E4*E5*E6
           !  -> computation of principal strains
           Q   = (THREE*I2 - I1*I1)/NINE
-          R   = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/CINQUANTE4     ! (2*I3^3-9*I1*I2+27*I3)/54  
+          R   = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/FIFTY4     ! (2*I3^3-9*I1*I2+27*I3)/54  
           R_INTER = MIN(R/SQRT(MAX(EM20,(-Q**3))),ONE)
           PHI = ACOS(MAX(R_INTER,-ONE))
           E11(I) = TWO*SQRT(MAX(ZERO,-Q))*COS(PHI/THREE)+THIRD*I1
@@ -305,7 +305,7 @@ c
      .         SIGNYY(I)*SIGNZX(I)*SIGNZX(I)-SIGNZZ(I)*SIGNXY(I)*SIGNXY(I)+
      .         TWO*SIGNXY(I)*SIGNZX(I)*SIGNYZ(I)
           Q  = (THREE*I2 - I1*I1)/NINE
-          R  = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/CINQUANTE4     ! (2*I3^3-9*I1*I2+27*I3)/54
+          R  = (TWO*I1*I1*I1-NINE*I1*I2+TWENTY7*I3)/FIFTY4     ! (2*I3^3-9*I1*I2+27*I3)/54
           R_INTER = MIN(R/SQRT(MAX(EM20,(-Q**3))),ONE)
           PSI = ACOS(MAX(R_INTER,-ONE))
           S11(I) = TWO*SQRT(MAX(ZERO,-Q))*COS(PSI/THREE)+THIRD*I1

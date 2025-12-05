@@ -144,10 +144,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, I_STOK, JLT_NEW, JLT , NFT, IVIS2,
-     .        IBC, NOINT, NSEG, ISECIN, IBAG, IADM,
+     . IBC, NOINT, ISECIN, IBAG, IADM,
      .        IGAP, INACTI, IFQ, MFROT, IGSTI, NISUB,
-     .        NB_LOC, I_STOK_LOC,DEBUT,JD42B,
-     .        ILAGM, LENR, LENT, MAXCC,INTTH,IFORM,JD22B,JD22C,
+     . NB_LOC, I_STOK_LOC,DEBUT,
+     . LENR, LENT, MAXCC,INTTH,IFORM,
      .        NLN, NRTMFT, NRTMLT, NMNFT, NMNLT, NRADM,
      .        NLNFT1, NLNLT, NLNL, IFUNCTK, SFSAVPARIT, J, H, IERROR
       INTEGER IX1(MVSIZ), IX2(MVSIZ), IX3(MVSIZ), IX4(MVSIZ),
@@ -160,7 +160,7 @@ C     REAL
       my_real
      .   STARTT, FRIC, GAP, STOPT,
      .   VISC,VISCF,STIGLO,GAPMIN,
-     .   KMIN, KMAX, GAPMAX,RSTIF,FHEAT,TINT,RHOH,FRAD,DRAD,
+     . KMIN, KMAX, GAPMAX,RSTIF,FHEAT,TINT,FRAD,DRAD,
      .   XTHE,FHEATM,FHEATS
 C-----------------------------------------------
 C     REAL
@@ -175,7 +175,7 @@ C     REAL
      .     Y1(MVSIZ), Y2(MVSIZ), Y3(MVSIZ), Y4(MVSIZ),
      .     Z1(MVSIZ), Z2(MVSIZ), Z3(MVSIZ), Z4(MVSIZ),
      .     XI(MVSIZ), YI(MVSIZ), ZI(MVSIZ), STIF(MVSIZ),
-     .     PENE(MVSIZ),
+     .
      .     H1(MVSIZ), H2(MVSIZ), H3(MVSIZ), H4(MVSIZ),
      .     GAPV(MVSIZ),VXI(MVSIZ),VYI(MVSIZ),VZI(MVSIZ),MSI(MVSIZ),
      .     GAPR(MVSIZ),TEMPI(MVSIZ),PHI(MVSIZ),AREASI(MVSIZ)
@@ -190,14 +190,12 @@ C     REAL
      .     VYM1(MVSIZ), VYM2(MVSIZ), VZM1(MVSIZ), VZM2(MVSIZ),
      .     MS1(MVSIZ),  MS2(MVSIZ),  MM1(MVSIZ),  MM2(MVSIZ)
       my_real
-     .     SURF(3,NRTMDIM), PRES(NRTMDIM)
-      my_real
      .     RCURVI(MVSIZ), ANGLMI(MVSIZ), ANGLT, PADM
       my_real
      .    NNX1(MVSIZ), NNX2(MVSIZ), NNX3(MVSIZ), NNX4(MVSIZ),
      .    NNY1(MVSIZ), NNY2(MVSIZ), NNY3(MVSIZ), NNY4(MVSIZ),
      .    NNZ1(MVSIZ), NNZ2(MVSIZ), NNZ3(MVSIZ), NNZ4(MVSIZ),
-     .    CMAJ(MVSIZ), PENRAD(MVSIZ),CONDINT(MVSIZ),FNI(MVSIZ),
+     . CMAJ(MVSIZ),CONDINT(MVSIZ),FNI(MVSIZ),
      .   PHI1(MVSIZ),PHI2(MVSIZ),PHI3(MVSIZ),PHI4(MVSIZ),EFRICT(MVSIZ)
       INTEGER N1(MVSIZ), N2(MVSIZ), M1(MVSIZ), M2(MVSIZ),
      .        NL1(MVSIZ), NL2(MVSIZ),ML1(MVSIZ), ML2(MVSIZ), 
@@ -265,7 +263,7 @@ C----deactive implicit part
       FHEATM   = ZERO
       FHEATS   = ZERO
 C----------------------------------------------------------------------
-C     NOEUDS/SURFACE
+C     NODES/SURFACE
 C----------------------------------------------------------------------
 
 c----------------------------------------------------
@@ -285,7 +283,7 @@ c----------------------------------------------------
               LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
             CALL SPMD_I20EXCH_N(INTBUF_TAB%SOLIDN_NORMAL,IAD_ELEM,FR_ELEM,LENR)
 C Normal supplementary communication on proc remote in SPMD
-C NSNR Size NSNR (NB NOEUDS STEND remote) allowance allowance
+C NSNR Size NSNR (NB NODES STEND remote) allowance allowance
             ALLOCATE(INTBUF_TAB%SOLIDN_NORMAL_F (3,IPARI(24)))
 C EDGE Party allowance on size n line (nb second remote lines)
             ALLOCATE(INTBUF_TAB%SOLIDN_NORMAL_FE(3,2*IPARI(57)))
@@ -460,7 +458,7 @@ c
       DO NFT = 0 , I_STOK - 1 , NVSIZ
 c------------------------------------------------
         JLT = MIN( NVSIZ, I_STOK - NFT )
-C preparation candidats retenus
+C preparation CANDIDATES retenus
         CALL I7CDCOR3(
      1         JLT,INDEX2(NFT+1),INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
      2         CAND_E_N,CAND_N_N)
@@ -638,7 +636,7 @@ C
 C
         DO NFT = 0 , I_STOK - 1 , NVSIZ
           JLT = MIN( NVSIZ, I_STOK - NFT )
-C         preparation candidats retenus
+C         preparation CANDIDATES retenus
       CALL I11CDCOR3(
      1       JLT,INDEX2(NFT+1),INTBUF_TAB%LCAND_N,INTBUF_TAB%LCAND_S,CM_LOC,
      2       CS_LOC)
@@ -716,7 +714,7 @@ C     3- Forces between second node.and anchor node
 C----------------------------------------------------------------------
       CALL MY_BARRIER
 C----------------------------------------------------------------------
-C     NOEUDS secnd,main,edge
+C     NODES second,main,edge
 C----------------------------------------------------------------------
       IF (IMONM > 0 .AND. JTASK == 1) CALL STARTIME(TIMERS,20)
       NLNFT1= (JTASK-1)*NLN/NTHREAD

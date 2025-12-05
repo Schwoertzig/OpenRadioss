@@ -49,13 +49,13 @@ C-----------------------------------------------
       INTEGER ELCUTC(2,*),NODENR(*),KXFENOD2ELC(*),ENRTAG(NUMNOD,*),
      .        ELCUTC_L(2,*),NODENR_L(*),
      .        KXFENOD2ELC_L(*),ENRTAG_L(NUMNOD_L,*),
-     .        NUMELC_L,NUMELTG_L,NCRKXFE_L,NUMNOD_L,NODGLOB(*),
+     .        NUMELC_L,NUMELTG_L,NUMNOD_L,NODGLOB(*),
      .        INOD_CRKXFEM(*),P,CEP(*),ELCUTTG_L(2,*),INCRKXFEM_L(*),
      .        INDEX_CRKXFEM(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,PROC,OFFC,OFFTG,NOD,NOD_CRK,IEL_L,NL_L
+      INTEGER I, J, OFFC, OFFTG, NOD, NOD_CRK, IEL_L, NL_L
 C-----------------------------------------------
       OFFC = NUMELS + NUMELQ
       OFFTG = OFFC + NUMELC + NUMELT + NUMELP + NUMELR

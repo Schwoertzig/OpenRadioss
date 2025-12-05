@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol                 ../engine/source/engine/resol.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod          ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE JOINT_ELEM_TIMESTEP(MS,IN,STIFN,STIFR,IXR,IPART,
      1                               IPARTR,IGEO,GEO,NPBY,IPARG,ELBUF_TAB,
@@ -34,6 +35,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      use element_mod , only : nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,9 +60,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,M1,M2,IG,IGTYP,KAD,ITYP,NG,JFT,JLT,NEL,
-     .        NB8,NFT,NUVAR,IRB,NV
-      my_real DTN,DTR,DTRB1,DTRB2,DT
+      INTEGER I,J,M1,M2,IG,IGTYP,ITYP,NG,JFT,JLT,NEL,
+     .        NFT,NUVAR,IRB,NV
+      my_real DTRB1,DTRB2,DT
       TYPE(G_BUFEL_),POINTER :: GBUF
 C----------------------------------------------------------      
       

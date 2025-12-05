@@ -86,6 +86,7 @@
 !||    hm_read_mat128              ../starter/source/materials/mat/mat128/hm_read_mat128.F90
 !||    hm_read_mat129              ../starter/source/materials/mat/mat129/hm_read_mat129.F90
 !||    hm_read_mat13               ../starter/source/materials/mat/mat013/hm_read_mat13.F
+!||    hm_read_mat130              ../starter/source/materials/mat/mat130/hm_read_mat130.F90
 !||    hm_read_mat133              ../starter/source/materials/mat/mat133/hm_read_mat133.F90
 !||    hm_read_mat134              ../starter/source/materials/mat/mat134/hm_read_mat134.F90
 !||    hm_read_mat14               ../starter/source/materials/mat/mat014/hm_read_mat14.F
@@ -180,6 +181,7 @@
 !||    hm_read_mat127_mod          ../starter/source/materials/mat/mat127/hm_read_mat127.F90
 !||    hm_read_mat128_mod          ../starter/source/materials/mat/mat128/hm_read_mat128.F90
 !||    hm_read_mat129_mod          ../starter/source/materials/mat/mat129/hm_read_mat129.F90
+!||    hm_read_mat130_mod          ../starter/source/materials/mat/mat130/hm_read_mat130.F90
 !||    hm_read_mat133_mod          ../starter/source/materials/mat/mat133/hm_read_mat133.F90
 !||    hm_read_mat134_mod          ../starter/source/materials/mat/mat134/hm_read_mat134.F90
 !||    hm_read_mat163_mod          ../starter/source/materials/mat/mat163/hm_read_mat163.F90
@@ -231,6 +233,7 @@
           use hm_read_mat127_mod
           use hm_read_mat128_mod
           use hm_read_mat129_mod
+          use hm_read_mat130_mod
           use hm_read_mat133_mod , only : hm_read_mat133
           use hm_read_mat134_mod
           use hm_read_mat163_mod
@@ -1214,6 +1217,13 @@
                 mtag     ,parmat   ,nuvar    ,nvartmp  ,            &
                 ntable   ,table    ,iout     ,unitab   ,lsubmodel)
 !-------
+             case ('LAW130','MODIFIED_HONEYCOMB')
+              ilaw  = 130
+              call hm_read_mat130(&
+                mat_param(mat_number),nuvar  ,mtag     ,iout     ,&
+                parmat   ,unitab   ,lsubmodel,israte   ,mat_id   ,&
+                titr     ,table    ,ntable   ,nvartmp  ,imatvis  )
+!-------
              case ('LAW133','GRANULAR')
               ilaw = 133
               call hm_read_mat133( &
@@ -1545,11 +1555,11 @@
               pm(190,i)= sqrt(max(zero, pm(21,i)))    ! nusr
             endif
 !
-!---------------  fin boucle sur les lois
+!---------------  end loop over materials
           enddo   ! hm_nummat
 !---------------
 !-------------------------------------
-!     recherche des id doubles
+!     search for duplicate ids
 !-------------------------------------
           i=79
           j=0

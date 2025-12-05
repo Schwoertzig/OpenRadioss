@@ -21,15 +21,17 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    assem_s10    ../engine/source/implicit/assem_s10.F
+!||    assem_s10     ../engine/source/implicit/assem_s10.F
 !||--- called by ------------------------------------------------------
-!||    s10ke3       ../engine/source/elements/solid/solide10/s10ke3.F
+!||    s10ke3        ../engine/source/elements/solid/solide10/s10ke3.F
 !||--- calls      -----------------------------------------------------
-!||    ass10_kkii   ../engine/source/implicit/assem_s10.F
-!||    ass10_kkij   ../engine/source/implicit/assem_s10.F
-!||    ass10_kkji   ../engine/source/implicit/assem_s10.F
-!||    assem_kii    ../engine/source/implicit/imp_glob_k.F
-!||    assem_kij    ../engine/source/implicit/imp_glob_k.F
+!||    ass10_kkii    ../engine/source/implicit/assem_s10.F
+!||    ass10_kkij    ../engine/source/implicit/assem_s10.F
+!||    ass10_kkji    ../engine/source/implicit/assem_s10.F
+!||    assem_kii     ../engine/source/implicit/imp_glob_k.F
+!||    assem_kij     ../engine/source/implicit/imp_glob_k.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE ASSEM_S10(
      1                   IXS   ,IXS10 ,NEL   ,IDDL  ,NDOF  ,
@@ -45,6 +47,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      B                   K67   ,K68   ,K69   ,K60   ,K77   ,
      C                   K78   ,K79   ,K70   ,K88   ,K89   ,
      D                   K80   ,K99   ,K90   ,K00   ,OFF   )
+      use element_mod , only : nixs
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -27,7 +27,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    lecint                 ../starter/source/interfaces/interf1/lecint.F
 !||--- calls      -----------------------------------------------------
 !||    countigeo              ../starter/source/interfaces/interf1/countigeo.F
-!||    usr2sys                ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||    format_mod             ../starter/share/modules1/format_mod.F90
 !||    message_mod            ../starter/share/message_module/message_mod.F
@@ -44,7 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------------------------------
 C     READING SURFACES AND COUNTING SEGMENTS
 C           ENTREE : 
-C                    NRT_IGE NOMBRE DE RENSEIGNEMENTS A LIRE
+C                    NRT_IGE NUMBER OF ITEMS TO READ
 C           SORTIE : 
 C                    IRECT 
 C-----------------------------------------------
@@ -70,12 +69,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, N23, IT, J, NSGOLD,ITG,K,L,IR1,K4,JSEG
-      INTEGER OLDIRECT,OLDIRECT1
+      INTEGER I, N23, J, K, IR1, K4
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS
 C=======================================================================   
 CC in intbuf_tab%nige, we write all the fictitious points second then the fictitious points main
 c NIGE is offset at the routine call

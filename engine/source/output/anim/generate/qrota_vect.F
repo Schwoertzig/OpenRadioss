@@ -24,8 +24,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    qrota_vect        ../engine/source/output/anim/generate/qrota_vect.F
 !||--- called by ------------------------------------------------------
 !||    h3d_quad_vector   ../engine/source/output/h3d/h3d_results/h3d_quad_vector.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE QROTA_VECT(X, IXQ, KCVT, VECT, GAMA, NEL)
+      use element_mod , only : nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,7 +62,7 @@ C-----------------------------------------------
           NC3(I)=IXQ(4,I)
           NC4(I)=IXQ(5,I)
 C----------------------------
-C     COORDONNEES NODALES
+C     NODE COORDINATES
 C----------------------------
           Y1(I)=X(2,NC1(I))
           Z1(I)=X(3,NC1(I))
@@ -70,7 +73,7 @@ C----------------------------
           Y4(I)=X(2,NC4(I))
           Z4(I)=X(3,NC4(I))
 C---------------------------------------
-C     LOCAL REFERENCE FRAME (ISOPARAMETRIQUE)
+C     LOCAL REFERENCE FRAME (ISOPARAMETRIC)
 C---------------------------------------
           SY(I)=HALF*(Y2(I)+Y3(I)-Y1(I)-Y4(I))
           SZ(I)=HALF*(Z2(I)+Z3(I)-Z1(I)-Z4(I))
@@ -96,7 +99,7 @@ C-----------
           SY(I)=SY(I)*SUMA
           SZ(I)=SZ(I)*SUMA
 C-----------
-C       MATRICE DE PASSAGE GLOBAL -> CONVECTE
+C       TRANSFORMATION MATRIX GLOBAL -> CONVECTED
 C-----------
           R22(I)= SY(I)
           R32(I)=-SZ(I)

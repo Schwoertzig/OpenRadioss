@@ -237,7 +237,7 @@ C
 !||====================================================================
       INTEGER FUNCTION GET_U_NOD_X(NOD, X,Y,Z)
 C   In SPMD, all procs must call this function
-C   sinon blocage
+C   otherwise deadlock
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -263,7 +263,7 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------
       IF (NOD>0) THEN
        IF(NSPMD>1) THEN
-C   get_proc_user_f retourne 1 si weight(nod) = 1, , 0 sinon
+C   get_proc_user_f returns 1 if weight(nod) = 1, 0 otherwise
 C   weight : pointeur 18 (cf resol.F)
          CALL GET_VAR_USER_I(18,NOD,P)
        ELSE
@@ -327,7 +327,7 @@ C
 !||====================================================================
       INTEGER FUNCTION GET_U_NOD_D(NOD, DX,DY,DZ)
 C   In SPMD, all procs must call this function
-C   sinon blocage
+C   otherwise deadlock
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -353,7 +353,7 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------
       IF (NOD>0) THEN
        IF(NSPMD>1) THEN
-C   get_proc_user_f retourne 1 si weight(nod) = 1, , 0 sinon
+C   get_proc_user_f returns 1 if weight(nod) = 1, 0 otherwise
 C   weight : pointeur 18 (cf resol.F)
          CALL GET_VAR_USER_I(18,NOD,P)
        ELSE
@@ -417,7 +417,7 @@ C
 !||====================================================================
       INTEGER FUNCTION GET_U_NOD_V(NOD, VX,VY,VZ)
 C   In SPMD, all procs must call this function
-C   sinon blocage
+C   otherwise deadlock
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -445,7 +445,7 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------
       IF (NOD>0) THEN
        IF(NSPMD>1) THEN
-C   get_proc_user_f retourne 1 si weight(nod) = 1, , 0 sinon
+C   get_proc_user_f returns 1 if weight(nod) = 1, 0 otherwise
 C   weight : pointeur 18 (cf resol.F)
          CALL GET_VAR_USER_I(18,NOD,P)
        ELSE
@@ -509,7 +509,7 @@ C
 !||====================================================================
       INTEGER FUNCTION GET_U_NOD_A(NOD, AX,AY,AZ)
 C   In SPMD, all procs must call this function
-C   sinon blocage
+C   otherwise deadlock
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -535,7 +535,7 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------
       IF (NOD>0) THEN
        IF(NSPMD>1) THEN
-C   get_proc_user_f retourne 1 si weight(nod) = 1, , 0 sinon
+C   get_proc_user_f returns 1 if weight(nod) = 1, 0 otherwise
 C   weight : pointeur 18 (cf resol.F)
          CALL GET_VAR_USER_I(18,NOD,P)
        ELSE
@@ -699,8 +699,11 @@ C
 !||    set_spring_elnum   ../engine/source/user_interface/uaccess.F
 !||--- called by ------------------------------------------------------
 !||    rforc3             ../engine/source/elements/spring/rforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SET_SPRING_ELNUM(JFT,JLT,IXR)
+      use element_mod , only : nixr
 C---------+---------+---+---+--------------------------------------------
 C Saves external spring number for local element group
 C---------+---------+---+---+--------------------------------------------
@@ -763,6 +766,7 @@ C-----------------------------------------------
 !||====================================================================
 !||    mat_solid_get_nod_x   ../engine/source/user_interface/uaccess.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    restmod               ../engine/share/modules/restart_mod.F
 !||    user_interface_mod    ../engine/source/modules/user_interface_mod.F90
 !||====================================================================
@@ -770,6 +774,7 @@ C-----------------------------------------------
 C---------+---------+---+---+--------------------------------------------
       USE RESTMOD 
       USE user_interface_mod
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -888,6 +893,7 @@ C-----------------------------------------------
 !||====================================================================
 !||    mat_solid_get_nod_v   ../engine/source/user_interface/uaccess.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    restmod               ../engine/share/modules/restart_mod.F
 !||    user_interface_mod    ../engine/source/modules/user_interface_mod.F90
 !||====================================================================
@@ -895,6 +901,7 @@ C-----------------------------------------------
 C---------+---------+---+---+--------------------------------------------
       USE RESTMOD
       USE user_interface_mod
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -31,12 +31,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    upxvit_t2       ../engine/source/elements/xfem/crk_velocity2.F
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod   ../engine/share/modules/crackxfem_mod.F
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CRK_VELOCITY2(IPARG    ,NGROUC   ,IGROUC   ,ELCUTC   ,CRKEDGE  ,
      .                        NODEDGE  ,IXC      ,IXTG     ,XEDGE4N  ,XEDGE3N  ,
      .                        IADC_CRK ,IEL_CRK  ,INOD_CRK ,ITAB     )
 C-----------------------------------------------
       USE CRACKXFEM_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -238,7 +240,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,II,K,IG,NG,ILAY,IXEL,ILEV,IL,ICUT,ELEM,ELCRK,ELCRKTG,
+      INTEGER I,II,K,ILAY,IXEL,ILEV,IL,ICUT,ELEM,ELCRK,ELCRKTG,
      .   IAD,ITRI,EN,EN0,EN1
 C=======================================================================
       DO ILAY=1,NXLAY
@@ -311,12 +313,14 @@ c-----------
 !||    crk_velocity2   ../engine/source/elements/xfem/crk_velocity2.F
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod   ../engine/share/modules/crackxfem_mod.F
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE UPXVIT_C2(NEL      ,NFT      ,NXLAY    ,IXC      ,XEDGE4N  ,
      .                     CRKEDGE  ,NODEDGE  ,IEL_CRK  ,IADC_CRK ,INOD_CRK ,
      .                     ELCUTC   ,ITAB     )
 C-----------------------------------------------
       USE CRACKXFEM_MOD
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -412,12 +416,14 @@ c
 !||    crk_velocity2   ../engine/source/elements/xfem/crk_velocity2.F
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod   ../engine/share/modules/crackxfem_mod.F
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE UPXVIT_T2(NEL      ,NFT      ,NXLAY    ,IXTG     ,XEDGE3N  ,
      .                     CRKEDGE  ,NODEDGE  ,IEL_XTG  ,IADC_XTG ,INOD_CRK ,
      .                     ELCUTG   ,ITAB     )
 C-----------------------------------------------
       USE CRACKXFEM_MOD
+      use element_mod , only : nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

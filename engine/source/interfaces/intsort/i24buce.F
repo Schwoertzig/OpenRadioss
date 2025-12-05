@@ -60,7 +60,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NMN, NRTM, NSN, NOINT,IDT,NIN, NSNR
+      INTEGER NMN, NRTM, NSN, NOINT, NIN, NSNR
       INTEGER IRECT(4,*),NSV(*),ITASK,ILEV,IEDGE,NSNE    
       INTEGER CAND_E(*),CAND_N(*),MSEGTYP(*)
       INTEGER NCONTACT,ESHIFT,ILD,NB_N_B, NCONT,I_MEM,
@@ -78,9 +78,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, IP0, IP1, MAXSIZ,
-     .        LOC_PROC, N, ISZNSNR,
-     .        NSNFIOLD(NSPMD)
+      INTEGER I, 
+     . ISZNSNR
       INTEGER, INTENT(IN) :: INTHEAT
       INTEGER, INTENT(IN) :: IDT_THERM
       INTEGER, INTENT(IN) :: NODADT_THERM
@@ -196,7 +195,7 @@ c      write(iout,*)'i24buce 2'
 c      write(iout,*)'i24buce 3'
 
 C
-C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
 
 c      write(iout,*)'i24buce 4'
 C

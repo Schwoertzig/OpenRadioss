@@ -82,11 +82,10 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER ADRBUF, I, IL, J3, J2, J1, IN, I3, I2, I1
+      INTEGER ADRBUF, I, IL, IN, I3, I2, I1
       INTEGER NISKYL
       INTEGER NDEB, NREST
       INTEGER DGR
-      INTEGER IPT,NPT,II,JJ
       my_real
      .   A, B, C, AN, BN, CN, ROT(9),
      .   X1, X2, X3, N1, N2, N3, N,
@@ -188,7 +187,7 @@ C----------------------------------------------------------
       IL=KSC(I+NDEB)
       IN=KSI(IL)
 C---------------------------------
-C     CALCUL DES MOMENTS MS ^ F (REP. GLOBAL).
+C     CALCULATION DES MOMENTS MS ^ F (REP. GLOBAL).
 C     the forces are transmitted to the (same) point
 C     que l'on a recu !!!
 C---------------------------------
@@ -296,7 +295,7 @@ C------------------------------------------------------------
 C---------------------------------
 C     for work of forces on secondary nodes
 C     1ere partie : ici
-C     2eme partie : apres calcul de DT2.
+C     2eme partie : apres calculation de DT2.
 C---------------------------------
       DO I=1,MIN(MVSIZ,NREST)
          IL=KSC(I+NDEB)
@@ -528,7 +527,7 @@ C----------------------------------------------------------
       IL=KSP(I+NDEB)
       IN=KSI(IL)
 C---------------------------------
-C     CALCUL DES MOMENTS MS ^ F (REP. GLOBAL).
+C     CALCULATION DES MOMENTS MS ^ F (REP. GLOBAL).
 C     the forces are transmitted to the (same) point
 C     que l'on a recu !!!
 C---------------------------------
@@ -624,7 +623,7 @@ C------------------------------------------------------------
 C---------------------------------
 C     for work of forces on secondary nodes
 C     1ere partie : ici
-C     2eme partie : apres calcul de DT2.
+C     2eme partie : apres calculation de DT2.
 C---------------------------------
       DO I=1,MIN(MVSIZ,NREST)
          IL=KSP(I+NDEB)

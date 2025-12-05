@@ -64,14 +64,14 @@ C
       DATA IPERM1/0,0,0,0,0,0,0,0,1,2,3,4,1,2,3,4,5,6,7,8/
       DATA IPERM2/0,0,0,0,0,0,0,0,2,3,4,1,5,6,7,8,6,7,8,5/
 C-----------------------------------------------------------------------
-C     mass init en parith pour spmd
+C     mass init in parith for spmd
        DO I=LFT,LLT
 C
         MASS(I)=FILL(I)*RHO(I)*VOLG(I)
         DTELEM(I)=MIN(DTELEM(I),DTX(I))
         STI(I) = FILL(I) * RHO(I) * VOLG(I) * TWO / SIXTY4 /
      .        MAX(EM20,DTX(I)*DTX(I))
-        FAC=TRHEE_OVER_14
+        FAC=THREE_OVER_14
         AM = MASS(I)*FAC/(EIGHT*FAC + TWELVE)
         BM = MASS(I)*ONE/(EIGHT*FAC + TWELVE)
         MSS(1,I)=AM
@@ -241,7 +241,7 @@ c
        IF(JTHE < 0 ) THEN
         DO I=LFT,LLT
           MASSCP=FILL(I)*RHOCP(I)*VOLG(I)        
-          FAC=TRHEE_OVER_14
+          FAC=THREE_OVER_14
           AM = MASSCP*FAC/(EIGHT*FAC + TWELVE)
           BM = MASSCP*ONE/(EIGHT*FAC + TWELVE)
           MCPS(1,I)=AM
@@ -362,7 +362,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER IPM(NPROPMI,*)
-      INTEGER NIX,N,JPS,JHBE,IGTYP,NSIGI,NUVAR,NEL,IUSER,NSIGS,
+      INTEGER NIX,JPS,JHBE,IGTYP,NSIGI,NUVAR,NEL,IUSER,NSIGS,
      .   IDEF,L_PLA,L_SIGB
       INTEGER IX(NIX,*),STRSGLOB(*),STRAGLOB(*),MAT(NEL),PT(*),SIGB(NEL*L_SIGB)
 C     REAL
@@ -375,7 +375,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,IIP,JPT, II, JJ, IPT, IPP,IUS,IPSU,JPS1,MA,IFLAGINI,
+      INTEGER I, II, JJ, IPT, IPP,IUS,IPSU,JPS1,MA,IFLAGINI,
      .   NVAR_TMP,IADB,NRATE
       my_real
      .   GAMA(6),TENS(6)

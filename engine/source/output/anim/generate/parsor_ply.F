@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_iglob_partn      ../engine/source/mpi/anim/spmd_iglob_partn.F
 !||    write_i_c             ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
 !||    plyxfem_mod           ../engine/share/modules/plyxfem_mod.F
 !||====================================================================
@@ -40,6 +41,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                      IADPLYG, PLYNUMC, NBF_PXFEMG)
       USE PLYXFEM_MOD
       USE my_alloc_mod
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -69,11 +71,10 @@ C-----------------------------------------------
       EXTERNAL GET_PLY_NOD
 C-----------------------------------------------
 C     REAL
-      my_real OFF
-      INTEGER II(4),IE,NG, ITY, LFT, LLT, N, I, J, 
-     .        IPRT, NEL, IAD, NPAR, NFT, IMID,IALEL,MTN,
-     .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,
-     .        JJ, K, SH_IH,BUF,ISHPLYXFEM,
+      INTEGER II(4), IE, NG, ITY, LFT, LLT, N, I, 
+     . NEL, IAD, NPAR, NFT,MTN,
+     . NN90,
+     . JJ,BUF,ISHPLYXFEM,
      .        IPT,ELC,PLYS,IPLY,IE_EL2FA,
      .        NPCC,IDPLYN
       INTEGER EMPL

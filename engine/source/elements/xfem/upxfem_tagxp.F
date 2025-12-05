@@ -34,6 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod   ../engine/share/modules/crackxfem_mod.F
 !||    elbufdef_mod    ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE UPXFEM_TAGXP(XFEM_TAB,
      .                        IPARG    ,IXC     ,NGROUC  ,IGROUC  ,IXTG    ,
@@ -44,6 +45,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE CRACKXFEM_MOD
       USE ELBUFDEF_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -69,7 +71,7 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,IG,NG,JFT,JLT,NEL,NXLAY,NF1,IXFEM,OFF,ITG1,ITG2,ACTIFXFEM
+      INTEGER IG,NG,JFT,JLT,NEL,NXLAY,IXFEM,OFF,ITG1,ITG2
 C=======================================================================
       ITG1 = 1+NUMELC
       ITG2 = 1+4*ECRKXFEC

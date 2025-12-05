@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sysfus2                ../engine/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE ALE51_SPMD2(IXQ      ,FLUX   ,ALE_CONNECT,
      .                       FLUX_VOIS,N4_VOIS,ITABM1,NV46)
@@ -35,6 +36,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
        USE ALE_CONNECTIVITY_MOD
+       use element_mod , only : nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

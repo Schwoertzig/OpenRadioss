@@ -61,7 +61,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NMN, NRTM, NSN, NOINT,IDT,INACTI,IFQ, NIN, NSNR, NSNROLD
+      INTEGER NMN, NRTM, NSN, NOINT, INACTI, IFQ, NIN, NSNR, NSNROLD
       INTEGER IRECT(4,*),NSV(*),MWAG(*), RENUM(*),NUM_IMP,NLN,ISYM
       INTEGER CAND_E(*),CAND_N(*),IFPEN(*),NLG(*)
       INTEGER NCONTACT,ESHIFT,ILD,NB_N_B, IGAP, NCONT,
@@ -83,14 +83,13 @@ C-----------------------------------------------
       INTEGER I_ADD_MAX
       PARAMETER (I_ADD_MAX = 1001)
 C
-      INTEGER I, J,  I_ADD, IP0, IP1, MAXSIZ,
-     .        ADD(2,I_ADD_MAX), LOC_PROC, N, ISZNSNR,
-     .        NSNFIOLD(NSPMD)
+      INTEGER I_ADD, IP0, IP1, MAXSIZ, 
+     . ADD(2,I_ADD_MAX), ISZNSNR
 C     REAL
       my_real
      .        XYZM(6,I_ADD_MAX-1), MARGE
       my_real
-     .        XXX,YYY,ZZZ,CURV_MAX(NRTM)
+     . CURV_MAX(NRTM)
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -157,7 +156,7 @@ C
      8   INTHEAT, IDT_THERM, NODADT_THERM) 
 C
 C     I_MEM = 1 ==> PAS ASSEZ DE MEMOIRE PILE
-C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
 C     I_MEM = 3 ==> TROP NIVEAUX PILE
       IF (I_MEM == 2) RETURN
       IF(I_MEM==1)THEN
@@ -239,7 +238,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NMNE, NLINMA, NSNE, NOINT,IDT,NLINSA,NIN, NLINSR, INACTI,
+      INTEGER NMNE, NLINMA, NOINT, NLINSA, NIN, NLINSR, 
      .        IGAP,IAUTO
       INTEGER IXLINS(2,*),IXLINM(2,*),ADDCM(*),CHAINE(2,*)
       INTEGER CAND_M(*),CAND_S(*),NLG(*)
@@ -257,8 +256,8 @@ C-----------------------------------------------
       INTEGER I_ADD_MAX
       PARAMETER (I_ADD_MAX = 1001)
 C
-      INTEGER I, J, N1, N2, I_ADD, MAXSIZ,
-     .        ADD(2,I_ADD_MAX), N
+      INTEGER I, I_ADD, MAXSIZ, 
+     . ADD(2,I_ADD_MAX)
 C     REAL
       my_real
      .        XYZM(6,I_ADD_MAX-1)
@@ -317,7 +316,7 @@ C       SEPARER B ET N EN TWO
      7   STIFS   ,STIFM   ,IAUTO    ,NIN      ) 
 C
 C     I_MEM = 1 ==> PAS ASSEZ DE MEMOIRE PILE
-C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
 C     I_MEM = 3 ==> TROP NIVEAUX PILE 
       IF (I_MEM == 1 .OR. I_MEM==2)RETURN
       IF(I_MEM==1)THEN

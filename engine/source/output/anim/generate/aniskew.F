@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_s_c      ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE ANISKEW(ELBUF_TAB,SKEW,IPARG ,X     ,IXT ,
      .                   IXP      ,IXR ,GEO   ,DD_IAD,BUFL)
@@ -36,6 +37,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      use element_mod , only : nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -60,7 +62,7 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J,ISK(6),NEL,NEL3,OFFSET,LFT,LLT,NG,
+      INTEGER I,ISK(6),NEL,LFT,LLT,NG,
      .   ITY,IAD,MLW,NFT,N,II,LEN,IPROP,IGTYP,WA(BUFL),JJ,NUVAR
       my_real
      .   EX(9),S3000,X1,Y1,Z1,X2,Y2,Z2,S

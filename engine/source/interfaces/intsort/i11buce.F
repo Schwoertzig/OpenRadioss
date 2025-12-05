@@ -65,7 +65,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NMN, NRTM, NSN, NOINT,IDT,NRTS, NIN, NRTSR,
+      INTEGER NMN, NRTM, NSN, NOINT,NRTS, NIN, NRTSR,
      .        IGAP,IAUTO, I_MEM, ITASK
       INTEGER IRECTS(2,*),IRECTM(2,*),ADDCM(*),CHAINE(2,*)
       INTEGER CAND_M(*),CAND_S(*),IFPEN(*),FLAGREMNODE,KREMNODE(*),REMNODE(*)
@@ -86,14 +86,10 @@ C-----------------------------------------------
       INTEGER I_ADD_MAX,ISZNSNR
       PARAMETER (I_ADD_MAX = 1001)
 C
-      INTEGER I, J, N1, N2, I_ADD, MAXSIZ,JJ,
-     .        ADD(2,I_ADD_MAX), N
+      INTEGER I, I_ADD, MAXSIZ,
+     . ADD(2,I_ADD_MAX)
       my_real
      .        XYZM(6,I_ADD_MAX-1), MARGE, AAA
-      my_real 
-     . DD,DD1,MARGE_ST,DX1,DY1,DZ1
-      INTEGER :: L
-      INTEGER NB_OLD(2,I_ADD_MAX+1)
       INTEGER NBX,NBY,NBZ
       INTEGER (KIND=8) :: NBX8,NBY8,NBZ8,RES8,LVOXEL8 
 C-----------------------------------------------
@@ -219,7 +215,7 @@ C Reduction of the number of voxels
 
 C
 C     I_MEM = 1 ==> N/A
-C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
 C     I_MEM = 3 ==> N/A
 
 
@@ -494,7 +490,7 @@ C --- --- ---   100 CONTINUE
 C --- --- --- 
 C --- --- --- C
 C --- --- --- C     I_MEM = 1 ==> N/A
-C --- --- --- C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C --- --- --- C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
 C --- --- --- C     I_MEM = 3 ==> N/A
 C --- --- --- 
 C --- --- ---       IF (I_MEM == 2) RETURN

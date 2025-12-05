@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    redef3                ../engine/source/elements/spring/redef3.F90
 !||    table_interp          ../engine/source/tools/curve/table_tools.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    interface_table_mod   ../engine/share/modules/table_mod.F
 !||    python_funct_mod      ../common_source/modules/python_mod.F90
 !||    redef3_mod            ../engine/source/elements/spring/redef3.F90
@@ -54,6 +55,7 @@ C-----------------------------------------------
       USE TABLE_MOD
       USE INTERFACE_TABLE_MOD
       USE python_funct_mod
+      use element_mod , only : nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -109,7 +111,7 @@ C     REAL
      .     XL0(MVSIZ),DMN(MVSIZ),DMX(MVSIZ),
      .     DLOLD(MVSIZ),B(MVSIZ), D(MVSIZ), DV(MVSIZ),
      .     FF(MVSIZ),LSCALE(MVSIZ),EE(MVSIZ),
-     .     GF3(MVSIZ),FRIC(MVSIZ),XSCALF(MVSIZ),GX(MVSIZ),YSCALF(MVSIZ),
+     .     GF3(MVSIZ),FRIC(MVSIZ),XSCALF(MVSIZ),YSCALF(MVSIZ),
      .     F_MIN(MVSIZ),F_MAX(MVSIZ),EPLA(MVSIZ)
       my_real
      .     BETA, MU,FMAX, DDX ,VX21,VY21,VZ21,VL21,

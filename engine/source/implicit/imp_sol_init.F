@@ -41,6 +41,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    zero1           ../engine/source/system/zero.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod    ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod    ../common_source/modules/groupdef_mod.F
 !||    impbufdef_mod   ../engine/share/modules/impbufdef_mod.F
 !||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
@@ -67,6 +68,7 @@ C-----------------------------------------------
       USE GROUPDEF_MOD
       USE MESSAGE_MOD
       USE IMPBUFDEF_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

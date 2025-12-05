@@ -33,18 +33,18 @@
 ! ======================================================================================================================
 !! \brief this subroutine doing the initialization of the interface type2 w/ input surf/surf
 !||====================================================================
-!||    i2_surfi                ../starter/source/interfaces/inter3d1/i2_surfi.F90
+!||    i2_surfi         ../starter/source/interfaces/inter3d1/i2_surfi.F90
 !||--- called by ------------------------------------------------------
-!||    lecins                  ../starter/source/interfaces/interf1/lecins.F
+!||    lecins           ../starter/source/interfaces/interf1/lecins.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg                  ../starter/source/output/message/message.F
-!||    ineltc                  ../starter/source/interfaces/inter3d1/inelt.F
-!||    inelts                  ../starter/source/interfaces/inter3d1/inelt.F
-!||    insol3                  ../starter/source/interfaces/inter3d1/insol3.F
-!||    select_s2s              ../starter/source/interfaces/inter3d1/select_s2s.F90
+!||    ancmsg           ../starter/source/output/message/message.F
+!||    ineltc           ../starter/source/interfaces/inter3d1/inelt.F
+!||    inelts           ../starter/source/interfaces/inter3d1/inelt.F
+!||    insol3           ../starter/source/interfaces/inter3d1/insol3.F
+!||    select_s2s       ../starter/source/interfaces/inter3d1/select_s2s.F90
 !||--- uses       -----------------------------------------------------
-!||    message_mod             ../starter/share/message_module/message_mod.F
-!||    select_s2s_mod          ../starter/source/interfaces/inter3d1/select_s2s.F90
+!||    message_mod      ../starter/share/message_module/message_mod.F
+!||    select_s2s_mod   ../starter/source/interfaces/inter3d1/select_s2s.F90
 !||====================================================================
         subroutine i2_surfi(                                                 &
           npari   ,ipari   ,nsurf   ,igrsurf ,                &
@@ -65,7 +65,7 @@
           use select_s2s_mod,   only : select_s2s
           use message_mod
           use constant_mod,     only : nine,ep20
-          use connectivity_size_mod, only : nixs,nixc,nixtg
+          use element_mod, only : nixs,nixc,nixtg
           use precision_mod, only : WP
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none

@@ -29,8 +29,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    rad_spmd_send   ../engine/source/mpi/generic/rad_spmd_send.F
 !||    spmd_igath      ../engine/source/mpi/anim/spmd_igath.F
 !||    write_i_c       ../common_source/tools/input_output/write_routines.c
+!||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE ANISKEWF(GEO,SKEW,IPARG,IXR,DD_IAD,LRBUF)
+      use element_mod , only : nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -53,8 +56,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J,ISK,NB1,NB2,NB3,NB4,NB5,NB6,NB7,NB8,NB9,
-     .   NB10,NB11,NB12,NB13,NB14,NEL,LFT,LLT,NG,
+      INTEGER I,ISK,
+     .   NEL,LFT,LLT,NG,
      .   ITY,IAD,MLW,NFT,N,II,ISKK,MSGTAG,LEN,IGTYP
       INTEGER SRBUF(LRBUF)
       INTEGER, PARAMETER :: INTSIZE = 4

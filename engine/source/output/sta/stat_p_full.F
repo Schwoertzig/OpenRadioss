@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_stat_pgather   ../engine/source/mpi/output/spmd_stat.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE STAT_P_FULL(
@@ -40,6 +41,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD         
       USE MY_ALLOC_MOD
+      use element_mod , only : nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -55,7 +57,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXP(NIXP,*),IPARG(NPARG,*),IGEO(NPROPGI,*),
      .        IPARTP(*),IPART_STATE(*),STAT_INDXP(*)
       my_real   
@@ -70,7 +72,7 @@ C-----------------------------------------------
      .   IR,IS,PT,L_PLA,G_PLA
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA_P0
-      CHARACTER*100 DELIMIT,LINE
+      CHARACTER*100 DELIMIT
       TYPE(G_BUFEL_)  ,POINTER :: GBUF
       TYPE(L_BUFEL_)  ,POINTER :: LBUF
 C-----------------------------------------------

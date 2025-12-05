@@ -59,7 +59,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE (UNIT_TYPE_),INTENT(IN) ::UNITAB 
-      INTEGER IIN,IOUT,IUNIT
+      INTEGER IOUT, IUNIT
       my_real PM(NPROPM)
       TYPE(SUBMODEL_DATA), DIMENSION(NSUBMOD), INTENT(IN) :: LSUBMODEL
       INTEGER,INTENT(IN) :: IMIDEOS
@@ -73,7 +73,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       my_real
      .   C1, C2, C3, G0, T1, T2, ES, HH, E0, RHO0,
-     .   FAC_L,FAC_T,FAC_M,FAC_C,RHOR,RHOI,MU2,
+     .   RHOR,RHOI,MU2,
      .   XX,AA,BB,GX,PRES,EXPA,ETA,EE,CC, MU0, DF, PP ,SSP0, DPDMU, PC, PSH
       LOGICAL :: IS_ENCRYPTED, IS_AVAILABLE, IS_AVAILABLE_RHO0     
 C-----------------------------------------------

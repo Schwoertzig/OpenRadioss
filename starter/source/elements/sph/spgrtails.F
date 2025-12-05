@@ -81,7 +81,7 @@ C-----------------------------------------------
       INTEGER NGR1, NG, MT, MLN, I, P, NEL, MODE, NB,
      .        N, IGTYP,JIVF,JHBE,IJK,NE1,
      .        ISSN,IKSNOD,IORDER,IPRT,ISLEEP,IEOS,NEL_PREC,IUN,IG,IFAIL, 
-     .        WORK(70000),NGP(NSPMD+1),K,J,II, MX, NFAIL, IR, IP, STAT,
+     .        WORK(70000),NGP(NSPMD+1),K,J,II, MX, NFAIL, IR,
      .        IPARTR2R, NOD, JALE_FROM_MAT, JALE_FROM_PROP
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: INUM
       INTEGER, DIMENSION(:),ALLOCATABLE :: INDEX     
@@ -350,7 +350,7 @@ C-------------------------------------------------
 C-------------------------------------------------          
           DO IJK = 1, NE1
 C
-C Attention, penser a sauvegarder KXSP(2) si besoin (backtrack spmd si interface)
+C Warning, remember to save KXSP(2) if needed (backtrack spmd if interface)
 C
             KXSP(2,EADD(N)-1+NFT+IJK)=
      .                SIGN(NGROUP,ISLEEP)

@@ -21,20 +21,22 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    srcoor3     ../engine/source/elements/solid/solide/srcoor3.F
+!||    srcoor3       ../engine/source/elements/solid/solide/srcoor3.F
 !||--- called by ------------------------------------------------------
-!||    s8cforc3    ../engine/source/elements/thickshell/solide8c/s8cforc3.F
-!||    s8eforc3    ../engine/source/elements/solid/solide8e/s8eforc3.F
-!||    s8zforc3    ../engine/source/elements/solid/solide8z/s8zforc3.F
-!||    scforc3     ../engine/source/elements/thickshell/solidec/scforc3.F
-!||    sforc3      ../engine/source/elements/solid/solide/sforc3.F
-!||    szforc3     ../engine/source/elements/solid/solidez/szforc3.F
+!||    s8cforc3      ../engine/source/elements/thickshell/solide8c/s8cforc3.F
+!||    s8eforc3      ../engine/source/elements/solid/solide8e/s8eforc3.F
+!||    s8zforc3      ../engine/source/elements/solid/solide8z/s8zforc3.F
+!||    scforc3       ../engine/source/elements/thickshell/solidec/scforc3.F
+!||    sforc3        ../engine/source/elements/solid/solide/sforc3.F
+!||    szforc3       ../engine/source/elements/solid/solidez/szforc3.F
 !||--- calls      -----------------------------------------------------
-!||    scortho3    ../engine/source/elements/thickshell/solidec/scortho3.F
-!||    sorthdir3   ../engine/source/elements/solid/solide/sorthdir3.F
-!||    sortho3     ../engine/source/elements/solid/solide/sortho3.F
-!||    srepiso3    ../engine/source/elements/solid/solide/srepiso3.F
-!||    srrota3     ../engine/source/elements/solid/solide/srrota3.F
+!||    scortho3      ../engine/source/elements/thickshell/solidec/scortho3.F
+!||    sorthdir3     ../engine/source/elements/solid/solide/sorthdir3.F
+!||    sortho3       ../engine/source/elements/solid/solide/sortho3.F
+!||    srepiso3      ../engine/source/elements/solid/solide/srepiso3.F
+!||    srrota3       ../engine/source/elements/solid/solide/srrota3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SRCOOR3(X   ,IXS   ,V     ,W     ,GAMA0 ,GAMA  ,
      .   X1    ,X2    ,X3    ,X4    ,X5    ,X6    ,X7    ,X8    ,
@@ -52,6 +54,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .   ZD1   ,ZD2   ,ZD3   ,ZD4   ,ZD5   ,ZD6   ,ZD7   ,ZD8   ,         
      .   XDP   ,X0    ,Y0    ,Z0    ,NEL   ,XGAX  ,XGAY  ,XGAZ  ,
      .   XGXA2,XGYA2  ,XGZA2 ,XGXYA ,XGYZA ,XGZXA ,IPARG ,GAMA_R) 
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -106,8 +109,6 @@ C-----------------------------------------------
     
 C     REAL
       my_real
-     .  DT05     
-      my_real
      .   G11,G12,G13,
      .   G21,G22,G23,
      .   G31,G32,G33,
@@ -117,8 +118,6 @@ C     REAL
      .   RX(MVSIZ) , RY(MVSIZ) , RZ(MVSIZ) ,
      .   SX(MVSIZ) , SY(MVSIZ) , SZ(MVSIZ) ,
      .   TX(MVSIZ) , TY(MVSIZ) , TZ(MVSIZ) 
-      my_real
-     .   XL(MVSIZ),YL(MVSIZ),ZL(MVSIZ)
       my_real
      .   OFF_L
 C=======================================================================

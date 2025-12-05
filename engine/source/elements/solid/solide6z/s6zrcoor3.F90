@@ -31,17 +31,18 @@
       module s6zrcoor3_mod
       contains
 !||====================================================================
-!||    s6zrcoor3       ../engine/source/elements/solid/solide6z/s6zrcoor3.F90
+!||    s6zrcoor3        ../engine/source/elements/solid/solide6z/s6zrcoor3.F90
 !||--- called by ------------------------------------------------------
-!||    s6zforc3        ../engine/source/elements/solid/solide6z/s6zforc3.F90
+!||    s6zforc3         ../engine/source/elements/solid/solide6z/s6zforc3.F90
 !||--- calls      -----------------------------------------------------
-!||    sorthdir3       ../engine/source/elements/solid/solide/sorthdir3.F
-!||    sortho3         ../engine/source/elements/solid/solide/sortho3.F
-!||    srepiso3        ../engine/source/elements/solid/solide/srepiso3.F
-!||    srrota3         ../engine/source/elements/solid/solide/srrota3.F
+!||    sorthdir3        ../engine/source/elements/solid/solide/sorthdir3.F
+!||    sortho3          ../engine/source/elements/solid/solide/sortho3.F
+!||    srepiso3         ../engine/source/elements/solid/solide/srepiso3.F
+!||    srrota3          ../engine/source/elements/solid/solide/srrota3.F
 !||--- uses       -----------------------------------------------------
-!||    constant_mod    ../common_source/modules/constant_mod.F
-!||    precision_mod   ../common_source/modules/precision_mod.F90
+!||    constant_mod     ../common_source/modules/constant_mod.F
+!||    precision_mod    ../common_source/modules/precision_mod.F90
+!||    prop_param_mod   ../common_source/modules/mat_elem/prop_param_mod.F90
 !||====================================================================
       subroutine s6zrcoor3(                                                   &
         numnod  , x       , ixs     , v       , gama0   , gama    ,           &
@@ -65,6 +66,7 @@
 !-------------------------------------------------------------------------------
       use precision_mod, only : wp
       use constant_mod , only : zero, one, two, one_over_6, em20
+      use prop_param_mod
 !-------------------------------------------------------------------------------
 !    I m p l i c i t   t y p e s
 !-------------------------------------------------------------------------------
@@ -159,7 +161,7 @@
       real(kind=WP), dimension(nel),       intent(out)   :: xgxya    !< XY cross product term
       real(kind=WP), dimension(nel),       intent(out)   :: xgyza    !< YZ cross product term
       real(kind=WP), dimension(nel),       intent(out)   :: xgzxa    !< ZX cross product term
-      integer      , dimension(nel),       intent(in)    :: iparg    !< Integer parameters
+      integer,dimension(n_var_iparg),      intent(in)    :: iparg
       real(kind=WP), dimension(nel,6),     intent(out)   :: gama_r   !< Rotation matrix storage
 !-------------------------------------------------------------------------------
 !    L o c a l   v a r i a b l e s

@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    strs_txt50          ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE STAT_C_ORTH_LOC(ELBUF_TAB,IPARG ,IPM ,IGEO ,IXC ,
@@ -42,6 +43,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD         
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +60,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXC(NIXC,*),IXTG(NIXTG,*),
      .        IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTC(*), IPARTTG(*), IPART_STATE(*),
@@ -70,7 +72,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,II,JJ,LEN, IOFF, IREP,NG, NEL, NFT, ITY, LFT, NPT,
+      INTEGER I, J, K, N, JJ, LEN, IOFF, IREP, NG, NEL, NFT, ITY, LFT, NPT, 
      .        LLT, MLW,NDIR,NLAY,IHBE,ISH3N,IDRAPE,NPTT, NPLY_MAX,IPT,
      .        IGTYP, ID, IPRT0, IPRT,NPG,IPG,IE, FLAGDEG,IDEL,ILAY,ILAW,IFRAM_OLD
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA
@@ -85,7 +87,7 @@ C-----------------------------------------------
      .   X2L
       CHARACTER*100 DELIMIT,LINE
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
-      TYPE(BUF_LAY_)  ,POINTER :: BUFLY 
+ 
        TYPE(L_BUFEL_DIR_) ,POINTER :: LBUF_DIR   
 C-----------------------------------------------
       DATA DELIMIT(1:60)

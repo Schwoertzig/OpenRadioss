@@ -21,10 +21,12 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    s20coor3   ../engine/source/elements/solid/solide20/s20coor3.F
+!||    s20coor3      ../engine/source/elements/solid/solide20/s20coor3.F
 !||--- called by ------------------------------------------------------
-!||    s16forc3   ../engine/source/elements/thickshell/solide16/s16forc3.F
-!||    s20forc3   ../engine/source/elements/solid/solide20/s20forc3.F
+!||    s16forc3      ../engine/source/elements/thickshell/solide16/s16forc3.F
+!||    s20forc3      ../engine/source/elements/solid/solide20/s20forc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE S20COOR3(
      1   X,       IXS,     IXSP,    V,
@@ -39,6 +41,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      A   QG,      EPLASM,  EPSDG,   G_PLA,
      B   G_EPSD,  NEL,     CONDEN,  JALE,
      C   ISMSTR,  JEUL,    JLAG)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

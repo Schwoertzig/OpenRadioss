@@ -74,6 +74,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    dtdc_mod                   ../engine/share/modules/dtdc_mod.F
 !||    ecnd_mod                   ../engine/share/modules/ecdn_mod.F
 !||    elbufdef_mod               ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod               ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod             ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod               ../common_source/modules/groupdef_mod.F
@@ -166,7 +167,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      6  TAGSLV_RBY,NFNCA2 ,NFTCA2  ,IN0  ,SORT_COMM,STACK,OUTPUT,
      7  THKE ,SFR_ELEM ,SH_OFFSET_TAB,
      8  NEED_COMM_INT25_SOLID_EROSION,COMM_INT25_SOLID_EROSION,
-     9  ISKWN ,IFRAME, LOADS ,GLOB_THERM,PBLAST,RBE3)
+     9  ISKWN ,IFRAME, LOADS ,GLOB_THERM,PBLAST,RBE3,NHIER_RBY)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -197,6 +198,7 @@ C-----------------------------------------------
       use spmd_xv_inter_type1_mod , only : is_present_inter1
       USE parith_on_mod, only: element_pon_
       use rbe3_mod
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -295,6 +297,7 @@ C-----------------------------------------------
 !                 INT7ITIED = 0 type 7 + ITIED/=0 not used
 !                 INT7ITIED = 1 type 7 + ITIED/=0 used
       INTEGER, INTENT(INOUT) :: INT7ITIED
+      INTEGER, INTENT(INOUT) :: NHIER_RBY
       my_real
      .   X(3,*), D(3,*), V(3,*), VR(3,*),
      .   MS(*), IN(*),  WA(*),  A(3,*), AR(3,*),
@@ -384,7 +387,8 @@ C
 C
 C kinematic conditions : arrays init. (RBY & INT20)
 C
-      CALL INIT_KYNE(IKINE,NPBY,LPBY,TAGSLV_RBY)
+      CALL INIT_KYNE(IKINE,NPBY,LPBY,TAGSLV_RBY,NHIER_RBY)
+      CALL SPMD_MAX_I(NHIER_RBY)
 C
 C reaction force (node array)
 C
@@ -1221,10 +1225,13 @@ C-----------------------------------------------
 !||    resol_init     ../engine/source/engine/resol_init.F
 !||--- calls      -----------------------------------------------------
 !||    sort_mid_pid   ../engine/source/system/sort_mid_pid.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE  GRPSPLIT(
      1     IPARG, IGROUC, NGROUC, IGROUNC, NGROUNC,
      2     IXC,IXS,IXTG,IPM,IGEO,PM,GEO,TABMP_L,TAB_MAT)
+      use element_mod , only : nixc,nixtg,nixs
 C----6------------------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1621,7 +1628,7 @@ C
 !||--- called by ------------------------------------------------------
 !||    resol_init   ../engine/source/engine/resol_init.F
 !||====================================================================
-      SUBROUTINE INIT_KYNE(IKINE,NPBY,LPBY,TAGSLV_RBY)
+      SUBROUTINE INIT_KYNE(IKINE,NPBY,LPBY,TAGSLV_RBY,NHIER_RBY)
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1637,6 +1644,7 @@ C-----------------------------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER IKINE(NUMNOD),NPBY(NNPBY,*),LPBY(*),TAGSLV_RBY(*)
+      INTEGER, INTENT(INOUT) :: NHIER_RBY
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -1646,11 +1654,13 @@ C-----------------------------------------------
         IKINE(J)=0
       ENDDO
 C-------------------------------------
-C Traitement Rigid Bodies 
+C Processing Rigid Bodies
 C-------------------------------------
       K = 0
+      NHIER_RBY = 0
       DO N=1,NRBYKIN
         NSN = NPBY(2,N)
+        NHIER_RBY = MAX(NHIER_RBY,NPBY(20,N))
         DO I=1,NSN
           J=LPBY(K+I)
           IKINE(J) = (IKINE(J)/2)*2 + 1

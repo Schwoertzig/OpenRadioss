@@ -36,6 +36,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    multi_solve_eint       ../engine/source/multifluid/multi_solve_eint.F90
 !||    multi_submatlaw        ../engine/source/multifluid/multi_submatlaw.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    matparam_def_mod       ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    multi_fvm_mod          ../common_source/modules/ale/multi_fvm_mod.F90
 !||    multi_solve_eint_mod   ../engine/source/multifluid/multi_solve_eint.F90
@@ -55,6 +56,7 @@ C-----------------------------------------------
       USE MULTI_SOLVE_EINT_MOD , ONLY : MULTI_SOLVE_EINT
       USE MULTI_SUBMATLAW_MOD , ONLY : MULTI_SUBMATLAW
       USE OUTPUT_MOD , ONLY : OUTPUT_
+      use element_mod , only : nixs,nixq,nixtg
 C-----------------------------------------------
 C     I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -92,15 +94,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C     L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER :: IELEM, ELEMID, NODE_ID
-      INTEGER :: KFACE, NB_NOD_FOUND, KK, JJ
-      my_real :: X1(3), X2(3), X3(3), X4(3), P, NORMVEL, VX, VY, VZ, SSP, SURF, NX, NY, NZ
-      my_real :: RHO, SSTAR, PSTAR, PFAC, SL, SR, WFAC(3), VII(5), VJJ(5), VEL2, NORMALW
-      my_real :: FII(5), FJJ(5), VIISTAR(5), VJJSTAR(5), FIISTAR(5), FJJSTAR(5), PP(5)
-      INTEGER :: NODE1, NODE2, IMAT, NBMAT
+      INTEGER :: IELEM, ELEMID
+      INTEGER :: KFACE
+      my_real ::     SURF, NX, NY, NZ
+      my_real ::  SSTAR, PSTAR, SL, SR, WFAC(3), VII(5), NORMALW
+      my_real :: FII(5), VIISTAR(5), FIISTAR(5), PP(5)
+      INTEGER ::   IMAT, NBMAT
       INTEGER :: MATLAW(MULTI_FVM%NBMAT), LOCAL_MATID(MULTI_FVM%NBMAT)
       my_real :: PHASE_RHOII(MULTI_FVM%NBMAT), PHASE_PRESII(MULTI_FVM%NBMAT), 
-     .           PHASE_EINTII(MULTI_FVM%NBMAT), PHASE_SSPII(MULTI_FVM%NBMAT),
+     .           PHASE_EINTII(MULTI_FVM%NBMAT),
      .           PHASE_ALPHAII(MULTI_FVM%NBMAT), PHASE_RHOJJ(MULTI_FVM%NBMAT),
      .           PHASE_PRESJJ(MULTI_FVM%NBMAT), PHASE_EINTJJ(MULTI_FVM%NBMAT),
      .           PHASE_SSPJJ(MULTI_FVM%NBMAT), PHASE_ALPHAJJ(MULTI_FVM%NBMAT)

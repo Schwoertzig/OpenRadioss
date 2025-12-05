@@ -70,7 +70,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NSNR, IGAP, I_STOK_GLO, SIZOPT, IEDGE, NEDGE, IGAP0, I_STOK, L_STOK
+      INTEGER NSNR, IGAP, I_STOK_GLO, SIZOPT, IEDGE, NEDGE, IGAP0
       INTEGER N, NSNF, NSNL, NSNRF, NSNRL ,IFQ
       INTEGER :: NRTM, NSN
 C     REAL
@@ -98,7 +98,7 @@ C-----------------------------------------------------------
       IF(IPARI(47,NIN) > 0) DRAD =INTBUF_TAB%VARIABLES(32)
       DGAPLOAD  =INTBUF_TAB%VARIABLES(46)
 C-----------------------------------------------------------
-C     Filtrage des candidats a l'impact
+C     Filtrage des CANDIDATES a l'impact
 C     (si candidat retenu, cand_n(i) = - cand_n(i))
 C-----------------------------------------------------------
        I_STOK_GLO = INTBUF_TAB%I_STOK(1)

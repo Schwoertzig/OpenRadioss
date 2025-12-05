@@ -53,7 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,N
+      INTEGER J
       my_real VGLOB(LENG)
 C-----------------------------------------------
 
@@ -90,7 +90,7 @@ C
        ENDIF
 C
 C INNODA: address of the last variable
-C (INCREMENTEE DE NUMNOD A CHAQUE PASSAGE)
+C (INCREMENTED BY NUMNOD AT EACH PASS)
 C 
       RETURN
       END

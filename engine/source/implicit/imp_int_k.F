@@ -1086,6 +1086,7 @@ C
 !||    spmd_ifront       ../engine/source/mpi/interfaces/spmd_ifront.F
 !||    spmd_sd_xv        ../engine/source/mpi/nodes/spmd_sd_xv.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod    ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod      ../common_source/modules/groupdef_mod.F
 !||    h3d_mod           ../engine/share/modules/h3d_mod.F
@@ -1122,6 +1123,7 @@ C-----------------------------------------------
       USE SENSOR_MOD
       USE INTERFACES_MOD
       use glob_therm_mod
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1466,8 +1468,8 @@ C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
        IF(NT_IMP1==0) RETURN
-C------dans NS_IMP1 input: NT_IMP1 , output:d'abord NT_IMP1, + NT_IMP-NT_IMP1
-C------dans NS_IMP input:d'abord NT_IMP1, + NT_IMP-NT_IMP1, output: NT_IMP
+C------in NS_IMP1 input: NT_IMP1 , output:d'abord NT_IMP1, + NT_IMP-NT_IMP1
+C------in NS_IMP input:d'abord NT_IMP1, + NT_IMP-NT_IMP1, output: NT_IMP
        NT_IMP = NT_IMP + NT_IMP1
        IF(NSPMD>1) THEN
         IAD1 = 0

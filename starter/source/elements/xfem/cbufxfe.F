@@ -69,7 +69,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER IGTYP,IREP,IXEL,I,II,IT,ILAY,L_DMG
+      INTEGER IGTYP, IREP, IXEL, I, IT, ILAY, L_DMG
       INTEGER MATLY(MVSIZ*100)
       my_real
      .  THKLY(MVSIZ*100),POSLY(MVSIZ,100)
@@ -163,7 +163,7 @@ C-----------------------------------------------
       PARAMETER (MAX_NPTT = 10)
       my_real
      .   THK_IT(MAX_NPTT),POS_IT(MAX_NPTT),THK_LY,POS_LY,THK_NPTT,
-     .   POS_NPTT,THICKT,POS_0
+     .   POS_NPTT,POS_0
 C-----------------------------------------------
       my_real
      .  A_GAUSS(9,9),W_GAUSS(9,9)

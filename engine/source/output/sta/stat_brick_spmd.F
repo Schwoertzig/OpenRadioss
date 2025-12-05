@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_iget_partn_sta   ../engine/source/mpi/output/spmd_stat.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod          ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE STAT_BRICK_SPMD(ITAB,IPART,IGEO,IXS,IPARTS,
@@ -40,6 +41,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD 
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -68,7 +70,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, N, JJ, IPRT, BUF, IPRT0, K, STAT_NUMELS_1
+      INTEGER I, N, JJ, IPRT, IPRT0, K
       INTEGER NG, NEL, NFT, LFT, LLT, ITY, ISOLNOD, IOFF
       INTEGER,DIMENSION(:,:),ALLOCATABLE :: IADG
       INTEGER,DIMENSION(:),ALLOCATABLE :: IADD

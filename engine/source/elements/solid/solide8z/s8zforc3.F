@@ -86,6 +86,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
 !||    dt_mod                 ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod         ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    message_mod            ../engine/share/message_module/message_mod.F
@@ -136,6 +137,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       use glob_therm_mod
       USE sz_dt1_mod, only : sz_dt1
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -217,9 +219,9 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------      
-      INTEGER  I,J,N,NF1,IFLAG,ILAY,NLAY,
+      INTEGER  I,J,NF1,IFLAG,ILAY,NLAY,
      .   IP,IR,IS,IT,NPTR,NPTS,NPTT,ICR,ICS,ICT,PID,
-     .   IPMAT,NLYMAX,MID,IPANG,IBID
+     .   IPMAT,NLYMAX,IPANG,IBID
 
       DOUBLE PRECISION 
      .   X0(MVSIZ,8),Y0(MVSIZ,8),Z0(MVSIZ,8),
@@ -338,14 +340,14 @@ C   variables used only in solid routines (as arguments)
      .   G1Z(MVSIZ),G2Z(MVSIZ),G3Z(MVSIZ)
       my_real
      .   WI,SMAX(MVSIZ),VOLG(MVSIZ),NU(MVSIZ),PP(MVSIZ),USB(MVSIZ),
-     .   SIGM(MVSIZ),DTI,BID(MVSIZ),FAC_NU,NU_SP,NU0
+     .   DTI,BID(MVSIZ),FAC_NU,NU_SP,NU0
       my_real
      .   SIGY(MVSIZ), SIGN(NEL,6),ET(MVSIZ), NU1(MVSIZ),
      . R1_FREE(MVSIZ),R3_FREE(MVSIZ),DELTAXI(MVSIZ)
       my_real
      .   VX0(MVSIZ,8),VY0(MVSIZ,8),VZ0(MVSIZ,8)
       my_real
-     .   SHF(MVSIZ),ZR,ZS,ZT,WT
+     .   ZR,ZS,ZT,WT
       my_real, DIMENSION(MVSIZ,NNPT) :: AJI1,AJI2,AJI3
       my_real, DIMENSION(MVSIZ,NNPT) :: AJI4,AJI5,AJI6
       my_real, DIMENSION(MVSIZ,NNPT) :: AJI7,AJI8,AJI9

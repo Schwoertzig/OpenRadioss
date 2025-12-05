@@ -21,16 +21,19 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    cpxpy3       ../engine/source/elements/shell/coque/cpxpy3.F
+!||    cpxpy3        ../engine/source/elements/shell/coque/cpxpy3.F
 !||--- called by ------------------------------------------------------
-!||    cforc3       ../engine/source/elements/shell/coque/cforc3.F
-!||    cforc3_crk   ../engine/source/elements/xfem/cforc3_crk.F
+!||    cforc3        ../engine/source/elements/shell/coque/cforc3.F
+!||    cforc3_crk    ../engine/source/elements/xfem/cforc3_crk.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CPXPY3(JFT ,JLT ,PM  ,STI  ,SMSTR,
      2                  PX1  ,PX2 ,PY1 ,PY2 ,STIR,
      3                  IXC  ,AREA,X2  ,X3  ,X4  , 
      4                  Y2   ,Y3  ,Y4  ,Z2  ,THK0,  
      5                  MAT  ,NEL )
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -87,7 +87,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NSNF,NMNF,NSNL,NMNL,I, II, N,NLNF,NLNL,IL,IG,NRTMF,NRTML
+      INTEGER NSNF,NMNF,NSNL,NMNL,I, II,NLNF,NLNL,IL,IG,NRTMF,NRTML
       INTEGER NSNEF,NMNEF,NSNEL,NMNEL,NLINSAF,NLINSAL,NLINMAF,NLINMAL
       INTEGER IRBY
       my_real 
@@ -369,7 +369,7 @@ C=======================================================================
 C     maj pene edges  fin !!!!!  deplace
 C=======================================================================
 C=======================================================================
-C     CALCUL CRITERE TRI
+C     CALCULATION CRITERE TRI
 C=======================================================================
 #include "vectorize.inc"
       DO I=NSNF,NSNL

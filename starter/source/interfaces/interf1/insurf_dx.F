@@ -40,7 +40,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C     READING SURFACES AND COUNTING SEGMENTS
 C           ENTREE : 
-C                    NRT NOMBRE DE RENSEIGNEMENTS A LIRE
+C                    NRT NUMBER OF ITEMS TO READ
 C           SORTIE : 
 C                    IRECT 
 C-----------------------------------------------
@@ -70,7 +70,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,K,K4
-      my_real :: SURF, S2n(3), D1(3), D2(3), SURF_MAX, SURF_MIN, SURF_MEAN, STVAL,VEL
+      my_real :: SURF, S2n(3), D1(3), D2(3), SURF_MAX, SURF_MIN, SURF_MEAN, STVAL
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------

@@ -77,11 +77,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, SOL_EDGE, SH_EDGE, K
+      INTEGER I, SOL_EDGE, SH_EDGE
       my_real
      .     PENE2(MVSIZ),
      .     XS12,YS12,ZS12,XM12,YM12,ZM12,XA,XB,
-     .     XS2,XM2,XSM,XS2M2,YS2,YM2,YSM,YS2M2,ZS2,ZM2,ZSM,ZS2M2,
+     .     XS2,XM2,XSM,XS2M2,YS2M2,ZS2M2,
      .     DET,GAP2,P1,P2,NN(MVSIZ)
       INTEGER NTRIA(3,4)
       DATA NTRIA/1,2,4,2,4,1,0,0,0,4,1,2/
@@ -172,7 +172,7 @@ C
        H2S(I) = ONE -H1S(I)
        H2M(I) = ONE -H1M(I)
 C !!!!!!!!!!!!!!!!!!!!!!!
-C  PENE = GAP^2 - DIST^2 UTILISE POUR TESTER SI NON NUL
+C  PENE = GAP^2 - DIST^2 USED TO TEST IF NON-NULL
 C!!!!!!!!!!!!!!!!!!!!!!!!
        NX(I) = H1S(I)*XXS1(I) + H2S(I)*XXS2(I)
      .       - H1M(I)*XXM1(I) - H2M(I)*XXM2(I)

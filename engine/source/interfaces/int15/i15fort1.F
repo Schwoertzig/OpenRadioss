@@ -77,12 +77,12 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER ADRBUF, I, IL, IN1, IN2, IN3, IN4, NLS
+      INTEGER ADRBUF, I, IL, IN1, IN2, IN3, NLS
       my_real
      .   A, B, C, ROT(9), X1, X2, X3, XM, YM, ZM,
      .   V1, V2, V3, VXM, VYM, VZM, VRX, VRY, VRZ,
      .   V1X2, V2X1, V1X3, V3X1, V2X3, V3X2,
-     .   DELTX, DELTY, DELTZ, ND, PN, SCALE, NV,
+     .   DELTX, DELTY, DELTZ, ND, PN, SCALE,
      .   VXK, VYK, VZK, DVX, DVY, DVZ, XH, YH, ZH,
      .   DX1, DY1, DZ1, DX2, DY2, DZ2, DX3, DY3, DZ3,
      .   DX, DY, DZ,
@@ -134,8 +134,8 @@ C-----------------------------------------------
       VRY=ROT(4)*V1+ROT(5)*V2+ROT(6)*V3
       VRZ=ROT(7)*V1+ROT(8)*V2+ROT(9)*V3
 C----------------------------------------------------------
-C     PASSAGE DES VELOCITIES EN LOCAL.
-C     non optimise (plusieurs fois / noeud).
+C     PASSAGE OF VELOCITIES TO LOCAL.
+C     non optimise (plusieurs fois / node).
 C----------------------------------------------------------
       DO 100 NLS=NDEB+1,MIN(NDEB+MVSIZ,NTC)
       IL =KTC(NLS)
@@ -301,7 +301,7 @@ C      Delta shift = scale.delta
        DELTX=SCALE*DOLD(1,4*(IL-1)+1)
        DELTY=SCALE*DOLD(2,4*(IL-1)+1)
        DELTZ=SCALE*DOLD(3,4*(IL-1)+1)
-C      MISE EN MEMOIRE BUFFERS D'INTERFACE (-> PROCHAIN CYCLE).
+C      SET EN MEMOIRE BUFFERS D'INTERFACE (-> PROCHAIN CYCLE).
        DOLD(1,4*(IL-1)+1)=DELTX
        DOLD(2,4*(IL-1)+1)=DELTY
        DOLD(3,4*(IL-1)+1)=DELTZ
@@ -350,7 +350,7 @@ C-----
       IOLD(3,4*(IL-1)+1)=S3*S
  650  CONTINUE
 C------------------------------------------------------------
-C     MISE EN MEMOIRE BUFFERS D'INTERFACE (-> PROCHAIN CYCLE).
+C     SET EN MEMOIRE BUFFERS D'INTERFACE (-> PROCHAIN CYCLE).
 C------------------------------------------------------------
 #include "vectorize.inc"
       DO 700 NLS=NDEB+1,MIN(NDEB+MVSIZ,NTC)
@@ -367,7 +367,7 @@ C-----
       NOLD(3,4*(IL-1)+1)=NZI(I)
  700  CONTINUE
 C------------------------------------------------------------
-C     MISE EN MEMOIRE (VECTEURS DE TRAVAIL -> ASSEMBLAGE).
+C     SET EN MEMOIRE (VECTEURS DE TRAVAIL -> ASSEMBLAGE).
 C------------------------------------------------------------
 C     non -vector.
       DO 600 NLS=NDEB+1,MIN(NDEB+MVSIZ,NTC)

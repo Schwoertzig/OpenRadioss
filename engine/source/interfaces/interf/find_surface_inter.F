@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    myqsort_int               ../common_source/tools/sort/myqsort_int.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod               ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod             ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    shooting_node_mod         ../engine/share/modules/shooting_node_mod.F90
 !||====================================================================
@@ -45,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !$ENDCOMMENT
         USE INTBUFDEF_MOD  
         USE SHOOTING_NODE_MOD
+        use element_mod , only : nixs,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -70,7 +72,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER :: I,J,K,N,IJK
-        INTEGER :: NODE_ID,NODE_ID_2,ELEM_ID
+        INTEGER :: NODE_ID, ELEM_ID
         INTEGER :: OFFSET_SOLID,OFFSET_QUAD,OFFSET_SHELL,OFFSET_TRUSS
         INTEGER :: OFFSET_BEAM,OFFSET_SPRING,OFFSET_TRIANGLE,OFFSET_UR
         INTEGER, DIMENSION(4,6), TARGET :: FACES ! definition of faces for solid
@@ -89,12 +91,12 @@ C-----------------------------------------------
         INTEGER, DIMENSION(:), ALLOCATABLE :: RESULT_INTERSECT_2,INTERSECT_3,INTERSECT_4
         INTEGER, DIMENSION(:), ALLOCATABLE :: TMP_ARRAY
         INTEGER, DIMENSION(4) :: LOCAL_NODE
-        INTEGER :: DICHOTOMIC_SEARCH_I_ASC  ! function
+ 
         INTEGER :: GROUP_NUMBER
         INTEGER :: KIND_SOLID,OLD_J,MERGED_NODE,ERROR
         INTEGER, DIMENSION(4) :: LIST_NODE_ID,PERM_LIST_NODE_ID,NB_APPAREANCE
         LOGICAL :: NEED_COMPUTE
-        INTEGER :: N1,N2,N3,N4
+ 
 C-----------------------------------------------
 
         FACES_SHELL(1:4,1) = (/1,2,3,4/)

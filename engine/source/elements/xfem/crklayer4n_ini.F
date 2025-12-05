@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod    ../engine/share/modules/crackxfem_mod.F
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CRKLAYER4N_INI(
      .           XFEM_STR ,NEL      ,NFT      ,IXC      ,ELCUTC   ,
@@ -46,6 +47,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE CRACKXFEM_MOD
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -71,11 +73,11 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,R,II,IR,P1,P2,PP1,PP2,PP3,NEWCRK,LAYCUT,FAC,
-     .  IEDGE,ICUT,IED,IED1,IED2,ICRK,ELCRK,NOD1,NOD2,IE1,IE2,ITRI,
+      INTEGER I,J,K,R,II,IR,P1,P2,PP1,PP2,PP3,NEWCRK,FAC,
+     .  IEDGE,ICUT,IED,ICRK,ELCRK,NOD1,NOD2,IE1,IE2,ITRI,
      .  IFI1,IFI2,IE10,IE20,NP,NX1,NX2,NX3,NX4
       INTEGER N(4),NN(4),dd(4),d(8),DX(8),
-     .  ISIGN(4),IENR0(4),IENR(4),INV(2),ECUT(2,NEL),
+     .  ISIGN(4),IENR0(4),IENR(4),ECUT(2,NEL),
      .  IADC(4),JCT(NEL),EDGEL(4,NEL),KPERM(8)
 C
       my_real
@@ -84,7 +86,7 @@ C
      .   FIT(4,NEL),XXL(4,NEL),YYL(4,NEL),LEN(4,NEL),BETA0(4,NEL)
 C
       my_real
-     .   XINT,YINT,FI,XXX,YYY,ZZZ,D12,M12,MM,CROSS,ACD,BCD,DLX,DLY,
+     .   XINT,YINT,FI,M12,MM,CROSS,ACD,BCD,DLX,DLY,
      .   XINT0,YINT0,DIR11,DIR22,BETA,BMIN,BMAX,
      .   X1,Y1,X2,Y2,X3,Y3,X4,Y4,AREA1,AREA2
 c---

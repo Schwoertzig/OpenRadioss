@@ -37,6 +37,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod                   ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod                ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                 ../common_source/modules/elements/element_mod.F90
 !||    matparam_def_mod            ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    names_and_titles_mod        ../common_source/modules/names_and_titles_mod.F
 !||    stack_mod                   ../engine/share/modules/stack_mod.F
@@ -56,6 +57,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
       USE DRAPE_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -96,11 +98,11 @@ C-----------------------------------------------
       INTEGER I,J,K,N,NG,NEL,NFT,ITY,NPT,MPT,IPT,NBFUNCT,NCHARD,MLW,
      .        ILAY,IR,IS,IT,NPTR,NPTS,NPTT,NLAY,NPG,IPLY,IDRAPE,
      .        IPID,NS1,NS2,ISTRE,IADBUF,NUPARAM,IMAT,NNI,N0,
-     .        IHBE,IREP,BUF,ISROT,IVISC,IGTYP,ISUBSTACK,
+     .        IHBE,IREP,ISROT,IVISC,IGTYP,ISUBSTACK,
      .        ID_PLY,IPANG,IPPOS,IPTHK,OFFSET,ISELECT,MAT_ORTH,
      .        IXLAY,IXFEM,LAYNPT_MAX,NUMEL_DRAPE,SEDRAPE,NLAY_MAX,
      .        IPT_ALL,ISLICE,PTS,IPG,LENS,MPT0
-      INTEGER        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,I1
+      INTEGER        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10
       INTEGER PID(MVSIZ),MAT(MVSIZ),IOK_PART(MVSIZ),JJ(15)
       my_real ,DIMENSION(3,MVSIZ) :: STRAIN
       my_real ,DIMENSION(4*MVSIZ) :: XN,YN,ZN,DXN,DYN,DZN
@@ -2174,11 +2176,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER I,J,NNOD
+      INTEGER I,NNOD
       PARAMETER (NNOD = 4)
       my_real 
      .   X0N(NNOD,NEL) , Y0N(NNOD,NEL) , Z0N(NNOD,NEL), 
-     .   LXYZ0(3),DETA1(NEL),COREL(2,NNOD),XX,YY,ZZ,
+     .   LXYZ0(3),COREL(2,NNOD),
      .   XL2(NEL),XL3(NEL),XL4(NEL),YL2(NEL),
      .   YL3(NEL),YL4(NEL),ZL1(NEL),ZL(NEL),
      .   X13,X24,Y13,Y24,UX1,UY1,UX2,UX3,UX4,UY2,UY3,UY4,
@@ -2379,7 +2381,7 @@ C     REAL
      .   E1X(NEL), E1Y(NEL), E1Z(NEL),
      .   E2X(NEL), E2Y(NEL), E2Z(NEL),
      .   E3X(NEL), E3Y(NEL), E3Z(NEL), 
-     .   C1,C2,CC,C1C1,C2C2,C1_1,C2_1
+     .   C1,C1C1,C2C2,C1_1,C2_1
 C~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       DO I=1,NEL
 C---------E3------------
@@ -2467,17 +2469,17 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER I,J,NNOD
+      INTEGER I,NNOD
       PARAMETER (NNOD = 3)
       my_real 
      .   X0N(NNOD,NEL) , Y0N(NNOD,NEL) , Z0N(NNOD,NEL), 
-     .   DETA1(NEL),XX,YY,ZZ,
+     .   
      .   XL2(NEL),XL3(NEL),YL2(NEL),YL3(NEL),
      .   UX1,UY1,UX2,UX3,UY2,UY3,
      .   PX2(NEL),PX3(NEL),PY2(NEL),PY3(NEL),
      .   UX21(NEL),UX31(NEL),UY21(NEL),UY31(NEL),
      .   X0L2(NEL),X0L3(NEL),Y0L2(NEL),
-     .   Y0L3(NEL),AREA(NEL),AREA_I(NEL),FXX,FYY,FXY,FYX,F(2,2,NEL) 
+     .   Y0L3(NEL),AREA(NEL),AREA_I(NEL),F(2,2,NEL) 
 C----------------------------------------------
 C------Compute coordinates in elementary local sys: actual configuration first
         CALL C3SYSG2L(XN,YN,ZN,XL2,YL2,XL3,YL3,AREA,NEL)
@@ -2613,10 +2615,10 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I
       DOUBLE PRECISION 
-     .         FMAT(2,2),UM(2,2),IC,I2C,I3C,IU,I2U,I3U,
-     .         C11,C21,C31,C12,C22,C32,C13,C23,C33,DETJ0,DETM1,
-     .         CC11,CC21,CC31,CC12,CC22,CC32,CC13,CC23,CC33,
-     .         A,B,ZZ,A1,A2,A3,A4,ALPHA,C_A,S_A,C_A2,S_A2
+     .         FMAT(2,2),UM(2,2),IC,
+     .         C11,C12,C22,
+     .         CC11,CC12,CC22,
+     .         B,ALPHA,C_A,S_A,C_A2,S_A2
 C-----------------------------------------------
       DO I=1,NEL
         FMAT(1,1)= F(1,1,I)+1.0

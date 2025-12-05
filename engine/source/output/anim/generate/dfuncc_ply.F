@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_r_c          ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||    matparam_def_mod   ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
@@ -52,6 +53,7 @@ C-----------------------------------------------
       USE STACK_MOD       
       USE MATPARAM_DEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -91,7 +93,7 @@ C     REAL
      .   A1,B1,B2,B3,YEQ,F1,M1,M2,M3, FAC, DAM1(MVSIZ),DAM2(MVSIZ),
      .   WPLA(MVSIZ), DMAX(MVSIZ),WPMAX(MVSIZ),
      .   FAIL(MVSIZ),SIGE(MVSIZ,5)
-      INTEGER I, NG, NEL, ISS, ISC,N, J, MLW, NUVAR, IUS,
+      INTEGER I, NG, NEL, ISS, N, J, MLW, NUVAR, IUS, 
      .        ISTRAIN,NN, K1, K2,JTURB,MT,IMID, IALEL,IPID,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,NF,
      .        LLL,NINTLAY,NFAIL,
@@ -100,7 +102,7 @@ C     REAL
      .        IPT,BUF,NPTR,NPTS,NPTT,NLAY,IR,IS,PTF,LENF,IL,
      .        IADR,IPMAT,PID(MVSIZ),MAT(MVSIZ),MATLY(MVSIZ*100),
      .        NEL_PLY,ILAYER,IFLAG,JJ(5)
-      INTEGER IE,ISHPLYXFEM,IP,JPID,IPPID,IPLY0,ILAST,ION,NUVARV,
+      INTEGER IE, ISHPLYXFEM, ILAST, NUVARV, 
      .        IVISC,IPMAT_IPLY,NUVARD,MAT_IPLY,
      .        MATPLY,LL,IPLYC,I3,I2
       INTEGER PLYS,IPLY,PLYELEMS(NUMELC),ELC,NS1,MATL,
@@ -109,7 +111,7 @@ C     REAL
       TYPE(G_BUFEL_)    ,POINTER :: GBUF     
       TYPE(BUF_LAY_)    ,POINTER :: BUFLY     
       TYPE(L_BUFEL_)    ,POINTER :: LBUF     
-      TYPE(BUF_INTLAY_) ,POINTER :: INTLAY 
+ 
       TYPE(BUF_INTLOC_) ,POINTER :: ILBUF
       TYPE(BUF_FAIL_)   ,POINTER :: FBUF
       my_real,

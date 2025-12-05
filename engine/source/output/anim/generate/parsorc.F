@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c          ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE PARSORC(X    ,D    ,XNORM,IADD ,CDG  ,
@@ -43,6 +44,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -72,9 +74,9 @@ C     REAL
       my_real
      .   OFF
       INTEGER II(4),IE,NG, ITY, LFT, LLT, N, I, J, 
-     .        IPRT, NEL, IAD, NPAR, NFT, IMID,IALEL,MTN,
+     .        IPRT, NEL, IAD, NPAR, NFT,MTN,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,
-     .        JJ, K, SH_IH, BUF
+     .        JJ, K, BUF
       INTEGER,DIMENSION(:),ALLOCATABLE::NP
 C-----------------------------------------------
       CALL MY_ALLOC(NP,(NUMELQ + NUMELC + NUMELTG)*4)

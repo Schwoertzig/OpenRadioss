@@ -86,7 +86,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,II,ICONV,NINDX,ICAS,ITER,IQUAD
+      INTEGER I,II,ICONV,NINDX,ICAS,ITER,IQUAD
       INTEGER,PARAMETER :: FUNC_TRAC  = 1
       INTEGER,PARAMETER :: FUNC_COMP  = 2
       INTEGER,PARAMETER :: FUNC_SHEAR = 3
@@ -96,7 +96,7 @@ C-----------------------------------------------
      .    SIGS,DSIGS_DP,SIGC,DSIGC_DP,SDXX,SDYY,SDZZ,SDXY,SDYZ,SDZX,DSIGT_DP,
      .    NUP,P,SVM,A0,A1,A2,PHI,DPLAC,DPLAT,DPLAS,PSI,ALPHA,DYDX
       my_real
-     .    NORMXX,NORMYY,NORMZZ,NORMXY,NORMYZ,NORMZX,NORM,AA,CB,
+     .    NORMXX,NORMYY,NORMZZ,NORMXY,NORMYZ,NORMZX,AA,
      .    NORMXX_N,NORMYY_N,NORMZZ_N,NORMXY_N,NORMYZ_N,NORMZX_N,
      .    DSIGT_DLAM,DSIGC_DLAM,DSIGS_DLAM,DA1_DSIGS,DA1_DSIGT,
      .    DA1_DSIGC,DA2_DSIGS,DA2_DSIGT,DA2_DSIGC,DA0_DLAM,DA1_DLAM,
@@ -121,7 +121,7 @@ C
       ! -> Plastic parameters
       NUPC   = UPARAM(9)  ! Plastic Poisson ratio                      
       ! -> Flags 
-      IQUAD  = NINT(UPARAM(14)) ! Flag for quadratic or non-quatratic yield surface
+      IQUAD  = NINT(UPARAM(14)) ! Flag for quadratic or non-quadratic yield surface
       ASRATE = MIN(ONE,UPARAM(16)*TIMESTEP)
       ICONV  = NINT(UPARAM(15)) ! Flag to ensure convexity
       ICAS   = NINT(UPARAM(17)) ! Flag for tabulated case
@@ -396,7 +396,7 @@ C
               DA1_DSIGT = -NINE*(SIGS(I)/SIGT(I))**2
               ! -> A2 derivatives
               !   -> With respect to SIGS
-              DA2_DSIGS = -CINQUANTE4*CC
+              DA2_DSIGS = -FIFTY4*CC
               !   -> With respect to SIGC                                         
               DA2_DSIGC = TWENTY7*CC*SIGS(I)/SIGC(I)  
               !   -> With respect to SIGT                       

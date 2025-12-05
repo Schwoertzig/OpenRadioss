@@ -30,12 +30,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    count_arsz_ss         ../engine/source/output/sty/outp_s_s.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
       SUBROUTINE OUTP_ARSZ_SS(IPARG,DD_IAD,IPM,IXS,P0ARS,WASZ,WASZ_WR)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use element_mod , only : nixs
         USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
 C-----------------------------------------------
@@ -58,11 +60,11 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER NN,NG,SZP0(2*NSPGROUP+2),RSZP0(2*NSPGROUP+2),NGF,NGL,JJ,
-     .        WASZ26,P0ARS26,MLW,NEL,NPT,JHBE,ISOLNOD, 
-     .        NUVAR,I,LFT,LLT,NFT,ITY
+      INTEGER SZP0(2*NSPGROUP+2), RSZP0(2*NSPGROUP+2), 
+     .
+     . I
 
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 C-----------------------------------------------
       P0ARS = 0
       WASZ = 0
@@ -106,6 +108,7 @@ C-----------------------------------------------
 !||--- calls      -----------------------------------------------------
 !||    count_arsz_cs         ../engine/source/output/sty/outp_c_s.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
       SUBROUTINE OUTP_ARSZ_CS(IPARG,IXC,IXTG,IGEO,IPM,DD_IAD,
@@ -113,6 +116,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use element_mod , only : nixc,nixtg
         USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
 C-----------------------------------------------
@@ -137,10 +141,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER JJ,NGF,NGL,NN,ITY,IAD,NFT,LFT,LLT,NPT,
-     .        IHBE,IGTYP,NUVAR,MLW,NG,NEL,NBX,I,NPG,MPT,
-     .        SZP0(2*NSPGROUP+2),RSZP0(2*NSPGROUP+2),P0ARSZ26
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER 
+     . I,
+     . SZP0(2*NSPGROUP+2),RSZP0(2*NSPGROUP+2)
+      INTEGER IERROR
 
 
       P0ARS = 0
@@ -222,10 +226,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER NGL,ITY,NRL,KHBE,MLW,NPT,ISOLNOD,NGF,NN,NEL,
-     .        NG,NLAY,NPTR,NPTS,NPTT,NPTG,JJ,I,
+      INTEGER 
+     . I,
      .        SZP0(3*NSPGROUP+3),RSZP0(3*NSPGROUP+3)
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 C=======================================================================
       WASZ = 0
       P0ARS = 0
@@ -295,12 +299,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-        INTEGER NGF,NGL,NN,ITY,MLW,NEL,NPT,IHBE,NPG,MPT,NG,JJ,COUNT,I,
-     .          SZP0(3*NSPGROUP+3),RSZP0(3*NSPGROUP+3),
-     .          IL,NLAY,IGTYP,NPT_ALL,
-     .          NPTR,NPTS
+        INTEGER COUNT, I, 
+     .          SZP0(3*NSPGROUP+3),RSZP0(3*NSPGROUP+3)
 C-----------------------------------------------
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 
       WASZ = 0
       WASZP = 0
@@ -407,10 +409,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER NGF,NGL,NN,ITY,NEL,NG,JJ,SZP0(NSPGROUP+1),RSZP0(NSPGROUP+1),
-     .        P0ARSZ2,WASZ2,I
+      INTEGER SZP0(NSPGROUP+1), RSZP0(NSPGROUP+1), 
+     . I
 
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 C-----------------------------------------------
 
       WASZP = 0
@@ -445,12 +447,14 @@ C-----------------------------------------------
 !||--- calls      -----------------------------------------------------
 !||    count_arsz_rt         ../engine/source/output/sty/outp_r_t.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
       SUBROUTINE OUTP_ARSZ_RT(IPARG,IGEO,GEO,IXR,DD_IAD,WASZ,WASZP,WASZ_WR)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use element_mod , only : nixr
         USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
 C-----------------------------------------------
@@ -475,10 +479,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER NGF,NGL,NN,ITY,NEL,NG,JJ,SZP0(NSPGROUP+1),RSZP0(NSPGROUP+1),
-     .        P0ARSZ2,WASZ2,IPROP,NUVAR,IGTYP,NFT,I
+      INTEGER SZP0(NSPGROUP+1), RSZP0(NSPGROUP+1), 
+     . I
 
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 C-----------------------------------------------
 
       WASZP = 0
@@ -539,10 +543,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER NGF,NGL,NN,ITY,NEL,NG,JJ,SZP0(NSPGROUP+1),RSZP0(NSPGROUP+1),
-     .        P0ARSZ2,WASZ2,I
+      INTEGER SZP0(NSPGROUP+1), RSZP0(NSPGROUP+1), 
+     . I
 
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 C-----------------------------------------------
       WASZP = 0
       WASZ = 0
@@ -610,10 +614,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER NGF,NGL,NN,ITY,NEL,NG,JJ,SZP0(NSPGROUP+1),RSZP0(NSPGROUP+1),
-     .        P0ARSZ2,WASZ2,I
+      INTEGER SZP0(NSPGROUP+1), RSZP0(NSPGROUP+1), 
+     . I
 
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 C-----------------------------------------------
       WASZP = 0
       WASZ = 0
@@ -673,10 +677,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER NGF,NGL,NN,ITY,NEL,NG,JJ,SZP0(NSPGROUP+1),RSZP0(NSPGROUP+1),
-     .        P0ARSZ2,WASZ2,I
+      INTEGER SZP0(NSPGROUP+1), RSZP0(NSPGROUP+1), 
+     . I
 
-      INTEGER IERROR,STATUS(MPI_STATUS_SIZE)
+      INTEGER IERROR
 C-----------------------------------------------
       WASZP = 0
       WASZ = 0
@@ -729,7 +733,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
        my_real
      .   V(3,*),VGATH(3,*)
-       INTEGER WEIGHT(*),NODGLOB(*),NUM,SRECBUF
+       INTEGER WEIGHT(*), NODGLOB(*)
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
@@ -843,7 +847,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
        my_real
      .   V(*),VGATH(*)
-       INTEGER WEIGHT(*),NODGLOB(*),NUM,SRECBUF
+       INTEGER WEIGHT(*), NODGLOB(*)
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
@@ -952,8 +956,8 @@ C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER STATUS(MPI_STATUS_SIZE),IERROR,
-     .        MSGTYP,I,SIZ,LENP(NSPMD),DISP(NSPMD)
+      INTEGER IERROR, 
+     . I,LENP(NSPMD),DISP(NSPMD)
 
 C=======================================================================
         CALL MPI_GATHER(
@@ -1034,8 +1038,8 @@ C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER STATUS(MPI_STATUS_SIZE),IERROR,
-     .        MSGTYP,I,SIZ,LENP(NSPMD),DISP(NSPMD)
+      INTEGER IERROR, 
+     . I,LENP(NSPMD),DISP(NSPMD)
 
 
 
@@ -1093,7 +1097,7 @@ C-----------------------------------------------
        INTEGER
      .   VGLOB(*),V(*)
 
-       INTEGER WEIGHT(*),NODGLOB(*),NUM,SRECBUF
+       INTEGER WEIGHT(*), NODGLOB(*)
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
@@ -1196,10 +1200,10 @@ C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER STATUS(MPI_STATUS_SIZE),IERROR,
-     .        MSGTYP,I,SIZ,DISP(NSPMD),
+      INTEGER IERROR, 
+     . I,DISP(NSPMD),
      .        LENP(NSPMD*NSPGROUP),LENP_LOC(NSPMD)
-      INTEGER IAD,J,LEN_LOC
+      INTEGER IAD, J
 C=======================================================================
         CALL MPI_GATHER(
      S    LEN           ,NSPGROUP ,MPI_INTEGER,

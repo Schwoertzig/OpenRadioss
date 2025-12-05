@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    alefvm_mod      ../common_source/modules/ale/alefvm_mod.F
 !||    elbufdef_mod    ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod     ../engine/share/resol/initbuf.F
 !||    multi_fvm_mod   ../common_source/modules/ale/multi_fvm_mod.F90
 !||====================================================================
@@ -111,6 +112,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD 
       USE MULTI_FVM_MOD
       USE ALEFVM_MOD , only:ALEFVM_Param
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1434,9 +1436,9 @@ c
                         LBUF => ELBUF_TAB(NG)%BUFLY(1)%LBUF(IR,IS,IT)
                         MBUF => ELBUF_TAB(NG)%BUFLY(1)%MAT(IR,IS,IT)
 c
-C                       IPWWA calcule sur la base de 3*9*3 points d'integration (r*s*t)
+C                       IPWWA calculated using 3*9*3 integration points (r*s*t)
                         IPT = IR + ( (IS-1) + (IT-1)*NPTS )*NPTR
-C                       IPWWA calcule sur la base de 3*9*3 points d'integration (s*t*r)
+C                       IPWWA calculated using 3*9*3 integration points (s*t*r)
                         IPWWA = (IR-1)*3*9*7 + (IT-1)*3*7 + (IS-1)*7
                         IUWWA = (IR-1)*3*9*9 + (IT-1)*3*9 + (IS-1)*9
 c
@@ -1833,7 +1835,7 @@ c
                         LBUF => ELBUF_TAB(NG)%BUFLY(IL)%LBUF(IR,IS,IT)
                         MBUF => ELBUF_TAB(NG)%BUFLY(IL)%MAT(IR,IS,IT)
 c
-C                       IPWWA calcule sur la base de 3*9*3 points d'integration (r*s*t)
+C                       IPWWA calculated using 3*9*3 integration points (r*s*t)
                          CPT=(IT-1)*99*6+((IR-1)*9+IS-1)*6
 
                         IPT   = IR + ( (IS-1) + (IT-1)*NPTS )*NPTR

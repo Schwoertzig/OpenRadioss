@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    i7ass3           ../engine/source/interfaces/int07/i7ass3.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    h3d_mod          ../engine/share/modules/h3d_mod.F
 !||    i22bufbric_mod   ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22tri_mod       ../common_source/modules/interfaces/cut-cell-search_mod.F
@@ -75,6 +76,7 @@ C-----------------------------------------------
       USE I22BUFBRIC_MOD  
       USE H3D_MOD 
       USE OUTPUT_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

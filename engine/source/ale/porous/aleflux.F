@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    aleflow                ../engine/source/ale/porous/aleflow.F
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod            ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE ALEFLUX(PM  ,IXS,
@@ -46,6 +47,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

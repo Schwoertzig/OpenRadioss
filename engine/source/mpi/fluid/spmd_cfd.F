@@ -1022,6 +1022,7 @@ C
 !||    spmd_waitany   ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    spmd_mod       ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE SPMD_L11VOIS(
@@ -1033,6 +1034,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD            
       USE SPMD_MOD
+      use element_mod , only : nixs,nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2005,6 +2007,7 @@ C
 !||    spmd_waitany         ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||    multimat_param_mod   ../common_source/modules/multimat_param_mod.F90
 !||    spmd_mod             ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
@@ -2018,6 +2021,7 @@ C-----------------------------------------------
       USE SPMD_MOD
       USE ELBUFDEF_MOD
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS, M51_IFLG6_SIZE
+      use element_mod , only : nixs,nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

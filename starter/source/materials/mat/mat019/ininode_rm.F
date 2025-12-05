@@ -31,7 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C=======================================================================
 C            EN SORTIE    
 C    IRBY    Rigid node 
-C    SLN     secnd node number by rigid material
+C    SLN     second node number by rigid material
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -44,18 +44,18 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER  IRBY(*),SLN(*),NRSLN,NRB,NUMEL,NER
-      INTEGER  RBYID,IRIG_NODE(*),CONNEC(NUMEL,*)
+      INTEGER  IRIG_NODE(*),CONNEC(NUMEL,*)
       my_real
      .    STIFN(*),STIFR(*),RMSTIFN(*), RMSTIFR(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,II,JJ,NR,NR1,NR0,KK,NRC,IR,N,NREST,IE,
+      INTEGER I,J,II,NR,NR1,NR0,KK,IR,N,NREST,IE,
      .        NER1,NER0,IEL
 C     REAL
 
        INTEGER, DIMENSION(:), ALLOCATABLE :: 
-     .                             IRN,INDX,INDX0,ITAG,IRE,
+     .                             IRN,INDX,INDX0,ITAG,
      .                             INDXE, INDXE0, ITAGE
 C
 C  construction of rigid materials
@@ -154,7 +154,7 @@ C remaining number of elements
                  DO I=1,NER0
                     INDXE(I)  = INDXE0(I)
                 ENDDO
-C noeud restant
+C node restant
                  NREST = NREST - NR1 
               ELSE
                NRB = NRB  + 1 

@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    h3d_write_vector            ../engine/source/output/h3d/h3d_results/h3d_write_vector.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod                ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                 ../common_source/modules/elements/element_mod.F90
 !||    fvbag_mod                   ../engine/share/modules/fvbag_mod.F
 !||    groupdef_mod                ../common_source/modules/groupdef_mod.F
 !||    names_and_titles_mod        ../common_source/modules/names_and_titles_mod.F
@@ -67,6 +68,7 @@ C-----------------------------------------------
       USE OUTMAX_MOD
       USE FVBAG_MOD , only : FVBAG_DATA, NFVBAG
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

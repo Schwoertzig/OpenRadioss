@@ -84,6 +84,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod         ../common_source/modules/ale/ale_connectivity_mod.F
 !||    elbufdef_mod                 ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                  ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod               ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod                 ../common_source/modules/groupdef_mod.F
 !||    h3d_mod                      ../engine/share/modules/h3d_mod.F
@@ -101,6 +102,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sensor_mod                   ../common_source/modules/sensor_mod.F90
 !||    spmd_mod                     ../engine/source/mpi/spmd_mod.F90
 !||    timer_mod                    ../engine/source/system/timer_mod.F90
+!||    tri25ebox                    ../engine/share/modules/tri25ebox.F
 !||    tri7box                      ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE INTTRI(OUTPUT ,TIMERS,
@@ -153,6 +155,8 @@ C-----------------------------------------------
       USE INTERFACES_MOD
       USE GLOB_THERM_MOD
       USE INT18_LAW151_NSV_SHIFT_MOD , ONLY : INT18_LAW151_NSV_SHIFT
+      use element_mod , only : nixtg
+      USE TRI25EBOX , ONLY : NEDGE_REMOTE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1081,7 +1085,7 @@ c          IF(ITASK==NTHREAD-1)NRTM_T=IPARI(4,N)-(NTHREAD-1)*NRTM_T
           ESHIFT = ITASK*NRTM_T
           IF(ITASK==NTHREAD-1)NRTM_T=(IPARI(4,N)-IPARI(42,N))
      +                                -(NTHREAD-1)*NRTM_T
-C-------  KINET,MS used for commu remot secnd, for the moment no need.   
+C-------  KINET,MS used for commu remot second, for the moment no need.   
          NSNE3 = 3*IPARI(55,N)
         IF (NSNE3 >0 ) THEN
          CALL MY_BARRIER
@@ -1120,7 +1124,7 @@ c-----------------------------------------------------------------------
           SSHIFT = ITASK*NRTM_T
           IF(ITASK==NTHREAD-1)NRTM_T=(IPARI(4,N)-IPARI(42,N))
      +                                -(NTHREAD-1)*NRTM_T
-C-------  KINET,MS used for commu remot secnd, for the moment no need.   
+C-------  KINET,MS used for commu remot second, for the moment no need.   
           CALL I25MAIN_TRI(TIMERS,
      1      IPARI   ,X       ,V       ,INTBUF_TAB(N),
      2      MS      ,N            ,ITASK        ,WEIGHT  ,
@@ -1253,7 +1257,7 @@ C=======================================================================
 C
 C       parallel calculation of normals
 C
-C       il FAUT garder une barriere avant i25main_norm !!!
+C       must garder une barriere avant i25main_norm !!!
         CALL MY_BARRIER
 C
         IF (IMON>0 .AND. ITASK==0) THEN
@@ -1278,6 +1282,7 @@ C
        IF(IDEL7NOK_SAV > 0) THEN
          DO N = 1,NINTER25
           NIN = INTLIST25(N)
+          NEDGE_REMOTE = IPARI(69,NIN)
           IF(IPARI(MACRO_IEDGE,NIN) > 0) THEN
 C
 C           Also needed in SMP for resetting STFE !

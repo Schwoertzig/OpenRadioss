@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_stat_pgather   ../engine/source/mpi/output/spmd_stat.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE STAT_R_FULL(
      1                  ELBUF_TAB ,IPARG ,GEO    ,IGEO        ,IXR       ,
@@ -38,6 +39,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD         
+      use element_mod , only : nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -53,7 +55,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXR(NIXR,*),IPARG(NPARG,*),IGEO(NPROPGI,*),
      .        IPARTR(*),IPART_STATE(*),STAT_INDXR(*)
       my_real   
@@ -67,7 +69,7 @@ C-----------------------------------------------
      .   LLT,ITY,ID,IPRT0,IPRT,IGTYP,IPROP,NUVAR,J_FIN
       INTEGER PTWA(STAT_NUMELR),
      .        PTWA_P0(0:MAX(1,STAT_NUMELR_G))
-      CHARACTER*100 DELIMIT,LINE
+      CHARACTER*100 DELIMIT
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
 C-----------------------------------------------
       DATA DELIMIT(1:60)

@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tab_strs_txt50      ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE STAT_C_STRAF(ELBUF_TAB,IPARG ,IPM ,IGEO ,IXC ,
@@ -41,6 +42,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD         
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +60,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXC(NIXC,*),IXTG(NIXTG,*),
      .        IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTC(*), IPARTTG(*), IPART_STATE(*),
@@ -79,8 +81,8 @@ C-----------------------------------------------
      .   THK, EM, EB, H1, H2, H3
       CHARACTER*100 DELIMIT,LINE
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
-      TYPE(L_BUFEL_)  ,POINTER :: LBUF     
-      TYPE(BUF_LAY_)  ,POINTER :: BUFLY     
+ 
+ 
       my_real, 
      .   DIMENSION(:),POINTER  :: STRAIN    
 C-----------------------------------------------

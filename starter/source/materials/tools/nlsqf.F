@@ -25,7 +25,7 @@ C IDEBUG=1 -> output debug information into .out file
 C IOCSV=1 -> output fitting to curv.csv
 #define IOCSV 0
 !>    @param[in]   IFUNCS     SUBROUTINE handle/ID for evaluation : 1=OGDEN0/OGDEN1
-!>    @param[out]  A          updated coeeficients
+!>    @param[out]  A          updated coefficients
 !>    @param[out]  IRET       return code 
 !>                            0 : optimization succeeded;
 !>                            1 : optimization failed;
@@ -47,7 +47,7 @@ C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
 C-----------------------------------------------
-C   C o m m o n   B l o c k s
+C   C o m m o n   B l o c  s
 C-----------------------------------------------
 #include      "units_c.inc"
 C-----------------------------------------------
@@ -579,12 +579,12 @@ C-----------------------------------------------
       INTEGER LAWID, NPT, MA, ICHECK, NSTART
       INTEGER , INTENT(IN) :: IS_ENCRYPTED
       my_real ERRTOL
-      INTEGER I,NONZERO(MAXA),IDUM,ITER,ICOUNT,J,K,NMUAL  
-      my_real GAMMA,ERRNOW,GASDEV,ERRPRE,
+      INTEGER I,NONZERO(MAXA),ITER,J,NMUAL  
+      my_real GAMMA,ERRNOW,ERRPRE,
      .        STRETCH(NPT),MUAL(10)
       my_real A(MAXA),COVAR(MAXA,MAXA),ALPHA(MAXA,MAXA),Y(NPT)
       my_real MCOF_MIN(MAXA), MCOF_MAX(MAXA)
-      my_real YOGD,XOGD
+      my_real YOGD
 
       INTEGER ID
       CHARACTER(LEN=NCHARTITLE) :: TITR
@@ -612,7 +612,7 @@ C-----------------------------------------------
 
       INTEGER NGUESS
       my_real A0(MAXA)
-      my_real ERRMIN, ERRMAX, ERRAVE, ERRAVE_MIN, ERR
+      my_real  ERRAVE, ERRAVE_MIN, ERR
 
       INTEGER ISTART, NPSAVED, IVALID,ICOMP, MMAX
       PARAMETER (MMAX =20)
@@ -1283,7 +1283,7 @@ C       CHECK IF SUM(MU_I * ALPHA_I) > 0.0
 
        INTEGER I
 
-       my_real AVE_SLOPE, mu_max, dx,DY
+       my_real AVE_SLOPE, mu_max, dx
 
        AVE_SLOPE = ZERO
        DO I = 1, NPT

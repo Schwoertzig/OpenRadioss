@@ -62,7 +62,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, IG,N1,N2,M1,M2,NI,L,J, IE, JE, IL, JL
+      INTEGER I, N1, N2, M1, M2, IE, JE
       my_real
      .     XXS1(MVSIZ) ,XXS2(MVSIZ) ,XYS1(MVSIZ) ,XYS2(MVSIZ) ,XZS1(MVSIZ) ,XZS2(MVSIZ) ,
      .     XXM1(MVSIZ) ,XXM2(MVSIZ) ,XYM1(MVSIZ) ,XYM2(MVSIZ) ,XZM1(MVSIZ) ,XZM2(MVSIZ) ,
@@ -207,7 +207,7 @@ C
           ALM = -(XB + ALS*XSM) / XM2
           ALM=MIN(ONE,MAX(ZERO,ALM))
 
-C  PENE = GAP^2 - DIST^2 UTILISE POUR TESTER SI NON NUL
+C  PENE = GAP^2 - DIST^2 USED TO TEST IF NON-NULL
 
           XX =  ALS*XXS1(I) + (ONE-ALS)*XXS2(I)
      .        - ALM*XXM1(I) - (ONE-ALM)*XXM2(I)

@@ -21,17 +21,20 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i20lagm   ../engine/source/interfaces/int16/i20lagm.F
+!||    i20lagm       ../engine/source/interfaces/int16/i20lagm.F
 !||--- called by ------------------------------------------------------
-!||    i16main   ../engine/source/interfaces/int16/i16main.F
+!||    i16main       ../engine/source/interfaces/int16/i16main.F
 !||--- calls      -----------------------------------------------------
-!||    i20lll    ../engine/source/interfaces/int16/i20lagm.F
+!||    i20lll        ../engine/source/interfaces/int16/i20lagm.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE I20LAGM(X    ,V     ,LLL     ,JLL   ,SLL   ,
      2                  XLL   ,CANDN ,CANDE   ,I_STOK,IXS   ,
      3                  IXS20 ,IADLL ,EMINX   ,NSV   ,NELEM ,
      4                  N_MUL_MX,ITASK ,A     ,ITIED ,
      5                  NINT  ,NKMAX  ,COMNTAG)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,11 +62,11 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,IK,IE,IS,IC,NK,III(MVSIZ,21),LLT,NFT,LE,FIRST,LAST,
+      INTEGER I, K, IE, IS, IC, III(MVSIZ, 21), LLT, NFT, LE, FIRST, LAST, 
      .        I20
       my_real
      .   XX(MVSIZ,21),YY(MVSIZ,21),ZZ(MVSIZ,21),
-     .   AA,XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,DIST
+     . DIST
 C-----------------------------------------------
 C
 C
@@ -97,9 +100,9 @@ C
 C        nc: number of contacts
 C        NK: Number of node for contact (8+1.16+1.8+8.16+16)
 C
-C        IC : numero du contact (1,NC)
-C        IK : numero de noeud local a un contact (1,NK)
-C        I  : numero global du noeud (1,NUMNOD)
+C        IC : contact number (1,NC)
+C        IK : local node number for a contact (1,NK)
+C        I  : global node number (1,NUMNOD)
 C
 C        IADLL(NC)        : IAD = IADLL(IC)
 C        LLL(NC*(21,63))  : I  = LLL(IAD+1,2...IADNEXT-1)
@@ -145,7 +148,7 @@ C       test if inside the box
 C-----------------------------------------------------------------------
         IF(DIST.LE .ZERO)THEN
 c
-c      print *, "dans la boite",XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX
+c      print *, "in la boite",XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX
 c
           LLT = LLT+1
           III(LLT,21)=IS
@@ -305,7 +308,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,IK,NK,I1,I2,I3,I4,IAD,NN,J1,J2,IIK,
+      INTEGER I, IK, NK, IAD, NN, J1, J2, IIK, 
      .        IPERM1(20),IPERM2(20),COMPTIK
       my_real
      .   VX,VY,VZ,VN,AA
@@ -319,7 +322,7 @@ C-----------------------------------------------
       DATA IPERM2 /0,0,0,0,0,0,0,0,2,3,4,1,1,2,3,4,
      .             6,7,8,5/     
 C-----------------------------------------------
-C      calcul de r,s,t
+C      calculation de r,s,t
 C-----------------------------------------------
 c
 c      print *, "XX(1,1),XX(1,9)",XX(1,1),XX(1,9)
@@ -695,9 +698,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,IK,NK,ITER,NITERMAX,JTER,NJTERMAX,CONV
-      my_real
-     .   VX,VY,VZ,VN
+      INTEGER I, ITER, NITERMAX, JTER, NJTERMAX, CONV
       my_real
      .   SN, RN, TN,
      .   DRDX(MVSIZ),DRDY(MVSIZ),DRDZ(MVSIZ),
@@ -747,14 +748,14 @@ C
          TT(I) = ZERO
        ENDDO
 C-----------------------------------------------
-C      calcul de r,s,t   et   Ni(r,s,t)
+C      calculation de r,s,t   et   Ni(r,s,t)
 C-----------------------------------------------
        DO ITER=1,NITERMAX
 c
 c      print *, "iter",iter
 c
 C-----------------------------------------------
-C          calcul de Ni(r,s,t); [J]; [J]-1
+C          calculation de Ni(r,s,t); [J]; [J]-1
 C-----------------------------------------------
            CALL I20DERI(LLT,RR ,SS    ,TT    ,NI    ,
      2            DRDX  ,DRDY  ,DRDZ  ,DSDX  ,DSDY  ,DSDZ  ,
@@ -767,7 +768,7 @@ c
 c      print *, "jter",jter
 c
 C-----------------------------------------------
-C            calcul de r,s,t new
+C            calculation de r,s,t new
 C-----------------------------------------------
              CALL I20RSTN(LLT,RR,SS   ,TT    ,NI    ,CONV  ,
      2            DRDX  ,DRDY  ,DRDZ  ,DSDX  ,DSDY  ,DSDZ  ,
@@ -778,7 +779,7 @@ c      print *, "r,s,t",r(1),s(1),t(1)
 c      print *, "rr,ss,tt",rr(1),ss(1),tt(1)
 c
 C-----------------------------------------------
-C            calcul de Ni(-1<r<1 , -1<s<1 , -1<t<1)
+C            calculation de Ni(-1<r<1 , -1<s<1 , -1<t<1)
 C-----------------------------------------------
              CALL I20NI(LLT,RR ,SS ,TT ,NI  )
 C  parith on problem if conv function of mvsiz !!!!!!
@@ -1065,10 +1066,10 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,N
+      INTEGER I
       my_real
      .   DNIDR(20),DNIDS(20),DNIDT(20),
-     .   D, AA, BB, DET(MVSIZ),R9 ,R13 ,S9 ,S10 ,S11 ,S12 ,T10 ,T14
+     . D, DET(MVSIZ)
       my_real
      .  U_M_R,U_P_R,U_M_S,U_P_S,U_M_T,U_P_T,
      .  UMS_UMT,UMS_UPT,UPS_UMT,UPS_UPT,

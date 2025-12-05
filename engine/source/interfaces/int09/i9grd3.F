@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    initbuf        ../engine/share/resol/initbuf.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod    ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE I9GRD3(IERR  ,AREA  ,TSTIF    ,T      ,VOL     ,
@@ -38,6 +39,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD            
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +60,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, N1, N2, N3, N4, IE, NG,MAT, IFA
+      INTEGER I, N1, N2, N3, N4, NG,MAT
       my_real
      .  X1, X2, X3, X4, Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4,
      .  NX, NY, NZ, DX, DY, DZ, NORM, DIST, COND
@@ -147,7 +149,7 @@ C
      .          -X(3,IXS(8))-X(3,IXS(9))
 C
 C---------------------------------
-C         CALCUL DISTANCE ET 1/4 SURFACE(SURFFACE NODALE))
+C         CALCULATION DISTANCE ET 1/4 SURFACE(SURFFACE NODALE))
 C---------------------------------
             DIST = ONE_OVER_8*(DX*NX+DY*NY+DZ*NZ) / MAX(EM15,NORM) 
             AREA = ONE_OVER_8*NORM

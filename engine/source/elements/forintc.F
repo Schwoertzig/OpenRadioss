@@ -34,7 +34,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    cforc3_crk                  ../engine/source/elements/xfem/cforc3_crk.F
 !||    czforc3                     ../engine/source/elements/shell/coquez/czforc3.F
 !||    czforc3_crk                 ../engine/source/elements/xfem/czforc3_crk.F
-!||    omp_get_thread_num          ../engine/source/engine/openmp_stub.F90
 !||    seatbelt_reduction_factor   ../engine/source/tools/seatbelts/seatbelt_reduction_factor.F
 !||    section_3n                  ../engine/source/tools/sect/section_3n.F
 !||    section_c                   ../engine/source/tools/sect/section_c.F
@@ -46,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod                   ../engine/share/modules/drape_mod.F
 !||    dt_mod                      ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod                ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                 ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod                ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod              ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod                ../common_source/modules/groupdef_mod.F
@@ -105,6 +105,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE DT_MOD
       use glob_therm_mod
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -191,18 +192,18 @@ C-----------------------------------------------
       DOUBLE PRECISION, POINTER :: pFBSAV6
       INTEGER INDXOF(MVSIZ)
       INTEGER I,II,J,N, NG, NVC, MLW, JFT, JLT,ISOLNOD,ITHK,IPLA,
-     .   K1, K2, NF1,IPRI, NELEM, OFFSET, NSGRP, K,JJ,NP,TYP,IPRT,
-     .   K0, K3, K5, K6, K7, K8, K9, NSG, NEL, KFTS,IOFC, ISTRA,
-     .   JJ19,NPE,ICNOD,NFT1,ISUBS,ISENS_ENERGY,
-     .   L1,L2,L3,L4,L5,L6,L7,L8,L9,L10,L11,L12,L13,L14,L15,L16,
-     .   L17,L18,L19,L20,L21,L22,L23,L24,L25,L26,L27,L28,L29,L30,
-     .   ICP,ICS,IEXPAN, IG,ITG1,ITG2,ITG3,NLEVXF,NRBDIM,ISEATBELT
-      INTEGER MTN1,MTN2,IPARSENS,ISECT
-      INTEGER ISH3N,ISHPLYXFEM,IXFEM,ITSK,OMP_GET_THREAD_NUM
-      INTEGER IXEL,ACTIFXFEM,ISUBSTACK,DIM6,DIM_EXCH
+     .    K2, NF1,IPRI, OFFSET,TYP,
+     .   K0, K5, K9, NSG, NEL, KFTS,IOFC, ISTRA,
+     .   ICNOD,NFT1,ISENS_ENERGY,
+     .   
+     .   
+     .   IEXPAN, IG,ITG1,ITG2,ITG3,NLEVXF,ISEATBELT
+      INTEGER IPARSENS,ISECT
+      INTEGER ISH3N,ISHPLYXFEM,IXFEM
+      INTEGER IXEL,ACTIFXFEM,ISUBSTACK
       my_real
      .   FX(MVSIZ,20),FY(MVSIZ,20),FZ(MVSIZ,20),
-     .   MX(MVSIZ,4),MY(MVSIZ,4),MZ(MVSIZ,4),BID
+     .   MX(MVSIZ,4),MY(MVSIZ,4),MZ(MVSIZ,4)
 C
       my_real
      .   UXINT_MEAN(NXEL*NXLAYMAX,MVSIZ),UYINT_MEAN(NXEL*NXLAYMAX,MVSIZ),
@@ -344,7 +345,8 @@ C
      S        APINCH,             STIFPINCH,          DRAPEG%INDX_SH4N,   IGRE,         
      T        JTUR,               DT,                 NCYCLE,             SNPC,         
      Y        STF,                GLOB_THERM,         NXLAYMAX,           IDEL7NOK,
-     U        USERL_AVAIL,        MAXFUNC,            SBUFMAT  )                                                         
+     U        USERL_AVAIL,        MAXFUNC,            SBUFMAT    ,
+     X        IPART      ,        LIPART1)                                                       
 
           ELSEIF (JHBE >= 21 .AND. JHBE <= 29) THEN
 
@@ -379,7 +381,8 @@ C
      S        DRAPE_SH4N,         NEL,                NLOC_DMG,           DRAPEG%INDX_SH4N,
      T        IGRE,               JTUR,               DT      ,           NCYCLE,
      Y        SNPC,               STF,                GLOB_THERM,         IDEL7NOK,   
-     U        USERL_AVAIL,        MAXFUNC,            SBUFMAT )
+     U        USERL_AVAIL,        MAXFUNC,            SBUFMAT    ,
+     X        IPART      ,        LIPART1)
 
         IF (ICRACK3D > 0 .AND. IXFEM > 0 .AND. ACTIFXFEM > 0) THEN
           DO IXEL=1,NXEL
@@ -408,7 +411,8 @@ C
      O        ISUBSTACK  ,UXINT_MEAN ,UYINT_MEAN,UZINT_MEAN,NLEVXF      ,
      P        NODEDGE    ,CRKEDGE    ,STACK    ,DRAPE_SH4N  ,NLOC_DMG,DRAPEG%INDX_SH4N,IGRE,
      *        DT         ,NCYCLE     ,SNPC      ,  STF      ,GLOB_THERM ,
-     *        IDEL7NOK   ,USERL_AVAIL,MAXFUNC  ,SBUFMAT)
+     *        IDEL7NOK   ,USERL_AVAIL,MAXFUNC  ,SBUFMAT   ,
+     X        IPART      ,        LIPART1)
           ENDDO
         ENDIF
 c
@@ -443,7 +447,8 @@ c
      R   XFEM_TAB, NG  ,CRKEDGE,      DRAPE_SH4N,         IPRI,
      S   NLOC_DMG,           DRAPEG%INDX_SH4N,   IGRE,               JTUR,
      T   OUTPUT,             DT,                 SNPC,               STF  , 
-     U   GLOB_THERM,         USERL_AVAIL,        MAXFUNC,            SBUFMAT )
+     U   GLOB_THERM,         USERL_AVAIL,        MAXFUNC,            SBUFMAT  ,
+     X        IPART)
 c
         IF (ICRACK3D > 0 .AND. IXFEM > 0 .AND. ACTIFXFEM > 0) THEN
           DO IXEL=1,NXEL
@@ -472,7 +477,8 @@ c
      O       ISUBSTACK   ,UXINT_MEAN  ,UYINT_MEAN  ,UZINT_MEAN,NLEVXF      ,
      P       NODEDGE     ,CRKEDGE     ,DRAPE_SH4N   ,IPRI       ,NLOC_DMG  ,
      Q       DRAPEG%INDX_SH4N,IGRE    ,DT           ,SNPC      ,  STF      ,
-     R       GLOB_THERM  ,USERL_AVAIL, MAXFUNC,SBUFMAT)
+     R       GLOB_THERM  ,USERL_AVAIL, MAXFUNC,SBUFMAT ,
+     X       IPART  )
           ENDDO
         END IF
 
@@ -544,7 +550,8 @@ C----6---------------------------------------------------------------7--
      M        DRAPEG%INDX_SH3N,IGRE,                 JTUR,            DT  ,
      N        NCYCLE,          SNPC,                 STF ,           GLOB_THERM ,
      O        NXLAYMAX,        IDEL7NOK,             USERL_AVAIL,    MAXFUNC,       
-     P        SBUFMAT     )
+     P        SBUFMAT     ,
+     X        IPART       ,        LIPART1)
           ELSE
 
             IF (ISH3N == 30) THEN
@@ -572,7 +579,8 @@ C----6---------------------------------------------------------------7--
      L          NLOC_DMG,                              DRAPEG%INDX_SH3N,     IGRE,            JTUR,
      M          DT,                                    NCYCLE,               SNPC,             STF,       
      M          GLOB_THERM  ,                          NXLAYMAX,             IDEL7NOK,        USERL_AVAIL,
-     M          MAXFUNC,                               SBUFMAT )
+     M          MAXFUNC,                               SBUFMAT  ,
+     X          IPART      ,        LIPART1)
      
             ELSE
               CALL C3FORC3(TIMERS,
@@ -603,7 +611,8 @@ C----6---------------------------------------------------------------7--
      P          CRKEDGE,               DRAPE_SH3N,                            IPRI,              NLOC_DMG,
      Q          XDP,                   DRAPEG%INDX_SH3N,                      IGRE,              JTUR,
      R          DT,                    SNPC,                                  STF,               GLOB_THERM,
-     S          IDEL7NOK,              USERL_AVAIL,                           MAXFUNC,           SBUFMAT)
+     S          IDEL7NOK,              USERL_AVAIL,                           MAXFUNC,           SBUFMAT ,
+     X          IPART      ,        LIPART1  )
 
                 IF (ICRACK3D > 0 .AND. IXFEM > 0 .AND. ACTIFXFEM > 0) THEN
                   DO IXEL=1,NXEL
@@ -634,7 +643,8 @@ C----6---------------------------------------------------------------7--
      O                CRKEDGE,           DRAPE_SH3N,           IPRI,             NLOC_DMG,
      P                DRAPEG%INDX_SH3N,  IGRE,                 DT  ,             NCYCLE  ,
      Q                SNPC,              STF,                 GLOB_THERM   ,     IDEL7NOK,
-     A                USERL_AVAIL,       MAXFUNC,              SBUFMAT )
+     A                USERL_AVAIL,       MAXFUNC,              SBUFMAT ,
+     X                IPART      ,        LIPART1   )
                   ENDDO
                 ENDIF
               ENDIF

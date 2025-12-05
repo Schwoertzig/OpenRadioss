@@ -257,7 +257,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER MSGTYP,INFO,I,NOD, DT_CST, LOC_PROC,P,IDEB,
+      INTEGER MSGTYP, I, NOD, LOC_PROC, P, IDEB, 
      .        SIZ,J, L, BUFSIZ, LEN, NB, IERROR1, IAD,
      .        IERROR,REQ_SB(NSPMD),
      .        REQ_RB(NSPMD),KK,NBIRECV,IRINDEXI(NSPMD),
@@ -705,7 +705,7 @@ c INT25
               DO J = 1, NB
                 I = INDEX(J)
                 NOD = NSV(I)
-C               IRTLM(3,NSN) en TYPE25 / IRTLM(3,-) inutile ici 
+C               IRTLM(3,NSN) in TYPE25 / IRTLM(3,-) useless here 
                 IBUF(P)%p(L2+ISHIFT)  =IRTLM(4*(I-1)+1)
                 IBUF(P)%p(L2+ISHIFT+1)=IRTLM(4*(I-1)+2)
 C
@@ -875,6 +875,7 @@ c END TRI7VOX
 !||    spmd_wait           ../engine/source/mpi/spmd_wait.F90
 !||    spmd_waitany        ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    message_mod         ../engine/share/message_module/message_mod.F
 !||    multi_fvm_mod       ../common_source/modules/ale/multi_fvm_mod.F90
 !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
@@ -897,6 +898,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE MULTI_FVM_MOD
       USE SPMD_MOD
+      use element_mod , only :nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -933,7 +935,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER MSGTYP,INFO,I,NOD, DT_CST, LOC_PROC,P,IDEB,
+      INTEGER MSGTYP, I, NOD, LOC_PROC, P, IDEB, 
      .        SIZ,J, L, BUFSIZ, LEN, NB, IERROR1, IAD,
      .        IERROR,REQ_SB(NSPMD),
      .        REQ_RB(NSPMD),KK,NBIRECV,IRINDEXI(NSPMD),
@@ -957,7 +959,7 @@ C-----------------------------------------------
      
       TYPE(real_pointer), DIMENSION(NSPMD) :: RBUF
       TYPE(int_pointer) , DIMENSION(NSPMD) :: IBUF   
-      INTEGER, DIMENSION(:), ALLOCATABLE :: ITAGNSNFI  
+ 
 
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -1431,7 +1433,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef  MPI
-      INTEGER MSGTYP,INFO,I,NOD, DT_CST, LOC_PROC,P,IDEB,
+      INTEGER MSGTYP, I, NOD, LOC_PROC, P, IDEB, 
      .        SIZ,J, L, BUFSIZ, LEN, NB, IERROR1, IAD,
      .        IERROR,REQ_SB(NSPMD),
      .        REQ_RB(NSPMD),KK,NBIRECV,IRINDEXI(NSPMD),
@@ -3045,10 +3047,6 @@ C-----------------------------------------------
      .        NN2,RSHIFT,ISHIFT, IOLDNSNFI, ND, JDEB, NSNR_OLD, Q
      
       INTEGER, DIMENSION(:), ALLOCATABLE :: IAUX
-      my_real,
-     .    DIMENSION(:), ALLOCATABLE :: PENEFI_OLD, STIFFI_OLD
-      my_real,
-     .     DIMENSION(:,:), ALLOCATABLE :: SECND_FRFI_OLD
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -3580,7 +3578,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER MSGTYP,INFO,I,NOD, DT_CST, LOC_PROC,P,IDEB,
+      INTEGER MSGTYP, I, NOD, LOC_PROC, P, IDEB, 
      .        J, L, BUFSIZ, LEN, NB, IERROR1,
      .        IERROR,REQ_SB(NSPMD),
      .        REQ_RB(NSPMD),KK,NBIRECV,IRINDEXI(NSPMD),
@@ -4431,7 +4429,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER MSGTYP,INFO,I, LOC_PROC,P,IDEB,
+      INTEGER MSGTYP, I, LOC_PROC, P, IDEB, 
      .        MSGOFF, MSGOFF2, MSGOFF3, MSGOFF4,
      .        SIZ,J, L, LEN, NB, IERROR1, IAD,
      .        IERROR,REQ_SB(NSPMD),

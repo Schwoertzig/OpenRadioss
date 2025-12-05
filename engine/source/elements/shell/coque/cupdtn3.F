@@ -21,10 +21,12 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    cupdtn3    ../engine/source/elements/shell/coque/cupdtn3.F
+!||    cupdtn3       ../engine/source/elements/shell/coque/cupdtn3.F
 !||--- called by ------------------------------------------------------
-!||    cbaforc3   ../engine/source/elements/shell/coqueba/cbaforc3.F
-!||    czforc3    ../engine/source/elements/shell/coquez/czforc3.F
+!||    cbaforc3      ../engine/source/elements/shell/coqueba/cbaforc3.F
+!||    czforc3       ../engine/source/elements/shell/coquez/czforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CUPDTN3(JFT  ,JLT  ,F   ,M   ,NVC  ,
      2                  OFFG ,OFF  ,STI ,STIR,STIFN,
@@ -36,6 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      8                  M31  ,M32  ,M33 ,M34 ,EINT,
      A                  PARTSAV,MAT,IPARTC,FAC,JTHE,
      B                  THEM ,FTHE ,CONDN,CONDE,NODADT_THERM)
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -475,10 +478,12 @@ C
       RETURN
       END
 !||====================================================================
-!||    cupdtn3p   ../engine/source/elements/shell/coque/cupdtn3.F
+!||    cupdtn3p      ../engine/source/elements/shell/coque/cupdtn3.F
 !||--- called by ------------------------------------------------------
-!||    cbaforc3   ../engine/source/elements/shell/coqueba/cbaforc3.F
-!||    czforc3    ../engine/source/elements/shell/coquez/czforc3.F
+!||    cbaforc3      ../engine/source/elements/shell/coqueba/cbaforc3.F
+!||    czforc3       ../engine/source/elements/shell/coquez/czforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CUPDTN3P(JFT  ,JLT  ,OFFG ,OFF  ,STI ,
      2                   STIR ,FSKY ,FSKYV,IADC ,
@@ -490,6 +495,7 @@ C
      A                   EINT ,PARTSAV,MAT,IPARTC,PM,
      B                   AREA ,THK  ,FAC , JTHE , THEM,
      C                   FTHESKY,CONDNSKY,CONDE ,NODADT_THERM)  
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -530,7 +536,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 C ds 41i 001 13/16/00 +1
 C     INTEGER I, II, K
-      INTEGER I, II, K, J, MX,MT
+      INTEGER I, K
       my_real
      .   OFF_L
 C-----------------------------------------------

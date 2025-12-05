@@ -68,14 +68,14 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,L,ID,IGS,IGRS,JREC,IADV,NSEG,NSEGV,SRFTYP,
-     .        SKIPFLAG,UID,IAD_TMP,BUFTMP_1,NSEG_TOT,
+      INTEGER I,J,K,L,ID,IGS,IGRS,NSEG,NSEGV,
+     .        SKIPFLAG,UID,IAD_TMP,NSEG_TOT,
      .        IWORK(70000),IERROR, II
       INTEGER, DIMENSION(:,:) , ALLOCATABLE :: ITRI
       INTEGER, DIMENSION(:) , ALLOCATABLE :: INDEX,BUFTMP
 
       CHARACTER(LEN=NCHARTITLE) :: TITR
-      CHARACTER(LEN=NCHARKEY) :: KEY,KEY2,KEY3
+      CHARACTER(LEN=NCHARKEY) :: KEY,KEY2
       INTEGER :: NB_IDS, NB_NEG_IDS
       INTEGER, DIMENSION(:), ALLOCATABLE :: IDS
       LOGICAL :: IS_AVAILABLE
@@ -99,7 +99,7 @@ C-----------------------------------------------
 !                             ID MaDyMo - for entity type which impose surface movement:
 !                             No systeme MaDyMo for entity type which impose surface movement
 ! IGRSURF(IGS)%NB_MADYMO   :: Entity number imposing surface movement.
-!                                --> No systeme Radioss ou MaDyMO.
+!                                --> No Radioss or MaDyMO system.
 !   IGRSURF(IGS)%TYPE_MADYMO   :: Entity type which impose surface movement.
 !                                  = 1 : Rigid Body.
 !                                  = 2 : MADYMO Hyper-ellipsoide.

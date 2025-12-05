@@ -110,6 +110,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    globmat                             ../starter/source/materials/globmat.F
 !||    globvars                            ../starter/source/spmd/globvars.F
 !||    group_ini                           ../starter/source/model/group/group_ini.F
+!||    hierarchy_rbody                     ../starter/source/constraints/general/rbody/hierarchy_rbody.F90
+!||    hierarchy_rbody_ddm                 ../starter/source/constraints/general/rbody/hierarchy_rbody.F90
 !||    hm_grogronod                        ../starter/source/groups/hm_grogronod.F
 !||    hm_lecgrn                           ../starter/source/groups/hm_lecgrn.F
 !||    hm_lines_of_lines                   ../starter/source/groups/hm_lines_of_lines.F
@@ -484,6 +486,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    func2d_mod                          ../starter/share/modules1/func2d_mod.F
 !||    fvbag_mod                           ../starter/share/modules1/fvbag_mod.F
 !||    group_mod                           ../starter/share/modules1/group_mod.F
+!||    hierarchy_rbody_mod                 ../starter/source/constraints/general/rbody/hierarchy_rbody.F90
 !||    hm_option_read_mod                  ../starter/share/modules1/hm_option_read_mod.F
 !||    hm_preread_inivel_mod               ../starter/source/initial_conditions/general/inivel/hm_preread_inivel.F90
 !||    hm_preread_skw_mod                  ../starter/source/tools/skew/hm_preread_skw.F90
@@ -646,6 +649,7 @@ C-----------------------------------------------
       use hm_read_bcs_nrf_mod , only : hm_read_bcs_nrf
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
       use hm_preread_skw_mod, ONLY : hm_preread_skw
+      use hierarchy_rbody_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1107,7 +1111,7 @@ C--- INterface Friction model
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_NM,INDX_NM
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_SCRATCH,INDX_SCRT
 C FLEXIBLE BODY
-      INTEGER  FXB_LAST_ADRESS(10)
+      INTEGER  FXB_LAST_ADDRESS(10)
       CHARACTER, DIMENSION(:), ALLOCATABLE :: FXBFILE_TAB*2148
 C
 !       -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-*-*-*-*-*-*
@@ -1224,6 +1228,9 @@ C SPH
       INTEGER DEF_INTER(100)
       ! constraint structure
       type(constraint_) :: constraint_struct
+C RWALL PENALTY   
+      INTEGER :: SLN_PEN
+      my_real, DIMENSION(:), ALLOCATABLE :: RWSTIF_PEN
 c=======================================================================
       IREAC = 0 
       PYTHON%NB_FUNCTS = 0
@@ -1593,7 +1600,7 @@ C--------------------------------------------
       ELSE
         THKEC => THKE
       END IF
-      IF(STHKE > 0) THKE = 0
+      IF ((STHKE > 0).AND.(FLAG_GOTO==0)) THKE = 0
       IF(NUMELC > 0) SH4ANG = 0
       IF(NUMELTG > 0) SH3ANG = 0
 c
@@ -3953,8 +3960,8 @@ C--- First pass-> count
      5        STACK%PM ,IWORKSH  ,IGRBRIC ,IGRQUAD   ,IGRSH4N ,
      6        IGRSH3N  ,IGRTRUSS ,IGRBEAM ,IGRSPRING ,IGRNOD  ,
      7        IGRSURF  ,IGRSLIN, LSUBMODEL,ALE_EULER ,IGEO    ,
-     8        NLOC_DMG ,DETONATORS,SENSORS%NSENSOR,SEATBELT_SHELL_TO_SPRING,
-     9        NB_SEATBELT_SHELLS,MAT_ELEM%MAT_PARAM)
+     8        NLOC_DMG ,DETONATORS,SEATBELT_SHELL_TO_SPRING,
+     9        NB_SEATBELT_SHELLS,MAT_ELEM%MAT_PARAM,NEBCS)
 C---
          ALLOCATE(IBUFTMP(IDX2)%ptr(SIBUFSSG+INNOD)   ,STAT=stat)
          IF(STAT /= 0) THEN
@@ -3981,8 +3988,8 @@ C---  Second Pass -> interface creation
      5        STACK%PM ,IWORKSH  ,IGRBRIC ,IGRQUAD   ,IGRSH4N ,
      6        IGRSH3N  ,IGRTRUSS ,IGRBEAM ,IGRSPRING ,IGRNOD  ,
      7        IGRSURF  ,IGRSLIN, LSUBMODEL,ALE_EULER ,IGEO    ,
-     8        NLOC_DMG ,DETONATORS,SENSORS%NSENSOR,SEATBELT_SHELL_TO_SPRING,
-     9        NB_SEATBELT_SHELLS,MAT_ELEM%MAT_PARAM)
+     8        NLOC_DMG ,DETONATORS,SEATBELT_SHELL_TO_SPRING,
+     9        NB_SEATBELT_SHELLS,MAT_ELEM%MAT_PARAM,NEBCS)
 C--------------------------------------------
 C     MULTIDOMAINS - ARRAY SPLITTING
 C--------------------------------------------
@@ -4999,7 +5006,7 @@ C-------------------------------------------------
         IF(.NOT. ALLOCATED(SENSOR_TMP)) ALLOCATE( SENSOR_TMP(0) )
         CALL INIEBCS(ALE_CONNECTIVITY, 0, IGRSURF, IXS, IXQ, IXTG,
      .               PM, IGEO, X, SENSOR_TMP, MONVOl, MULTI_FVM%IS_USED,
-     .               EBCS_TAB, EBCS_TAG_CELL_SPMD)
+     .               EBCS_TAB, EBCS_TAG_CELL_SPMD, ITABM1)
         DEALLOCATE(SENSOR_TMP)
       ENDIF
       CALL TRACE_OUT1()
@@ -5613,7 +5620,7 @@ C------------------------------------------------------------------------
 C
 CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 C
-C 100 return adress for domain decomposition after reading of contact interfaces or AMS element selection
+C 100 return address for domain decomposition after reading of contact interfaces or AMS element selection
 C
 CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -6029,7 +6036,7 @@ C Buffer Max (super group)
 C
       WRITE(ISTDO,'(A)')TITRE(37)
 C---------------------------------
-C-  PRE TRI + SUPER GROUPES
+C-  PRE-SORTING + SUPER GROUPS
 C---------------------------------
       NGR_SOL = 0
       IF(NUMELS/=0) THEN
@@ -6161,7 +6168,7 @@ C---- COQUES
 C
       IF(NUMELC/=0) THEN
 C---------------------------------
-C-  PRE TRI + SUPER GROUPES
+C-  PRE-SORTING + SUPER GROUPS
 C---------------------------------
        K0 = 1
        K1 = 9*NUMELC
@@ -6395,7 +6402,7 @@ C
 C
       IF(NUMELTG/=0) THEN
 C---------------------------------
-C-  PRE TRI + SUPER GROUPES
+C-  PRE-SORTING + SUPER GROUPS
 C---------------------------------
        K1 = 10*NUMELTG
        K2 = 12*NUMELTG
@@ -7420,18 +7427,26 @@ C--------------------------------------------
      .                      NGROUP,    NPARG,      IPARG,        NPROPG,
      .                      NUMGEO,      GEO,     DEFAULTS%SHELL%IOFFSET)
       IF (DEFAULTS%SHELL%IOFFSET>0) THEN
+
         IF (IDDLEVEL == 0) THEN 
           NULLIFY(X_C) 
           IF (DEFAULTS%SHELL%IOFFSET==1) THEN
             ALLOCATE(ITAGOSET(NUMELC+NUMELTG), STAT=Stat)
             ALLOCATE(XYZ(3*NUMNOD), STAT=Stat)
+          ELSE
+            ALLOCATE(ITAGOSET(0), STAT=Stat)
+          END IF
+        END IF
+
+          NULLIFY(X_C) 
+          IF (DEFAULTS%SHELL%IOFFSET==1) THEN
             XYZ(1:3*NUMNOD) = X(1:3*NUMNOD)
             X_C=>XYZ
           ELSE
-            ALLOCATE(ITAGOSET(0), STAT=Stat)
             X_C=>X
           END IF
-        END IF
+
+
           ITAGOSET = 0
           CALL SHELL_OFFSETP(
      .                NGROUP,    NPARG,      IPARG,        NPROPG,
@@ -7708,7 +7723,7 @@ C read /INIBRI/FILL before interfaces stiffness
 
 C
 C fill interface structure to be used by sorting 
-c set INTERCEP for INT7 only to avoid bug with INT20 dur to renumerotation
+c set INTERCEP for INT7 only to avoid bug with INT20 due to renumbering
 c in I20NLG (other interface types still done in SET_INTERCEP)
         CALL FILL_INTERCEP(IPARI,INTBUF_TAB,INTERCEP)
 C
@@ -7804,6 +7819,7 @@ C
         ALLOCATE(RWORK(SRWORK)    ,STAT=stat)
         RWORK = ZERO
         NRWLAG = 0
+        SLN_PEN = 0
 c
         IF(NRWALL > 0) THEN
           WRITE(ISTDO,'(A)')TITRE(39)
@@ -7813,12 +7829,14 @@ c
      3         IXQ      ,NPC1     ,D        ,IGRNOD   ,
      4         SRWBUF   ,IMERGE   ,UNITAB   ,
      5         IKINE1LAG,IDDLEVEL ,LSUBMODEL ,RTRANS  ,
-     6         NOM_OPT(LNOPT1*INOM_OPT(5)+1),ITAGND)
+     6         NOM_OPT(LNOPT1*INOM_OPT(5)+1),ITAGND   ,SLN_PEN )
         ENDIF
 C
 
         IF(IDDLEVEL==0) THEN
           ALLOCATE(LPRW(SLPRW)  ,STAT=stat)
+          CALL MY_ALLOC(RWSTIF_PEN,SLN_PEN)
+          RWSTIF_PEN = ZERO
         END IF
         LPRW = IWORK(1:SLPRW)
         DEALLOCATE(IWORK)
@@ -7944,6 +7962,13 @@ C--------------------------------------------
      .      LSUBMODEL)
       ENDIF
 C--------------------------------------------
+C     rigid body hierarchy
+C--------------------------------------------
+      IF(NRBYKIN > 0) THEN
+        call hierarchy_rbody(NRBYKIN ,NNPBY ,NPBY  ,SLRBODY ,LPBY  ,
+     .                       NRBY    ,RBY   ,NUMNOD,IOUT )
+      ENDIF
+C--------------------------------------------
 C     Checking rigid structures
 C--------------------------------------------
       IF(NRBYKIN > 0) THEN
@@ -8004,7 +8029,7 @@ C---------------------------------
 C---------------------------------
 #ifdef DNC
 C--------------------------------------------
-C     READING and PREPARATION OF FINITE ELEMENTS TO SEND TO MADYMO :
+C     READING AND PREPARATION OF FINITE ELEMENTS TO SEND TO MADYMO:
 C     "EXTENDED COUPLING".
 C--------------------------------------------
       ERR_MSG='MADYMO INTERFACED FEM'
@@ -8157,7 +8182,7 @@ C
 C
          CALL HM_READ_FXB2(FXBIPM,  FXBRPM, FXBNOD, FXBGLM,
      .                FXBCPM,   FXBCPS,  FXBLM,  FXBFLS, FXBDLS,
-     .                FXBMOD, ITAB    , ITABM1 , NOM_OPT(LNOPT1*INOM_OPT(11)+1),FXB_LAST_ADRESS,
+     .                FXBMOD, ITAB    , ITABM1 , NOM_OPT(LNOPT1*INOM_OPT(11)+1),FXB_LAST_ADDRESS,
      .                LSUBMODEL)
 C
 C
@@ -8675,7 +8700,7 @@ C
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
 C
 C----------------------------------
-C   READING OF INITIAL STATE DATA
+C -- READING OF INITIAL STATE DATA
 C----------------------------------
 C
       ALLOCATE(SIGI(NSIGS,LSIGI)                  ,STAT=stat)
@@ -8783,12 +8808,14 @@ C
      &            IGRQUAD    , IGRSH4N        , IGRSH3N          , IGRPART            , TOTMAS   ,
      &            KNOTLOCPC  , KNOTLOCEL      , VNIGE            , BNIGE              , FXBGLM   ,
      &            FXBCPM     , FXBCPS         , FXBLM            , FXBFLS             , FXBDLS   ,
-     &            FXB_MATRIX , FXB_MATRIX_ADD , FXB_LAST_ADRESS  , INOM_OPT(11)       , R_SKEW   ,
+     &            FXB_MATRIX , FXB_MATRIX_ADD , FXB_LAST_ADDRESS  , INOM_OPT(11)       , R_SKEW   ,
      &            KNOD2EL1D  , NOD2EL1D       , EBCS_TAB         , RBY_INIAXIS        , ALEA     ,
      &            KNOD2ELC   , NOD2ELC        , DR               , SLRBODY            , DRAPEG   ,
      &            IPARI      , INTBUF_TAB     , INTERFACES       , MAT_ELEM%MAT_PARAM ,
      &            NPRELOAD_A , PRELOAD_A      , FAIL_FRACTAL     ,FAIL_BROKMANN       ,DEFAULTS  ,
-     &            NDAMP_FREQ_RANGE,DAMPR      , IBEAM_VECTOR     , RBEAM_VECTOR       ,D)
+     &            NDAMP_FREQ_RANGE,DAMPR      , IBEAM_VECTOR     , RBEAM_VECTOR       ,D         ,
+     &            LSIGI      ,LSIGSP          , SRNOISE2         ,NPRW               ,LPRW       ,
+     &            RWSTIF_PEN ,SLN_PEN )
 
 
       IF(NINTER>0.AND.NUMELIG3D>0) THEN
@@ -9082,13 +9109,13 @@ c-----
         ENDIF
 c-----
 c       local numbering of ghost nodes and elements of xfem parts
-c       IEL_CRKXFEM  : local system numerotation of Xfem shells
-c       INOD_CRKXFEM : local system numerotation of Xfem nodes
+c       IEL_CRKXFEM  : local system numbering of Xfem shells
+c       INOD_CRKXFEM : local system numbering of Xfem nodes
 c--------------------------------------------------
 c       build local Xfem node and element tables
         CALL PRETAG_XFEM(IPARG  ,ITAGE   ,IEL_CRKXFEM,ITAGN   ,INOD_CRKXFEM)
 c
-c       build xfem sky adress table
+c       build xfem sky address table
         CALL PRECRKXFEM(IPARG ,IXC  ,IXTG   ,NCRKXFE ,
      .                  IEL_CRKXFEM ,INOD_CRKXFEM    ,ADDCNE_CRKXFEM)
 c--------------------------------------------------
@@ -9561,7 +9588,7 @@ c
          SEGINDX = 0
          !update due to domain decomposition
          CALL INIEBCS(ALE_CONNECTIVITY, 1,IGRSURF, IXS, IXQ, IXTG,
-     .        PM, IGEO, X, SENSORS, MONVOl, MULTI_FVM%IS_USED, EBCS_TAB, EBCS_TAG_CELL_SPMD)
+     .        PM, IGEO, X, SENSORS, MONVOl, MULTI_FVM%IS_USED, EBCS_TAB, EBCS_TAG_CELL_SPMD,ITAB)
          !initialization
         CALL INIEBCSP0(X, IPARG, ELBUF_TAB, EBCS_TAB, IXS, IXQ, IXTG, IPARTS, IPARTQ, IPARTG, PM, IPM, MAT_ELEM%MAT_PARAM)
         CALL INIEBCS_PROPELLANT(IXS,IXQ,IXTG,MULTI_FVM%IS_USED,EBCS_TAB,MAT_ELEM%MAT_PARAM,SIXS,SIXQ,SIXTG,NUMMAT)
@@ -10536,6 +10563,13 @@ C--------------------------------------------
         END IF
        END IF
       END IF
+C--------------------------------------------
+C     traitement for hierarchy_rbody
+C--------------------------------------------
+      IF(NRBYKIN > 0) THEN
+        call hierarchy_rbody_ddm(NRBYKIN ,NNPBY ,NPBY  ,SLRBODY ,LPBY  ,
+     .                           NUMNOD  ,NSPMD )
+      ENDIF
 C   preparation of spmd processing of flows by bem
       CALL TRACE_OUT1()
       ERR_MSG='PROCESS BEM FOR SPMD'
@@ -11120,7 +11154,7 @@ c
      D         KLOADPINTER  ,LOADPINTER   ,DGAPLOADINT   ,S_LOADPINTER, SCEP,DYNAIN_DATA,
      E         DRAPEG       ,USER_WINDOWS ,OUTPUT        ,INTERFACES  ,NUMBER_LOAD_CYL ,
      F         LOADS_PER_PROC(P), PYTHON,DPL0CLD,VEL0CLD ,NAMES_AND_TITLES,
-     G         BCS_PER_PROC(P),constraint_struct,glob_therm,PBLAST)
+     G         BCS_PER_PROC(P),constraint_struct,glob_therm,PBLAST,RWSTIF_PEN ,SLN_PEN )
       GOTO 220
  221  CONTINUE
 

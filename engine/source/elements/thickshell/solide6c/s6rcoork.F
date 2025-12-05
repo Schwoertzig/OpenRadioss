@@ -21,12 +21,14 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    s6rcoork    ../engine/source/elements/thickshell/solide6c/s6rcoork.F
+!||    s6rcoork      ../engine/source/elements/thickshell/solide6c/s6rcoork.F
 !||--- called by ------------------------------------------------------
-!||    s6cke3      ../engine/source/elements/thickshell/solide6c/s6cke3.F
+!||    s6cke3        ../engine/source/elements/thickshell/solide6c/s6cke3.F
 !||--- calls      -----------------------------------------------------
-!||    s6cortho3   ../engine/source/elements/thickshell/solide6c/s6cortho3.F
-!||    vrrota3     ../engine/source/elements/thickshell/solide6c/vrrota3.F
+!||    s6cortho3     ../engine/source/elements/thickshell/solide6c/s6cortho3.F
+!||    vrrota3       ../engine/source/elements/thickshell/solide6c/vrrota3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE S6RCOORK(
      1   X,       IXS,     X1,      X2,
@@ -45,6 +47,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      E   K33,     K34,     K35,     K36,
      F   K44,     K45,     K46,     K55,
      G   K56,     K66,     NEL,     ISMSTR)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

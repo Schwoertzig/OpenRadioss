@@ -23,9 +23,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
     
 
 !||====================================================================
-!||    sfint3b   ../engine/source/elements/solid/solide/sfint3b.F
+!||    sfint3b       ../engine/source/elements/solid/solide/sfint3b.F
 !||--- called by ------------------------------------------------------
-!||    sforc3    ../engine/source/elements/solid/solide/sforc3.F
+!||    sforc3        ../engine/source/elements/solid/solide/sforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SFINT3B(
      1   SIG,     SIGD,    X,       NC1,
@@ -51,6 +53,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      L   MY6,     MZ6,     MX7,     MY7,
      M   MZ7,     MX8,     MY8,     MZ8,
      N   IXS,     NEL,     ISMSTR,  SVIS)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -86,14 +89,14 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J
+      INTEGER I
       my_real
      .   S1, S2, S3,
      .   S4, S5, S6,
      .   SXY, SYZ, SZX,
      .   SYX, SZY, SXZ,
      .   MX(MVSIZ), MY(MVSIZ), MZ(MVSIZ),
-     .   FINT,FINTD,AAA,DXR,DYR,DZR
+     .   FINT,AAA,DXR,DYR,DZR
 C-----------------------------------------------
       DO I=1,NEL
         S1=(SIG(I,1)+SVIS(I,1)-QVIS(I))*VOL(I)

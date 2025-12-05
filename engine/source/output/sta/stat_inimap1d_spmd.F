@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_state_inimap_exch_siz      ../engine/source/output/sta/spmd_state_inimap_exch_siz.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod                    ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                     ../common_source/modules/elements/element_mod.F90
 !||    matparam_def_mod                ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    message_mod                     ../engine/share/message_module/message_mod.F
 !||    multi_fvm_mod                   ../common_source/modules/ale/multi_fvm_mod.F90
@@ -59,6 +60,7 @@ C-----------------------------------------------
       USE MULTI_FVM_MOD
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
       USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
+      use element_mod , only : nixs,nixq,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -90,10 +92,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, N, JJ,J, IPRT0, IPRT, K, STAT_NUMELS_1, KK, INOD
-      INTEGER NG, NEL, NFT, LFT, LLT, ITY, ISOLNOD, IOFF,NPT
-      INTEGER NUM_CENTROIDS, IPOS,MLW,IFORM,NBMAT,NB2,ISUBMAT,NNOD,NNOD2
-      INTEGER NUVAR,NUM_CELL
+      INTEGER I, N, JJ,J, IPRT, K, KK
+      INTEGER NG, NEL, NFT, LFT, LLT, ITY, ISOLNOD,NPT
+      INTEGER NUM_CENTROIDS, IPOS,MLW,NBMAT,NB2,ISUBMAT,NNOD,NNOD2
+      INTEGER NUVAR
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
       my_real P0(3),P0_INF(3),P0_SUP(3),SHIFT_C,SHIFT_N,LENGTH
       my_real MAX_XC,MAX_YC,MAX_ZC,MIN_XC,MIN_YC,MIN_ZC

@@ -21,12 +21,17 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    initnoise   ../engine/source/general_controls/computation/initnoise.F
+!||    initnoise     ../engine/source/general_controls/computation/initnoise.F
 !||--- called by ------------------------------------------------------
-!||    noise       ../engine/source/general_controls/computation/noise.F
+!||    noise         ../engine/source/general_controls/computation/noise.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE INITNOISE(IN,NOIADD,IXS,IWA,LENGTH,IXQ)
-C
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------        
+      use element_mod , only : nixs,nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -48,7 +53,7 @@ C-----------------------------------------------
       INTEGER I,J,LENGTH,K
 C-----------------------------------------------
 C
-C ADRESSE DES NOEUDS SAUVES DS NOISE
+C ADDRESS DES NODES SAUVES DS NOISE
 C
       DO I=0,NUMNOD
        IWA(I)=0
@@ -59,7 +64,7 @@ C
       ENDDO
       NOIADD(NNOISE+1)=0
 C
-C STOCKE DANS NOIADD(K) LE NOMBRE d'ELEMENTS CONNECTES AU NOEUD K-1
+C STOCKE IN NOIADD(K) LE NUMBER d'ELEMENTS CONNECTES AU NODE K-1
 C
       IF(N2D==0)THEN
         DO I=1,NUMELS
@@ -91,12 +96,17 @@ c-----------
       END
 
 !||====================================================================
-!||    initnoise2   ../engine/source/general_controls/computation/initnoise.F
+!||    initnoise2    ../engine/source/general_controls/computation/initnoise.F
 !||--- called by ------------------------------------------------------
-!||    noise        ../engine/source/general_controls/computation/noise.F
+!||    noise         ../engine/source/general_controls/computation/noise.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE INITNOISE2(IN,ELNOI,ELG,NOIADD,IXS,IWA,IPARG,IXQ)
-C
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------        
+      use element_mod , only : nixs,nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -116,7 +126,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER , DIMENSION (:), ALLOCATABLE :: KN
-      INTEGER I,J,LENGTH,K,II
+      INTEGER I,J,K,II
       INTEGER NG,NEL,ITY,NB2,NFT
 C-----------------------------------------------
       IF(NNOISE>0)THEN

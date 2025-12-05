@@ -39,6 +39,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tribox3         ../engine/stub/fvmbags_stub.F
 !||    tritri3         ../engine/stub/fvmbags_stub.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    fvbag_mod       ../engine/share/modules/fvbag_mod.F
 !||====================================================================
       SUBROUTINE FVMESH1(IBUF , ELEM  , X     , IVOLU, BRIC ,
@@ -50,6 +51,7 @@ C-----------------------------------------------
 C   M o d u l e s 
 C-----------------------------------------------
       USE FVBAG_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -143,7 +145,7 @@ C
      .           3,5,6,
      .           6,5,1,
      .           1,3,6/
-C liste chainee polygones
+C linked list of polygons
       TYPE POLYGONE
          INTEGER IZ(3), NNSP
          INTEGER, DIMENSION(:), POINTER :: IPOLY, IELNOD
@@ -157,7 +159,7 @@ C liste chainee polygones
       TYPE(POLYGONE), POINTER :: FIRST, PTR_PREC, PTR_CUR, PTR_TMP,
      .                           PTR_OLD, FIRST2, PTR_CUR2, PTR_PREC2,
      .                           PTR_TMP2
-C liste chainee polyhedres
+C linked list of polyhedra
       TYPE POLYHEDRE
          INTEGER RANK
          INTEGER, DIMENSION(:), POINTER :: POLH
@@ -168,7 +170,7 @@ C
 C Finished volume meshing data structure
 C    - NNS: Number of new nodes (= IVolu (46))
 C    - NNTR: Number of new triangles (= IVolu (47))
-C    - NPOLY : Nombre de polygones ( = IVOLU(48) )
+C    - NPOLY : Number of polygons ( = IVOLU(48) )
 C    - NPOLH: Number of polyhedres (finished volumes) (= IVolu (49))
 C
 C    - IFVNOD(NNS)   : Reference airbag triangle for the new node
@@ -176,12 +178,12 @@ C    - RFVNOD(2,NNS) : Local coordinates of the node in the triangle
 C
 C    - Ifvtri (6, NNTR): Connectivitis new triangles (1-> 3)
 C                       Reference element if supported on surface (4)
-C                       Polyhedres connectes si interne (5->6)
+C                       Polyhedra connected if internal (5->6)
 C
-C    - IFVPOLY(NNTR)    : Attribution triangles-polygones
+C    - IFVPOLY(NNTR)    : Triangle-polygon assignment
 C    - IFVTADR(NPOLY+1) : Addresses in the previous table
 C
-C    - IFVPOLH(NPOLY)   : Attribution polygones-polyhedres
+C    - IFVPOLH(NPOLY)   : Polygon-polyhedron assignment
 C    - IFVPADR(NPOLH+1) : Addresses in the previous table
 C
       IFV=IVOLU(45)
@@ -327,7 +329,7 @@ C 1. Airbag facets cuts
      . ' ** MONITORED VOLUME ID: ',IVOLU(1),' - BUILDING POLYGONS **'
       ENDIF
 C
-C nullify sinon test sur associated vrai second appel fvmesh1
+C nullify otherwise test on associated is true in second call to fvmesh1
       NULLIFY(FIRST2)
       DO I=1,NBRIC
 C        IF (ILVOUT<0) CALL PROGBAR_C(I,NBRIC)
@@ -3171,7 +3173,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, II, IC1, IC2
+      INTEGER I, II
       my_real
      .        X1, Y1, Z1, X2, Y2, Z2, SS1, SS2, X12, Y12, Z12,
      .        XA1, YA1, ZA1, ALPHA, XM, YM, ZM, SSN
@@ -4016,7 +4018,7 @@ C polygon j is a hole in polygon i
                   ENDDO
                ENDIF
                LENPOLY(I)=LENPOLY(I)+LENPOLY(J)
-C Polygone interior j.
+C Interior polygon j.
                VX1=QUAD(1,2)-QUAD(1,1)
                VY1=QUAD(2,2)-QUAD(2,1)
                VZ1=QUAD(3,2)-QUAD(3,1)
@@ -4336,7 +4338,7 @@ C-----------------------------------------------
      .        TSEG(3,2*NN), NHOL_OLD, ICUT, J, JJ, NSEG_INI, NSEG1,
      .        REDIR(NN), N1, N2, ISTOP, NNP, ICLOSE, ISEG,
      .        POLY(2*NN,NN), IN, IN1, IN2, LENPOLY(NN), K, KK,
-     .        THOL(NHOL), JN, NHOLP, IADHOLP(NHOL), KN, I1, I2,
+     . THOL(NHOL), JN, NHOLP, IADHOLP(NHOL), KN,
      .        ITAG2(2*NN), ITAGN(NN), ITAGS(NN), ISEG_OLD
       my_real
      .        X1, Y1, Z1, X2, Y2, Z2, ZL1, ZL2, ALPHA, NPX, NPY, NPZ,
@@ -5284,7 +5286,7 @@ C polygon j is a hole in polygon i
      .                                   RPOLY(4+3*(K-1)+3,J)
                ENDDO
                LENPOLY(I)=LENPOLY(I)+LENPOLY(J)
-C Polygone interior j.
+C Interior polygon j.
                VX1=RPOLY(5,J)-RPOLY(8,J)
                VY1=RPOLY(6,J)-RPOLY(9,J)
                VZ1=RPOLY(7,J)-RPOLY(10,J)

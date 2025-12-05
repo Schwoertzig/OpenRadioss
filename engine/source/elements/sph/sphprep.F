@@ -52,6 +52,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    stoptime             ../engine/source/system/timer_mod.F90
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod         ../common_source/modules/groupdef_mod.F
 !||    message_mod          ../engine/share/message_module/message_mod.F
 !||    sph_crit_voxel_mod   ../engine/source/elements/sph/sph_crit_voxel.F90
@@ -84,6 +85,7 @@ C-----------------------------------------------
       USE SPH_STRUCT_MOD
       USE spmd_mod
       USE sph_crit_voxel_mod
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -450,7 +452,7 @@ C
 C
           SPATRUE=SPASORT
 C
-C init DBUC, MIN/MAX + recherche cell remote si spmd 
+C init DBUC, MIN/MAX + search remote cell if spmd 
           CALL SPHTRI0(TIMERS, X   ,SPBUF,KXSP,WSP2SORT,BMINMA ,DMAX,
      2                 NSP2SORTF,NSP2SORTL,NSP2SORT,ITASK, DBUC)
 C

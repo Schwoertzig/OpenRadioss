@@ -73,7 +73,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, IG
+      INTEGER I
       my_real
      .     X0(MVSIZ), Y0(MVSIZ), Z0(MVSIZ),
      .     AL1(MVSIZ),  AL2(MVSIZ),  AL3(MVSIZ), AL4(MVSIZ),
@@ -334,7 +334,7 @@ C
         P4(I) = NX4(I)*NX4(I) + NY4(I)*NY4(I) +NZ4(I)*NZ4(I)
         D4 = MAX(ZERO, GAP2 - P4(I))
 C !!!!!!!!!!!!!!!!!!!!!!!
-C  PENE2 = GAP^2 - DIST^2 UTILISE POUR TESTER SI NON NUL
+C  PENE2 = GAP^2 - DIST^2 USED TO TEST IF NON-NULL
 C!!!!!!!!!!!!!!!!!!!!!!!!
         PENE2(I) = MAX(D1,D2,D3,D4)
 C

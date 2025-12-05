@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    alefvm_init             ../engine/source/ale/alefvm/alefvm_init.F
 !||    allocate_nodal_arrays   ../common_source/modules/nodal_arrays.F90
 !||    allocate_rbe3           ../common_source/modules/constraints/rbe3_mod.F90
+!||    allocate_rwall          ../common_source/modules/constraints/rwall_mod.F90
 !||    ancmsg                  ../engine/source/output/message/message.F
 !||    arret                   ../engine/source/system/arret.F
 !||    intstamp_zero           ../engine/share/modules/intstamp_mod.F
@@ -45,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod               ../engine/share/modules/drape_mod.F
 !||    ecnd_mod                ../engine/share/modules/ecdn_mod.F
 !||    eig_mod                 ../engine/share/modules/eig_mod.F
+!||    element_mod             ../common_source/modules/elements/element_mod.F90
 !||    fxb_mod                 ../engine/share/modules/fxb_mod.F
 !||    glob_therm_mod          ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    h3d_mod                 ../engine/share/modules/h3d_mod.F
@@ -59,6 +61,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    pinchtype_mod           ../common_source/modules/pinchtype_mod.F
 !||    rbe3_mod                ../common_source/modules/constraints/rbe3_mod.F90
 !||    restmod                 ../engine/share/modules/restart_mod.F
+!||    rwall_mod               ../common_source/modules/constraints/rwall_mod.F90
 !||    seatbelt_mod            ../common_source/modules/seatbelt_mod.F
 !||    segvar_mod              ../engine/share/modules/segvar_mod.F
 !||    skew_mod                ../common_source/modules/skew_mod.F90
@@ -67,7 +70,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    trimat_mod              ../engine/share/modules/trimat.F
 !||====================================================================
       SUBROUTINE RESTALLOC(OUTPUT,ELEMENT, NODES,MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR,INTERFACES,SKEWS,
-     .                     GLOB_THERM,RBE3)
+     .                     GLOB_THERM,RBE3,RWALL)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -102,6 +105,8 @@ C-----------------------------------------------
       USE connectivity_mod
       USE nodal_arrays_mod
       use rbe3_mod
+      use rwall_mod
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -144,10 +149,11 @@ C-----------------------------------------------
       TYPE(SKEW_) , INTENT(INOUT)       :: SKEWS
       type(glob_therm_) ,intent(inout) :: GLOB_THERM
       type(rbe3_) ,intent(inout) :: RBE3
+      type(rwall_),intent(inout) :: RWALL
 C----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER IERR0,IERROR, NBMAT,I,NPT,ISIZ1,ISIZ2
+      INTEGER IERR0,IERROR, NBMAT,ISIZ1,ISIZ2
 C-----------------------------------------------
       IERROR = 0
 C to avoid conflict with IERR in common
@@ -410,14 +416,8 @@ C     allocations structures Interface friction
 C        ALLOCATE (T8(NINTER),STAT=IERR)
 C        IF (IERR/=0) GOTO 1000
 
+        call allocate_rwall(RWALL, NSPMD)
 
-        ALLOCATE (NPRW(SNPRW),STAT=IERR)
-        IF (IERR/=0) GOTO 1000
-        NPRW = 0  
-
-        ALLOCATE (LPRW(SLPRW),STAT=IERR)
-        IF (IERR/=0) GOTO 1000
-        LPRW = 0  
 
         ALLOCATE (ICONX(SICONX),STAT=IERR)
         IF (IERR/=0) GOTO 1000
@@ -584,10 +584,6 @@ C
         ALLOCATE (FR_RBY(SFR_RBY),STAT=IERR)
         IF (IERR/=0) GOTO 1000
         FR_RBY = 0  
-
-        ALLOCATE (FR_WALL(SFR_WALL),STAT=IERR)
-        IF (IERR/=0) GOTO 1000
-        FR_WALL = 0 
 
         ALLOCATE (FR_RBY2(SFR_RBY2),STAT=IERR)
         IF (IERR/=0) GOTO 1000
@@ -1217,13 +1213,6 @@ C
         IF (IERR/=0) GOTO 1000
         ELBUF = 0   
 
-        ALLOCATE (RWBUF(SRWBUF),STAT=IERR)
-        IF (IERR/=0) GOTO 1000
-        RWBUF = 0 
-
-        ALLOCATE (RWSAV(SRWSAV),STAT=IERR)
-        IF (IERR/=0) GOTO 1000
-        RWSAV = 0 
 
         ALLOCATE (RBY(SRBY),STAT=IERR)
         IF (IERR/=0) GOTO 1000

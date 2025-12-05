@@ -83,7 +83,7 @@ C     REAL
       my_real
      .   STF(*),X(3,*),XYZM(6,*),GAP_S(*), 
      .   DIST,BUMULT,GAP,TZINF,MAXBOX,MINBOX,GAPMIN,GAPMAX,
-     .   MARGEREF, GAP_M(*)
+     .    GAP_M(*)
       INTEGER ID
       CHARACTER(LEN=NCHARTITLE) :: TITR
       INTEGER, DIMENSION(MVSIZ), INTENT(INOUT) :: PROV_N,PROV_E
@@ -105,7 +105,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, L, N1, N2, N3, N4, I_AMAX
-      INTEGER I_ADD, ADESTK, NB_NC, NB_EC, ADNSTK, IBID
+      INTEGER I_ADD, ADESTK, NB_NC, NB_EC, ADNSTK
       INTEGER IP1, IP2, IP21, IP22, IP31,J_STOK,I_BID,NB_N_B
 C     REAL
       my_real
@@ -113,20 +113,20 @@ C     REAL
      .   DX3,DY3,DZ3,
      .   DX4,DY4,DZ4,
      .   DX6,DY6,DZ6,
-     .   DD1,DD2,DD3,DD4,DD,DD0,XMIN,YMIN,ZMIN,TB,
-     .   XMAX,YMAX,ZMAX,MINBOX_ST,MAXBOX_ST,GAPSMAX,
-     .   BID,TZINF_ST,MARGE,MARGE_ST,GAPV(MVSIZ),
+     .   DD1,DD2,DD3,DD4,DD,DD0,XMIN,YMIN,ZMIN,
+     .   XMAX,YMAX,ZMAX,MINBOX_ST,MAXBOX_ST,
+     .   TZINF_ST,MARGE,MARGE_ST,GAPV(MVSIZ),
      .   XMAX_M,YMAX_M,ZMAX_M,XMIN_M,YMIN_M,ZMIN_M,
      .   XMAX_S,YMAX_S,ZMAX_S,XMIN_S,YMIN_S,ZMIN_S
 C
 C
 C
 C
-C     1-CALCUL TAILLE DES ZONES INFLUENCES
+C     1-CALCULATION TAILLE DES ZONES INFLUENCES
 C     DD IS THE AVERAGE ELEMENT LENGTH
       DD=ZERO
       DO 10 L=1,NRTM
-C      CONNECIVITES ELEMENT
+C      ELEMENT CONNECTIVITIES
        N1=IRECT(1,L)
        N2=IRECT(2,L)
        N3=IRECT(3,L)
@@ -173,7 +173,7 @@ C DD + 2*Tzinfo: Size element increased in influence zone
       MINBOX= HALF*MAXBOX
       MAXBOX_ST= HALF*(DD + 2*TZINF_ST)
       MINBOX_ST= HALF*MAXBOX_ST
-C     MIS A ZERO POUR FAIRE SEARCH COMPLET CYCLE 0 ENGINE
+C     SET TO ZERO TO PERFORM COMPLETE SEARCH CYCLE 0 ENGINE
       DIST = ZERO     
 C--------------------------------
 C     CALCULATION OF THE BOUNDS OF THE DOMAIN
@@ -324,7 +324,7 @@ C------------------
         RETURN
       ENDIF
 C     I_MEM = 1 ==> PAS ASSEZ DE MEMOIRE PILE
-C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
       IF(I_MEM==1)THEN
         NB_N_B = NB_N_B + 1
         I_MEM = 0

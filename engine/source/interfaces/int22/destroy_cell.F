@@ -25,6 +25,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- called by ------------------------------------------------------
 !||    sinit22_fvm      ../engine/source/interfaces/int22/sinit22_fvm.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod   ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22tri_mod       ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||====================================================================
@@ -45,7 +46,7 @@ C      TYPE BRICK_ENTITY
 C        INTEGER                         :: NBCUT                   !number of cutting planes
 C        INTEGER                         :: SECID_Cell(8)           !cut local id in [1,8] -> [1,52] = sec type. Each possible cut is numbered from 1 to 52 ; 8 nodes => 8 possible cut cells
 C        INTEGER                         :: WhichCell_Node(8)       !node local id in[1,8] -> [1,8] = local cut cell id.
-C        INTEGER                         :: %POLY()%NumNOD(9)          !noeuds sommets
+C        INTEGER                         :: %POLY()%NumNOD(9)          !vertex nodes
 C        Integer :: %Poly () %Numpoint! Total number of points describing the volume
 C        INTEGER                         :: %POLY()%FACE()%NumPOINT      !gives number of points (node+intersec.pts) on a given cell face        
 C        INTEGER                         :: Adjacent_Cell(6,9,5)    !index3: IADJ (adjacent cell id 1:%NAdjCell)
@@ -65,6 +66,7 @@ C   M o d u l e s
 C----------------------------------------------- 
       USE I22BUFBRIC_MOD 
       USE I22TRI_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

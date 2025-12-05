@@ -286,8 +286,7 @@ C
           E(J2)=E(J2)+FY4(I)
           E(J3)=E(J3)+FZ4(I)
 C---------------------------------
-C     FRICTION SECND
-C---------------------------------
+C     FRICTION SECOND C---------------------------------
           IG=NSV(IL)
           I3=3*IG
           I2=I3-1
@@ -481,7 +480,7 @@ C-----------------------------------------------
      .   SS0, TT0, XC, ECONVT, ALPHA, ALPHI,
      .   YC, ZC, XC0, YC0, ZC0, SP, SM, TP, TM, ANSX, ANSY, ANSZ, FMAX,
      .   STF, FTI, FN, TN1, TN2, TN3, TN, DTM, XMU, VX,VY,VZ,VV,V2,P,
-     .   VV1,VV2,V21,DMU,AA
+     .   VV1,VV2,DMU,AA
       INTEGER IRTLO_I(MVSIZ)
       my_real FRIC0_I(3,MVSIZ)
 C-----------------------------------------------
@@ -788,8 +787,7 @@ C
           E(J2)=E(J2)+FY4(I)
           E(J3)=E(J3)+FZ4(I)
 C---------------------------------
-C     FRICTION SECND
-C---------------------------------
+C     FRICTION SECOND C---------------------------------
           IG=NSV(IL)
           I3=3*IG
           I2=I3-1

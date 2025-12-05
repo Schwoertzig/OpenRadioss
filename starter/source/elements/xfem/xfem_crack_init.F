@@ -55,7 +55,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER NG,ITY,LFT,LLT,N,I,J,IPRT,NEL,NFT,IXFEM,ILEV,NCOUNT,
+      INTEGER NG,ITY,LFT,LLT,N,I,J,NEL,NFT,IXFEM,ILEV,NCOUNT,
      .   SHCOUNT,NCOUNTG
       INTEGER TAG_ARRAY(NUMNOD),TAG_SHELLS_C(NUMELC),TAG_SHELLS_TG(NUMELTG),
      .   NLEVXF,NN(4),TYPE_SHELLS_C(NUMELC),TYPE_SHELLS_TG(NUMELTG)
@@ -162,7 +162,7 @@ C
       ENDDO  !       DO ILEV=1,NLEVMAX
 c
 C-----------------------------------------------------------------------
-C     Numeros globaux des shell crack (by level)
+C     Global shell crack numbers (by level)
 C-------------------------------
       NCOUNT = 0
       DO ILEV=1,NLEVMAX
@@ -187,7 +187,7 @@ C-------------------------------
       ENDDO
 C
 C-------------------------------
-C Numeros globaux des NODES (unconnected) for shell crack (by level)
+C Global NODES numbers (unconnected) for shell crack (by level)
 C-------------------------------
 C
       NCOUNTG = 0

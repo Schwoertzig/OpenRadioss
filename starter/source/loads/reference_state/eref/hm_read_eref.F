@@ -31,7 +31,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_option_read_key       ../starter/source/devtools/hm_reader/hm_option_read_key.F
 !||    hm_option_start          ../starter/source/devtools/hm_reader/hm_option_start.F
 !||    nintri                   ../starter/source/system/nintrr.F
-!||    r2r_sys                  ../starter/source/coupling/rad2rad/routines_r2r.F
 !||    usr2sys                  ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||    hm_option_read_mod       ../starter/share/modules1/hm_option_read_mod.F
@@ -86,7 +85,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS,R2R_SYS,NINTRI
+      INTEGER USR2SYS, NINTRI
 C=======================================================================
 
       ALLOCATE(TAGELC(NUMELC),TAGELTG(NUMELTG),TAGELS(NUMELS8),TAGNOD(NUMNOD))

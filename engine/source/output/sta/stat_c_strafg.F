@@ -36,6 +36,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod           ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||    stack_mod           ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -51,6 +52,7 @@ C-----------------------------------------------
       USE STACK_MOD
       USE DRAPE_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -69,7 +71,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXC(NIXC,*),IXTG(NIXTG,*),
      .        IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTC(*), IPARTTG(*), IPART_STATE(*),
@@ -84,7 +86,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,II,JJ,LEN, IOFF, NG, NEL, NFT, ITY, LFT, NPT,
+      INTEGER I, J, K, N, JJ, LEN, IOFF, NG, NEL, NFT, ITY, LFT, NPT, 
      .    LLT, MLW, ISTRAIN,ID, IPRT0, IPRT,NPG,IPG,IE,NPTR,NPTS,G_STRA,
      .    ITHK,KK(8),NF1,IGTYP,IREL,IHBE,NLAY,IBID0,MAT_1,PID_1,ILAY,NF3,
      .    SEDRAPE,NUMEL_DRAPE
@@ -94,7 +96,7 @@ C-----------------------------------------------
      .   THK, EM, EB, H1, H2, H3
       CHARACTER*100 DELIMIT,LINE
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
-      TYPE(L_BUFEL_)  ,POINTER :: LBUF     
+ 
       TYPE(BUF_LAY_)  ,POINTER :: BUFLY     
       INTEGER LAYNPT_MAX,NLAY_MAX,ISUBSTACK,IPT_ALL,NPTT,IT,IPT,NPT_ALL,MPT
       my_real, 
@@ -754,9 +756,12 @@ c-----------
 !||    stat_c_strafg    ../engine/source/output/sta/stat_c_strafg.F
 !||--- calls      -----------------------------------------------------
 !||    clskew3          ../engine/source/elements/sh3n/coquedk/cdkcoor3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||====================================================================
         SUBROUTINE GET_Q4L(JFT    ,JLT    ,IXC    ,X    ,OFFG   ,
      .                     IREL   ,VQ     )
+        use element_mod , only : nixc
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 #include      "implicit_f.inc"
 c-----------------------------------------------
@@ -772,7 +777,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER I,J,K,L
+      INTEGER I
       INTEGER IXCTMP2,IXCTMP3,IXCTMP4,IXCTMP5
       my_real 
      .   RX(MVSIZ),RY(MVSIZ),RZ(MVSIZ),SX(MVSIZ),SY(MVSIZ),
@@ -821,9 +826,12 @@ C
 !||    stat_c_strafg    ../engine/source/output/sta/stat_c_strafg.F
 !||--- calls      -----------------------------------------------------
 !||    clskew3          ../engine/source/elements/sh3n/coquedk/cdkcoor3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||====================================================================
         SUBROUTINE GET_T3L(JFT    ,JLT    ,IXTG    ,X    ,OFFG   ,
      .                     IREL   ,VQ     )
+        use element_mod , only : nixtg
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 #include      "implicit_f.inc"
 c-----------------------------------------------
@@ -839,7 +847,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER I,J,K,L
+      INTEGER I
       INTEGER I2,I3,I1
       my_real 
      .   RX(MVSIZ),RY(MVSIZ),RZ(MVSIZ),SX(MVSIZ),SY(MVSIZ),
@@ -899,7 +907,7 @@ C-----------------------------------------------
 C------------------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I
+ 
       my_real 
      .       TXX,TYY,TZZ,TXY,TYZ,TZX,UXX,UYY,UZZ,UXY,UYZ,UZX,A,B,C
 C-Input EPS convention: Exx, Eyy, Exy, Eyz, Ezx, 0;Output Exx, Eyy, Ezz, Exy, Eyz, Ezx

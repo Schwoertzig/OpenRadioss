@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    qrota_group            ../engine/source/output/anim/generate/qrota_group.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||    stack_mod              ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -46,6 +47,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE STACK_MOD
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+      use element_mod , only : nixq,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -87,8 +89,8 @@ C     REAL
      .   SIGE(MVSIZ,5)
       my_real
      .   EVAR(6,MVSIZ), GAMA(6,MVSIZ)
-      REAL R4(18)
-      INTEGER I,NG,NEL,NFT,ITY,LFT,NPT,MPT,IPT,
+ 
+      INTEGER I, NG, NEL, NFT, ITY, LFT, NPT, 
      .        N,J,LLT,MLW,ISTRAIN,IL,IR,IS,IT,NPTR,NPTS,NLAY,
      .        IPID,I1,I2,NS1,NS2,ISTRE,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,NNI,N0,
@@ -96,14 +98,11 @@ C     REAL
      .        IPMAT,IGTYP,MATLY,ISUBSTACK,IIGEO,IADI,IPMAT_IPLY,
      .        NPT_ALL,NPTT,ILAY,IUS,ID_PLY,IPANG,IPPOS,IPTHK,OFFSET,ISELECT,
      .        IPLY,IUVAR,IAD,JALE,JTURB,JCVT,NC1,NC2,NC3,NC4,ISORTH
-      INTEGER PID(MVSIZ),MAT(MVSIZ),IOK_PART(MVSIZ),JJ(6),IS_WRITTEN_TENSOR(MVSIZ)
+      INTEGER IOK_PART(MVSIZ), JJ(6), IS_WRITTEN_TENSOR(MVSIZ)
 C
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF
-C
-      my_real,
-     .   DIMENSION(:), POINTER :: DIR_A
       my_real,
      .  DIMENSION(:), POINTER  :: UVAR
 C-----------------------------------------------      
@@ -192,7 +191,7 @@ C-----------------------------------------------
 C---------------------------------------------
 C     in 2d the stresses are:
 C     1=YY 2=ZZ 3=TT 4=YZ 5=0 6=0
-C     EN CONTRADICTION AVEC X=T
+C     IN CONTRADICTION WITH X=T
 C---------------------------------------------
 c ILAYER=NULL IR=NULL IS=NULL IT=NULL
               IF( ILAY == -1 .AND. IR == -1 .AND. IS == -1 .AND. IT == -1 )THEN

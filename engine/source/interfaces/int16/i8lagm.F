@@ -21,17 +21,20 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i8lagm    ../engine/source/interfaces/int16/i8lagm.F
+!||    i8lagm        ../engine/source/interfaces/int16/i8lagm.F
 !||--- called by ------------------------------------------------------
-!||    i16main   ../engine/source/interfaces/int16/i16main.F
+!||    i16main       ../engine/source/interfaces/int16/i16main.F
 !||--- calls      -----------------------------------------------------
-!||    i8lll     ../engine/source/interfaces/int16/i8lagm.F
+!||    i8lll         ../engine/source/interfaces/int16/i8lagm.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE I8LAGM(X      ,V      ,LLL    ,JLL     ,SLL   ,
      2                  XLL    ,CANDN  ,CANDE  ,I_STOK  ,IXS   ,
      3                  IADLL  ,EMINX  ,NSV    ,NELEM   ,
      4                  N_MUL_MX,ITASK ,A       ,ITIED ,
      5                  NINT   ,NKMAX  ,COMNTAG)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,11 +62,10 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,IK,IE,IS,IC,NK,III(MVSIZ,9),LLT,NFT,LE,FIRST,LAST,
-     .        I8
+      INTEGER I, K, IE, IS, IC, III(MVSIZ, 9), LLT, NFT, LE, FIRST, LAST
       my_real
      .   XX(MVSIZ,9),YY(MVSIZ,9),ZZ(MVSIZ,9),
-     .   AA,XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,DIST
+     . DIST
 C-----------------------------------------------
 C
 C
@@ -97,9 +99,9 @@ C
 C        nc: number of contacts
 C        NK: Number of node for contact (8+1.16+1.8+8.16+16)
 C
-C        IC : numero du contact (1,NC)
-C        IK : numero de noeud local a un contact (1,NK)
-C        I  : numero global du noeud (1,NUMNOD)
+C        IC : contact number (1,NC)
+C        IK : local node number for a contact (1,NK)
+C        I  : global node number (1,NUMNOD)
 C
 C        IADLL(NC)        : IAD = IADLL(IC)
 C        LLL(NC*(9,27))  : I  = LLL(IAD+1,2...IADNEXT-1)
@@ -143,7 +145,7 @@ C       test if inside the box
 C-----------------------------------------------------------------------
         IF(DIST.LE .ZERO)THEN
 c
-c      print *, "dans la boite",XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX
+c      print *, "in la boite",XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX
 c
           LLT = LLT+1
           III(LLT,9)=IS
@@ -238,7 +240,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,IK,NK,I1,I2,I3,I4,IAD,NN
+      INTEGER I, IK, NK, IAD, NN
       my_real
      .   VX,VY,VZ,VN,AA
       my_real
@@ -246,7 +248,7 @@ C-----------------------------------------------
      .   NX(MVSIZ), NY(MVSIZ), NZ(MVSIZ),
      .   NI(MVSIZ,9) 
 C-----------------------------------------------
-C      calcul de r,s,t
+C      calculation de r,s,t
 C-----------------------------------------------
 c
 c      print *, "XX(1,1),XX(1,9)",XX(1,1),XX(1,9)
@@ -522,9 +524,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,IK,NK,ITER,NITERMAX,JTER,NJTERMAX,CONV
-      my_real
-     .   VX,VY,VZ,VN
+      INTEGER I, ITER, NITERMAX, JTER, NJTERMAX, CONV
       my_real
      .   DRDX(MVSIZ),DRDY(MVSIZ),DRDZ(MVSIZ),
      .   DSDX(MVSIZ),DSDY(MVSIZ),DSDZ(MVSIZ),     
@@ -572,14 +572,14 @@ C
          TT(I) = ZERO
        ENDDO
 C-----------------------------------------------
-C      calcul de r,s,t   et   Ni(r,s,t)
+C      calculation de r,s,t   et   Ni(r,s,t)
 C-----------------------------------------------
        DO ITER=1,NITERMAX
 c
 c      print *, "iter",iter
 c
 C-----------------------------------------------
-C          calcul de Ni(r,s,t); [J]; [J]-1
+C          calculation de Ni(r,s,t); [J]; [J]-1
 C-----------------------------------------------
            CALL I8DERI(LLT,RR ,SS    ,TT    ,NI    ,
      2            DRDX  ,DRDY  ,DRDZ  ,DSDX  ,DSDY  ,DSDZ  ,
@@ -591,7 +591,7 @@ c
 c      print *, "jter",jter
 c
 C-----------------------------------------------
-C            calcul de r,s,t new
+C            calculation de r,s,t new
 C-----------------------------------------------
              CALL I8RSTN(LLT,RR,SS   ,TT    ,NI    ,CONV  ,
      2            DRDX  ,DRDY  ,DRDZ  ,DSDX  ,DSDY  ,DSDZ  ,
@@ -602,7 +602,7 @@ c      print *, "r,s,t",r(1),s(1),t(1)
 c      print *, "rr,ss,tt",rr(1),ss(1),tt(1)
 c
 C-----------------------------------------------
-C            calcul de Ni(-1<r<1 , -1<s<1 , -1<t<1)
+C            calculation de Ni(-1<r<1 , -1<s<1 , -1<t<1)
 C-----------------------------------------------
              CALL I8NI(LLT,RR ,SS ,TT ,NI  )
 C  parith on problem if conv function of mvsiz !!!!!!
@@ -647,9 +647,9 @@ C-----------------------------------------------
       my_real
      .  U_M_R,U_P_R,U_M_S,U_P_S,U_M_T,U_P_T,
      .  UMS_UMT,UMS_UPT,UPS_UMT,UPS_UPT,
-     .  UMR_UMS,UMR_UPS,UPR_UMS,UPR_UPS,
-     .  UMT_UMR,UMT_UPR,UPT_UMR,UPT_UPR,
-     .  A,R05,S05,T05
+     .
+     .
+     . R05,S05,T05
 C-----------------------------------------------------------------------
 C     calculation of ni
 C-----------------------------------------------------------------------
@@ -802,16 +802,16 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,N
+      INTEGER I
       my_real
      .   DXDS(MVSIZ), DYDS(MVSIZ), DZDS(MVSIZ),
      .   DNIDR(8),DNIDS(8),DNIDT(8),
-     .   D, AA, BB, DET(MVSIZ),R9 ,R13 ,S9 ,S10 ,S11 ,S12 ,T10 ,T14
+     . D, DET(MVSIZ)
       my_real
      .  U_M_R,U_P_R,U_M_S,U_P_S,U_M_T,U_P_T,
      .  UMS_UMT,UMS_UPT,UPS_UMT,UPS_UPT,
-     .  UMR_UMS,UMR_UPS,UPR_UMS,UPR_UPS,
-     .  UMT_UMR,UMT_UPR,UPT_UMR,UPT_UPR,
+     .
+     .
      .  A,R05,S05,T05
 C-----------------------------------------------
 C/*

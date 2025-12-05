@@ -38,6 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod           ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||    stack_mod           ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -53,6 +54,7 @@ C-----------------------------------------------
       USE STACK_MOD
       USE DRAPE_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -71,7 +73,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXC(NIXC,*),IXTG(NIXTG,*),
      .        IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTC(*), IPARTTG(*), IPART_STATE(*),
@@ -1096,7 +1098,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER J
+ 
       my_real
      .   R1,R2,R3,S1,S2,S3,R12A,R22A,S12B,S22B,RS1,RS2,RS3,
      .   T1,T2,T3,PHI,SUM1,SUM2,FACT,R3R3,S3S3 
@@ -1180,7 +1182,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I
+ 
       my_real
      .   S1, S2, S3, S4, S5
 C-----------------------------------------------
@@ -1219,7 +1221,7 @@ C-----------------------------------------------
 C------------------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I
+ 
       my_real 
      .       TXX,TYY,TZZ,TXY,TYZ,TZX,UXX,UYY,UZZ,UXY,UYZ,UZX,A,B,C
 C--convention input MOM : mxx,myy,mxy,0,0,0; output mxx,myy,mzz,mxy,myz,mzx

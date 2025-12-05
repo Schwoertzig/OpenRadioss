@@ -47,6 +47,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    dt_mod              ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    h3d_mod             ../engine/share/modules/h3d_mod.F
 !||    mat_elem_mod        ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    preload_axial_mod   ../engine/source/elements/spring/preload_axial.F90
@@ -82,6 +83,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE DT_MOD
       USE SENSOR_MOD
+      use element_mod , only : nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -137,8 +139,8 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,IFLAG,IGTYP,NUVAR,NFUNC,IFUNC_ALPHA,IMAT
-      INTEGER MAT(MVSIZ),PID(MVSIZ),NGL(MVSIZ),IFUNC(100),
+      INTEGER I, IFLAG, IGTYP, NUVAR, IFUNC_ALPHA, IMAT
+      INTEGER MAT(MVSIZ), PID(MVSIZ), NGL(MVSIZ), 
      .   NC1(MVSIZ),NC2(MVSIZ),NC3(MVSIZ),IPT
       my_real 
      .   STI(MVSIZ),STIR(MVSIZ),OFF(MVSIZ),AL(MVSIZ),EXX(MVSIZ),
@@ -161,7 +163,7 @@ C
       my_real ,DIMENSION(:) ,POINTER :: UVAR
       my_real ,DIMENSION(:) ,POINTER :: EL_TEMP
       TYPE(G_BUFEL_) ,POINTER :: GBUF
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
+ 
       TARGET :: TEMPEL,VECNUL
 C-----------------------------------------------      
        my_real FINTER 

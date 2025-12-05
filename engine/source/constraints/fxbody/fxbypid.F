@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_wiout        ../engine/source/mpi/generic/spmd_wiout.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||    output_mod        ../common_source/modules/output/output_mod.F90
 !||====================================================================
       SUBROUTINE FXBYPID(OUTPUT,IPARG ,         IXS   , IXQ   , IXC       ,
@@ -41,6 +42,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD            
       USE OUTPUT_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -65,7 +67,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       
-      INTEGER NSN,NG,MLW,ITY,NEL,NFT,IAD,I,II,NALL,IGOF,ISHFT,IWIOUT
+      INTEGER NSN,NG,MLW,ITY,NEL,NFT,IAD,I,II,NALL,IGOF,IWIOUT
       my_real,
      .    DIMENSION(:), POINTER :: OFFG
 C-----------------------------------------------

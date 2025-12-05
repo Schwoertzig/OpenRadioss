@@ -24,8 +24,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    nlocal_acc       ../engine/source/assembly/nlocal_acc.F
 !||--- called by ------------------------------------------------------
 !||    resol            ../engine/source/engine/resol.F
-!||--- calls      -----------------------------------------------------
-!||    my_isnan         ../engine/source/system/my_isnan.F
 !||--- uses       -----------------------------------------------------
 !||    nlocal_reg_mod   ../common_source/modules/nlocal_reg_mod.F
 !||====================================================================
@@ -46,10 +44,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER  N,NDDL,NPOS,K
+      INTEGER N,NDDL,NPOS
       my_real, POINTER, DIMENSION(:) :: 
      .  F,M
-      LOGICAL :: MY_ISNAN
 C-----------------------------------------------
 c     calculation of acceleration of the non-local variable
 c=======================================================================

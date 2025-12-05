@@ -46,6 +46,7 @@ cc
 !||    dt_mod           ../engine/source/modules/dt_mod.F
 !||    dttherm_mod      ../engine/source/time_step/dttherm.F90
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod     ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod   ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod     ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -80,7 +81,7 @@ cc
      M   INDX_DRAPE,  IGRE,        JTUR,        DT,
      N   NCYCLE,      SNPC,        STF ,        GLOB_THERM,
      N   NXLAYMAX,    IDEL7NOK,    USERL_AVAIL, MAXFUNC,
-     O   SBUFMAT  )
+     O   SBUFMAT ,IPART     ,LIPART1 )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -96,6 +97,7 @@ C-----------------------------------------------
       USE DT_MOD
       use glob_therm_mod
       use dttherm_mod
+      use element_mod , only : nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -157,6 +159,10 @@ C     REAL
       TYPE (SENSORS_) ,INTENT(INOUT) :: SENSORS
       TYPE (DT_) ,INTENT(IN) :: DT
       type (glob_therm_) ,intent(inout)   :: glob_therm
+      integer, intent(in) :: LIPART1
+     
+      INTEGER, DIMENSION(LIPART1,NPART), INTENT(IN) :: IPART
+
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -164,11 +170,11 @@ c  Indx uses locally unlike 4N shells
       INTEGER MAT(MVSIZ),PID(MVSIZ),NGL(MVSIZ),INDX(MVSIZ),IVS(MVSIZ),
      .   FWAVE_EL(NEL)
       INTEGER 
-     .   I, J, NG,NPG,NNOD,PT0,PT1,PT2,NVS,IFLAG,IBID,NFAIL,
+     . I, J, NG,NPG,NNOD,NVS,IBID,NFAIL,
      .   IR,IS,ILAY,NLAY,IMAT,L_DIRA,L_DIRB,J1,J2,N1,N2,N3,
      .   IGTYP,IGMAT,NPTTOT,IREP,IFAILWAVE,IDRAPE,IT,NPTT,
      .   ACTIFXFEM,SEDRAPE,NUMEL_DRAPE
-      INTEGER ,DIMENSION(:) ,POINTER     :: FWAVE_NOD
+ 
       PARAMETER (NNOD = 3)
       my_real 
      .   STI(MVSIZ),STIR(MVSIZ),RHO(MVSIZ),
@@ -214,9 +220,9 @@ C--- Variables for non-local
       my_real, DIMENSION(:,:), ALLOCATABLE :: VAR_REG
       my_real, DIMENSION(:), POINTER :: DNL,UNL
 C-----
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF
-      TYPE(L_BUFEL_) ,POINTER :: LBUF
+ 
       TYPE(L_BUFEL_DIR_) ,POINTER :: LBUF_DIR
       INTEGER SDIR_A    ! Size of DIR_A
       INTEGER SDIR_B    ! Size of DIR_B
@@ -432,7 +438,8 @@ c-------------------------------------------
      R   INDX_DRAPE,THKE      ,SEDRAPE     ,NUMEL_DRAPE ,DT      ,
      Q   NCYCLE    ,SNPC      ,STF         ,NXLAYMAX    ,IDEL7NOK  ,
      R   USERL_AVAIL ,MAXFUNC ,NPTTOT      ,SBUFMAT     ,SDIR_A    ,SDIR_B    ,
-     S   GBUF%FOR_G,SSP_EQ )
+     S   GBUF%FOR_G,SSP_EQ,
+     X    IPART     ,LIPART1  ,IPARTTG   )
 C----------------------------------------------------------------------------
 C     FORCES VISCOCITE 
 C----------------------------

@@ -68,6 +68,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    dt_mod              ../engine/source/modules/dt_mod.F
 !||    dttherm_mod         ../engine/source/time_step/dttherm.F90
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod        ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod      ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod        ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -108,7 +109,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      R   XFEM_STR, IG,  CRKEDGE,     DRAPE_SH4N,  IPRI,
      S   NLOC_DMG,    INDX_DRAPE,  IGRE,        JTUR,
      T   OUTPUT,      DT,          SNPC,        STF  ,
-     T   GLOB_THERM,  USERL_AVAIL, MAXFUNC,     SBUFMAT )
+     T   GLOB_THERM,  USERL_AVAIL, MAXFUNC,     SBUFMAT ,IPART   )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -126,6 +127,7 @@ C-----------------------------------------------
       USE DT_MOD
       use glob_therm_mod
       use dttherm_mod
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -193,11 +195,13 @@ C
       TYPE (GROUP_PARAM_),INTENT(IN)    :: GROUP_PARAM
       TYPE (DT_), INTENT(IN) :: DT
       type (glob_therm_) ,intent(inout) :: glob_therm
+    
+      INTEGER, DIMENSION(LIPART1,NPART), INTENT(IN)     :: IPART
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER MAT(MVSIZ),PID(MVSIZ),NDT(MVSIZ),NGL(MVSIZ),FWAVE_EL(NEL),
-     .   I,J,IGTYP,ICSEN,IFLAG,IUN,NPG,ILAY,NLAY,IXEL,IXLAY,NXLAY,N1,N2,N3,N4,
+     . I,J,IGTYP,ICSEN,IUN,NPG,ILAY,NLAY,IXEL,IXLAY,NXLAY,
      .   IBID,NG,IR,IS,L_DIRA,L_DIRB,J1,J2,IGMAT,NPTTOT,IREP,IFAILWAVE,IDRAPE,
      .   NPTT,IT,ACTIFXFEM,SEDRAPE,NUMEL_DRAPE,IMAT
       my_real 
@@ -207,8 +211,8 @@ C-----------------------------------------------
      .   VX1(MVSIZ), VX2(MVSIZ), VX3(MVSIZ), VX4(MVSIZ),
      .   VY1(MVSIZ), VY2(MVSIZ), VY3(MVSIZ), VY4(MVSIZ),
      .   VZ1(MVSIZ), VZ2(MVSIZ), VZ3(MVSIZ), VZ4(MVSIZ),
-     .   VX13(MVSIZ),VX24(MVSIZ),VY13(MVSIZ),VY24(MVSIZ),
-     .   VZ13(MVSIZ),VZ24(MVSIZ),THK02(MVSIZ), 
+     .
+     . THK02(MVSIZ),
      .   X1G(MVSIZ), X2G(MVSIZ), X3G(MVSIZ), X4G(MVSIZ),
      .   Y1G(MVSIZ), Y2G(MVSIZ), Y3G(MVSIZ), Y4G(MVSIZ),
      .   Z1G(MVSIZ), Z2G(MVSIZ), Z3G(MVSIZ), Z4G(MVSIZ),
@@ -238,8 +242,8 @@ C-----------------------------------------------
      .   DIE(MVSIZ),TEMPEL(MVSIZ),THEM(MVSIZ,4),BID,
      .   UX1(MVSIZ),UX2(MVSIZ),UX3(MVSIZ),UX4(MVSIZ),
      .   UY1(MVSIZ),UY2(MVSIZ),UY3(MVSIZ),UY4(MVSIZ),
-     .   DSUB(MVSIZ,3,4),DRSUB(MVSIZ,3,4),TSUB(MVSIZ),
-     .   DTCSUB(MVSIZ),AREAS(MVSIZ),CONDE(MVSIZ),A11R(MVSIZ)
+     .
+     . DTCSUB(MVSIZ),CONDE(MVSIZ),A11R(MVSIZ)
 
       my_real 
      .  AREAT(MVSIZ),PX1T(MVSIZ),PX2T(MVSIZ),PY1T(MVSIZ),PY2T(MVSIZ),
@@ -262,9 +266,9 @@ C--- Variables for non-local
       my_real, DIMENSION(:,:), ALLOCATABLE :: VAR_REG
       my_real, DIMENSION(:), POINTER :: DNL
 C-----
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF
-      TYPE(L_BUFEL_) ,POINTER :: LBUF
+ 
       TYPE(L_BUFEL_DIR_) ,POINTER :: LBUF_DIR
       TYPE (STACK_PLY) :: STACK
       INTEGER SDIR_A    ! Size of DIR_A
@@ -572,8 +576,9 @@ C-----------------------------
      P  F_DEF       ,ITASK       ,DRAPE_SH4N  ,VAR_REG    ,NLOC_DMG   ,
      R  INDX_DRAPE  ,THKE        ,SEDRAPE     ,NUMEL_DRAPE  ,DT        ,
      Q  NCYCLE      ,SNPC        ,STF         ,NXLAYMAX    ,IDEL7NOK   , 
-     S  USERL_AVAIL ,MAXFUNC    ,NPTTOT       ,SBUFMAT     ,SDIR_A     ,
-     T  SDIR_B      ,GBUF%FOR_G  ,SSP_EQ )
+     S  USERL_AVAIL ,MAXFUNC     ,NPTTOT      ,SBUFMAT     ,SDIR_A     ,
+     T  SDIR_B      ,GBUF%FOR_G  ,SSP_EQ ,
+     X    IPART     ,LIPART1     ,IPARTC     )
 C-----------------------------
       IF ((IMON_MAT==1).AND. ITASK == 0)CALL STOPTIME(TIMERS,35)
 C-----------------------------

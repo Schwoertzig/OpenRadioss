@@ -21,15 +21,18 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    ccoor3   ../engine/source/elements/shell/coque/ccoor3.F
+!||    ccoor3        ../engine/source/elements/shell/coque/ccoor3.F
 !||--- called by ------------------------------------------------------
-!||    cforc3   ../engine/source/elements/shell/coque/cforc3.F
+!||    cforc3        ../engine/source/elements/shell/coque/cforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CCOOR3(JFT ,JLT ,X   ,IXC ,GEO ,OFFG  ,
      2                  OFF ,SIGY,PID,V,VR,VL1,VL2,VL3,VL4,
      3                  VRL1,VRL2,VRL3,VRL4,MAT,DT1C,THKE,THK0,NGL,
      4                  X1  ,X2  ,X3  ,X4  ,Y1  ,Y2    ,
      5                  Y3  ,Y4  ,Z1  ,Z2  ,Z3  ,Z4    )
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -156,9 +159,11 @@ C
       RETURN
       END
 !||====================================================================
-!||    ccoort3   ../engine/source/elements/shell/coque/ccoor3.F
+!||    ccoort3       ../engine/source/elements/shell/coque/ccoor3.F
 !||--- called by ------------------------------------------------------
-!||    cforc3    ../engine/source/elements/shell/coque/cforc3.F
+!||    cforc3        ../engine/source/elements/shell/coque/cforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CCOORT3(JFT     ,JLT   ,X     ,IXC    ,OFFG   ,
      1                    DR     ,PX1   ,PX2   ,PY1    ,PY2    ,
@@ -166,6 +171,7 @@ C
      3                    E2Z    ,E3X   ,E3Y   ,E3Z    ,AREA   , 
      4                    V13X   ,V24X  ,V13Y  ,V24Y   ,SMSTR  ,
      5                    NEL    )
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

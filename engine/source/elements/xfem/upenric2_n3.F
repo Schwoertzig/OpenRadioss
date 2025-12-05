@@ -26,12 +26,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    upxfem1         ../engine/source/elements/xfem/upxfem1.F
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod   ../engine/share/modules/crackxfem_mod.F
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE UPENRIC2_N3(IPARG  ,IXTG     ,NFT      ,JFT     ,JLT   ,
      .                       ELCUTC ,IAD_CRKTG,IEL_CRKTG,INOD_CRK,ENRTAG,
      .                       NXLAY  ,CRKEDGE  ,XEDGE3N  )
 C-----------------------------------------------
       USE CRACKXFEM_MOD
+      use element_mod , only : nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -56,9 +58,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,K,IR,ELCRK,ELCRKTG,ILEV,ILAY,IXEL,ELCUT,IECUT,NELCRK,NSX,
+      INTEGER I,K,IR,ELCRK,ELCRKTG,ILEV,ILAY,IXEL,ELCUT,IECUT,NELCRK,
      .  IED,EDGE,FAC,IBOUNDEDGE,LAYCUT,ENR,ITRI,ITIP,IAD,COUNT
-      INTEGER JCT(MVSIZ),IADC(3),ENR0(3),IENR(3),NTAG(3),d(3),NS(3)
+      INTEGER JCT(MVSIZ),IADC(3),NTAG(3),d(3),NS(3)
       DATA D/2,3,1/
 C=======================================================================
       NELCRK = 0

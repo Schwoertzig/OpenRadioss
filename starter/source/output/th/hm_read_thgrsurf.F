@@ -32,11 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_get_intv              ../starter/source/devtools/hm_reader/hm_get_intv.F
 !||    hm_thvarc                ../starter/source/output/th/hm_read_thvarc.F
 !||    hord                     ../starter/source/output/th/hord.F
-!||    nintrn                   ../starter/source/system/nintrn.F
 !||    r2r_exist                ../starter/source/coupling/rad2rad/routines_r2r.F
-!||    r2r_listcnt              ../starter/source/coupling/rad2rad/routines_r2r.F
-!||    ulist2s                  ../starter/source/system/sysfus.F
-!||    usr2sys                  ../starter/source/system/sysfus.F
 !||    zeroin                   ../starter/source/system/zeroin.F
 !||--- uses       -----------------------------------------------------
 !||    format_mod               ../starter/share/modules1/format_mod.F90
@@ -85,9 +81,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER J,JJ, I,ISU,ID,NNE,NOSYS,NTOT,KK,IER,
-     .        OK,IGRS,NSU,K,L,JREC,CONT,IAD0,IADV,NTRI,
-     .        IFITMP,IADFIN,NVAR,M,N,IAD1,IAD2,ISK,IPROC,ITITLE(LTITR),
+      INTEGER J, I,ID,NNE,
+     .        K,IAD0,
+     .        IFITMP,NVAR,N,IAD1,IAD2,ITITLE(LTITR),
      .        IDS,IDSMAX,
      .        NUM_FOUND
       CHARACTER(LEN=NCHARTITLE) :: TITR
@@ -96,8 +92,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS,ULIST2S,LISTCNT,NINTRN,THVARC,HM_THVARC
-      INTEGER R2R_LISTCNT,R2R_EXIST
+      INTEGER HM_THVARC
+      INTEGER R2R_EXIST
       DATA MESS/'TH GROUP DEFINITION                     '/
 C-----------------------------------------------
 C   S o u r c e   L i n e s

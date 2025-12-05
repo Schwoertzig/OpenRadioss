@@ -34,6 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_connectivity_mod           ../common_source/modules/ale/ale_connectivity_mod.F
 !||    alefvm_mod                     ../common_source/modules/ale/alefvm_mod.F
 !||    elbufdef_mod                   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                    ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod                    ../engine/share/resol/initbuf.F
 !||    matparam_def_mod               ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    multi_fvm_mod                  ../common_source/modules/ale/multi_fvm_mod.F90
@@ -67,6 +68,7 @@ C-----------------------------------------------
         USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
         USE MATPARAM_DEF_MOD
         USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
+        use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -111,7 +113,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         my_real EVAR(MVSIZ),DAM1(MVSIZ),DAM2(MVSIZ),WPLA(MVSIZ),DMAX(MVSIZ),WPMAX(MVSIZ),FAIL(MVSIZ),
      .          EPST1(MVSIZ),EPST2(MVSIZ),EPSF1(MVSIZ),EPSF2(MVSIZ),VALUE(MVSIZ),VG(5),VLY(5),VE(5),MASS(MVSIZ),
-     .          NINTY,VONM2,S1,S2,S12,DMGMX,A1,A2,A3,A4,DIR1_1,DIR1_2,AA,BB,V1,V2,V3,X21,X32,X34,
+     .          VONM2,S1,S2,S12,DMGMX,A1,A2,A3,A4,DIR1_1,DIR1_2,AA,BB,V1,V2,V3,X21,X32,X34,
      .          X41,Y21,Y32,Y34,Y41,Z21,Z32,Z34,Z41,SUMA,VR,VS,X31,Y31,Z31,E11,E12,E13,E21,E22,E23,SUM_,AREA,X2L,
      .          E1X,E1Y,E1Z,E2X,E2Y,E2Z,E3X,E3Y,E3Z,RX,RY,RZ,S_X,S_Y,S_Z,RHO0(MVSIZ),THK0,XX1,XX2,XX3,YY1,YY2,YY3,ZZ1,ZZ2,ZZ3,A0,
      .          RINDX,VFRAC(MVSIZ,1:21),TMP(3,3),CUMUL(3),VX,VY,VZ,SURF,NX,NY,NZ,PHI,ERR,PRES(MVSIZ),VEL(0:3),MAXDAMINI,
@@ -150,7 +152,6 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
-        NINTY = 90.
         CALL INITBUF(IPARG   ,NG      ,
      2                MLW     ,NEL     ,NFT     ,IAD     ,ITY     ,
      3                NPT     ,JALE    ,ISMSTR  ,JEUL    ,JTURB   ,
@@ -1473,9 +1474,9 @@ C
                           ENDIF
 c
                           PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                          ERR = (ABS(PHI) - NINTY)/NINTY
+                          ERR = (ABS(PHI) - NINETY)/NINETY
                           VALUE(I) = PHI
-                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                           IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                           IS_WRITTEN_VALUE(I) = 1
                         ENDDO
@@ -1583,9 +1584,9 @@ C
                             DIR1_2 = BUFLY%DIRA(I+NEL)
                           ENDIF
                           PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                          ERR = (ABS(PHI) - NINTY)/NINTY
+                          ERR = (ABS(PHI) - NINETY)/NINETY
                           VALUE(I) = PHI
-                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                           IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                           IS_WRITTEN_VALUE(I) = 1
                         ENDDO
@@ -1665,9 +1666,9 @@ C
                             DIR1_2 = LBUF_DIR%DIRA(I+NEL)
                           ENDIF
                           PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                          ERR = (ABS(PHI) - NINTY)/NINTY
+                          ERR = (ABS(PHI) - NINETY)/NINETY
                           VALUE(I) = PHI
-                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                           IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                           IS_WRITTEN_VALUE(I) = 1
                         ENDDO
@@ -1732,9 +1733,9 @@ C
                             DIR1_2 = BUFLY%DIRA(I+NEL)
                           ENDIF
                           PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                          ERR = (ABS(PHI) - NINTY)/NINTY
+                          ERR = (ABS(PHI) - NINETY)/NINETY
                           VALUE(I) = PHI
-                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                          IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                           IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                           IS_WRITTEN_VALUE(I) = 1
                         ENDDO
@@ -1868,9 +1869,9 @@ C
                               ENDIF
 c
                               PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                              ERR = (ABS(PHI) - NINTY)/NINTY
+                              ERR = (ABS(PHI) - NINETY)/NINETY
                               VALUE(I) = PHI
-                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                               IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                               IS_WRITTEN_VALUE(I) = 1
                             ENDDO
@@ -1980,9 +1981,9 @@ C
                               ENDIF
 c
                               PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                              ERR = (ABS(PHI) - NINTY)/NINTY
+                              ERR = (ABS(PHI) - NINETY)/NINETY
                               VALUE(I) = PHI
-                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                               IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                               IS_WRITTEN_VALUE(I) = 1
                             ENDDO
@@ -2059,9 +2060,9 @@ C
                                 DIR1_2 = LBUF_DIR%DIRA(I+NEL)
                               ENDIF
                               PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                              ERR = (ABS(PHI) - NINTY)/NINTY
+                              ERR = (ABS(PHI) - NINETY)/NINETY
                               VALUE(I) = PHI
-                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                               IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                               IS_WRITTEN_VALUE(I) = 1
                             ENDDO
@@ -2126,9 +2127,9 @@ C
                                 DIR1_2 = BUFLY%DIRA(I+NEL)
                               ENDIF
                               PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)
-                              ERR = (ABS(PHI) - NINTY)/NINTY
+                              ERR = (ABS(PHI) - NINETY)/NINETY
                               VALUE(I) = PHI
-                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINTY,PHI)
+                              IF(ABS(ERR) < EM02) VALUE(I) = SIGN(NINETY,PHI)
                               IF(ABS(VALUE(I)) < ONE) VALUE(I) = ZERO
                               IS_WRITTEN_VALUE(I) = 1
                             ENDDO

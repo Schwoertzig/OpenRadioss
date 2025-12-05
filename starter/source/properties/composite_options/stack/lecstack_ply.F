@@ -34,7 +34,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_option_start        ../starter/source/devtools/hm_reader/hm_option_start.F
 !||    hm_read_stack          ../starter/source/stack/hm_read_stack.F
 !||    lcgeo19                ../starter/source/elements/shell/coque/lcgeo19.F
-!||    usr2sys                ../starter/source/system/sysfus.F
 !||    vdouble                ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||    defaults_mod           ../starter/source/modules/defaults_mod.F90
@@ -89,13 +88,12 @@ C-----------------------------------------------
       LOGICAL lFOUND
       CHARACTER(LEN=NCHARTITLE) ::  IDTITL,TITR1
       CHARACTER MESS*40
-      INTEGER I, IG,IGTYP,J,IP,ISTRAIN,I8PT,ISK,ITU,IRB,IHON,IHBE,IPLAST,ITHK,K,N,IDS, IUNIT,UID,ISORTH
-      INTEGER NSTACK,ISTACK,NUMS,IFLAGUNIT,JPID,N1,SUB_ID,PID1,JPID1,JPID2,NISUB,II,IPOS
-      my_real ANGL,RBID,FAC_L,ZSHIFT
+      INTEGER I, IG, IGTYP, J, IHBE, K, IDS, IUNIT, UID, ISORTH
+      INTEGER NSTACK, ISTACK, NUMS, IFLAGUNIT, JPID, N1, SUB_ID, JPID1, JPID2, NISUB, II, IPOS
+      my_real RBID, FAC_L, ZSHIFT
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS
       DATA MESS/'PID DEFINITION                          '/
 C----------------------
 C     GEO(3) : ISMSTR

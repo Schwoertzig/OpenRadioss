@@ -24,10 +24,13 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    cbafint_ply   ../engine/source/properties/composite_options/stack/cbafint_ply.F
 !||--- called by ------------------------------------------------------
 !||    cbaforc3      ../engine/source/elements/shell/coqueba/cbaforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CBAFINT_PLY(JFT,JLT,NPT,NG,NPLAT,IPLAT,CDET,THKLY,TH12,
      .                        VOL,FF0,BM,BC,TC,SIG_IPLY,VNI,AREA,
-     .                        VF,VFI,IXC) 
+     .                        VF,VFI,IXC)
+      use element_mod , only : nixc
 C--------------------------------------------------------------------------------------------------
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 C  CALCUL DES FORCES INTERNES AUX NOEUDS 
@@ -56,7 +59,7 @@ c     .   FF(5,MVSIZ,NPT),CDET(*),VOL(MVSIZ,NPT),
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER EP,I,J,JSUP,JINF,IPLY,K,NPLAT0
+      INTEGER EP,I,J,JSUP,JINF,IPLY,NPLAT0
       my_real
      .  C1,C2,BC1,BC3,BC5,BCX,BCY,FL1,FL2,FL3,
      .  FF(MVSIZ,5,NPT)

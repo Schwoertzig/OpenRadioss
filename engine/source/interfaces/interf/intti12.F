@@ -77,7 +77,7 @@ C-----------------------------------------------
  
       INTEGER ITIED,NOINT,NGROUS,NGROUM,NG,
      .  L1 ,L2 ,L3 ,L4,L5,L6
-      INTEGER JCODV(ALE%GLOBAL%LCONV),CODTOT,I,ITEST,ILEV,IREF,ICEN
+      INTEGER JCODV(ALE%GLOBAL%LCONV), CODTOT, ITEST, ILEV, IREF, ICEN
       INTEGER, DIMENSION(MVSIZ) :: IX1,IX2,IX3,IX4
       my_real
      .  GAP
@@ -85,8 +85,8 @@ C-----------------------------------------------
       my_real, DIMENSION(MVSIZ) :: Y1,Y2,Y3,Y4,YI
       my_real, DIMENSION(MVSIZ) :: Z1,Z2,Z3,Z4,ZI
       my_real, DIMENSION(MVSIZ) :: XFACE,N1,N2,N3
-      my_real, DIMENSION(MVSIZ) :: SSC,TTC,AREA,THK,ALP
-      my_real, DIMENSION(MVSIZ) :: X0,Y0,Z0,ANS
+      my_real, DIMENSION(MVSIZ) :: SSC, TTC, AREA
+      my_real, DIMENSION(MVSIZ) :: X0, Y0, Z0
       my_real, DIMENSION(MVSIZ) :: XX1,XX2,XX3,XX4
       my_real, DIMENSION(MVSIZ) :: YY1,YY2,YY3,YY4
       my_real, DIMENSION(MVSIZ) :: ZZ1,ZZ2,ZZ3,ZZ4
@@ -96,8 +96,8 @@ C-----------------------------------------------
       my_real, DIMENSION(MVSIZ) :: XN1,XN2,XN3,XN4
       my_real, DIMENSION(MVSIZ) :: YN1,YN2,YN3,YN4
       my_real, DIMENSION(MVSIZ) :: ZN1,ZN2,ZN3,ZN4
-      my_real, DIMENSION(MVSIZ) :: XP,YP,ZP
-      my_real, DIMENSION(MVSIZ) :: H1,H2,H3,H4
+ 
+ 
       INTEGER :: NRTS, NRTM, NSN, NMN, NST, MST
       INTEGER :: LFT, LLT, NFT
 C-----------------------------------------------
@@ -165,7 +165,7 @@ C-----------------------------------------------
      7   Z3,               Z4,               ZI,               XFACE,
      8   LFT,              LLT,              NFT)
           !-----------------------------------------------------------!
-          !   CALCUL COORDONNEES ISOPARAMETRIQUES S & T NOEUD SECONDARY   !
+          !   CALCULATION COORDONNEES ISOPARAMETRIQUES S & T NODE SECONDARY   !
           !-----------------------------------------------------------!
           CALL I3CST3(
      1   X1,      X2,      X3,      X4,
@@ -264,10 +264,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER ITIED,NOINT,NGROUS,NGROUM,NG
+      INTEGER ITIED, NOINT, NGROUS, NGROUM
       INTEGER ILEV,IREF
-      my_real
-     .  GAP
       INTEGER :: NRTS, NRTM, NSN, NMN, NST, MST
 
 C-----------------------------------------------
@@ -293,7 +291,7 @@ C-----------------------------------------------
       IF(ITIED==2)CALL IN12R(A,INTBUF_TAB%VARIABLES(1),INTBUF_TAB%NSV,
      .                         NSN,1,INTBUF_TAB%FCOUNT)
       !-----------------------------------------------------------------!     
-      ! CALCUL FORCES COTE MAIN (IDEM TYPE 2)                         !
+      ! CALCULATION FORCES COTE MAIN (IDEM TYPE 2)                         !
       !-----------------------------------------------------------------!
       CALL I12FOR3(
      1 NSN         ,NMN            ,A         ,INTBUF_TAB%IRECTM,INTBUF_TAB%CSTS,

@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    stoptimeg      ../engine/source/system/timer.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    message_mod    ../engine/share/message_module/message_mod.F
 !||    sphbox         ../engine/share/modules/sphbox.F
 !||====================================================================
@@ -45,6 +46,7 @@ C-----------------------------------------------
       USE SPHBOX
       USE ELBUFDEF_MOD         
       USE MESSAGE_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -78,10 +80,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,  N, IP, KP, NG, MG, J, NP, KFT, IG, NELEM,
-     .        NEL, OFFSET, NVOIS, M, INOD, JNOD, NN, IPRT, IMAT,
+      INTEGER I,  N, KP, NG, MG, NP, KFT, IG, NELEM,
+     .        NEL, OFFSET, INOD, IMAT,
      .        N1, N2, N3, N4, N5, N6, N7, N8,
-     .        K1, K2, K3, K4, K5, K6, K7, K8, IERROR,
+     .        K1, K2, K3, K4, K5, K6, K7, K8,
      .        NODFT, NODLT
       my_real
      .        DM, RHO0, EHOURT, EK, VI2, VXI, VYI, VZI,
@@ -421,6 +423,7 @@ C-----------------------------------------------
 !||    stoptimeg       ../engine/source/system/timer.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod    ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    message_mod     ../engine/share/message_module/message_mod.F
 !||    sphbox          ../engine/share/modules/sphbox.F
 !||====================================================================
@@ -436,6 +439,7 @@ C-----------------------------------------------
       USE SPHBOX
       USE ELBUFDEF_MOD         
       USE MESSAGE_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -467,8 +471,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,  N, IP, KP, NG, MG, J, NP, KFT, IG, NELEM,
-     .        NEL, OFFSET, NVOIS, M, INOD, JNOD, NN, IPRT, IMAT
+      INTEGER I,  N, KP, NG, J, NP, IG, NELEM,
+     .        NEL, OFFSET, NVOIS, M, INOD, JNOD, NN
 C                                                                    
 C-----
       TYPE(G_BUFEL_) ,POINTER :: GBUF

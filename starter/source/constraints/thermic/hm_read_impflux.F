@@ -31,7 +31,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_get_intv            ../starter/source/devtools/hm_reader/hm_get_intv.F
 !||    hm_option_read_key     ../starter/source/devtools/hm_reader/hm_option_read_key.F
 !||    hm_option_start        ../starter/source/devtools/hm_reader/hm_option_start.F
-!||    usr2sys                ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||    hm_option_read_mod     ../starter/share/modules1/hm_option_read_mod.F
 !||    message_mod            ../starter/share/message_module/message_mod.F
@@ -84,14 +83,13 @@ C-----------------------------------------------
       INTEGER IEL, IGBR, K1, K2
 C
       my_real FCX, FCY, FCX_DIM, FCY_DIM
-      my_real TEMP, TSTART, TSTOP, TSTOP_DIM
+      my_real TSTART, TSTOP, TSTOP_DIM
       CHARACTER MESS*40
       CHARACTER(LEN=NCHARTITLE)::TITR
       LOGICAL IS_AVAILABLE
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS
       DATA MESS/'THERMAL  FLUX  DEFINITION               '/
 C=======================================================================
       IS_AVAILABLE = .FALSE.                                       

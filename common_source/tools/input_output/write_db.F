@@ -129,6 +129,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_real_2d             ../common_source/comm/write_mod.F
 !||    write_real_3d             ../common_source/comm/write_mod.F
 !||    write_rrbe3pen            ../engine/source/output/restart/restart_rbe3pen.F90
+!||    write_rrwallpen           ../engine/source/output/restart/restart_rwallpen.F90
 !||    write_sensors             ../engine/source/output/restart/write_sensors.F
 !||    write_thermparam          ../engine/source/output/restart/write_thermparam.F90
 !||    write_units               ../common_source/comm/write_units.F
@@ -316,7 +317,6 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER I,J,K,N1,N2
         DOUBLE PRECISION R8(1000)
-        REAL R4(1000)
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------

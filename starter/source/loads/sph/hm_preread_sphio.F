@@ -64,8 +64,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,N,ID,IDS,NSEG,ITYPE,IDPRT,IDSURF,SKIP,IN1,IN2,IN3,LVAD
-      my_real DIST,FCUT
+      INTEGER I, J, N, ID, IDS, NSEG, ITYPE, IDSURF, SKIP, LVAD
       CHARACTER(LEN=NCHARTITLE) :: TITR
       LOGICAL IS_AVAILABLE
 C=======================================================================
@@ -95,7 +94,7 @@ C
           NOM_OPT(1,I)=ID
           CALL FRETITL(TITR,NOM_OPT(LNOPT1-LTITR+1,I),LTITR)
 C         
-          ! Reading type dans surface ID
+          ! Reading type in surface ID
           CALL HM_GET_INTV('Itype'   ,ITYPE  ,IS_AVAILABLE,LSUBMODEL)
           CALL HM_GET_INTV('SURF_ID' ,IDSURF ,IS_AVAILABLE,LSUBMODEL)
 C

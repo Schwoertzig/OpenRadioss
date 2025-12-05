@@ -56,7 +56,6 @@
 !||    jcook51_mod                      ../engine/source/materials/mat/mat051/jcook51.F90
 !||    matparam_def_mod                 ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    multimat_param_mod               ../common_source/modules/multimat_param_mod.F90
-!||    polynomial51_mod                 ../engine/source/materials/mat/mat051/polynomial51.F
 !||    precision_mod                    ../common_source/modules/precision_mod.F90
 !||    prop_param_mod                   ../common_source/modules/mat_elem/prop_param_mod.F90
 !||    sigeps51_boundary_material_mod   ../engine/source/materials/mat/mat051/sigeps51_boundary_material.F90
@@ -94,7 +93,6 @@
           use granular51_mod , only : granular51
           use jcook51_mod , only : jcook51
           use matparam_def_mod , only : matparam_struct_
-          use polynomial51_mod , only : polynomial51
           use eosmain51_mod , only : eosmain51
 !---------+---------+---+---+--------------------------------------------
 ! VAR     | SIZE    |TYP| RW| DEFINITION
@@ -246,15 +244,15 @@
             AV1(nel),AV2(nel),AV3(nel),AV4(nel),RHO10,RHO20,RHO30,RHO40,RHO1,RHO2,RHO3,RHO4, &
             RHO1OLD,RHO2OLD,RHO3OLD,RHO4OLD, &
             MAS1,MAS2,MAS3,MAS4,EINT1,EINT2,EINT3,EINT4, &
-            ESPE1, ESPE2, ESPE3, ESPE4, &
+            ESPE1, ESPE2, ESPE3, &
             P1,P2,P3,P4,P1I,P2I,P3I,P4I,VQ0,VQ1,VQ2,VQ3,VQ4, &
             Q0, Q1,Q2,Q3,Q4,Q1OLD,Q2OLD,Q3OLD,Q4OLD,SSP1,SSP2,SSP3,SSP4, &
             MU1,MU2,MU3,MU4, &
             MU1P1, MU2P1, MU3P1, MU4P1, &
             DDVOL1,DDVOL2,DDVOL3,DDVOL4, &
             DVOL1,DVOL2,DVOL3,DVOL4,&
-            DPDMU1,DPDMU2,DPDMU3,DPDMU4,&
-            DF1,DF2,DF3,DF4,&
+            DPDMU1,DPDMU2,DPDMU3,&
+            DF1,DF2,DF3,&
             SPH1,SPH2,SPH3,SPH4, &
             DPDE1,DPDE2,DPDE3,DPDE4,&
             V10,V20,V30,V40,V1,V2,V3,V4,V1OLD,V2OLD,V3OLD,V4OLD, &

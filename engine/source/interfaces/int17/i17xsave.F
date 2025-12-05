@@ -25,12 +25,15 @@ C  |         I17MAIN_TRI                       /int17/i17main_lag.F
 !||    i17xsave      ../engine/source/interfaces/int17/i17xsave.F
 !||--- called by ------------------------------------------------------
 !||    i17main_tri   ../engine/source/interfaces/int17/i17main_pena.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE I17XSAVE(
      1       X     ,V     ,A     ,IXS   ,IXS16 ,
      2       NMES  ,NME_T ,ESH_T ,NELEM ,NELES ,
      3       EMINXM,ITASK ,XSAV  ,XMIN  ,YMIN  ,
      4       ZMIN  ,XMAX  ,YMAX  ,ZMAX  )
+      use element_mod , only : nixs
 C saving of xsav and calculation of domain bounds
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -46,7 +49,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NMES,NME_T,ESH_T,NMN,ITASK,
+      INTEGER NMES,NME_T,ESH_T,ITASK,
      .        NELEM(*),NELES(*),IXS(NIXS,*),IXS16(8,*)
       my_real
      .        XMAX, YMAX, ZMAX, XMIN, YMIN, ZMIN,

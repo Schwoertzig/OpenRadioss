@@ -115,9 +115,9 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER MSGTYP,INFO,I,NOD, DT_CST, LOC_PROC,P,IDEB,
-     .        SIZ,J, L, BUFSIZ, LEN, NB, IERROR1, IAD,
-     .        STATUS(MPI_STATUS_SIZE),IERROR,REQ_SB(NSPMD),
+      INTEGER MSGTYP, I, NOD, LOC_PROC, P, IDEB, 
+     . J, L, LEN, NB,
+     . IERROR,REQ_SB(NSPMD),
      .        REQ_RB(NSPMD),KK,NBIRECV,IRINDEXI(NSPMD),
      .        REQ_RD(NSPMD),REQ_SD(NSPMD),REQ_SD2(NSPMD),
      .        REQ_RC(NSPMD),REQ_SC(NSPMD),
@@ -130,8 +130,7 @@ C-----------------------------------------------
      .        REQ_SD4(NSPMD),REQ_RD4(NSPMD),
      .        REQ_SD5(NSPMD),REQ_RD5(NSPMD),
      .        LEN2, RSHIFT, ISHIFT, ND, JDEB, Q, NBB,
-     .        NB_EDGE, IDEB_EDGE,
-     .        ISIZ_EDGE
+     .        NB_EDGE, IDEB_EDGE
 
       my_real:: XMINS,YMINS,ZMINS
       my_real:: XMAXS,YMAXS,ZMAXS
@@ -434,7 +433,7 @@ C            First segment is on the other side of the boundary
 
            IF( STF > ZERO .AND. LEDGE(7,I) >= 0)  THEN
 C
-C            GAPE inutile ici (Redondant avec BGAPEMAX cote main) !
+C            GAPE useless here (Redundant with BGAPEMAX on main side) !
              XMINS = MIN(X(1,N1),X(1,N2))!- GAPE(I)      
              YMINS = MIN(X(2,N1),X(2,N2))!- GAPE(I)      
              ZMINS = MIN(X(3,N1),X(3,N2))!- GAPE(I)      
@@ -842,7 +841,7 @@ c INT25
               DO J = 1, NB
                 I = INDEX(J)
                 NOD = NSV(I)
-C               IRTLM(3,NSN) en TYPE25 / IRTLM(3,-) inutile ici 
+C               IRTLM(3,NSN) in TYPE25 / IRTLM(3,-) useless here 
                 IBUF(P)%p(L2+ISHIFT)  =IRTLM(4*(I-1)+1)
                 IBUF(P)%p(L2+ISHIFT+1)=IRTLM(4*(I-1)+2)
 C

@@ -59,7 +59,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER IER1, II, I, J, K, L, M, JJ, IER2
+      INTEGER IER1, II, I, J, K, L, M, IER2
       my_real  N2, N3, YS, ZS, T2, T3, XL, SS,YM1,YM2,ZM1,ZM2
 C-----------------------------------------------
 C   S o u r c e   L i n e s
@@ -104,7 +104,7 @@ C-----------------------------------------------
       ENDDO !next II
 
       IF(IER1 > 0)THEN
-        ! ** ERROR TIED INTERFACE: SECND NODE OUTSIDE main SEGMENT
+        ! ** ERROR TIED INTERFACE: SECOND NODE OUTSIDE main SEGMENT
         CALL ANCMSG(MSGID=81,MSGTYPE=MSGERROR,ANMODE=ANINFO,I1=ID,C1=TITR)
       ENDIF
 C-----------------------------------------------

@@ -81,7 +81,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,N, ICOR
       my_real
-     .   D, AA, BB, DET(MVSIZ)
+     .   D, DET(MVSIZ)
 C-----------------------------------------------
 C
 C
@@ -387,7 +387,7 @@ C
       DO I=1,NEL
 C-----------------------------------------------------------------------
 C          -1 inversion of the Jacobian suite
-C       [J]              et repere local r,s,t
+C       [J]              and local frame r,s,t
 C-----------------------------------------------------------------------
         D = ONE/DET(I)
         DRDX(I)=D*DRDX(I)

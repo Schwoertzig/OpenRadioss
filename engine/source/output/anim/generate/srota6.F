@@ -41,10 +41,13 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    scoor431             ../engine/source/elements/solid/sconnect/scoor431.F
 !||    scortho31            ../engine/source/elements/thickshell/solidec/scortho31.F
 !||    sortho31             ../engine/source/elements/solid/solide/sortho31.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SROTA6(
      1   X,       IXS,     KCVT,    TENS,
      2   GAMA,    KHBE,    ITYP,    ISORTH)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    arret          ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    message_mod    ../engine/share/message_module/message_mod.F
 !||    remesh_mod     ../engine/share/modules/remesh_mod.F
 !||====================================================================
@@ -46,7 +47,8 @@ C   M o d u l e s
 C-----------------------------------------------
       USE REMESH_MOD
       USE MESSAGE_MOD
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD
+      use element_mod , only : nixc,nixtg 
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

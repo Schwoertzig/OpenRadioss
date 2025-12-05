@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale51_init             ../engine/source/ale/ale51/ale51_init.F
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    i22tri_mod             ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||====================================================================
       SUBROUTINE ALE51_UPWIND3(PM     ,IXS  ,FLUX ,FLU1 ,ALE_CONNECT,
@@ -46,6 +47,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE I22TRI_MOD
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

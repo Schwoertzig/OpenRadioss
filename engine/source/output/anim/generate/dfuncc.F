@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_connectivity_mod         ../common_source/modules/ale/ale_connectivity_mod.F
 !||    alefvm_mod                   ../common_source/modules/ale/alefvm_mod.F
 !||    elbufdef_mod                 ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                  ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod                  ../engine/share/resol/initbuf.F
 !||    matparam_def_mod             ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    multi_fvm_mod                ../common_source/modules/ale/multi_fvm_mod.F90
@@ -64,6 +65,7 @@ C-----------------------------------------------
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
       USE MATPARAM_DEF_MOD , ONLY : MATPARAM_STRUCT_
       USE MY_ALLOC_MOD
+      use element_mod , only : nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -112,7 +114,7 @@ C-----------------------------------------------
      .   E1X,E1Y,E1Z,E2X,E2Y,E2Z,E3X,E3Y,E3Z,RX,RY,RZ,SX,SY,SZ,
      .   VG(5),VLY(5),VE(5),DMGMX_LY,EVAR_TMP,A01,A02,A03,A12,A,
      .   M,FF,GG,NN,
-     .   VEL(0:3),VFRAC(MVSIZ,21),PHI,ERR,NINTY
+     .   VEL(0:3),VFRAC(MVSIZ,21),PHI,ERR
       INTEGER I,IDX,I1,II,J,NG,NEL,NPTR,NPTS,NPTT,NLAY,L,IFAIL,ILAY,
      .        IR,IS,IT,IL,MLW, NUVAR,IUS,PTF,PTM,PTS,NFAIL,
      .        N,K,K1,K2,JTURB,MT,IMID,IALEL,IPID,ISH3N,NNI,
@@ -149,9 +151,9 @@ C-----------------------------------------------
       my_real :: RHOi(21) !< submaterial  mass densities (max submat : 21)
       my_real :: RHO0g !< global initial mass density (mixture)
       LOGICAL detected
+      INTEGER :: IDX0,IDX1,IDX2
 C-----------------------------------------------
       CALL MY_ALLOC(WAL,NBF_L)
-      NINTY = 90.
       NN1  = 1
       NN3  = 1
       NN4  = NN3 + NUMELQ
@@ -159,6 +161,9 @@ C-----------------------------------------------
       NN6  = NN5 + NUMELTG
       NN9  = NN6 
       ISH_EINT = 13242 + 4*MX_PLY_ANIM + 2
+      IDX0 = 15921 + 4*MX_PLY_ANIM  ! VEL-Y 0:10
+      IDX1 = IDX0+10+1              ! VEL-Z 0:10
+      IDX2 = IDX1+10+1              ! VEL   0:10
       
       !-------------------------------------------------------!
       !     INITIALIZATION IF SCHLIEREN DEFINED               !
@@ -988,7 +993,7 @@ c------------------------------------ Tillotson Region id
                 ENDIF
               ENDIF
 
-c------------------------------------ Volumetric Strain (VSTRAIN)
+c------------------------------------ Volumetric Strain (GLOBAL VSTRAIN)
             elseif(IFUNC == 15899 + 4*MX_PLY_ANIM .and. N2D > 0) then
 !--------------------------------------------------
               DO I=LFT,LLT
@@ -1113,7 +1118,7 @@ c------------------------------------ Volumetric Strain (VSTRAIN)
                 end if
 
               enddo
-c------------------------------------ Volumetric Strain (VSTRAIN)
+c------------------------------------ Volumetric Strain (submaterial VSTRAIN)
             elseif(   IFUNC >= 15899 + 4*MX_PLY_ANIM +1
      .          .and. IFUNC <= 15899 + 4*MX_PLY_ANIM +10
      .          .and. N2D > 0) then
@@ -1191,12 +1196,51 @@ c------------------------------------ Volumetric Strain (VSTRAIN)
                       FUNC(EL2FA(NN3+NFT+I)) = ZERO
                     end if
                 enddo
-
-              end if
-
+            end if
 
 
-c------------------------------------ 
+c------------------------------------ 2D velocity VEL-GLOBAL
+          elseif( IFUNC >= IDX0 .AND. IFUNC <= IDX0+10) then
+            ILAY = IFUNC - IDX0
+            IF(MLW == 151 .AND. ILAY == 0)THEN
+              DO I=LFT,LLT
+                VEL(1) = MULTI_FVM%VEL(1, I + NFT)
+                VEL(2) = MULTI_FVM%VEL(2, I + NFT)
+                VEL(3) = MULTI_FVM%VEL(3, I + NFT)
+                FUNC(EL2FA(NN3+NFT+I)) = SQRT(VEL(1)*VEL(1)+VEL(2)*VEL(2)+VEL(3)*VEL(3))
+              ENDDO
+            ELSE
+              DO I=LFT,LLT
+                FUNC(EL2FA(NN3+NFT+I)) = ZERO
+              ENDDO
+            ENDIF
+c------------------------------------ 2D velocity VEL-Y
+          elseif( IFUNC >= IDX1 .AND. IFUNC <= IDX1+10) then
+            ILAY = IFUNC - IDX1
+            IF(MLW == 151 .AND. ILAY == 0)THEN
+              DO I=LFT,LLT
+                VEL(2) = MULTI_FVM%VEL(2, I + NFT)
+                FUNC(EL2FA(NN3+NFT+I)) = VEL(2)
+              ENDDO
+            ELSE
+              DO I=LFT,LLT
+                FUNC(EL2FA(NN3+NFT+I)) = ZERO
+              ENDDO
+            ENDIF
+c------------------------------------ 2D velocity VEL-Z
+          elseif( IFUNC >= IDX2 .AND. IFUNC <= IDX2+10) then
+            ILAY = IFUNC - IDX2
+            IF(MLW == 151 .AND. ILAY == 0)THEN
+              DO I=LFT,LLT
+                VEL(3) = MULTI_FVM%VEL(3, I + NFT)
+                FUNC(EL2FA(NN3+NFT+I)) = VEL(3)
+              ENDDO
+            ELSE
+              DO I=LFT,LLT
+                FUNC(EL2FA(NN3+NFT+I)) = ZERO
+              ENDDO
+            ENDIF
+c------------------------------------
             ELSE                                                      
               DO  I=LFT,LLT                                           
                 FUNC(EL2FA(NN3+NFT+I)) = ZERO                         
@@ -1696,9 +1740,9 @@ C
                         ENDIF                                       
 C
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                         !!EVAR(I) = (HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
                       ENDDO                                
@@ -1807,9 +1851,9 @@ C
                         ENDIF                                       
 C
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                         !!EVAR(I) = (HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
                       ENDDO    
@@ -1890,9 +1934,9 @@ C
                           DIR1_2 = LBUF_DIR%DIRA(I+NEL)          
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO          
                       ENDDO                                                  
                      ELSE  ! IDRAPE                    
@@ -1961,9 +2005,9 @@ C
                           DIR1_2 = BUFLY%DIRA(I+NEL)          
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO          
                       ENDDO  
                      ENDIF ! IDRAPE                                                    
@@ -3249,9 +3293,9 @@ C
                         ENDIF                                       
 c
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                       ENDDO                                                       
                     ENDIF  ! MLW                            
@@ -3362,9 +3406,9 @@ C
                         ENDIF                                       
 c
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                       ENDDO                                                       
                     ENDIF  ! MLW                                                  
@@ -3443,9 +3487,9 @@ C
                           DIR1_2 = LBUF_DIR%DIRA(I+NEL)                        
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO     
                       ENDDO                                                     
                     ENDIF                                                        
@@ -3517,9 +3561,9 @@ C
                           DIR1_2 = BUFLY%DIRA(I+NEL)                        
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO     
                       ENDDO                                                     
                     ENDIF                                                       
@@ -5155,14 +5199,14 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER JFT,JLT,IREP
+ 
       my_real
      .   RX , RY , RZ, SX , SY , SZ,
      .   E1X, E1Y, E1Z,E2X, E2Y, E2Z,E3X, E3Y, E3Z
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I
+ 
       MY_REAL
      .   C1,C2,CC,DET
 C~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

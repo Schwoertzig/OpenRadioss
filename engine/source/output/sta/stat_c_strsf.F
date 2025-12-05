@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tab_strs_txt50      ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE STAT_C_STRSF(
@@ -42,6 +43,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD         
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,7 +61,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXC(NIXC,*),IXTG(NIXTG,*),
      .        IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTC(*), IPARTTG(*), IPART_STATE(*),
@@ -72,7 +74,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J,K,N,II,JJ,LEN,IOFF,IE,NG,NEL,NFT,LFT,NPT,
-     .   LLT,ITY,MLW,IH,IHBE, ID, IPRT0, IPRT,IR,IS,IT,
+     .   LLT,ITY,MLW,IHBE, ID, IPRT0, IPRT,IR,IS,IT,
      .   NPG,IPG,MPT,IPT,NPTR,NPTS,NPTT,NLAY,L_PLA,ITHK,
      .   IGTYP,NPT_ALL,IL,KK(12)
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA

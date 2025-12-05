@@ -159,15 +159,15 @@ C-----------------------------------------------
      .        IMOD,IFILTR,IFUNS,IFUNN,IFUNT,NOINT,IDBG
 C     REAL
       my_real
-     .   S,T,SP,SM,TP,TM,AA,INS,MXI,MYI,MZI,XSM,YSM,ZSM,XC,YC,ZC,
+     .   S,T,SP,SM,TP,TM,XSM,YSM,ZSM,XC,YC,ZC,
      .   X0,X1,X2,X3,X4,Y0,Y1,Y2,Y3,Y4,Z0,Z1,Z2,Z3,Z4,SUM,DX,DY,DZ,
-     .   FX,FY,FZ,FXI,FYI,FZI,SX,SY,SZ,TX,TY,TZ,DT12M,DTIME,
-     .   DXNORM,DXTANG,DXTAN2,FNORM,FTANG,FTAN2,MCDG,
+     .   FX,FY,FZ,SX,SY,SZ,TX,TY,TZ,DT12M,DTIME,
+     .   DXNORM,DXTANG,FNORM,FTANG,FTAN2,MCDG,
      .   VX,VY,VZ,VNX,VNY,VNZ,VTX,VTY,VTZ,VUX,VUY,VUZ,FACN,FACT,
-     .   FSAV1,FSAV2,FSAV3,FSAV4,FSAV5,FSAV6,FSAV7,FSAV8,FSAV9,FSAV10, 
+     .   FSAV1,FSAV2,FSAV3,FSAV4,FSAV5,FSAV6,FSAV8,FSAV9,FSAV10, 
      .   FSAV11,FSAV12,FSAV13,FSAV14,FSAV15,IMPX,IMPY,IMPZ 
       my_real
-     .   H(4),DXN(3),DXT(3),DXU(3),FN(3),FT(3),FU(3),FNAREA,FTAREA,ADXTANG
+     .   H(4),DXN(3),DXT(3),FN(3),FT(3),FU(3),FNAREA,FTAREA,ADXTANG
 C----
       type(UINTBUF) :: USERBUF
 !
@@ -183,7 +183,7 @@ C
           L=IRTL(II)
           IRUPT(II) = 0
           INORM(II) = 0  
-C         initial distance main-secnd
+C         initial distance main-second
           S = CRST(1,II)                                         
           T = CRST(2,II)                                         
           SP=ONE + S                                              
@@ -251,7 +251,7 @@ C
         DT12M = ONE/DT12
       ENDIF                 
 C---------------
-C     Reset initial main & secnd masse /inertia
+C     Reset initial main & second masse /inertia
 C---------------
       DO II=1,NMN        
         I=MSR(II)        
@@ -301,7 +301,7 @@ C
            N3  = IRECT(3,L)
            N4  = IRECT(4,L)
 C------------------------------------------------                  
-C         Relative Main-Second Deplacement
+C         Relative Main-Second Displacement
 C------------------------------------------------                  
            X0  = X(1,I)
            Y0  = X(2,I)
@@ -352,7 +352,7 @@ C------------------------------------------------
            VTY = SY * SUM
            VTZ = SZ * SUM
 C------------------------------------------------                  
-C         components n/t'du Deplacement
+C         components n/t'du Displacement
 C------------------------------------------------                  
            DXNORM = VNX*DX + VNY*DY + VNZ*DZ
            DXN(1) = VNX*DXNORM
@@ -362,7 +362,7 @@ C------------------------------------------------
            DXT(2) = DY - DXN(2)
            DXT(3) = DZ - DXN(3)
            DXTANG = SQRT(DXT(1)**2 + DXT(2)**2 + DXT(3)**2)
-C          repere local
+C          local frame
            IF (DXTANG > ZERO) THEN
              SUM = ONE / DXTANG
              VTX = DXT(1) * SUM
@@ -373,7 +373,7 @@ C          repere local
            VUY = VNZ * VTX - VNX * VTZ
            VUZ = VNX * VTY - VNY * VTX
 C------------------------------------------------                  
-C         force main/secnd
+C         force main/second
 C------------------------------------------------                  
            IF (IRUPT(II) == 0) THEN
 C            No break - cinematic interface          
@@ -391,7 +391,7 @@ C            No break - cinematic interface
              FY = A(2,I) + (V(2,I) - VY)*MS(I)*DT12M 
              FZ = A(3,I) + (V(3,I) - VZ)*MS(I)*DT12M
            ELSEIF (IRUPT(II) == -1) THEN
-C            rupture partielle = spring main/secnd        
+C            rupture partielle = spring main/second
              FX  = STIFN(I)*DX
              FY  = STIFN(I)*DY              
              FZ  = STIFN(I)*DZ              

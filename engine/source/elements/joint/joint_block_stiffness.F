@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    arret                   ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod            ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod             ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE JOINT_BLOCK_STIFFNESS(ITAB,MS,IN,STIFN,STIFR,
      1                    WEIGHT ,IXR,IPART,X,
@@ -36,6 +37,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      use element_mod , only : nixr
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -65,10 +67,10 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,M1,M2,IG,IGTYP,N1,N2,KAD,ITYP,NG,JFT,JLT,NEL,
-     .        NB8,FLAG,NFT,NUVAR,JNTYP,IRB1,IRB2,FLAG_S,FLAG_PR,NV
-      my_real MASS,INER1,INER2,KM1,KRM1,KM2,KRM2,XX,KX1,KX2,KR1,DTC,ALPHA,
-     .        XL,KXMAX,KRMAX,KXMIN1,KXMIN2,KX,KR,DTCG,SCF,GET_U_GEO,
+      INTEGER I,J,M1,M2,IG,IGTYP,N1,N2,ITYP,NG,JFT,JLT,NEL,
+     .        FLAG,NFT,NUVAR,JNTYP,IRB1,IRB2,FLAG_S,FLAG_PR,NV
+      my_real INER1,INER2,KM1,KRM1,KM2,KRM2,XX,KX1,KX2,KR1,DTC,ALPHA,
+     .        XL,KXMAX,KRMAX,KX,KR,SCF,GET_U_GEO,
      .        XX1,XX2,DTA,MASS1,MASS2     
       CHARACTER(LEN=30) :: INFO_MESSAGE
 C
@@ -148,7 +150,7 @@ C
      .             +((X(3,N2)-X(3,M2))**2)
               XX = MAX(XX1,XX2)
 C           
-C--------> Calcul raideur cote noeud 1 -------         
+C--------> Stiffness calculation node 1 side -------         
               MASS1 = MS(M1)
               INER1 = IN(M1)
               KM1 = STIFN(M1)
@@ -164,7 +166,7 @@ C
             ENDIF          
               KXMAX = MIN(KX1,KX2)              
 C                                   
-C--------> Calcul raideur cote noeud 2 -------          
+C--------> Stiffness calculation node 2 side -------          
               MASS2 = MS(M2)
               INER2 = IN(M2)
               KM2 = STIFN(M2)
@@ -182,11 +184,11 @@ C
               KXMAX = MIN(KX1,KX2,KXMAX)    
               KR = MIN(KR,KR1)
                        
-C--------> Calcul raideur finale et affectation------- 
+C--------> Final stiffness calculation and assignment------- 
             KX = MAX(KXMAX,2*KM1,2*KM2)
               IF ((KX - KXMAX)>1e-8) FLAG_S = 1
             IF ((INER1 == ZERO).OR.(INER2 == ZERO)) THEN
-C--         Raideur en rotation mise    zero si kjoint attach      un noeud de solid --
+C--         Rotational stiffness set to zero if kjoint attached to a solid node --
               KR = ZERO
                 KRMAX = KR
               FLAG_S = 0

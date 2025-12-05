@@ -34,6 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    weight0               ../engine/source/elements/sph/weight.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod          ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    message_mod           ../engine/share/message_module/message_mod.F
 !||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
 !||    sph_work_mod          ../common_source/modules/mat_elem/sph_work.F90
@@ -57,6 +58,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE SPHBOX
       USE SPH_WORK_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -100,16 +102,16 @@ C-----------------------------------------------
      .        IPROP,IMAT,I,
      .        NVOISS,SM,NC,JS,
      .        IS,IC,ISLIDE,IPRT,NS,MYADRN, 
-     .        NSOL, NSKI, N1, N2, N3, N4, N5, N6, N7, N8, 
+     .        NSOL, N1, N2, N3, N4, N5, N6, N7, N8, 
      .        IR, IT, NSPHDIR, KP, NP,NELEM, OFFSET, NEL, IG, NG, 
-     .        II, II1, SZ, LENR, IERROR
+     .        II, II1, SZ, LENR
       my_real
-     .       XI,YI,ZI,DI,RHOI,PRESI,XJ,YJ,ZJ,DJ,PRESJ,RHOJ,DIJ,
+     .       XI,YI,ZI,DI,RHOI,XJ,YJ,ZJ,DJ,RHOJ,DIJ,
      .       VXI,VYI,VZI,VXJ,VYJ,VZJ,
-     .       VJ,VJX,VJY,VJZ,
-     .       DRHO,WGHT,DIVV,
-     .       MUIJ,MUMAX,
-     .       ALPCI,ALPCJ,FACT,FACI,FACJ,
+     .       
+     .       WGHT,
+     .       
+     .       ALPCI,FACT,FACI,
      .       WAX,WAY,WAZ,AXI,AYI,AZI,AXJ,AYJ,AZJ,AN,
      .       VV,KV,EHOURT,DTINV,
      .       OX,OY,OZ,NX,NY,NZ,AXS,AYS,AZS,
@@ -124,7 +126,7 @@ C-----------------------------------------------
       my_real  GET_U_GEO
       EXTERNAL GET_U_GEO
 C-----
-      TYPE(G_BUFEL_) ,POINTER :: GBUF, GBUFSP
+      TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF     
       TYPE(BUF_MAT_) ,POINTER :: MBUF  
 C-----------------------------------------------

@@ -73,23 +73,22 @@ C   D u m m y   A r g u m e n t s
 C
 C     NOM          DESCRIPTION                       E/S
 C
-C     IRECT(4,*)   TABLEAU DES CONEC FACETTES        E
+C     IRECT(4,*)   ARRAY OF CONEC FACETTES        E
 C     X(3,*)       COORDONNEES NODALES               E
-C     NSV          NOS SYSTEMES DES NOEUDS           E
+C     NSV          NOS SYSTEMES DES NODES E
 C     Xmax larger abcisse existing e
 C     XMAX largest order.existing E
 C     Xmax larger existing side E
 C     I_STOK       storage level of pairs
-C                                candidats impact    E/S
-C     CAND_N       boites resultats noeuds
-C     CAND_E       adresses des boites resultat elements
+C                                CANDIDATES impact    E/S
+C     CAND_N       boites resultats nodes C     CAND_E       adresses des boites resultat elements
 C                  MULNSN = MULTIMP*NSN max size admitted now for the
-C                  COUPLES NOEUDS,ELT CANDIDATS
-C     NOINT        NUMERO USER DE L'INTERFACE
+C                  COUPLES NODES,ELT CANDIDATES
+C     NOINT        INTERFACE USER NUMBER
 C     TZINF        TAILLE ZONE INFLUENCE
 C
 C     Prov_n Provisional Cand_n (static variable in i7tri)
-C     PROV_E       CAND_E provisoire (variable static dans i7tri)
+C     PROV_E       CAND_E provisoire (variable static in i7tri)
 
 C     VOXEL(ix,iy,iz) contains the local number of the first node of
 C                  the box
@@ -115,25 +114,25 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NB_NCN,NB_NCN1,NB_ECN,I,J,DIR,NB_NC,NB_EC,
-     .        N1,N2,N3,N4,NN,NE,K,L,NCAND_PROV,J_STOK,II,JJ,
+      INTEGER I,J,
+     .        NN,NE,J_STOK,JJ,
      .        PROV_N(MVSIZ),PROV_E(MVSIZ),
      .        OLDNUM(ISZNSNR), NSNF, NSNL
 C     REAL
       my_real
-     .   DX,DY,DZ,XS,YS,ZS,XX,SX,SY,SZ,S2,
-     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX, TZ, GAPSMX, GAPL,
+     .   XS,YS,ZS,SX,SY,SZ,S2,
+     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX,
      .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4,
-     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
+     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2
 c provisional
       INTEGER  LAST_NOD(NSN+NSNR)
-      INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
+      INTEGER  IX,IY,IZ,M1,M2,M3,M4,
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
       INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
       my_real
      .   XMINB,YMINB,ZMINB,XMAXB,YMAXB,ZMAXB,
      .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
-      INTEGER FIRST,NEW,LAST
+      INTEGER FIRST,LAST
       SAVE IIX,IIY,IIZ
 C-----------------------------------------------
       IF(ITASK == 0)THEN
@@ -162,7 +161,7 @@ c     Dev Future: xminb larger than Xmin ...
       ZMAXB = ZMAX
 
 
-C En SPMD, retrouve ancienne numerotation des candidats non locaux
+C En SPMD, retrouve ancienne numerotation des CANDIDATES non local
       IF(NSPMD>1) THEN
         CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD,INTHEAT,IDT_THERM,NODADT_THERM)
       END IF

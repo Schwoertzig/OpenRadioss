@@ -46,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    pinchtype_mod    ../common_source/modules/pinchtype_mod.F
 !||    pload_cyl_mod    ../common_source/modules/loads/pload_cyl_mod.F
 !||    rbe3_mod         ../common_source/modules/constraints/rbe3_mod.F90
+!||    rwall_mod        ../common_source/modules/constraints/rwall_mod.F90
 !||    sensor_mod       ../common_source/modules/sensor_mod.F90
 !||    skew_mod         ../common_source/modules/skew_mod.F90
 !||    state_mod        ../common_source/modules/state_mod.F
@@ -53,7 +54,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE RDCOMI(OUTPUT,TABVINT,MULTI_FVM,H3D_DATA,DYNAIN_DATA,
      .                  INTER_PARAMETERS,SENSORS,LOADS ,MAT_ELEM,SKEWS,
-     .                  GLOB_THERM,PBLAST,RBE3 )
+     .                  GLOB_THERM,PBLAST,RBE3 ,RWALL)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -80,6 +81,7 @@ C-----------------------------------------------
       USE TH_MOD , ONLY : TH_HAS_NODA_PEXT
       USE OUTPUT_MOD
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
+      USE RWALL_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -97,6 +99,7 @@ C-----------------------------------------------
       TYPE (GLOB_THERM_)    ,INTENT(INOUT) :: GLOB_THERM
       TYPE (PBLAST_)        ,INTENT(INOUT) :: PBLAST
       TYPE (RBE3_)          ,INTENT(INOUT) :: RBE3
+      TYPE (RWALL_)         ,INTENT(INOUT) :: RWALL
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -389,6 +392,7 @@ c     ENDIF
       SBUFIN    = 0 !TABVINT(217)
       SRWBUF    = TABVINT(218)
       SRWSAV    = TABVINT(219)
+      RWALL%SZ_RWSAV = SRWSAV 
       ! TABVINT(220) obsolete option removed
       SRBY      = TABVINT(221)
       SRBYL     = TABVINT(222)
@@ -400,6 +404,8 @@ c     ENDIF
       SFASOLFR  = TABVINT(228)
       SDD_R2R   = TABVINT(229)
       SLPRW     = TABVINT(230)
+      RWALL%SZ_LPRW = SLPRW
+      RWALL%nrwlp = NRWLP
       !TABVINT(231) obsolete option removed
       SIEXMAD   = TABVINT(232)
       SIGEO     = TABVINT(233)
@@ -424,6 +430,7 @@ C-----1
       NLASER =TABVINT(251)
       NINTER =TABVINT(252)
       NRWALL =TABVINT(253)
+      RWALL%NRWALL = NRWALL
       NRBODY =TABVINT(254)
       NODMAS =TABVINT(255)
       NFXVEL =TABVINT(256)
@@ -660,8 +667,10 @@ C
       NFVLAG = TABVINT(NEXT)
       NEXT = NEXT+1
       NNPRW = TABVINT(NEXT)
+      RWALL%NNPRW = NNPRW
       NEXT = NEXT+1
       NRWLAG = TABVINT(NEXT)
+      RWALL%NRWLAG = NRWLAG
       NEXT = NEXT+1
       NHMAX = TABVINT(NEXT)
       NEXT = NEXT+1

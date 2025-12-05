@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    i16cut        ../engine/source/interfaces/int16/i16tri.F
 !||    i16sto        ../engine/source/interfaces/int16/i16tri.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||    message_mod   ../engine/share/message_module/message_mod.F
 !||====================================================================
       SUBROUTINE I16TRI(
@@ -43,6 +44,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -72,7 +74,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I_ADD_MAX
       PARAMETER (I_ADD_MAX = 1001)
-      INTEGER I,J,I_ADD,I_STOK,L,NB_NC,NB_EC,CONT,NE
+      INTEGER I,J,I_ADD,I_STOK,L,NB_NC,NB_EC,CONT
       INTEGER ADD(2,I_ADD_MAX) ,PROV_N(MVSIZ),PROV_E(MVSIZ)
       my_real
      .        XYZM(6,I_ADD_MAX-1)
@@ -175,7 +177,7 @@ C       end or error test
 C-----------------------------------------------
 C     CONT = 0  ==> FIN
 C     CONT = -1 ==> PAS ASSEZ DE MEMOIRE PILE
-C     CONT = -2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     CONT = -2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
 C     CONT = -3 ==> TROP NIVEAUX PILE 
       IF(CONT==0)THEN
         IF(I_STOK/=0)CALL I16STO(
@@ -198,11 +200,13 @@ C
       RETURN
       END
 !||====================================================================
-!||    i16cut   ../engine/source/interfaces/int16/i16tri.F
+!||    i16cut        ../engine/source/interfaces/int16/i16tri.F
 !||--- called by ------------------------------------------------------
-!||    i16tri   ../engine/source/interfaces/int16/i16tri.F
+!||    i16tri        ../engine/source/interfaces/int16/i16tri.F
 !||--- calls      -----------------------------------------------------
-!||    i16sto   ../engine/source/interfaces/int16/i16tri.F
+!||    i16sto        ../engine/source/interfaces/int16/i16tri.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE I16CUT(
      1      BPE        ,PE      ,BPN      ,PN       ,ADD      ,
@@ -212,6 +216,7 @@ C
      5      I_STOK     ,IXS     ,IXS16    ,IXS20    ,TZINF    ,
      6      I_STOK_GLOB,PROV_N  ,PROV_E   ,V        ,A        ,
      7      MX_CAND    ,IXS10   )
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -236,39 +241,37 @@ C   D u m m y   A r g u m e n t s
 C
 C     NOM          DESCRIPTION                       E/S
 C
-C     BPE          TABLEAU DES FACETTES A TRIER      E/S
+C     BPE          ARRAY OF FACETTES TO SORT      E/S
 C                  and the result on the max side
-C     PE           TABLEAU DES FACETTES              S
+C     PE           ARRAY OF FACETTES              S
 C                  RESULTAT COTE MIN
-C     BPN          TABLEAU DES NOEUDS A TRIER        E/S
+C     BPN          SORTED NODES ARRAY        E/S
 C                  and the result on the max side
-C     PN           TABLEAU DES NOEUDS                S
+C     PN           NODES ARRAY S
 C                  RESULTAT COTE MIN
-C     ADD(2,*)     TABLEAU DES ADRESSES              E/S 
-C          1.......ADRESSES NOEUDS
-C          2.......ADRESSES ELEMENTS
-C     ZYZM(6,*)     TABLEAU DES XYZMIN               E/S 
+C     ADD(2,*)     ARRAY OF ADRESSES              E/S 
+C          1.......ADRESSES NODES C          2.......ADRESSES ELEMENTS
+C     ZYZM(6,*)     ARRAY OF XYZMIN               E/S 
 C          1.......XMIN BOITE
 C          2.......YMIN BOITE
 C          3.......ZMIN BOITE
 C          4.......XMAX BOITE
 C          5.......YMAX BOITE
 C          6.......ZMAX BOITE
-C     EMINX(6,*)   TABLEAU DES COORD ELEM MIN/MAX    E
+C     EMINX(6,*)   ARRAY OF COORD ELEM MIN/MAX    E
 C     X(3,*)       COORDONNEES NODALES               E
-C     NB_NC        NOMBRE DE NOEUDS CANDIDATS        E/S
-C     NB_EC        NOMBRE D'ELTS CANDIDATS           E/S
+C     NB_NC        NUMBER OF CANDIDATE NODES        E/S
+C     NB_EC        NUMBER OF CANDIDATE ELEMENTS           E/S
 C     I_ADD        position in the input/output address table
-C     NSV          NOS SYSTEMES DES NOEUDS           E
+C     NSV          NOS SYSTEMES DES NODES E
 C     Xmax larger abcisse existing e
 C     XMAX largest order.existing E
 C     Xmax larger existing side E
 C     MAXSIZ       TAILLE MEMOIRE MAX POSSIBLE       E
 C     I_STOK       storage level of the pairs
-C                                candidats impact    E/S
-C     CAND_N       boites resultats noeuds
-C     CAND_E       adresses des boites resultat elements
-C                  COUPLES NOEUDS,ELT CANDIDATS
+C                                CANDIDATES impact    E/S
+C     CAND_N       boites resultats nodes C     CAND_E       adresses des boites resultat elements
+C                  COUPLES NODES,ELT CANDIDATES
 C     MINBOX       TAILLE MIN BUCKET
 C
 C-----------------------------------------------
@@ -287,7 +290,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER NB_NCN,NB_NCN1,NB_ECN,ADDNN,ADDNE,I,J,DIR,
-     .        NN,NE,LE,K,L,NCAND_PROV,N16,N20,N8,N10
+     .        NN,NE,LE,L,NCAND_PROV,N16,N20,N8,N10
 C     REAL
       my_real
      .   DX,DY,DZ,DSUP,SEUIL,XX,YY,ZZ
@@ -297,8 +300,7 @@ C
 C
 C    1- TEST ARRET = BOITE VIDE
 C                    BOITE TROP PETITE 
-C                    BOITE NE CONTENANT QU'ONE NOEUD
-C                    More Available Memory
+C                    BOITE NE CONTENANT QU'ONE NODE C                    More Available Memory
 C
 C-------------------test on exceeded memory------------
 C
@@ -442,7 +444,7 @@ C
           ENDIF
           SEUIL =(XYZM(DIR+3,I_ADD)+XYZM(DIR,I_ADD))*0.5
 C
-C    2.2- DIVISER LES NOEUDS EN TWO ZONES 
+C    2.2- DIVISER LES NODES EN TWO ZONES 
 C
           NB_NCN= 0
           NB_NCN1= 0
@@ -570,8 +572,7 @@ C-------------------------------------------------------------------------
 C         the bottoms of the stacks must be copied into the corresponding bas_de_pile
 C         before descending into the neighboring branch
 C-------------------------------------------------------------------------
-C     3.1- PILE DES NOEUDS
-C
+C     3.1- PILE DES NODES C
       NB_NC = ADD(1,I_ADD+1) - ADD(1,I_ADD)
       DO I=1,NB_NC
         BPN(I) = PN(ADD(1,I_ADD)+I)

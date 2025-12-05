@@ -28,11 +28,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_fvb_amax     ../engine/source/mpi/anim/spmd_fvb_amax.F
 !||    spmd_iget_partn   ../engine/source/mpi/anim/spmd_iget_partn.F
 !||    write_i_c         ../common_source/tools/input_output/write_routines.c
+!||--- uses       -----------------------------------------------------
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE DELNUMBC(IPARG,IXQ  ,IXC   ,IXTG ,INVERT,
      2                    EL2FA,NBF  ,INUM ,NELCUT,
      3                    DD_IAD  ,IADD ,NBF_L,
      4                    NBPART,IADG,NODGLOB,IDCMAX          )
+      use element_mod , only : nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -53,10 +56,8 @@ C-----------------------------------------------
       INTEGER DD_IAD(NSPMD+1,*), IADD(*), NBF_L
 C-----------------------------------------------
 C     REAL
-      my_real
-     .   OFF
-      INTEGER II(4),IE,NG, ITY, LFT, LLT, N, I, J,
-     .        IPID, NEL, IAD, NFT, IMID,IALEL,
+      INTEGER NG, ITY, LFT, LLT, N, I, 
+     . NEL, IAD, NFT,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,BUF,NODGLOB(*),
      .        IDCMAX, IDCMAXL
 C-----------------------------------------------

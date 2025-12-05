@@ -72,7 +72,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
       INTEGER OLDNSNR,NODFI,NNP,LSKYFI,
-     .        NOD, LOC_PROC, I, N, NN, P, IDEB, J, K,
+     .         LOC_PROC, I, N, NN, P, IDEB, J, K,
      .        IERROR1,IERROR2,IERROR3,IERROR4,IERROR5,IERROR6,IERROR7,
      .        IERROR8,IERROR9,IERROR0,IERROR11,IERROR12,IERROR13,
      .        IERROR14,IERROR15,IERROR16,IERROR17,
@@ -1609,7 +1609,7 @@ C
         END IF            
       END IF
 C
-C allocations additionnelles pour interface type20
+C additional allocations for interface type20
 C
       IF(ITY==20) THEN
         IF(ASSOCIATED(ALPHAKFI(NIN)%P)) DEALLOCATE(ALPHAKFI(NIN)%P)    
@@ -1692,7 +1692,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
       INTEGER OLDNRTSR,SEGFI,NODFI,NNP,LSKYFI,
-     .        NOD, LOC_PROC, I, J, K, N, NN, P, IDEB, N1, N2,
+     .         LOC_PROC, I, J, K, N, NN, P, IDEB, N1, N2,
      .        IERROR1,IERROR2,IERROR3,IERROR4,IERROR5,IERROR6,IERROR7,
      .        IERROR8,IERROR9,IERROR0,IERROR11,IERROR12,IERROR13,
      .        INDEX(NRTSR)
@@ -2638,7 +2638,7 @@ C factor 2 to store the 2 nodes
         ENDIF
       ENDIF
 C
-C allocations specifiques interface type20
+C specific allocations for interface type20
 C
       IF(ASSOCIATED(DAANC6FIE(NIN)%P)) DEALLOCATE(DAANC6FIE(NIN)%P)    
       ALLOCATE(DAANC6FIE(NIN)%P(3,6,NODFI),STAT=IERROR1)
@@ -2721,15 +2721,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER RESULT, NIN, NMES, I_STOK, INACTI, NMESR,
+      INTEGER RESULT, NIN, NMES, I_STOK, NMESR,
      .        CAND_N(*)
 C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
       INTEGER OLDNRTSR,ELEMFI,NNP,LSKYFI,
-     .        NOD, LOC_PROC, I, N, NN, P, IDEB, N1, N2,
-     .        IERROR1,IERROR2,IERROR3,IERROR4,IERROR5,IERROR6,IERROR7,
-     .        IERROR8,
+     .         LOC_PROC, I, N, NN, P, IDEB,
+     .        IERROR1,IERROR2,IERROR3,IERROR4,IERROR5,IERROR6,
+     .        
      .        INDEX(NMESR)
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -2911,7 +2911,7 @@ C
         ENDDO
 C facteur 16 ?
         LSKYFI = NN*MULTIMAX
-C   nmesr inutile ici
+C   nmesr useless here
         NMESR = NN
       ENDIF
 C

@@ -90,7 +90,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,SIZ
+      INTEGER I
       INTEGER, DIMENSION(:,:), ALLOCATABLE  ::
      .  TAB_RMAX_UID
       INTEGER, DIMENSION(:), ALLOCATABLE  ::
@@ -267,7 +267,7 @@ C
         FACE_A(1:NSN) = 0
 
         ! Compact NSV,IRTL,XI,ZI and FACE
-        ! by keeping only secnd nodes that are 
+        ! by keeping only second nodes that are 
         ! active on this SPMD domain
         DO I = 1,NSN
            IF(INTBUF_TAB%ILOCS(I) > -1 .AND.

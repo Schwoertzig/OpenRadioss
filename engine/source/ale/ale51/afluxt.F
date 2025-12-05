@@ -46,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_connectivity_mod    ../common_source/modules/ale/ale_connectivity_mod.F
 !||    alemuscl_mod            ../common_source/modules/ale/alemuscl_mod.F
 !||    elbufdef_mod            ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod             ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod          ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22tri_mod              ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    initbuf_mod             ../engine/share/resol/initbuf.F
@@ -71,6 +72,7 @@ C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       USE ALEMUSCL_MOD , only:ALEMUSCL_Param
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

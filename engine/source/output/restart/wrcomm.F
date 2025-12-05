@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    alemuscl_mod     ../common_source/modules/ale/alemuscl_mod.F
 !||    damp_mod         ../engine/share/modules/damp_mod.F
 !||    drape_mod        ../engine/share/modules/drape_mod.F
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    eos_param_mod    ../common_source/modules/mat_elem/eos_param_mod.F90
 !||    glob_therm_mod   ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    h3d_mod          ../engine/share/modules/h3d_mod.F
@@ -71,6 +72,7 @@ C-----------------------------------------------
       USE PBLAST_MOD
       USE TH_MOD , ONLY : TH_HAS_NODA_PEXT
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

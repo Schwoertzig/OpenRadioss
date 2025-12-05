@@ -24,6 +24,8 @@
 #define MECI_PARAMETER_H
 #include "hcio.h"
 
+#include <string>
+
 class IParameter
 {
 public:

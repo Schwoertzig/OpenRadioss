@@ -66,11 +66,11 @@ C     REAL
       my_real
      .   A(MVSIZ),B(MVSIZ),DPLA_I(MVSIZ),DPLA_J(MVSIZ),DR(MVSIZ),
      .   H(MVSIZ),NU1(MVSIZ),NU2(MVSIZ),P(MVSIZ),Q(MVSIZ),
-     .   SVM(MVSIZ),DK(MVSIZ),FF(MVSIZ),G(MVSIZ),
-     .   PLAEF(MVSIZ),PLAXX(MVSIZ),PLAYY(MVSIZ),PLAXY(MVSIZ),
-     .   EPMAX(MVSIZ),DEPSL,ALPEI,GI,A1I,A2I,EPSP,S11,S22,S12,
+     .   SVM(MVSIZ),DK(MVSIZ),G(MVSIZ),
+     .   
+     .   DEPSL,ALPEI,GI,A1I,A2I,EPSP,S11,S22,S12,
      .   S1S2,S122,VM2,PLA_I,YLD_I,F,DF,P2,Q2,NNU1,
-     .   NNU2,NU3,NU4,NU5,NU6,R,UMR,AA,BB,C,EE,SIGZ,PP,QQ,S1,S2,S3,
+     .   NNU2,NU4,NU6,R,UMR,AA,BB,C,PP,QQ,S1,S2,S3,
      .   SMALL
       DATA NMAX/3/
 C-----------------------------------------------
@@ -105,7 +105,7 @@ C
         SIGNZX(I)= SIGNZX(I)+ALPEI*GS(I)*DEPSZX(I)
       ENDDO
 C-------------------
-C     CONTRAINTE VM
+C     VM STRESS
 C-------------------
 #include "vectorize.inc"
       DO I=JFT,JLT
@@ -124,7 +124,7 @@ C----------------------------
         IF (ICC(I) == 2) YLD(I) = MIN(YLD(I),YMAX(I))
       ENDDO
 C------------------------------------------
-C     CONTRAINTES PLASTIQUEMENT ADMISSIBLES
+C     PLASTICALLY ADMISSIBLE STRESSES
 C------------------------------------------
       IF (IPLA == 0) THEN
 C radial projection
@@ -169,7 +169,7 @@ C
 C
       IF (NINDX == 0) GOTO 800
 C---------------------------
-C    DEP EN CONTRAINTE PLANE
+C    DEP IN PLANE STRESS
 C---------------------------
 #include "vectorize.inc"
       DO J=1,NINDX
@@ -206,7 +206,7 @@ C
         ENDDO
       ENDDO
 C------------------------------------------
-C     CONTRAINTES PLASTIQUEMENT ADMISSIBLES
+C     PLASTICALLY ADMISSIBLE STRESSES
 C------------------------------------------
 #include "vectorize.inc" 
       DO J=1,NINDX

@@ -116,7 +116,7 @@ C-----------------------------------------------
          ENDDO
        ENDIF
 C-----------------------------------------------
-C SUPPRESSION DES ANCIENS CANDIDATS DEJA STOCKES (PENE INITIALE)
+C SUPPRESSION DES ANCIENS CANDIDATES DEJA STOCKES (PENE INITIALE)
 C-----------------------------------------------
        IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0)THEN
             DO I=1,J_STOK
@@ -337,10 +337,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, IG,N1,N2,M1,M2,NI,L
+      INTEGER I,N1,N2,M1,M2,NI,L
       my_real
      .     XS12,YS12,ZS12,XM12,YM12,ZM12,XXA,XXB,
-     .     XS2,XM2,XSM,XS2M2,YS2,YM2,YSM,YS2M2,ZS2,ZM2,ZSM,ZS2M2,
+     .     XS2,XM2,XSM,XS2M2,YS2M2,ZS2M2,
      .     XX,YY,ZZ,ALS,ALM,DET,
      .     GAP2, X11, X12, X13, X21, X22, X23,
      .     XMAX1,YMAX1,ZMAX1,XMAX2,YMAX2,ZMAX2,
@@ -462,7 +462,7 @@ C
           ALM = MIN(ONE,ALM)
           ALM = MAX(ZERO,ALM)
 
-C  PENE = GAP^2 - DIST^2 UTILISE POUR TESTER SI NON NUL
+C  PENE = GAP^2 - DIST^2 USED TO TEST IF NON-NULL
 
           XX =  ALS*X11 + (ONE-ALS)*X21
      .        - ALM*XA(1,M1) - (ONE-ALM)*XA(1,M2)

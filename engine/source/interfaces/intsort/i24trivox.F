@@ -77,22 +77,21 @@ C   D u m m y   A r g u m e n t s
 C
 C     NOM          DESCRIPTION                       E/S
 C
-C     IRECT(4,*)   TABLEAU DES CONEC FACETTES        E
+C     IRECT(4,*)   ARRAY OF CONEC FACETTES        E
 C     X(3,*)       COORDONNEES NODALES               E
-C     NSV          NOS SYSTEMES DES NOEUDS           E
+C     NSV          NOS SYSTEMES DES NODES E
 C     Xmax larger abcisse existing e
 C     XMAX largest order.existing E
 C     Xmax larger existing side E
 C     I_STOK       storage level of pairs
-C                                candidats impact    E/S
-C     CAND_N       boites resultats noeuds
-C     CAND_E       adresses des boites resultat elements
+C                                CANDIDATES impact    E/S
+C     CAND_N       boites resultats nodes C     CAND_E       adresses des boites resultat elements
 C                  MULNSN = MULTIMP*NSN maximum size now allowed for
-C                  COUPLES NOEUDS,ELT CANDIDATS
-C     NOINT        NUMERO USER DE L'INTERFACE
+C                  COUPLES NODES,ELT CANDIDATES
+C     NOINT        INTERFACE USER NUMBER
 C
 C     Prov_n Provisional Cand_n (static variable in i7tri)
-C     PROV_E       CAND_E provisoire (variable static dans i7tri)
+C     PROV_E       CAND_E provisoire (variable static in i7tri)
 
 C     VOXEL(ix,iy,iz) contains the local number of the first node of
 C                  the box
@@ -122,31 +121,31 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NB_NCN,NB_NCN1,NB_ECN,I,J,DIR,NB_NC,NB_EC,
-     .        N1,N2,N3,N4,NN,NE,K,L,J_STOK,II,JJ,
+      INTEGER I,J,
+     .        NN,NE,K,L,J_STOK,JJ,
      .        PROV_N(MVSIZ),PROV_E(MVSIZ),
-     .        OLDNUM(ISZNSNR), NSNF, NSNL,M,NSE,NS,ip
+     .        OLDNUM(ISZNSNR), NSNF, NSNL,M,NSE,NS
 C     REAL
       my_real
-     .   DX,DY,DZ,XS,YS,ZS,XX,SX,SY,SZ,S2,
-     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX, TZ, GAPSMX, GAPL,
+     .   XS,YS,ZS,SX,SY,SZ,S2,
+     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX,
      .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4,
-     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
+     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2
 c provisional
       INTEGER  LAST_NOD(NSN+NSNR)
-      INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
+      INTEGER  IX,IY,IZ,M1,M2,M3,M4,
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
       INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
       my_real
      .   XMINB,YMINB,ZMINB,XMAXB,YMAXB,ZMAXB,
      .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
-      INTEGER FIRST,NEW,LAST
+      INTEGER FIRST,LAST
       SAVE IIX,IIY,IIZ
       INTEGER, DIMENSION(NUMNOD+NSNE) :: TAG
 C --------------------------------
 C TYPE24 E2E - I24FIC_GETN method
 C --------------------------------
-      INTEGER IK1(4),IK2(4),IE1,IE2,IED,NS1,NS2,NS1ID,NS2ID
+      INTEGER IK1(4),IK2(4),IED,NS1,NS2,NS1ID,NS2ID
       DATA IK1 /1,2,3,4/
       DATA IK2 /2,3,4,1/
 C-----------------------------------------------
@@ -423,8 +422,8 @@ c NO need to communicate in SPMD
                     ENDIF
                   END IF!(FLAGREMNODE == 2)THEN
 C
-C Auto impact between main surface and secnd Edge
-C can happen with Remote nodes when Secnd Nodes are on border between 2 domains
+C Auto impact between main surface and second Edge
+C can happen with Remote nodes when Second nodes are on border between 2 domains
 C and Fictive node is remote
                   IF(IREM(8,J)==1) THEN
                     ! Same than in I24FIC_GETN but for Remote Node

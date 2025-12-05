@@ -42,8 +42,6 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: NFT
       INTEGER NEL,MLW
       my_real
-     .   DT2T
-      my_real
      .  PHI1(*),PHI2(*),UVAR(*),PHI3(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -66,7 +64,7 @@ C
         UVAR(I + NEL) = PHI2(IE)*VOL0
       ENDDO    
 C------------------------------------------------------
-C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+C     CALCULATION OF STRESSES ACCORDING TO CONSTITUTIVE LAWS
 C------------------------------------------------------
       RETURN
       END

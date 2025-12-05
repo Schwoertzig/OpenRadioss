@@ -54,7 +54,6 @@ C-----------
 !||====================================================================
 !||    r2r_sys          ../starter/source/coupling/rad2rad/routines_r2r.F
 !||--- called by ------------------------------------------------------
-!||    hm_read_eref     ../starter/source/loads/reference_state/eref/hm_read_eref.F
 !||    hm_read_thgrne   ../starter/source/output/th/hm_read_thgrne.F
 !||    hm_read_xref     ../starter/source/loads/reference_state/xref/hm_read_xref.F
 !||    lecrefsta        ../starter/source/loads/reference_state/refsta/lecrefsta.F
@@ -191,7 +190,7 @@ C-----------------------------------------------
 C-----------------------------------------------
         TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
 C-----------------------------------------------
-        INTEGER I,NNCPL,COMPT
+        INTEGER I,COMPT
 C=======================================================================
         NODGR_R2R = 0
         IF (IGU > 0) THEN
@@ -466,17 +465,16 @@ C-----------GAUGES------------------
       end function R2R_EXIST
 
 !||====================================================================
-!||    r2r_listcnt        ../starter/source/coupling/rad2rad/routines_r2r.F
+!||    r2r_listcnt      ../starter/source/coupling/rad2rad/routines_r2r.F
 !||--- called by ------------------------------------------------------
-!||    hm_read_thgrsurf   ../starter/source/output/th/hm_read_thgrsurf.F
-!||    hm_thgrki_vent     ../starter/source/output/th/hm_thgrki_vent.F
+!||    hm_thgrki_vent   ../starter/source/output/th/hm_thgrki_vent.F
 !||--- calls      -----------------------------------------------------
-!||    my_exit            ../starter/source/output/analyse/analyse.c
-!||    r2r_exist          ../starter/source/coupling/rad2rad/routines_r2r.F
+!||    my_exit          ../starter/source/output/analyse/analyse.c
+!||    r2r_exist        ../starter/source/coupling/rad2rad/routines_r2r.F
 !||--- uses       -----------------------------------------------------
-!||    format_mod         ../starter/share/modules1/format_mod.F90
-!||    r2r_mod            ../starter/share/modules1/r2r_mod.F
-!||    reader_old_mod     ../starter/share/modules1/reader_old_mod.F90
+!||    format_mod       ../starter/share/modules1/format_mod.F90
+!||    r2r_mod          ../starter/share/modules1/r2r_mod.F
+!||    reader_old_mod   ../starter/share/modules1/reader_old_mod.F90
 !||====================================================================
       INTEGER FUNCTION R2R_LISTCNT(NVAR,TYP)
 C-----------------------------------------------
@@ -669,7 +667,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-        INTEGER I,J
+        INTEGER I
 C=======================================================================
 C-- Split of NOM_OPT
 

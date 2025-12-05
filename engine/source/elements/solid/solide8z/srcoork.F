@@ -21,16 +21,18 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    srcoork      ../engine/source/elements/solid/solide8z/srcoork.F
+!||    srcoork       ../engine/source/elements/solid/solide8z/srcoork.F
 !||--- called by ------------------------------------------------------
-!||    s8cke3       ../engine/source/elements/thickshell/solide8c/s8cke3.F
-!||    s8zke3       ../engine/source/elements/solid/solide8z/s8zke3.F
+!||    s8cke3        ../engine/source/elements/thickshell/solide8c/s8cke3.F
+!||    s8zke3        ../engine/source/elements/solid/solide8z/s8zke3.F
 !||--- calls      -----------------------------------------------------
-!||    scortho3     ../engine/source/elements/thickshell/solidec/scortho3.F
-!||    sorthdir17   ../engine/source/elements/solid/solide8z/sorthdir17.F
-!||    sorthdir3    ../engine/source/elements/solid/solide/sorthdir3.F
-!||    sortho3      ../engine/source/elements/solid/solide/sortho3.F
-!||    srepisot3    ../engine/source/elements/solid/solide/srepisot3.F
+!||    scortho3      ../engine/source/elements/thickshell/solidec/scortho3.F
+!||    sorthdir17    ../engine/source/elements/solid/solide8z/sorthdir17.F
+!||    sorthdir3     ../engine/source/elements/solid/solide/sorthdir3.F
+!||    sortho3       ../engine/source/elements/solid/solide/sortho3.F
+!||    srepisot3     ../engine/source/elements/solid/solide/srepisot3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SRCOORK(
      1   X,       IXS,     X1,      X2,
@@ -57,6 +59,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      M   K88,     KHBE,    GAMA0,   GAMA,
      N   NEL,     ISMSTR,  JHBE,    JCVT,
      O   IREP,    IGTYP,   ISORTH)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -106,13 +109,6 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J, MXT_1
 C     REAL
-      my_real
-     .   G11(MVSIZ),G12(MVSIZ),G13(MVSIZ),
-     .   G21(MVSIZ),G22(MVSIZ),G23(MVSIZ),
-     .   G31(MVSIZ),G32(MVSIZ),G33(MVSIZ),
-     .   T11(MVSIZ),T12(MVSIZ),T13(MVSIZ),
-     .   T21(MVSIZ),T22(MVSIZ),T23(MVSIZ),
-     .   T31(MVSIZ),T32(MVSIZ),T33(MVSIZ)
       my_real
      .   XL,YL,ZL
       my_real

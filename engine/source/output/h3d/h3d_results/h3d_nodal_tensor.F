@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tensgpstrain           ../engine/source/output/anim/generate/tensgpstrain.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||    outmax_mod             ../common_source/modules/outmax_mod.F
 !||====================================================================
@@ -57,6 +58,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
       USE ELBUFDEF_MOD 
       USE OUTMAX_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -91,7 +93,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,LENR
+      INTEGER I, J, N, LENR
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAGPS, IOK_PART 
       my_real
      .       , DIMENSION(:,:), ALLOCATABLE :: AFLU, VFLU,VALUES
@@ -380,7 +382,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER  I,J
+      INTEGER I
       my_real
      .   S(3),NORM2
 C-----------------------------------------------

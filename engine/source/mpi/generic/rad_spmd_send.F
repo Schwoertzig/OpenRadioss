@@ -31,7 +31,7 @@ C
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
       SUBROUTINE RAD_SPMD_SEND(A,SIZ,ISPMD,IT_SPMD,MSGTAG,INTSIZE)
-C routine speciale smp
+C special smp routine
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -50,7 +50,7 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER INFO,BUFSIZMAX,ADD,LEN,SIZ_I
+      INTEGER BUFSIZMAX,ADD,LEN,SIZ_I
       INTEGER STATUS(MPI_STATUS_SIZE),IERROR
 C shared memory segment must be superior to 10 Mb
       DATA BUFSIZMAX/10000000/

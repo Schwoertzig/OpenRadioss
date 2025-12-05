@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    init_th        ../engine/source/output/th/init_th.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE THRES_COUNT(IPARG,ITHBUF,ELBUF_TAB,IGEO,IXR, 
      .                       ITHGRP,NTHGRP2,WA_SIZE,INDEX_WA_SPRING,SITHBUF)
@@ -33,6 +34,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      use element_mod , only : nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -63,15 +65,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       LOGICAL :: BOOL
-      INTEGER :: II,I,N,IH,NG,ITY,MTE,K,IP,L,
-     .   LWA,NEL,NFT,IPROP,IGTYP,J,JJ(6)
+      INTEGER :: II, I, N, IH, NG, ITY, MTE, K, IP, 
+     . NEL,NFT,IPROP,IGTYP,J,JJ(6)
       INTEGER :: NN,IAD,IADV,NVAR,ITYP,NITER,J_FIRST
       INTEGER, DIMENSION(NTHGRP2) :: INDEX_RESSORT
-
-      my_real
-     . WWA(100)
-      my_real
-     . V1,V2,V3,E1X,E1Y,E1Z,E2X,E2Y,E2Z,E3X,E3Y,E3Z
 C
       TYPE(G_BUFEL_)  ,POINTER :: GBUF
 !$COMMENT

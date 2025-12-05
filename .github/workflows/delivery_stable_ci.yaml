@@ -1,7 +1,6 @@
 name: Delivery stable CI
 
 on:
-
   workflow_dispatch:
     inputs:
       tag_name:
@@ -18,13 +17,13 @@ env:
   QA_TIMEOUT_PER_TEST_LINUX: 150
   QA_TIMEOUT_PER_TEST_WIN: 500
   LAST_STABLE_TAG_NAME: ${{ github.event.inputs.tag_name }}
-  RADIOSS_SHA_HEADER: ${{ github.sha }}
 
 jobs:
 
   build_linux:
     if: ${{ github.repository_owner == 'OpenRadioss' }}
     # DEV ONLY # runs-on: ["${{ matrix.build }}","dev_pmci"]
+
     runs-on: ["${{ matrix.build }}","delivery_stable_ci"]
 
     env:
@@ -135,7 +134,7 @@ jobs:
         with:
           path: ${{ env.WORKDIR }}
           clean: 'false'
-          lfs: 'true'
+          lfs: 'false'
           ref: ${{ env.LAST_STABLE_TAG_NAME }}
 
       - name: Running build
@@ -265,7 +264,6 @@ jobs:
 
         if: ${{ always() && env.CLOSE_BRANCH == 1 && steps.close_branch_build.outputs.status != 200 }} 
 
-
   build_windows_no_container:
     if: ${{ github.repository_owner == 'OpenRadioss' }}
     # DEV ONLY # runs-on: ["${{ matrix.build }}","dev_pmci"]
@@ -342,7 +340,7 @@ jobs:
         with:
           path: ${{ env.WORKDIR }}
           clean: 'false'
-          lfs: 'true'
+          lfs: 'false'
           ref: ${{ env.LAST_STABLE_TAG_NAME }}
 
 
@@ -485,7 +483,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ${{ env.WORKDIR }}
-          lfs: 'true'
+          lfs: 'false'
           ref: ${{ env.LAST_STABLE_TAG_NAME }}
 
       # Get OpenRadioss extras from dedicated repository

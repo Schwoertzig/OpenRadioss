@@ -75,13 +75,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER K, TYP, LEN, IN, N5, ISENSUSR, I, LEN1,LOC_PROC,
-     .        ISENST1, ISENST2, KK, N1, N2,M,
+      INTEGER K, TYP, LEN, IN, N5, ISENSUSR, LOC_PROC, 
+     . ISENST1, ISENST2, KK, N1, N2,
      .        IBUF(NSENSOR), ISENST10,ISENST13,J
-      my_real RBUF(NSENSOR*LSENBUF), RXBUF(5,2*NSENSOR)
+      my_real RXBUF(5,2*NSENSOR)
 
       INTEGER :: MY_SIZE
-      CHARACTER(len=4) :: MY_OPERATION
+ 
       REAL(kind=8), DIMENSION(:), ALLOCATABLE :: SBUF_DOUBLE,RBUF_DOUBLE
       INTEGER :: I2,I3,I4,IDX
      
@@ -208,7 +208,7 @@ c-------------
        ENDDO
 c-----------------------------------------------------------------------
        IF (ISENST1 == 1) THEN
-c        Extra communication pour sensor type 1 (accelerometre associe)
+c        Extra communication for sensor type 1 (associated accelerometer)
 C
          CALL SPMD_SD_ACC(ACCELM,IACCP,NACCP)
          CALL SPMD_RBCAST(ACCELM,ACCELM,LLACCELM,NACCELM,0,2)

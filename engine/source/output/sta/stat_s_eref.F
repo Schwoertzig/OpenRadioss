@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tab_strs_txt50      ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod         ../engine/share/resol/initbuf.F
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
@@ -46,6 +47,7 @@ C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -70,7 +72,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXS(NIXS,*),IXS10(6,*),IXS16(8,*),IXS20(12,*),
      .        IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTS(*), IPART_STATE(*), STAT_INDXS(*),IPART(LIPART1,*)
@@ -81,7 +83,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,N,J,K,II,JJ,LEN,NLAY,NPTR,NPTS,NPTT,ISOLNOD0,
+      INTEGER I, N, J, K, JJ, LEN, ISOLNOD0, 
      .   ISOLNOD,ISTRAIN,NG, NEL, MLW, ID, IPRT0, IPRT,IE, 
      .   NPG,IPG,IPT,IL,IR,IS,IT,IPID,PID,IOFF,KK(8),NC(20),
      .   NN1,NN,NSROT
@@ -94,7 +96,7 @@ C-----------------------------------------------
       DATA DELIMIT(61:100)
      ./'----7----|----8----|----9----|----10---|'/
 C----  
-      TYPE(L_BUFEL_) ,POINTER :: LBUF     
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF     
 C======================================================================|
       CALL MY_ALLOC(PTWA,STAT_NUMELS)

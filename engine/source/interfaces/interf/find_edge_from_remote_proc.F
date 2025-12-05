@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    check_edge_state              ../engine/source/interfaces/interf/check_edge_state.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod                   ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod                 ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    nodal_arrays_mod              ../common_source/modules/nodal_arrays.F90
 !||    shooting_node_mod             ../engine/share/modules/shooting_node_mod.F90
@@ -48,6 +49,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         USE nodal_arrays_mod
         USE INTBUFDEF_MOD   
         USE SHOOTING_NODE_MOD
+        use element_mod , only : nixs,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

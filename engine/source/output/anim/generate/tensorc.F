@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod            ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod         ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||    matparam_def_mod     ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    my_alloc_mod         ../common_source/tools/memory/my_alloc.F90
 !||    stack_mod            ../engine/share/modules/stack_mod.F
@@ -50,6 +51,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE MY_ALLOC_MOD
       USE DRAPE_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -102,7 +104,7 @@ C
       TYPE(BUF_LAY_) ,POINTER :: BUFLY
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF 
-      TYPE(L_BUFEL_DIR_) ,POINTER :: LBUF_DIR
+ 
 C
       my_real, DIMENSION(:), POINTER :: DIR_A,DIR_B
       REAL,DIMENSION(:),ALLOCATABLE :: WA
@@ -1482,13 +1484,15 @@ C
 !||    shlrotg        ../engine/source/output/anim/generate/tensor6.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE TENCGPS1(ELBUF_TAB ,IPARG,ITENS,TENS1 ,TENS2  ,
      .                    X     ,IXC  ,IGEO ,IXTG  ,ITAGPS )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1515,7 +1519,7 @@ C-----------------------------------------------
 C     REAL
       my_real
      .   OFF, FAC, A1, A2, A3, THK, EVAR(6,MVSIZ),AREA(MVSIZ)
-      INTEGER I, NG, NEL, NFT, ITY, LFT, NPT, IPT,
+      INTEGER I, NG, NEL, NFT, ITY, LFT, 
      .        N, J, LLT, MLW,K,
      .        IPID, I1, I2, IAD2, NS1, NS2  , IALEL, ISTRE,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,NNI,N0,
@@ -1643,6 +1647,7 @@ C
 !||    shlrotg        ../engine/source/output/anim/generate/tensor6.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE TENCGPS2(ELBUF_TAB ,IPARG,ITENS,TENS1 ,TENS2  ,
      .                    X     ,IXC  ,IGEO ,IXTG  ,GEO    ,
@@ -1650,7 +1655,8 @@ C
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1678,7 +1684,7 @@ C     REAL
       my_real
      .   OFF, FAC, A1, A2, A3, THK0, EVAR(6,MVSIZ),AREA(MVSIZ),
      .   VOL(MVSIZ)
-      INTEGER I, NG, NEL, NFT, ITY, LFT, NPT, IPT,
+      INTEGER I, NG, NEL, NFT, ITY, LFT, 
      .        N, J, LLT, MLW,K,
      .        IPID, I1, I2, IAD2, NS1, NS2  , IALEL, ISTRE,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,NNI,N0,

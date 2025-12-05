@@ -186,6 +186,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    crackxfem_mod                ../engine/share/modules/crackxfem_mod.F
 !||    drape_mod                    ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod                 ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                  ../common_source/modules/elements/element_mod.F90
 !||    fvbag_mod                    ../engine/share/modules/fvbag_mod.F
 !||    glob_therm_mod               ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod                 ../common_source/modules/groupdef_mod.F
@@ -259,6 +260,7 @@ C-----------------------------------------------
         use drape_mod
         USE OUTPUT_MOD , ONLY : OUTPUT_
         USE ANIM_MONVOL_MOD
+        use element_mod , only : nixs,nixq,nixc,nixtg,nixr,nixt,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -402,7 +404,7 @@ C-----------------------------------------------
 
         CHARACTER*80 STR, MES*30, CAUX,TITL*100
         CHARACTER CHANIM*9,FILNAM*100, CHANIM1*4
-        INTEGER I, IDX,NBF, NBPART, MAGIC, J, IFUNC, FILEN, NPSOL,
+        INTEGER I, IDX,IDX0,IDX1,IDX2,NBF, NBPART, MAGIC, J, IFUNC, FILEN, NPSOL,
      .          NODCUT,NELCUT,LENR,LENI,LENCUT,LENCUTO,IXEL,
      .          MIC1,MIC2,MIC3,MIC4,MIC5,MAC1,MAC2,MAC3,NPSPR,N,K,
      .          I3000, NESCT,NERBY,NERWL,NNWL,TMPNBF,ISK(6),
@@ -2594,6 +2596,49 @@ C all NPTT for PID51
             IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Volumetric Strain - 8',21)
             IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Volumetric Strain - 9',21)
             IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Volumetric Strain - 10',22)
+
+            IDX0 = 15921 + 4*MX_PLY_ANIM  ! VEL-Y 0:10
+            IDX1 = IDX0+10+1              ! VEL-Z 0:10
+            IDX2 = IDX1+10+1              ! VEL   0:10
+
+            IDX = IDX0-1
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude',18)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 1',22) !phase 1 (multimat)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 2',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 3',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 4',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 5',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 6',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 7',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 8',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 9',22)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Magnitude - 10',23)
+
+            IDX = IDX1-1
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y',10)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 1',14) !phase 1 (multimat)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 2',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 3',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 4',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 5',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 6',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 7',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 8',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 9',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Y - 10',15)
+
+            IDX = IDX2-1
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z',10)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 1',14) !phase 1 (multimat)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 2',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 3',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 4',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 5',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 6',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 7',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 8',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 9',14)
+            IDX=IDX+1; IF(ANIM_CE(IDX) == 1) CALL ANI_TXT('Velocity Z - 10',15)
 
             !---NEXT ANIM
             !IDX=IDX+1

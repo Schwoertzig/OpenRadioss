@@ -71,7 +71,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,II,IV
+      INTEGER I
       my_real
      .   SY(MVSIZ) , SZ(MVSIZ) ,
      .   TY(MVSIZ) , TZ(MVSIZ) , 
@@ -90,7 +90,7 @@ C-----------------------------------------------
       END DO
 C
 C----------------------------
-C     COORDONNEES NODALES
+C     NODE COORDINATES
 C----------------------------
       DO I=1,NEL
         Y1(I)=X(2,NC1(I))
@@ -212,7 +212,7 @@ C
           ZL=G23*Y4(I)+G33*Z4(I)
           Y4(I)=YL
           Z4(I)=ZL
-C         MATRICE DE PASSAGE GLOBAL -> ORTHOTROPE.
+C         TRANSFORMATION MATRIX GLOBAL -> ORTHOTROPIC.
           T22=R22(I)*G22+R23(I)*G32
           T23=R22(I)*G23+R23(I)*G33
           T32=R32(I)*G22+R33(I)*G32

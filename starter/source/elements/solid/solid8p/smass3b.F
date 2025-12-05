@@ -63,7 +63,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I1,I2,I3,I4,I5,I6,I7,I8,IP, I,J,K
+      INTEGER I1, I2, I3, I4, I5, I6, I7, I8, IP, I
       my_real
      .   MASS(MVSIZ), DMASGP(8,MVSIZ),
      .   XX,XY,YY,YZ,ZZ,ZX,DMCPGP(8,MVSIZ)
@@ -101,7 +101,7 @@ C
         DMCPGP(8,I)=RHOCP(I)*VOLGP(8,I)
        ENDDO  
       ENDIF 
-C     mass init en parith/on si spmd
+C     mass init in parith/on if spmd
 
        DO I=LFT,LLT
         MSS(1,I)=DMASGP(1,I)

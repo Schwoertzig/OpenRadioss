@@ -107,7 +107,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, L, N1, N2, N3, N4, I_AMAX
-      INTEGER I_ADD, ADESTK, NB_NC, NB_EC, ADNSTK, IBID
+      INTEGER I_ADD, ADESTK, NB_NC, NB_EC, ADNSTK
       INTEGER IP1, IP2, IP21, IP22, IP31,J_STOK,I_BID,NB_N_B
 C     REAL
       my_real
@@ -116,15 +116,15 @@ C     REAL
      .   DX4,DY4,DZ4,
      .   DX6,DY6,DZ6,
      .   DD1,DD2,DD3,DD4,DD,DD0,XMIN,YMIN,ZMIN,
-     .   XMAX,YMAX,ZMAX,TZINF0,MINBOX_ST,MAXBOX_ST,GAPSMAX,
-     .   BID,TZINF_ST,MARGE_ST,GAPV(MVSIZ)
+     .   XMAX,YMAX,ZMAX,MINBOX_ST,MAXBOX_ST,
+     .   TZINF_ST,MARGE_ST,GAPV(MVSIZ)
 C-----------------------------------------------
 C
-C     1-CALCUL TAILLE DES ZONES INFLUENCES
+C     1-CALCULATION TAILLE DES ZONES INFLUENCES
 C     DD IS THE AVERAGE ELEMENT LENGTH
       DD=ZERO
       DO 10 L=1,NRTS
-C      CONNECIVITES ELEMENT
+C      ELEMENT CONNECTIVITIES
        N1=IRECTS(1,L)
        N2=IRECTS(2,L)
        N3=IRECTS(3,L)
@@ -173,7 +173,7 @@ C DD + 2*Tzinfo: Size element increased in influence zone
       MINBOX= HALF*MAXBOX
       MAXBOX_ST= HALF*(DD + 2*TZINF_ST)
       MINBOX_ST= HALF*MAXBOX_ST
-C     MIS A ZERO POUR FAIRE SEARCH COMPLET CYCLE 0 ENGINE
+C     SET TO ZERO TO PERFORM COMPLETE SEARCH CYCLE 0 ENGINE
       DIST = ZERO     
 C--------------------------------
 C     CALCULATION OF THE DOMAIN BOUNDS
@@ -312,7 +312,7 @@ C       SEPARER B ET N EN TWO
      2   PROV_E,N11  ,N21    ,N31    ,DGAPLOAD)
 C------------------
 C     I_MEM = 1 ==> PAS ASSEZ DE MEMOIRE PILE
-C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATS
+C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
         IF (I_MEM == 2)THEN
           RETURN
         ENDIF

@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    my_barrier          ../engine/source/system/machine.F
 !||    spmd_i17frots_pon   ../engine/source/mpi/interfaces/spmd_i17frots_pon.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    h3d_mod             ../engine/share/modules/h3d_mod.F
 !||    icontact_mod        ../engine/share/modules/icontact_mod.F
 !||    message_mod         ../engine/share/message_module/message_mod.F
@@ -54,6 +55,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE H3D_MOD
       USE OUTPUT_MOD, ONLY : OUTPUT_
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -334,7 +336,7 @@ C-----------------------------------------------
      .   R_S(MVSIZ) ,T_S(MVSIZ)   ,AREA(MVSIZ) ,AREA_TOT(MVSIZ),
      .   AREA_EL(MVSIZ)        
 C-----------------------------------------------
-C      calcul de r,s,t
+C      calculation de r,s,t
 C-----------------------------------------------
 C      central node face 1 2 3 4
 C-----------------------------------------------
@@ -410,7 +412,7 @@ C
         ENDIF
       ENDDO
 C-----------------------------------------------
-C      calcul de SI_S=s(relatif element main) 
+C      calculation de SI_S=s(relatif element main) 
 c      the 8 nodes of the face of the second element
 C-----------------------------------------------
       DO J=1,8
@@ -924,7 +926,7 @@ c         main 5678
         IF(AREA_TOT(I) == ZERO)AREA_TOT(I) = AREA_EL(I)
       ENDDO
 C-----------------------------------------------
-C          calcul de Ni(r,s,t); dNi/dr; dNi/dt; normale second(-n)
+C          calculation de Ni(r,s,t); dNi/dr; dNi/dt; normale second(-n)
 C-----------------------------------------------
       CALL I17NORM(LLT  ,R_CS  ,S_CS  ,T_CS  ,
      2             NX   ,NY    ,NZ    ,XXS   ,YYS   ,ZZS   )
@@ -1102,7 +1104,7 @@ c
       SUBROUTINE I17RACINE_PENA(LLT,A,B,C,R1,R2)
 C-----------------------------------------------
 C
-C    calcul des racines r1,r2 bornees a +- 1
+C    calculation des racines r1,r2 bornees a +- 1
 C
 C    de  a x^2 + b x + c = 0
 C 

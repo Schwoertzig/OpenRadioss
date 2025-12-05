@@ -55,7 +55,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  
@@ -99,8 +99,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I_STOK_GLOB,NSN,NME,NAD,EAD,
-     .        NME_T,ESH_T,IGN,IGE,MULTIMP,NOINT,I,MX_CAND,NTY,IVIS2,
+      INTEGER NSN,
+     .        NOINT,I,NTY,IVIS2,
      .        IGAP,INACTI,IBAG,I_STOK, I_STOK_LOC, JLT_NEW,
      .        JLT, NFT,DEBUT,NBID,NB_LOC,JTASK, IGSTI,ICURV,IADM
       INTEGER IX1(MVSIZ), IX2(MVSIZ), IX3(MVSIZ), IX4(MVSIZ),
@@ -121,8 +121,8 @@ C     REAL
      .   Y1(MVSIZ), Y2(MVSIZ), Y3(MVSIZ), Y4(MVSIZ),
      .   Z1(MVSIZ), Z2(MVSIZ), Z3(MVSIZ), Z4(MVSIZ),
      .   XI(MVSIZ), YI(MVSIZ), ZI(MVSIZ), STIF(MVSIZ),
-     .   N1(MVSIZ), N2(MVSIZ), N3(MVSIZ), PENE(MVSIZ),
-     .   H1(MVSIZ), H2(MVSIZ), H3(MVSIZ), H4(MVSIZ),
+     .      
+     .      
      .   GAPV(MVSIZ),VXI(MVSIZ),VYI(MVSIZ),VZI(MVSIZ),MSI(MVSIZ)
       my_real
      .    NNX1(MVSIZ), NNX2(MVSIZ), NNX3(MVSIZ), NNX4(MVSIZ),
@@ -235,7 +235,7 @@ C
 C
       DO NFT = 0 , I_STOK - 1 , NVSIZ
           JLT = MIN( NVSIZ, I_STOK - NFT )
-C preparation candidats retenus
+C preparation CANDIDATES retenus
           CALL I7CDCOR3(
      1         JLT,INDEX2(NFT+1),INTBUF_TAB(NIN)%CAND_E,INTBUF_TAB(NIN)%CAND_N,
      2         CAND_E_N,CAND_N_N)

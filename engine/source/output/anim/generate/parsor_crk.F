@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c          ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod      ../engine/share/modules/crackxfem_mod.F
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE PARSOR_CRK(IPARG  ,IXC     ,IXTG  ,EL2FA,IDCRK   ,
@@ -38,6 +39,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
       USE CRACKXFEM_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,9 +60,8 @@ C-----------------------------------------------
      .        NBF_L,NBF,NODGLOBXFE(*),ITAB(*)
 C-----------------------------------------------
 C     REAL
-      my_real OFF
-      INTEGER IE,NG,ITY,LFT,LLT,N,I,J,NEL,NFT,JJ,K,BUF,IXFEM,
-     .        IPT,ELC,CRKS,ICRK,IE_EL2FA,NEL_CRK,EMPL,NLEVXF
+      INTEGER IE, NG, ITY, LFT, LLT, N, I, NEL, NFT, JJ, BUF, IXFEM, 
+     . CRKS,ICRK,IE_EL2FA,NEL_CRK,NLEVXF
       INTEGER II(4)
       INTEGER,DIMENSION(:),ALLOCATABLE::NP
 C=======================================================================

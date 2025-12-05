@@ -27,6 +27,7 @@ C
 !||    chkstfn3n             ../engine/source/interfaces/interf/chkstfn3.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    nodal_arrays_mod      ../common_source/modules/nodal_arrays.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
@@ -38,10 +39,11 @@ C
      5    LINDEX,IXP   ,IXR    ,IXT    ,GEO    ,
      6    TAGEL ,IAD_ELEM)
        USE nodal_arrays_mod
+       USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
+       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
 C-----------------------------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -74,9 +76,9 @@ C-----------------------------------------------
 #ifdef MPI
       INTEGER MSGOFF2 ,MSGOFF3, MSGTYP, LOC_PROC,
      .        IERROR,I, IDEB, LEN, N1, N2, N3, N4,
-     .        K, IX, LFT, LLT, II, NN, J, IOFF,
-     .        JD(50), KD(50), NG, IDEL, ITYP, NBEL,
-     .        ITY, MLW, NEL, NFT, KAD, NPT, ISTRA, IHBE,
+     .        K, IX, II, NN, J, IOFF,
+     .           IDEL, ITYP, NBEL,
+     .            
      .        REQ_S2(NSPMD),REQ_S3(NSPMD),STATUS(MPI_STATUS_SIZE),
      .        REQ_R1(NSPMD)
       INTEGER, DIMENSION(:), ALLOCATABLE ::  BUFR, BUFS2

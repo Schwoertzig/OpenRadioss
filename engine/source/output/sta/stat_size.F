@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_glob_isum9   ../engine/source/mpi/interfaces/spmd_th.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||    output_mod        ../common_source/modules/output/output_mod.F90
 !||====================================================================
       SUBROUTINE STAT_SIZE_C(IPARG ,IXC  ,IXTG ,IGEO ,IPM      ,
@@ -39,6 +40,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD         
       USE OUTPUT_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -69,11 +71,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER JJ,NN,ITY,IAD,NFT,LFT,LLT,NPT,NPTM,ISTRAIN,IHBE,ISH3N,
+      INTEGER ITY,NFT,LFT,LLT,NPT,NPTM,ISTRAIN,IHBE,
      .        NUVAR,MLW,NG,NEL,I,NPG,MPT,ISROT,
-     .        RWASZ,WASZ2,P0ARSZ2,RWASZ2,JHBE,ISOLNOD,
-     .        NLAY,NPTR,NPTS,NPTT,NPTG,IGTYP,ICSIG,
-     .        NPTS0,NPTR0,NPTT0,NUVARR,NVARF,IL,NPT_ALL,IPROP,
+     .        RWASZ,WASZ2,P0ARSZ2,RWASZ2,ISOLNOD,
+     .        NLAY,NPTR,NPTS,NPTT,IGTYP,
+     .        NUVARR,NVARF,IL,NPT_ALL,IPROP,
      .        EL_FIX,EL_VAR,ISMSTR,NFAIL,IPRT,MT
       TYPE(BUF_FAIL_) ,POINTER :: FBUF
 C======================================================================|

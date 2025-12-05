@@ -31,7 +31,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_option_is_encrypted   ../starter/source/devtools/hm_reader/hm_option_is_encrypted.F
 !||    hm_option_read_key       ../starter/source/devtools/hm_reader/hm_option_read_key.F
 !||    hm_option_start          ../starter/source/devtools/hm_reader/hm_option_start.F
-!||    nintri                   ../starter/source/system/nintrr.F
 !||    nintrigr                 ../starter/source/system/nintrr.F
 !||    udouble                  ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
@@ -78,17 +77,17 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER PID,MID,SID,ID,I,IMID,IPID,ISID,K,ITH,IGTYP,N,GR,IGR
+      INTEGER ID, I, GR, IGR
       CHARACTER(LEN=NCHARTITLE) :: TITR,TITR1
       CHARACTER MESS*40,TYP*6
-      INTEGER IDS, CNT, FLAG_FMT, FLAG_FMT_TMP, IFIX_TMP,NGROU,ITYP
+      INTEGER ITYP
       CHARACTER(LEN=NCHARKEY) :: KEY
       LOGICAL IS_ENCRYPTED,IS_AVAILABLE,IS_FOUND_SURF
       my_real BID
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER NINTRI,NINTRIGR
+      INTEGER NINTRIGR
       DATA MESS/' THPART DEFINITION                      '/
 C-----------------------------------------------
 C   S o u r c e   L i n e s

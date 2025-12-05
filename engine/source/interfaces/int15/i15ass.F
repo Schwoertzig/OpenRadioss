@@ -74,8 +74,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER ADRBUF, I, IN, I3, I2, I1
-      INTEGER NFORC , NISKYL
-      INTEGER NDEB, NREST
+      INTEGER NISKYL
       my_real
      .   ROT(9), XK , YK, ZK, FX, FY, FZ, AM1, AM2, AM3,
      .   FN1, FN2, FN3, FT1, FT2, FT3,
@@ -213,7 +212,7 @@ C------------------------------------------------------------
 C---------------------------------
 C     for work of forces on secondary nodes
 C     1ere partie : ici
-C     2eme partie : apres calcul de DT2.
+C     2eme partie : apres calculation de DT2.
 C---------------------------------
        DO 450 I=1,NNC
        IN=KNC(I)

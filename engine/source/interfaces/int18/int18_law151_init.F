@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol               ../engine/source/engine/resol.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod        ../common_source/modules/groupdef_mod.F
 !||    message_mod         ../engine/share/message_module/message_mod.F
 !||    multi_fvm_mod       ../common_source/modules/ale/multi_fvm_mod.F90
@@ -59,6 +60,7 @@ C-----------------------------------------------
         USE GROUPDEF_MOD
         USE ELBUFDEF_MOD 
         USE MESSAGE_MOD
+        use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -90,7 +92,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER :: N,NN,II,JJ,MY_SIZE
         INTEGER :: NFT,GROUP_ID,ILOC
-        INTEGER :: ISU1,NSN,NTY,INACTI,NODE_ID,IBRIC
+        INTEGER :: ISU1,NSN,NODE_ID,IBRIC
         LOGICAL, DIMENSION(:), ALLOCATABLE :: TAG
 C-----------------------------------------------
         !   X/V/MASS extended 

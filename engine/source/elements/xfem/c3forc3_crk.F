@@ -55,6 +55,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod        ../engine/share/modules/drape_mod.F
 !||    dt_mod           ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod     ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod   ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod     ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -91,7 +92,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      O   CRKEDGE,     DRAPE_SH3N,  IPRI,        NLOC_DMG,
      P   INDX_DRAPE,  IGRE,        DT,          NCYCLE ,
      R   SNPC,        STF,         GLOB_THERM,  IDEL7NOK,
-     Q   USERL_AVAIL, MAXFUNC,     SBUFMAT)
+     Q   USERL_AVAIL, MAXFUNC,     SBUFMAT,IPART     ,LIPART1 )
 C-----------------------------------------------
       USE TIMER_MOD
       USE TABLE_MOD
@@ -105,6 +106,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE DT_MOD
       use glob_therm_mod
+      use element_mod , only : nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -169,20 +171,23 @@ C-----------------------------------------------
       TYPE (SENSORS_) ,INTENT(INOUT) :: SENSORS
       TYPE (DT_), INTENT(IN) :: DT
       type (glob_therm_) ,intent(inout)   :: glob_therm
+      integer, intent(in) :: LIPART1
+      INTEGER, DIMENSION(LIPART1,NPART), INTENT(IN)     :: IPART
+    
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 c     Indx uses locally unlike 4N shells 
       INTEGER 
-     .   I,J,J1,J2,IR,IS,IT,IPT,IFLAG,IGTYP,IXFEM2,IREP,IMAT,
-     .   IUN,NPG,IBID,IDRIL,NG,IXLAY,NXLAY,NLAYER,NPTT,STEP,
-     .   L_DIRA,L_DIRB,ILEV,IGMAT,IPTHK,ISH3NFR,IDRAPE,ACTIFXFEM,
+     .   I,J1,J2,IR,IS,IT,IGTYP,IXFEM2,IREP,IMAT,
+     .   IUN,NPG,IBID,IDRIL,NG,IXLAY,NXLAY,NLAYER,NPTT,
+     .   L_DIRA,L_DIRB,ILEV,IGMAT,IPTHK,ISH3NFR,ACTIFXFEM,
      .   SEDRAPE, NUMEL_DRAPE
       INTEGER  MAT(MVSIZ),PID(MVSIZ),NGL(MVSIZ),INDX(MVSIZ),FWAVE(MVSIZ)
       my_real STI(MVSIZ),STIR(MVSIZ),RHO(MVSIZ),
      .   SSP(MVSIZ),VISCMX(MVSIZ),AREA(MVSIZ),
-     .   X21(MVSIZ), Y21(MVSIZ), Z21(MVSIZ),
-     .   X31(MVSIZ), Y31(MVSIZ), Z31(MVSIZ),
+     .     
+     .     
      .   EXX(MVSIZ),EYY(MVSIZ),EXY(MVSIZ),EYZ(MVSIZ),EZX(MVSIZ),
      .   KXX(MVSIZ),KYY(MVSIZ),KXY(MVSIZ),
      .   PX1(MVSIZ),PY1(MVSIZ),PY2(MVSIZ),
@@ -479,7 +484,8 @@ C--------------------------
      R   INDX_DRAPE , THKE    ,SEDRAPE   ,NUMEL_DRAPE,     DT  ,
      Q   NCYCLE     ,SNPC      ,  STF    ,NXLAYMAX   ,IDEL7NOK ,
      S   USERL_AVAIL, MAXFUNC,      NPTTOT,BUFMAT     ,SDIR_A   ,
-     T   SDIR_B     ,GBUF%FOR_G,SSP_EQ )
+     T   SDIR_B     ,GBUF%FOR_G,SSP_EQ,
+     X    IPART     ,LIPART1 ,IPARTTG   )
 
 C--------------------------
         IF ((ITASK==0).AND.(IMON_MAT==1)) CALL STOPTIME(TIMERS,35)

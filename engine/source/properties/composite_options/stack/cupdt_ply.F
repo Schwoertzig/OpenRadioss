@@ -25,6 +25,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- called by ------------------------------------------------------
 !||    cbaforc3      ../engine/source/elements/shell/coqueba/cbaforc3.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||    plyxfem_mod   ../engine/share/modules/plyxfem_mod.F
 !||====================================================================
       SUBROUTINE CUPDT_PLY(
@@ -40,6 +41,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
        USE PLYXFEM_MOD
+       use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -74,7 +76,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NVC1, NVC2, NVC3, NVC4, I, J, MX,IOFF,IP,I1,I2,I3,I4,N,
+      INTEGER NVC1, NVC2, NVC3, NVC4, I, J, IP, I1, I2, I3, I4, N, 
      .        IN1,IN2,IN3,IN4
       my_real
      .   OFF_L,  

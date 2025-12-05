@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_stat_pgather   ../engine/source/mpi/output/spmd_stat.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE STAT_T_FULL(
@@ -40,6 +41,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixt
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -55,7 +57,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXT(NIXT,*),IPARG(NPARG,*),IGEO(NPROPGI,*),
      .        IPARTT(*),IPART_STATE(*),STAT_INDXT(*)
       my_real   
@@ -66,10 +68,10 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J,K,N,JJ,LEN,IOFF,IE,NG,NEL,NFT,LFT,
-     .   LLT,ITY,ID,IPRT0,IPRT,IGTYP,IPROP,G_PLA
+     .   LLT,ITY,ID,IPRT0,IPRT,IGTYP,IPROP
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA_P0
-      CHARACTER*100 DELIMIT,LINE
+      CHARACTER*100 DELIMIT
       TYPE(G_BUFEL_)  ,POINTER :: GBUF
 C-----------------------------------------------
       DATA DELIMIT(1:60)

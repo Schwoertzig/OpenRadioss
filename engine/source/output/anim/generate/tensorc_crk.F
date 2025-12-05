@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod      ../engine/share/modules/crackxfem_mod.F
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    matparam_def_mod   ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
@@ -48,6 +49,7 @@ C-----------------------------------------------
       USE CRACKXFEM_MOD
       USE ELBUFDEF_MOD
       USE MATPARAM_DEF_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -87,12 +89,12 @@ C     REAL
       REAL R4(18)
       INTEGER I,NI,NG,NEL,NFT,ITY,LFT,NPT,IPT,
      .        N,J,LLT,MLW,ISTRAIN,
-     .        IPID,I1,I2,ISTRE,NNI,N0,
-     .        KK,IHBE,IREP,BUF,NEL_CRK,
-     .        NLAY,NPTT,IXEL,ILAY,NUVARV,IVISC,
+     . IPID,ISTRE,NNI,N0,
+     . IHBE,IREP,BUF,NEL_CRK,
+     . NLAY,IXEL,ILAY,NUVARV,IVISC,
      .        IPMAT,IGTYP,MATLY,NLEVXF,NPG,ICRK,JJ(8)
 C
-      INTEGER IXFEM,K,CRKS,ITG,IA,NN1,NN2,
+      INTEGER IXFEM, CRKS, ITG, NN1, NN2, 
      .        NN3,NN4,NN5,NN6
       REAL, DIMENSION(:,:), ALLOCATABLE :: WA
       INTEGER, DIMENSION(:), ALLOCATABLE  :: NELCRK
@@ -100,7 +102,7 @@ C
       INTEGER ILAYCRK,ELCRK,NPT0
       INTEGER PID(MVSIZ),MAT(MVSIZ)
 C---
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF
 C---

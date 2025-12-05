@@ -96,14 +96,14 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, MX, J
+      INTEGER I, MX
       my_real
      .   RHO0(MVSIZ), 
      .   G(MVSIZ), G1(MVSIZ), G2(MVSIZ),
      .   C1(MVSIZ),
-     .   DF,DAV, DPDM, P,
+     .   DAV, P,
      .   E1, E2, E3, E4, E5, E6, EINC, P2,
-     .   BID1, BID2, BID3, DTA,  YM, DPDMP,FACQ0,
+     .   BID1, BID2, BID3, DTA,FACQ0,
      .   RHO0_1,C1_1
       my_real
      .    lmb(mvsiz),epsm 
@@ -132,7 +132,7 @@ C
        SSP(I)=SQRT((ONEP333*G(I)+C1(I))/RHO0(I))
        RHOSP(I)=RHO0(I)
        !-------------------------------
-       !     CONTRAINTES DEVIATORIQUES
+       !     DEVIATORIC STRESSES
        !-------------------------------
        P  =-THIRD*(SIG(I,1)+SIG(I,2)+SIG(I,3))
        DAV=-THIRD*(D1(I)+D2(I)+D3(I))

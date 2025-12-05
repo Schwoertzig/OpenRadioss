@@ -33,7 +33,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_part           ../starter/source/model/assembling/hm_read_part.F
 !||    hm_read_retractor      ../starter/source/tools/seatbelts/hm_read_retractor.F
 !||    hm_read_slipring       ../starter/source/tools/seatbelts/hm_read_slipring.F
-!||    hm_read_thpart         ../starter/source/output/thpart/hm_read_thpart.F
 !||    lecint                 ../starter/source/interfaces/interf1/lecint.F
 !||    nbadigemesh            ../starter/source/elements/ige3d/nbadigemesh.F
 !||    read_dfs_detcord       ../starter/source/initial_conditions/detonation/read_dfs_detcord.F
@@ -83,7 +82,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
-C      FONCTION DONNE N0 SYSTEME D'UNE LISTE D'ELEMENTS USER
+C      FUNCTION RETURNS SYSTEM ID FROM A LIST OF USER ELEMENTS
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -176,7 +175,7 @@ C
       INTEGER FUNCTION NINTLST2 (LIST,NLIST,INDEXL,IX,NIX,NUMEL,
      .                           MESS,IX1,IX2,INDEX,KK)
       USE MESSAGE_MOD
-C      FONCTION DONNE N0 SYSTEME D'UNE LISTE D'ELEMENTS USER, AUTORISE LES 0.
+C      FUNCTION RETURNS SYSTEM ID FROM A LIST OF USER ELEMENTS, ALLOWS ZEROS.
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -190,7 +189,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J,NOLD,K,
+      INTEGER I, J,
      .        IWORK(70000)
 C-----------------------
 C TRI DE LIST EN ORDRE CROISSANT
@@ -392,7 +391,6 @@ C
 !||    hm_preread_imptemp       ../starter/source/constraints/thermic/hm_preread_imptemp.F
 !||    hm_preread_impvel        ../starter/source/constraints/general/impvel/hm_preread_impvel.F
 !||    hm_preread_load_centri   ../starter/source/loads/general/load_centri/hm_preread_load_centri.F
-!||    hm_preread_pload         ../starter/source/loads/general/pload/hm_preread_pload.F
 !||    hm_preread_radiation     ../starter/source/loads/thermic/hm_preread_radiation.F
 !||    hm_preread_rbe2          ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||    hm_preread_xelem         ../starter/source/elements/reader/hm_preread_xelem.F
@@ -649,7 +647,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J,NEL,NOLD,K,
+      INTEGER I,
      .        IWORK(70000)
       INTEGER, DIMENSION(:), ALLOCATABLE :: INDEX ! LENI*2
 C-----------------------
@@ -737,10 +735,9 @@ C-----------------------
 !||====================================================================
 !||    user2sys   ../starter/source/system/nintrr.F
 !||--- called by ------------------------------------------------------
-!||    nintlstn   ../starter/source/system/nintrr.F
 !||====================================================================
       INTEGER FUNCTION USER2SYS(IU,IXX_S,NIX,CUR,LAST)
-C      FONCTION DONNE N0 SYSTEME D'UNE LISTE D'ELEMENTS USER OR ZERO IF NOT FOUND
+C      FUNCTION RETURNS SYSTEM ID FROM A LIST OF USER ELEMENTS OR ZERO IF NOT FOUND
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -748,12 +745,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NIX,NUMEL, CUR, LAST
+      INTEGER NIX, CUR, LAST
       INTEGER IU,IXX_S(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, JINF, JSUP
+      INTEGER  J, JINF, JSUP
 C-----------------------
 
       IF (LAST==0) THEN
@@ -793,7 +790,6 @@ C
 !||    hm_lecgre              ../starter/source/groups/hm_lecgre.F
 !||--- calls      -----------------------------------------------------
 !||    ancmsg                 ../starter/source/output/message/message.F
-!||    user2sys               ../starter/source/system/nintrr.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod            ../starter/share/message_module/message_mod.F
 !||====================================================================
@@ -801,7 +797,7 @@ C
      .                          IXX_S_IND,INDEX,TYPE,ID,TITR)
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
-C      FONCTION DONNE N0 SYSTEME D'UNE LISTE D'ELEMENTS USER
+C      FUNCTION RETURNS SYSTEM ID FROM A LIST OF USER ELEMENTS
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

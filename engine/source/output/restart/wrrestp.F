@@ -94,6 +94,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_nloc_struct            ../engine/source/output/restart/write_nloc_struct.F
 !||    write_pcyl                   ../engine/source/output/restart/write_pcyl.F
 !||    write_rrbe3pen               ../engine/source/output/restart/restart_rbe3pen.F90
+!||    write_rrwallpen              ../engine/source/output/restart/restart_rwallpen.F90
 !||    write_sensors                ../engine/source/output/restart/write_sensors.F
 !||    write_th_restart             ../engine/source/output/th/write_th_restart.F
 !||    write_units                  ../common_source/comm/write_units.F
@@ -134,7 +135,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    python_funct_mod             ../common_source/modules/python_mod.F90
 !||    rbe3_mod                     ../common_source/modules/constraints/rbe3_mod.F90
 !||    restart_rbe3pen_mod          ../engine/source/output/restart/restart_rbe3pen.F90
+!||    restart_rwallpen_mod         ../engine/source/output/restart/restart_rwallpen.F90
 !||    restmod                      ../engine/share/modules/restart_mod.F
+!||    rwall_mod                    ../common_source/modules/constraints/rwall_mod.F90
 !||    seatbelt_mod                 ../common_source/modules/seatbelt_mod.F
 !||    sensor_mod                   ../common_source/modules/sensor_mod.F90
 !||    skew_mod                     ../common_source/modules/skew_mod.F90
@@ -162,7 +165,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                   IMPBUF_TAB ,IMPL_S          ,IMPL_S0    ,MCP         ,TEMP             ,
      .                   FORNEQS    ,UNITAB          ,STACK      ,NDRAPE      ,DRAPE_SH3N       ,
      .                   DRAPE_SH4N ,DRAPEG          ,RESTSIZE   ,SKEWS       ,GLOB_THERM       ,
-     .                   PBLAST     ,RBE3)
+     .                   PBLAST     ,RBE3            ,RWALL      )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -219,6 +222,8 @@ C-----------------------------------------------
       use rbe3_mod
       use restart_rbe3pen_mod, only : write_rrbe3pen
       use checksum_output_option_mod, only : checksum_restart_write
+      use rwall_mod
+      use restart_rwallpen_mod, only : write_rrwallpen
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -269,6 +274,7 @@ c     TYPE (CLUSTER_) ,DIMENSION(NCLUSTER) :: CLUSTER
       type (glob_therm_) ,intent(inout) :: GLOB_THERM
       TYPE(PBLAST_)    ,INTENT(INOUT) :: PBLAST
       TYPE(RBE3_)      ,INTENT(INOUT) :: RBE3
+      TYPE(RWALL_)     ,INTENT(INOUT) :: RWALL
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -741,9 +747,9 @@ c        CALL WRITE_I_C(INBUF,SINBUF)
         !write new structure INTBUF_TAB
         CALL WRITE_INTBUF(INTBUF_TAB)
 
-        CALL WRITE_I_C(NPRW,SNPRW)
+        CALL WRITE_I_C(RWALL%NPRW,RWALL%NNPRW*RWALL%NRWALL)
 
-        CALL WRITE_I_C(LPRW,SLPRW)
+        CALL WRITE_I_C(RWALL%LPRW,RWALL%sz_lprw)
 
         CALL WRITE_I_C(ICONX,SICONX)
 
@@ -836,7 +842,7 @@ C
 
         CALL WRITE_I_C(FR_RBY,SFR_RBY)
 
-        CALL WRITE_I_C(FR_WALL,SFR_WALL)
+        CALL WRITE_I_C(RWALL%FR_WALL,SFR_WALL)
 
         CALL WRITE_I_C(FR_RBY2,SFR_RBY2)
 
@@ -1271,9 +1277,11 @@ C  if xfem
 
          CALL W_CLUSTER(CLUSTER)
 
-         CALL WRITE_DB(RWBUF,SRWBUF)
+         CALL WRITE_DB(RWALL%RWBUF,RWALL%nrwlp*RWALL%nrwall)
 
-         CALL WRITE_DB(RWSAV,SRWSAV)
+         CALL WRITE_DB(RWALL%RWSAV,RWALL%sz_rwsav)
+
+         CALL write_rrwallpen(RWALL%nrwall_pen,RWALL%PEN,RWALL%PEN%lnspen)
 
          CALL WRITE_DB(RBY,SRBY)
 
@@ -1302,7 +1310,7 @@ C Writing Additional Tables Frontieres SPH (Real part)
 C--------------------------------------
       CALL SPMD_SAVESPH(2,NUMSPHG)
 C--------------------------------------
-C     ECRITURES FACULTATIVES
+C     OPTIONAL WRITES
 C--------------------------------------
       IF (IRESMD==0.AND.NPSAV>=25) THEN
 C   bring PARTSAV back to the proc and set the others to zero

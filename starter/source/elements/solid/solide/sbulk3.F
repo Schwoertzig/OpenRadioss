@@ -66,7 +66,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, IP, N1, N2, N11, N22, N,
+      INTEGER I, N1, N2, N11, N22, N,
      .        IPERM101(10),IPERM102(10),IPERM103(10),
      .        IPERM161(16),IPERM162(16),
      .        IPERM201(20),IPERM202(20)
@@ -151,7 +151,7 @@ C
 C     10 nodes tetrahedra :
 100   CONTINUE
       DO I=LFT,LLT
-       FAC=TRHEE_OVER_14
+       FAC=THREE_OVER_14
        AV1 = VOLU(I)*FAC/(FOUR*FAC+SIX)
        AV2 = VOLU(I)*ONE /(FOUR*FAC+SIX)
        VNS(1,I)=AV1
@@ -224,7 +224,7 @@ C
 C     20 nodes bricks :
 200   CONTINUE
       DO I=LFT,LLT
-       FAC=TRHEE_OVER_14
+       FAC=THREE_OVER_14
        AV1 = VOLU(I)*FAC/(EIGHT*FAC+TWELVE)
        AV2 = VOLU(I)*ONE /(EIGHT*FAC+TWELVE)
        VNS(1,I)=AV1

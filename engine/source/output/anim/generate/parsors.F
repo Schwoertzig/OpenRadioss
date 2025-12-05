@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_iget_partn    ../engine/source/mpi/anim/spmd_iget_partn.F
 !||    spmd_iglob_partn   ../engine/source/mpi/anim/spmd_iglob_partn.F
 !||    write_i_c          ../common_source/tools/input_output/write_routines.c
+!||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE PARSORS(IADD ,IPARG     ,IXS    ,MATER ,IPARTS ,
      2                  EL2FA ,                   DD_IAD, 
@@ -35,6 +37,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4                  IXS10 ,IXS20     ,IXS16  ,NNSPH ,ISPH3D,
      5                  NODGLOB,SHFT16   ,SHFTSPH ,NNSPHG,IPARTIG3D,
      6                  KXIG3D,IGEO,IG3DSOLID)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -63,14 +66,12 @@ C     REAL
      .        IGEO(NPROPGI,*),IG3DSOLID(8,27,*)
 C-----------------------------------------------
 C     REAL
-      my_real
-     .   OFF
-      INTEGER II(8),IE,NG, ITY, LFT, LLT, KPT, N, I, J, 
-     .        IPID, NEL, IAD, NPAR, NFT, IPRT,IALEL,MTN,
-     .        NN1,NN2,NN3,NN4,NN5,NN6,NN7,NN8,NN9,NN10,
-     .        JJ, K, INOD, ISOLNOD ,NNN,IE1,IDBRICK,
+      INTEGER II(8), IE, NG, ITY, LFT, LLT, N, I, J, 
+     . NEL, IAD, NPAR, NFT, IPRT,
+     . NN1,NN2,NN3,NN4,NN5,
+     . JJ, INOD, ISOLNOD ,NNN,IE1,IDBRICK,
      .        N9,N10,N11,N12,N13,N14,N15,N16,IPROP,PX,PY,PZ
-      INTEGER BUF,BUFP,FIRST_NODE,L,M
+      INTEGER BUF, BUFP, L, M
       INTEGER, DIMENSION(:), ALLOCATABLE :: NP
 C-----------------------------------------------
 C

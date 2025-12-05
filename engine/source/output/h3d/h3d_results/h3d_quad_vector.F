@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    alefvm_mod             ../common_source/modules/ale/alefvm_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod            ../engine/share/resol/initbuf.F
 !||    multi_fvm_mod          ../common_source/modules/ale/multi_fvm_mod.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
@@ -59,6 +60,7 @@ C-----------------------------------------------
       USE MULTI_FVM_MOD              
       USE ALEFVM_MOD
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
+      use element_mod , only : nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -106,7 +108,7 @@ C-----------------------------------------------
      .   S11,S22,S33,S4,S5,S6,CRIT,VALUE1,VALUE2
       my_real
      .   EVAR(3,MVSIZ)
-      INTEGER I,I1,II,J,NG,NEL,NPTR,NPTS,NPTT,NLAY,L,IFAIL,ILAY,
+      INTEGER I, NG, NEL, NPTR, NPTS, NPTT, NLAY, ILAY, 
      .        IR,IS,IT,IL,MLW, NUVAR,IUS,LENF,PTF,PTM,PTS,NFAIL,
      .        N,NN,K,K1,K2,JTURB,MT,IMID,IALEL,IPID,ISH3N,NNI,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NN9,NF,BUF,NVARF,
@@ -114,21 +116,21 @@ C-----------------------------------------------
      .        IIGEO,IADI,ISUBSTACK,ITHK,NERCVOIS(*),NESDVOIS(*),
      .        LERCVOIS(*),LESDVOIS(*),ID_PLY,NB_PLYOFF,IOK,IADBUF,NUPARAM,
      .        IMAT,IVISC,IPOS,ITRIMAT
-      INTEGER PID(MVSIZ),MAT(MVSIZ),MATLY(MVSIZ*100),FAILG(100,MVSIZ),
+      INTEGER 
      .        PTE(4),PTP(4),PTMAT(4),PTVAR(4),NPT_ALL,IPLY,
      .        ID_ELEM_TMP(MVSIZ),NIX,IOK_PART(MVSIZ),JJ(6),NPGT,IUVAR,
      .        IS_WRITTEN_VALUE(MVSIZ)
-      CHARACTER*5 BUFF
-      REAL R4
+ 
+ 
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
       TYPE(L_BUFEL_)  ,POINTER :: LBUF     
-      TYPE(BUF_LAY_)  ,POINTER :: BUFLY     
-      TYPE(BUF_FAIL_) ,POINTER :: FBUF 
+ 
+ 
       my_real,
      .  DIMENSION(:), POINTER  :: UVAR
-      TYPE(L_BUFEL_) ,POINTER  :: LBUF1,LBUF2,LBUF3,LBUF4
-      TYPE(BUF_MAT_)  ,POINTER :: MBUF 
-      my_real, DIMENSION(:) ,POINTER  :: UPARAM
+ 
+ 
+ 
       TARGET :: BUFMAT
 C-----------------------------------------------
       ILAY = LAYER_INPUT

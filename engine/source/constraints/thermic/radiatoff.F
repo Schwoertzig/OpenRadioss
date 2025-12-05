@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    desacti          ../engine/source/elements/desacti.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod   ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||====================================================================
       SUBROUTINE RADIATOFF(IBCR, FRADIA, IPARG, IGROUPS, IXS, ELBUF_TAB,GLOB_THERM)
@@ -34,6 +35,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD            
       use glob_therm_mod
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -56,7 +58,7 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER N, JJ, NG, NEL, MLW
+      INTEGER N, JJ, NG, MLW
       my_real, DIMENSION(:), POINTER :: OFFG
 C======================================================================|
 C   activation/deactivation of radiation

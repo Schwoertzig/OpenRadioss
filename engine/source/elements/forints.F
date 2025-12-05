@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    xforc3         ../engine/source/elements/xelem/xforc3.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod    ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE FORINTS(
@@ -50,6 +51,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -86,12 +88,9 @@ C
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,N, NG, NVC, MLW, JFT, JLT ,K ,
-     .   K1, K2, KAD,IAD2,NF1,IPRI,NGLOC, NELEM, OFFSET,
-     .   NSG, NEL,ISOLNOD
-      INTEGER IADUIX,IADUX ,IADUV ,IADUVR,IADUMS,
-     .        IADUIN,IADUSM,IADUSR,IADUMV,IADURV,
-     .        IADUF ,IADUTQ
+      INTEGER NG, NVC, 
+     . NELEM, OFFSET,
+     . NSG, NEL
 C-----------------------------------------------
 C
       DO 240 NG=1,NGROUP

@@ -22,12 +22,14 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    i7therm    ../engine/source/interfaces/int07/i7therm.F
+!||    i7therm       ../engine/source/interfaces/int07/i7therm.F
 !||--- called by ------------------------------------------------------
-!||    i20mainf   ../engine/source/interfaces/int20/i20mainf.F
-!||    i7mainf    ../engine/source/interfaces/int07/i7mainf.F
+!||    i20mainf      ../engine/source/interfaces/int20/i20mainf.F
+!||    i7mainf       ../engine/source/interfaces/int07/i7mainf.F
 !||--- calls      -----------------------------------------------------
-!||    finter     ../engine/source/tools/curve/finter.F
+!||    finter        ../engine/source/tools/curve/finter.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE I7THERM(JLT  ,IPARG ,PM    ,IXS   ,IFORM  ,X     ,
      1                   XI   ,YI    ,ZI    , X1    ,Y1    ,Z1    ,
@@ -39,6 +41,7 @@ C
      6                   CONDINT,PHI1,PHI2  ,PHI3   ,PHI4  ,FHEATS,
      7                   FHEATM,EFRICT,TEMP ,H1     ,H2     ,H3   ,
      8                   H4   ,theaccfact)     
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -72,13 +75,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, II,L,NB3M, I3N,LS,J,IE,MAT
+      INTEGER I,MAT
 C     REAL
       my_real
      .   SX1 , SY1 , SZ1 , SX2 , SY2 , SZ2,
-     .   AREAM ,TS, VOLM, TSTIF, TM,TSTIFM,
-     .   TSTIFT,AX,AY,AZ,DIST, NORM,COND,P,RSTIFF,
-     .   AX1,AY1,AZ1,AX2,AY2,AZ2,AREA,AREAC,PHIM
+     .   TS, TM,TSTIFM,
+     .   TSTIFT,DIST, NORM,COND,P,RSTIFF,
+     .   AREAC,PHIM
       my_real 
      .   FINTER 
       EXTERNAL FINTER
@@ -116,7 +119,7 @@ C-------------------------------------------------------------
          END IF  
 C
 C-----------------------------------------------
-C         CALCUL DISTANCE ENTRE LE NOEUD SECOND. 
+C         CALCULATION DISTANCE ENTRE LE NODE SECOND. 
 C              and the surface (nodal surface)
 C-----------------------------------------------
          DIST = (SX2*SX1+SY2*SY1+SZ2*SZ1) / MAX(EM15,NORM)
@@ -235,7 +238,7 @@ C-------------------------------------------------------------
          END IF  
 C
 C-----------------------------------------------
-C         CALCUL DISTANCE ENTRE LE NOEUD SECOND. 
+C         CALCULATION DISTANCE ENTRE LE NODE SECOND. 
 C              and the surface (nodal surface)
 C-----------------------------------------------
          DIST = (SX2*SX1+SY2*SY1+SZ2*SZ1) / MAX(EM15,NORM)

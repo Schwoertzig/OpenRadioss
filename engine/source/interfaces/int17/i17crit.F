@@ -29,11 +29,14 @@ Cas|         I17MAIN_PENA            /int17/i17main_pena.F
 !||--- calls      -----------------------------------------------------
 !||    i16box             ../engine/source/interfaces/int16/i16crit.F
 !||    i20box             ../engine/source/interfaces/int16/i16crit.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||====================================================================
        SUBROUTINE I17CRIT(
      1       X      ,V      ,A       ,NELEM ,EMINX  ,
      2       NME    ,ITASK  ,XSAV    ,IXS   ,IXS16  ,
      3       IXS20  ,XMSR_G ,SIZE_T_G)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,7 +62,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NSNF,NMEF,NSNL,NMEL,I, J, II, K,I16,I20,LFT16,LLT16,
+      INTEGER NMEF,NMEL,I,I16,I20,LFT16,LLT16,
      .        LFT20,LLT20,INDEX16(MVSIZ),INDEX20(MVSIZ)
       my_real
      .   XMSR(6), SIZE_T

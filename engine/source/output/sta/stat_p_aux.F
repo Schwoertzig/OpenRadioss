@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tab_strs_txt50      ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE STAT_P_AUX(
@@ -42,6 +43,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD         
       USE MY_ALLOC_MOD
+      use element_mod , only : nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +60,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0
+      INTEGER SIZP0
       INTEGER IXP(NIXP,*),
      .        IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTP(*),IPART_STATE(*),STAT_INDXP(*)
@@ -68,7 +70,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,N,J,K,JJ,LEN,IOFF,NG,NEL,NFT,ITY,LFT,LLT,ID,IPRT0,IPRT,IE, 
-     .        NPT,IR,IS,IPT,IL,IVAR,NUVAR,MY_NUVAR,IGTYP,IPROP,MLW
+     .        NPT,IR,IS,IPT,IL,IVAR,MY_NUVAR,IGTYP,IPROP,MLW
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA_P0
       CHARACTER*100 DELIMIT,LINE

@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    my_orders      ../common_source/tools/sort/my_orders.c
 !||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
 !||    remesh_mod     ../engine/share/modules/remesh_mod.F
 !||====================================================================
@@ -37,6 +38,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE REMESH_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

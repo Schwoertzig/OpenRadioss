@@ -154,10 +154,10 @@ c ARGUMENTS:  (I: input, O: output, IO: input & output, W: workspace)
 c TYPE NAME                FUNCTION
 c  I   PM ,GEO             Material and geometrical property data
 c  I   IC(7,NUM_QUAD)      connectivity and mid,pid integer data
-c  I   X(3,NUMNOD)         co-ordinate 
+c  I   X(3,NUMNOD)         coordinate 
 c  IO  A(3,NUMNOD)         nodal internal force
 c  I   V(3,NUMNOD)         nodal velocity
-c  IO  MS(NUMNOD)          nodal masse
+c  IO  MS(NUMNOD)          nodal mass
 c  I   FLUX(4,NEL)         flux at each side used w/ ALE or EULER
 c  I   FLU1,VEUL,IELVS     used w/ ALE or EULER 
 c  I   IPARG(NG)           element group data
@@ -171,7 +171,7 @@ c  IO  STIFN(NUMNOD)       nodal stiffness to calcul nodal time step
 c  IO  EANI()              anim output vector
 c  I   IPARTQ()            quad element group data (output)
 c  I   NEL                 nb of quad element in this group
-c  I   IADQ(),FSKY()       work arrays for special option of internal force assemlage   
+c  I   IADQ(),FSKY()       work arrays for special option of internal force assemblage   
 c  I   ICP                 flag for constant pressure
 c  I   IPM(NPROPMI,*)      MATERIAL DATA (INTEGER)
 c  I   BUFVOIS()           work table for fluid w/ SPMD 
@@ -182,9 +182,9 @@ c  I   IGEO                geometrical property integer data
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,II,IFLAG,IOFFS,ICPG,ISTRAIN
+      INTEGER I,IFLAG,IOFFS,ICPG,ISTRAIN
 C     FOR THE USAGE OF EMPTY INPUT
-      INTEGER IBID,IBIDON(1),ipr,enum,SZ_IX
+      INTEGER IBID,IBIDON(1),SZ_IX
       INTEGER SZ_BUFVOIS
 C     INDEX OF ELEMENT INFORMATION IN GLOBAL TABLE "IC"
       INTEGER LCO
@@ -262,7 +262,7 @@ c     +    DEFP(MVSIZ),
      +    PZ1(MVSIZ),PZ2(MVSIZ),PZ3(MVSIZ),PZ4(MVSIZ),
      +    RX(MVSIZ),RY(MVSIZ),RZ(MVSIZ),
      +    SX(MVSIZ),SY(MVSIZ),SZ(MVSIZ),
-     +    TX(MVSIZ),TY(MVSIZ),TZ(MVSIZ),
+     +    
      +    AIRN(MVSIZ),VOLN(MVSIZ),
      +    DVOL(MVSIZ),
      +    NU(MVSIZ),E0(MVSIZ),C1,FAC(MVSIZ),
@@ -277,12 +277,12 @@ c     +    DEFP(MVSIZ),
      +    PP(MVSIZ),DSV(MVSIZ)
 C
       my_real
-     +    AY1(MVSIZ),AY2(MVSIZ),AY3(MVSIZ),AY4(MVSIZ),YH(MVSIZ),
+     +    
      +    FAY1(MVSIZ),FAY2(MVSIZ),FAY3(MVSIZ),FAY4(MVSIZ),
-     +    DET(MVSIZ), 
+     +     
      .    BYZ1(MVSIZ),BYZ2(MVSIZ),BYZ3(MVSIZ),BYZ4(MVSIZ),
      .    BZY1(MVSIZ),BZY2(MVSIZ),BZY3(MVSIZ),BZY4(MVSIZ),
-     +    QN1,QN2,QN3,QN4,NUU(MVSIZ)
+     +    NUU(MVSIZ)
 C
       my_real VARNL(NEL)
       my_real
@@ -406,7 +406,7 @@ C     PROJECT NODAL COORDINATES AND VELOCITES INTO CO-ROTATIONAL SYSTEM
      8   YAVG,    AY,      EXX,     NEL,
      9   JHBE)
       ELSE
-C----EXX,YAVG ,AY are calculated in global system anyway, more efficient eo be done here
+C----EXX,YAVG ,AY are calculated in global system anyway, more efficient to be done here
 C----for the moment constant in element
         CALL Q4RCOOR2(
      1   X,       IC(LCO), Y1,      Y2,

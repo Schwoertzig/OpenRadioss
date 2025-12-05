@@ -38,6 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    aleanim_mod                    ../common_source/modules/aleanim_mod.F
 !||    alefvm_mod                     ../common_source/modules/ale/alefvm_mod.F
 !||    elbufdef_mod                   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod                    ../common_source/modules/elements/element_mod.F90
 !||    h3d_mod                        ../engine/share/modules/h3d_mod.F
 !||    initbuf_mod                    ../engine/share/resol/initbuf.F
 !||    mat_elem_mod                   ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -73,6 +74,7 @@ C-----------------------------------------------
         USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
         USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
         USE MATPARAM_DEF_MOD , ONLY : MATPARAM_STRUCT_
+        use element_mod , only : nixs
         USE MULTI_CUTCELL_MOD, ONLY : MULTI_CUTCELL_STRUCT
         USE ALE_MOD , ONLY : ALE ! ALE%solver%multimat%is_defined_mmale3
 C-----------------------------------------------

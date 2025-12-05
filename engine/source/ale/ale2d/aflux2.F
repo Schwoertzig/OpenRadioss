@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    amulf2                 ../engine/source/ale/bimat/amulf2.F
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE AFLUX2(PM         ,IXQ  ,V    ,W     ,X   ,
      .                  FLUX       ,FLU1 ,FILL ,DFILL ,VOL ,
@@ -36,6 +37,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only : nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

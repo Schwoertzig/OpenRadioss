@@ -257,7 +257,13 @@ protected:
 
     void SetDataPointer(IMECPreObject* ptr)
     {
-        if(!ptr || !(p_ptr && !strcmp(ptr->GetKernelFullType(), p_ptr->GetKernelFullType()))) p_pDescr = 0;
+         if(!ptr ||
+           !(p_ptr && !strcmp(ptr->GetKernelFullType(), p_ptr->GetKernelFullType())) ||
+           !(p_ptr && strlen(ptr->GetKernelFullType()) == 0 &&
+             !strcmp(ptr->GetInputFullType(), p_ptr->GetInputFullType())))
+        {
+            p_pDescr = 0;
+        }
         p_vpSubDescr.resize(0); /* we could check the subobjects one by one, but they might be different,
                                  * so this is a simple and safe approach */
         p_ptr = ptr;
@@ -476,63 +482,8 @@ public:
 
 
     // Get value of an attribute for this element (by attribute name)
-    virtual Status GetValue(const sdiIdentifier& identifier, sdiValue& value) const
-    {
-        if (!p_ptr) return false;
-        // Try to get the attribute as an array value at the element's index (p_index2)
-        int att_index = p_ptr->GetIndex(IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_INT, identifier.GetNameKey());
-        if (att_index >= 0) {
-            value = sdiValue(p_ptr->GetIntValue(att_index, p_index2));
-            return true;
-        }
-        att_index = p_ptr->GetIndex(IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_FLOAT, identifier.GetNameKey());
-        if (att_index >= 0) {
-            value = sdiValue(p_ptr->GetFloatValue(att_index, p_index2));
-            return true;
-        }
-        att_index = p_ptr->GetIndex(IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_STRING, identifier.GetNameKey());
-        if (att_index >= 0) {
-            value = sdiValue(sdiString(p_ptr->GetStringValue(att_index, p_index2)));
-            return true;
-        }
-        att_index = p_ptr->GetIndex(IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_OBJECT, identifier.GetNameKey());
-        if (att_index >= 0) {
-            int objId = p_ptr->GetObjectId(att_index, p_index2);
-            if (objId > 0) {
-                value = sdiValue(sdiValueEntity(sdiValueEntityType(
-                    this->GetModelView()->GetEntityType(p_ptr->GetInputFullType())), objId));
-                return true;
-            }
-        }
-            
-        // Try as single value (not array)
-        att_index = p_ptr->GetIndex(IMECPreObject::ATY_SINGLE, IMECPreObject::VTY_INT, identifier.GetNameKey());
-        if (att_index >= 0) {
-            value = sdiValue(p_ptr->GetIntValue(att_index));
-            return true;
-        }
-        att_index = p_ptr->GetIndex(IMECPreObject::ATY_SINGLE, IMECPreObject::VTY_FLOAT, identifier.GetNameKey());
-        if (att_index >= 0) {
-            value = sdiValue(p_ptr->GetFloatValue(att_index));
-            return true;
-        }
-        att_index = p_ptr->GetIndex(IMECPreObject::ATY_SINGLE, IMECPreObject::VTY_STRING, identifier.GetNameKey());
-        if (att_index >= 0) {
-            value = sdiValue(sdiString(p_ptr->GetStringValue(att_index)));
-            return true;
-        }
-        att_index = p_ptr->GetIndex(IMECPreObject::ATY_SINGLE, IMECPreObject::VTY_OBJECT, identifier.GetNameKey());
-        if (att_index >= 0) {
-            int objId = p_ptr->GetObjectId(att_index);
-            if (objId > 0) {
-                value = sdiValue(sdiValueEntity(sdiValueEntityType(
-                    this->GetModelView()->GetEntityType(p_ptr->GetInputFullType())), objId));
-                return true;
-            }
-        }
-        // Not found
-        return false;
-    }
+    inline virtual Status GetValue(const sdiIdentifier& identifier, sdiValue& value) const;
+    
     virtual unsigned int GetNodeCount() const
     {
         unsigned int node_count = 0;
@@ -1511,14 +1462,14 @@ public:
 
 
         if(isNewPo)
-        {         
+        {
             pObj = HCDI_GetPreObjectHandle(kernelFullType.c_str(), keyword.c_str(), "", (int) p_currentIncludeId, 0);
             p_preobjects[HCDI_OBJ_TYPE_ELEMS].push_back(pObj);
             pObj->AddIntArray("id", 1);
             for (int i = 0; i < aNodeId.size(); ++i) 
             {
-            sdiString nodeId = "node_ID" + std::to_string(i + 1);
-            pObj->AddIntArray(nodeId.c_str(), 1);
+                sdiString nodeId = "node_ID" + std::to_string(i + 1);
+                pObj->AddIntArray(nodeId.c_str(), 1);
             }
             pObj->AddObjectValue("PART", HCDI_get_entitystringtype(HCDI_OBJ_TYPE_COMPS).c_str(), owner.GetId(this));
         }
@@ -1539,7 +1490,7 @@ public:
         for (int i = 0; i < aNodeId.size(); ++i) {
             idIndex = pObj->GetIndex(IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_INT, "node_ID" + std::to_string(i + 1));
             if(!isNewPo) {
-            pObj->resizeArray(IMECPreObject::VTY_INT, idIndex, arraySize + 1);
+                pObj->resizeArray(IMECPreObject::VTY_INT, idIndex, arraySize + 1);
             }
             pObj->SetIntValue(idIndex, elementIndex, aNodeId[i]);
         }
@@ -1886,8 +1837,58 @@ public:
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-    //! Descriptior Values and Hierachy by identifier
+    //! Descriptor Values and Hierachy by identifier
     ////////////////////////////////////////////////////////////////////////////////
+    virtual Status GetValue(const HandleRead&    handle,
+                            const sdiIdentifier& identifier,
+                            sdiValue&            value) const
+    { 
+        EntityType type = handle.GetType();
+        SpecializationType SpecializationType = GetSpecializationType(type);
+        switch(SpecializationType)
+        {
+        case SPECIALIZATION_TYPE_NODE: 
+        {
+            sdiIdentifier newIdentifier(identifier.GetNameKey(), identifier.GetSolverIdx(), handle.GetIndex2());
+            if (handle.GetIndex1() >= p_preobjects[HCDI_OBJ_TYPE_NODES].size()) {
+                return false;
+            }
+            IMECPreObject* pObj = p_preobjects[HCDI_OBJ_TYPE_NODES][handle.GetIndex1()];
+            return GetValueFromPreObject(pObj, newIdentifier, value);
+        }
+        case SPECIALIZATION_TYPE_ELEMENT: 
+        {
+            sdiIdentifier newIdentifier;
+            if(identifier.GetNameKey() == "PART")
+            {
+                newIdentifier = sdiIdentifier(identifier.GetNameKey());
+            }
+            else
+            {
+                newIdentifier = sdiIdentifier(identifier.GetNameKey(), identifier.GetSolverIdx(), handle.GetIndex2());
+            }
+            IMECPreObject* pObj = p_preobjects[HCDI_OBJ_TYPE_ELEMS][handle.GetIndex1()];
+            if (handle.GetIndex1() >= p_preobjects[HCDI_OBJ_TYPE_ELEMS].size()) {
+                return false;
+            }
+            return GetValueFromPreObject(pObj, newIdentifier, value);
+        }
+        default:
+        {
+            if(myTypeInclude == type)
+            { // has a specific GetValue()
+                EntityRead entity(this, HandleRead(type, handle.GetPointer()));
+                return entity.GetValue(identifier, value);
+            }
+            unsigned int CFGType = GetCFGType(type);
+            if(CFGType > p_nbPOTypes) return false;
+            EntityReadPO entityReadPO(static_cast<const IMECPreObject*>(handle.GetPointer()), this);
+            return GetValueFromPreObject(static_cast<const IMECPreObject*>(handle.GetPointer()),
+                identifier, value, &entityReadPO);
+        }
+        }
+    }
+
     virtual Status GetValue(const EntityType                type,
                           const void*                     entityptr,
                           const sdiIdentifier& identifier,
@@ -1910,6 +1911,7 @@ public:
                 identifier, value, &entityReadPO);
         }
     }
+    
     virtual Status SetValue(const HandleEdit&    handle,
                             const sdiIdentifier& identifier,
                             const sdiValue&      value) const
@@ -2011,8 +2013,8 @@ public:
         
     inline bool SetValueToPreObjectArray(IMECPreObject                  *pObj,
                                   unsigned int          index2,
-                                  const sdiIdentifier& identifier,
-                                  const sdiValue&      value) const;
+                                         const sdiIdentifier& identifier,
+                                         const sdiValue&      value) const;
                                   
 
     template <class ENTITYREAD>
@@ -2313,13 +2315,13 @@ inline ElemsByCompsCache::ElemsByCompsCache(const std::vector<IMECPreObject*>& p
                         index1 = j;
                         break;
                     }
-                }     
+                }
                 
                 // Find the element index within the preobject
                 unsigned int index2 = 0;
                 if (att_index_id >= 0) {
                     index2 = i; // assuming the order of collector and id attributes match
-                }      
+                }
 
                 (*this)[compId].push_back(ElemCache(index1, index2));
             }
@@ -2433,6 +2435,16 @@ const IDescriptor *TSDIEntityDataPO<SPECIALTYPE>::GetDescriptor() const
         p_pDescr=mv->GetDescriptor(p_ptr);
     }
     return p_pDescr;
+}
+
+
+Status SDIElementDataPO::GetValue(const sdiIdentifier& identifier,
+                                  sdiValue&            value) const
+{
+    const ModelViewPO* mv = static_cast<const ModelViewPO*>(this->GetModelView());
+    assert(mv);
+    sdiIdentifier arrayIdentifier(identifier.GetNameKey(), identifier.GetSolverIdx(), p_index2);
+    return mv->GetValueFromPreObject(p_ptr, arrayIdentifier, value, this, &p_pDescr);
 }
 
 
@@ -2717,6 +2729,7 @@ bool ModelViewPO::GetValueFromPreObject(const IMECPreObject            *pObj,
     }
     else
     {
+        
         skwd = identifier.GetNameKey();
         aindex = GetIndexFromPreobject(pObj, skwd, &atype, &vtype);
         if(0 > aindex)
@@ -3935,129 +3948,6 @@ bool ModelViewPO::SetValueToPreObjectArray(IMECPreObject*              pObj,
     sdiIdentifier arrayIdentifier(identifier.GetNameKey(),identifier.GetSolverIdx(),arrayIndex);
 
     return SetValueToPreObject(pObj, arrayIdentifier, value);
-
-    /*
-    if(!pObj) return false;
-
-    printf("Setting value to array attribute %s at index %u\n",
-        identifier.GetNameKey().c_str(), arrayIndex);
-    printf("pObj key: %s\n", pObj->GetKernelFullType());
-    printf("pObj cfg type: %s\n", pObj->GetInputFullType());
-    printf("pObj config type: %s\n", pObj->getConfigType());
-    unsigned int attributeIndex = UINT_MAX;
-
-    sdiCompoundType compoundType = value.GetCompoundType();
-
-    sdiBasicType valueType = value.GetBasicType();
-     //switch(compoundType)
-
-    switch(valueType)
-    {
-    case BASIC_TYPE_BOOL:
-        printf("Value type is BOOL\n");
-        break;
-    case BASIC_TYPE_INT:
-        printf("Value type is INT\n");
-        break;          
-    case BASIC_TYPE_DOUBLE:
-        printf("Value type is FLOAT\n");
-        break;
-    case BASIC_TYPE_STRING:
-        printf("Value type is STRING\n");
-        break;
-    }
-
-    // First try to get as INT array
-    attributeIndex = pObj->GetIndex(
-        IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_INT, identifier.GetNameKey().c_str());
-    
-    if(attributeIndex != UINT_MAX) {
-        printf("Found INT array attribute %s at index %u\n",
-            identifier.GetNameKey().c_str(), attributeIndex);
-        int value_loc = 0;
-        bool isOk = value.GetValue(value_loc);
-        if(!isOk) return false;
-        
-        // Ensure array is large enough
-        int currentSize = pObj->GetNbValues(IMECPreObject::VTY_INT, attributeIndex);
-        if(currentSize <= (int)arrayIndex) {
-            pObj->resizeArray(IMECPreObject::VTY_INT, attributeIndex, arrayIndex + 1);
-        }
-        
-        pObj->SetIntValue(attributeIndex, arrayIndex, value_loc);
-        printf("Set INT array value at index %u to %d\n", arrayIndex,  value_loc);
-        return true;
-    }
-    
-    // Try FLOAT array
-    attributeIndex = pObj->GetIndex(
-        IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_FLOAT, identifier.GetNameKey().c_str());
-    
-    if(attributeIndex != UINT_MAX) {
-        printf("Found FLOAT array attribute %s at index %u\n",
-            identifier.GetNameKey().c_str(), attributeIndex);
-        double value_loc = 0.0;
-        bool isOk = value.GetValue(value_loc);
-        if(!isOk) return false;
-        
-        // Ensure array is large enough
-        int currentSize = pObj->GetNbValues(IMECPreObject::VTY_FLOAT, attributeIndex);
-        if(currentSize <= (int)arrayIndex) {
-            pObj->resizeArray(IMECPreObject::VTY_FLOAT, attributeIndex, arrayIndex + 1);
-        }
-        
-        pObj->SetFloatValue(attributeIndex, arrayIndex, value_loc);
-        printf("Set FLOAT array value at index %u to %f\n", arrayIndex,  value_loc);
-        return true;
-    }
-    
-    // Try STRING array
-    attributeIndex = pObj->GetIndex(
-        IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_STRING, identifier.GetNameKey().c_str());
-    
-    if(attributeIndex != UINT_MAX) {
-        printf("Found STRING array attribute %s at index %u\n",
-            identifier.GetNameKey().c_str(), attributeIndex);
-        sdiString value_loc;
-        bool isOk = value.GetValue(value_loc);
-        if(!isOk) return false;
-        
-        // Ensure array is large enough
-        int currentSize = pObj->GetNbValues(IMECPreObject::VTY_STRING, attributeIndex);
-        if(currentSize <= (int)arrayIndex) {
-            pObj->resizeArray(IMECPreObject::VTY_STRING, attributeIndex, arrayIndex + 1);
-        }
-        
-        pObj->SetStringValue(attributeIndex, arrayIndex, value_loc.c_str());
-        printf("Set STRING array value at index %u to %s\n", arrayIndex,  value_loc.c_str());
-        return true;
-
-        
-    attributeIndex = pObj->GetIndex(
-        IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_OBJECT, identifier.GetNameKey().c_str());
-
-    if(attributeIndex != UINT_MAX) {
-        printf("Found OBJECT attribute %s at index %u\n",
-            identifier.GetNameKey().c_str(), attributeIndex);
-        sdiValueEntity value_loc;
-        bool isOk = value.GetValue(value_loc);
-        if(!isOk) return false;
-        
-        // Ensure array is large enough
-        int currentSize = pObj->GetNbValues(IMECPreObject::VTY_OBJECT, attributeIndex);
-        if(currentSize <= (int)arrayIndex) {
-            pObj->resizeArray(IMECPreObject::VTY_OBJECT, attributeIndex, arrayIndex + 1);
-        }
-
-        pObj->SetObjectValue(attributeIndex, arrayIndex,identifier.GetNameKey().c_str(),value_loc.GetId());
-        printf("Set OBJECT array value at index %u to ID %u\n", arrayIndex,  value_loc.GetId());
-        return true;
-        }
-
-
-
-    }*/
-    
 }
 
 template <class ENTITYREAD>

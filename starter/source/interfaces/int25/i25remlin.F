@@ -466,8 +466,8 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER II,J,K,IE,NN, NM,N2,ND,NES,NM2,M,
-     .       NN2,NNOD,NNREM_EDG,KI,KL,JJ,IEDG,IEDGS,ES,
-     .       COMPTEUR,I,L,L1,IS,IIS,NS,IADA,III,JJJ,NNOD_2,
+     .       NNREM_EDG,KI,KL,JJ,IEDGS,ES,
+     .       I,L,IS,IIS,NS,IADA,III,JJJ,NNOD_2,
      .       FIRST,LAST,NNREM_EDG_SAVE,
      .        OFFSET, NBR_INTRA,NBR_EXTRA,TOTAL_INSERTED,
      .        OLDSIZE,
@@ -490,7 +490,7 @@ C-----------------------------------------------
 !       NBR_EXTRA : integer , number of old remaining edges
 !       TOTAL_INSERTED : integer , total number of inserted edgees
 !       NBR_INSERT_II : integer, dimension = NEDGE , number of inserted edges for each II edge
-!       ADRESS_II : integer, dimension = NEDGE , adress of the first inserted edges for each II segment
+!       ADRESS_II : integer, dimension = NEDGE , address of the first inserted edges for each II segment
 !       KREMNODE_EDG_SAVE : integer, dimension = NEDGE+1 , list of old edges
 !       SIZE_INSERTED_EDG : integer, size of the INSERTED_EDG array ; SIZE_INSERTED_EDG is an upper bound, 
 !                            can be optimized!
@@ -813,7 +813,7 @@ C extend INSERTED_EDG if needed
             NBR_INSERT_II(II) = NNREM_EDG - NNREM_EDG_SAVE
             KREMNODE_EDG_SAVE(II) = KREMNODE_EDG_SAVE(II+1) - KREMNODE_EDG_SAVE(II)
             IADA = IADA + KREMNODE_EDG_SAVE(II)
-           !   adress of the first inserted node
+           !   address of the first inserted node
             ADRESS_II(II) = IADA
             KREMNODE_EDG_SAVE(II) = IADA + NBR_INSERT_II(II) - 1
             IADA = IADA + NBR_INSERT_II(II)

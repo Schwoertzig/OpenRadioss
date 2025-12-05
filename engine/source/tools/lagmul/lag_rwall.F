@@ -49,23 +49,23 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NC, NSN, ITIED, MSR, NDDIM, N_MUL_MX, NKMAX
+      INTEGER NC, NSN, ITIED, MSR, N_MUL_MX, NKMAX
       INTEGER NSW(*),INDEX(*),LLL(*),JLL(*),SLL(*),IADLL(*),COMNTAG(*)
       my_real
      .   X(*), V(*), A(*), RWL(*), XLL(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, IK, J, JJ, K, N, N1, N2, N3, M1, M2, M3, NINDEX, 
+      INTEGER I, IK, J, N, N1, N2, N3, M1, M2, M3, NINDEX, 
      .   ICONT
       my_real 
      .   XWL, YWL, ZWL, VXW, VYW, VZW, VNW,
-     .   VX, VY, VZ, UX, UY, UZ, XC, YC, ZC, DP0, DP, DV
+     .   VX, VY, VZ, UX, UY, UZ, XC, YC, ZC, DP0, DP
 C-----------------------------------------------
 C        NC: number of cinematic condition 
 C        ic: number of the kinematic condition (1,nc)
 C        IK : 
-C        I  : numero global du noeud (1,NUMNOD)
+C        I  : global node number (1,NUMNOD)
 C        J ': direction 1,2,3,4,5,6
 C------
 C        IADLL(NC)        : IAD = IADLL(IC)

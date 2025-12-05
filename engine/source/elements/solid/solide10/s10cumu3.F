@@ -67,7 +67,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER  I,N, IPERM(4),IPERM1(10),IPERM2(10),N1,N2,NN,ND,II,J
+      INTEGER  I,N, IPERM(4),IPERM1(10),IPERM2(10),N1,N2,NN,J
 C-----------------------------------------------
       DATA IPERM/1,3,6,5/
       DATA IPERM1/0,0,0,0,1,2,3,1,2,3/
@@ -125,7 +125,7 @@ C                => STIG == sum( Volp*rho ) *  Omega**2/4 == M * Omega**2/4
 C
 C           cf Assembling respectively Kvertex=Mvertex * Omega**2/2 and Kedge=Medge * Omega**2/2
             STIV(I) = TWO/THIRTY2 * STI(I)
-            STIE(I) = TWO*SEVEN/FOURTY8 * STI(I)
+            STIE(I) = TWO*SEVEN/FORTY8 * STI(I)
           END DO
 C
           DO N=1,4

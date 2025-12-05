@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    s8evolume      ../engine/source/elements/solid/solide8e/s8evolume.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod   ../common_source/modules/groupdef_mod.F
 !||====================================================================
        SUBROUTINE ELOFF(IXS     ,IXQ     ,IXC      ,IXP     ,IXT      ,
@@ -44,6 +45,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE GROUPDEF_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

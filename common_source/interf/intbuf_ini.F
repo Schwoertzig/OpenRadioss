@@ -62,8 +62,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-        INTEGER I,N,NI,SIZ,L_INTBUF_SIZE
-        INTEGER VAL_TEST
+        INTEGER N,NI,SIZ,L_INTBUF_SIZE
 C=======================================================================
         ALLOCATE(INTBUF_SIZE(L_INTBUF_SIZE_MAX))
         INTBUF_SIZE(1:L_INTBUF_SIZE_MAX) = 0
@@ -2185,7 +2184,7 @@ C-----------------------------------------------
             T8%BUFFER(P2)%NBSECND_TOT = NBS_INTERF
             T8%BUFFER(P2)%NBMAIN    = NBM_INTERF
 
-            !nb secnds per main
+            !number of seconds per main
 
             IF(NBM_INTERF > 0) THEN
               ALLOCATE(T8%BUFFER(P2)%NBSECND(NBM_INTERF))

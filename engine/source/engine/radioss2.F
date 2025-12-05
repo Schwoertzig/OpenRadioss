@@ -125,6 +125,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    rad2r_mod                    ../engine/share/modules/rad2r.F
 !||    rbe3_mod                     ../common_source/modules/constraints/rbe3_mod.F90
 !||    restmod                      ../engine/share/modules/restart_mod.F
+!||    rwall_mod                    ../common_source/modules/constraints/rwall_mod.F90
 !||    scratchfile_mod              ../engine/share/modules/scratchfiles_mod.F
 !||    segvar_mod                   ../engine/share/modules/segvar_mod.F
 !||    sensor_mod                   ../common_source/modules/sensor_mod.F90
@@ -198,6 +199,7 @@ C-----------------------------------------------
       use file_descriptor_mod,only : fd_bin_th,fd_bin_rd_rst,fd_bin_wr_rst           ! Contains the file descriptors for all files / same as unit_c.inc
       use coupling_adapter_mod
       USE ANIM_MOD
+      use rwall_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -353,6 +355,7 @@ C-------------------------------------------------------------------------------
       TYPE(timer_) :: TIMERS
       TYPE(rbe3_) :: rbe3
       TYPE(coupling_type) :: coupling
+      TYPE(rwall_) :: rwall
 C------------------------------------------------------------------
 C to build a IBM PARALLEL version
 C In starter : define install parameter nspmd 
@@ -861,7 +864,7 @@ C------------------------------------------------
      .            PRESFIL, MULTI_FVM, H3D_DATA,
      .            PINCH_DATA,DYNAIN_DATA,INTERFACES,SENSORS,LOADS,
      .            MAT_ELEM,NAMES_AND_TITLES,SKEWS ,GLOB_THERM,PBLAST,
-     .            RBE3)
+     .            RBE3,RWALL)
 
 C------------------------------------------------
 C     Test of .rst file compatibility
@@ -964,7 +967,7 @@ C
 
       ! Most of arrays from Restart
       CALL RESTALLOC(OUTPUT,ELEMENT,NODES,MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR,INTERFACES,SKEWS,
-     *               GLOB_THERM,RBE3)
+     *               GLOB_THERM,RBE3,RWALL)
 
       ! Initialization
       IGEO = 0
@@ -1051,7 +1054,8 @@ C
      .            SKEWS          ,RFLOW      ,LIFLOW        ,LRFLOW           ,IMPL_S0   ,
      .            FORNEQS       ,UNITAB,
      .            STACK          ,DRAPE_SH4N ,DRAPE_SH3N    ,DRAPEG           ,NDRAPE ,
-     .            GLOB_THERM     ,PBLAST     ,ELEMENT       ,NODES            ,RBE3)
+     .            GLOB_THERM     ,PBLAST     ,ELEMENT       ,NODES            ,RBE3     ,
+     .            RWALL          )
       ! Close restart file
        CALL CLOSE_C
  
@@ -2204,7 +2208,7 @@ C---------------------------------------------------------------------
      .                   DIFFUSION    ,SEGVAR          ,DYNAIN_DATA     ,DRAPEG     ,USER_WINDOWS    ,
      .                   OUTPUT       ,INTERFACES      ,DT              ,LOADS      ,MAT_ELEM  , PYTHON,
      .                   NAMES_AND_TITLES, UNITAB ,SKEWS,LIFLOW         ,LRFLOW     ,glob_therm,PBLAST,
-     .                   RBE3, coupling)
+     .                   RBE3, coupling,RWALL)
 C---------------------------------------------------------------------
       CURRENT_RUN = GLOBAL_COMP_TIME%RUN_NBR
       CALL SPMD_REDUCE_DB(GLOBAL_COMP_TIME%ENGINE_TIME(CURRENT_RUN),RESULT,1,0,"MAX ")

@@ -25,6 +25,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- called by ------------------------------------------------------
 !||    cbaforc3      ../engine/source/elements/shell/coqueba/cbaforc3.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||    plyxfem_mod   ../engine/share/modules/plyxfem_mod.F
 !||====================================================================
           SUBROUTINE CBAVIT_PLY(JFT,JLT,IXC,OFFG,OFF,NPLAT,IPLAT,NPT,
@@ -35,6 +36,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
        USE PLYXFEM_MOD
+       use element_mod , only : nixc
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 C  transformation au repere local est absolue
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
@@ -65,8 +67,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER J,I,K,EP,NN(4), IPLY,IP,NPLAT0
-      INTEGER L,M,J1,J2
+      INTEGER J, I, EP, NN(4), IP, NPLAT0
+ 
       my_real
      .   PG,Z1,Z2,MX13,MY13,MX23,MY23,MX34,MY34,GAMA1,GAMA2, X21, 
      .   X34,Y21,Y34 ,Z21,Z34,L12,L34,X41,X32,Y41,Y32,Z41,Z32,XX1

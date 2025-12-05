@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ancmsg                ../engine/source/output/message/message.F
 !||    arret                 ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    message_mod           ../engine/share/message_module/message_mod.F
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||    tri7box               ../engine/share/modules/tri7box.F
@@ -42,6 +43,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
       USE MESSAGE_MOD
+      use element_mod , only :nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -70,8 +72,8 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER MSGTYP,INFO,I,NOD, LOC_PROC,P,IDEB,
-     .        SIZ,J, L, BUFSIZ, LEN, NB, N1, NE,
+      INTEGER MSGTYP,I, LOC_PROC,P,IDEB,
+     .        SIZ,J, L, LEN, NB, N1, NE,
      .        STATUS(MPI_STATUS_SIZE),IERROR,REQ_SB(NSPMD),
      .        REQ_RB(NSPMD),KK,NBIRECV,IRINDEXI(NSPMD),
      .        REQ_RD(NSPMD),REQ_SD(NSPMD),REQ_SD2(NSPMD),

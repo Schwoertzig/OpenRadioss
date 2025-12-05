@@ -79,6 +79,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod                 ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod              ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod               ../common_source/modules/elements/element_mod.F90
 !||    inoutfile_mod             ../common_source/modules/inoutfile_mod.F
 !||    mat_elem_mod              ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    message_mod               ../engine/share/message_module/message_mod.F
@@ -121,6 +122,7 @@ C-----------------------------------------------
       USE stat_sphcel_spmd_mod
       USE stat_sphcel_full_mod
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs,nixq,nixc,nixp,nixr,nixt,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -176,10 +178,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      CHARACTER CHSTAT*4,FILNAM*100,T10*10,MES*40
-      INTEGER FILEN,I,INNODA,IERR,J,N
-      INTEGER LENR,SIZLOC,SIZP0
-      INTEGER I161,I16A,I16B,I16C,I16D,I16E,I16F,I16G,I16H,I16I
+      CHARACTER CHSTAT*4, FILNAM*100, T10*10, MES*40
+      INTEGER FILEN, I, IERR, J, N
+      INTEGER SIZLOC, SIZP0
+ 
       INTEGER,DIMENSION(:),ALLOCATABLE :: ITABG
       INTEGER,DIMENSION(:),ALLOCATABLE :: NODTAG
       INTEGER,DIMENSION(:),ALLOCATABLE :: STAT_INDXC
@@ -188,7 +190,7 @@ C-----------------------------------------------
       INTEGER,DIMENSION(:),ALLOCATABLE :: STAT_INDXS
       INTEGER,DIMENSION(:),ALLOCATABLE :: STAT_INDXR
       INTEGER,DIMENSION(:),ALLOCATABLE :: STAT_INDXP
-      INTEGER,DIMENSION(:),ALLOCATABLE :: STAT_INDX
+ 
       INTEGER,DIMENSION(:),ALLOCATABLE :: STAT_INDXT
       INTEGER,DIMENSION(:),ALLOCATABLE :: STAT_INDXSPH
       

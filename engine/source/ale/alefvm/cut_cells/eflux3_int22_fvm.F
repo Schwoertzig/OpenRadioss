@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    alefvm_mod         ../common_source/modules/ale/alefvm_mod.F
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod     ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22tri_mod         ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||====================================================================
@@ -65,7 +66,8 @@ C-----------------------------------------------
       USE I22BUFBRIC_MOD
       USE I22TRI_MOD 
       USE ELBUFDEF_MOD 
-      USE ALEFVM_MOD          
+      USE ALEFVM_MOD      
+      use element_mod , only : nixs    
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

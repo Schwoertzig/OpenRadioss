@@ -56,7 +56,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,IP,IAD,N
+      INTEGER I, IP, N
 C-----------------------------------------------
 C
       IF(IDTGRS==0)THEN
@@ -122,12 +122,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, NG, N, JJ, KK, ITY, NEL, NFT, ISOLNOD, 
+      INTEGER I, J, K, N, ITY, 
      .        IAD, IP, ILOC4(4)
-      INTEGER SIZE, LENR, ISMS, NM, NS, IMOV, NSN, ILAGM,
+      INTEGER ISMS, IMOV, NSN, ILAGM, 
      .        N2, N3, N4, N5, N6
-      INTEGER M, MSR, NSNW, KI, NHI, NSMS(2)
-      INTEGER J1, IPERM1(6), IPERM2(6)
+      INTEGER M, MSR, NSNW, KI
+      INTEGER IPERM1(6), IPERM2(6)
       DATA ILOC4/1,3,6,5/
       DATA IPERM1/1,2,3,1,2,3/
       DATA IPERM2/2,3,1,4,4,4/
@@ -197,6 +197,7 @@ C-----------------------------------------------
 !||    resol          ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_KAD(
@@ -212,6 +213,7 @@ C-----------------------------------------------
      A  IGEO    ,NATIV_SMS)
 C-----------------------------------------------
         USE MY_ALLOC_MOD
+        use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -248,7 +250,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, NG, N, JJ, KK, ITY, NEL, NFT, ISOLNOD, 
+      INTEGER I, J, K, NG, JJ, KK, ITY, NEL, NFT, ISOLNOD, 
      .        IAD, IP, ILOC4(4),
      .        TAG8(8), IG, IGTYP
       INTEGER J1, IPERM1(6), IPERM2(6),IPENTA6(6)
@@ -603,6 +605,7 @@ C-----------------------------------------------
 !||    startimeg       ../engine/source/system/timer.F
 !||    stoptimeg       ../engine/source/system/timer.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    my_alloc_mod    ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
@@ -623,6 +626,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -662,16 +666,16 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, JJ, KK, II, IJ, M, N, IERROR, KL
+      INTEGER I, J, K, JJ, KK, IJ
       INTEGER NG, ITY, NEL, NFT, ISOLNOD,ILOC4(4),
      .        TAG8(8), IG, IGTYP
-      INTEGER MSR, NSN, KI, KJ, NSR
-      INTEGER SIZE, LENR, IAD, L, LLT
-      INTEGER NTY, ILAGM, K10, K11, K12, K13, K14, JI, 
+      INTEGER KJ
+ 
+      INTEGER 
      .         N1, N2, N3, N4, LNEW, ILEV
       INTEGER J1, IPERM1(6), IPERM2(6),IPENTA6(6)
-      INTEGER LSMSPCG
-      INTEGER IK, NK
+ 
+      INTEGER IK
       INTEGER,DIMENSION(:),ALLOCATABLE :: TAGA
       INTEGER,DIMENSION(:),ALLOCATABLE :: NAD_SMS
       INTEGER,DIMENSION(:),ALLOCATABLE :: TAGK
@@ -1039,6 +1043,7 @@ C
 !||--- calls      -----------------------------------------------------
 !||    my_orders       ../common_source/tools/sort/my_orders.c
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    my_alloc_mod    ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
@@ -1059,6 +1064,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1098,11 +1104,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, JJ, KK, II, IJ, M, N, IERROR, KL
-      INTEGER MSR, NSN, KI, KJ, NSR
-      INTEGER SIZE, LENR, IAD, L, LLT
-      INTEGER NTY, ILAGM, K10, K11, K12, K13, K14, JI, 
-     .         N1, N2, N3, N4, LNEW, ILEV
+      INTEGER I, J, K, KK, II, N
+      INTEGER NSN, KJ
+      INTEGER L
+      INTEGER NTY, ILAGM, 
+     . N1, N2, N3, N4, ILEV
       INTEGER IK, NK, IKK,WORK(70000)
       INTEGER,DIMENSION(:),ALLOCATABLE :: NAD_SMS
       INTEGER,DIMENSION(:),ALLOCATABLE :: TAGK
@@ -1385,6 +1391,7 @@ C-----------------------------------------------
 !||    resol           ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    intstamp_mod    ../engine/share/modules/intstamp_mod.F
 !||    message_mod     ../engine/share/message_module/message_mod.F
@@ -1411,6 +1418,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD 
       USE MESSAGE_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1455,12 +1463,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, JJ, KK, II, IJ, M, N, IERROR, KL,
+      INTEGER I, J, K, KK, II, N, 
      .        NHI, NS
-      INTEGER MSR, NSN, KI, KJ, NSR, NSMS(2)
-      INTEGER NSNW, IMOV
-      INTEGER SIZE, LENR, IAD, L, LLT
-      INTEGER NTY, ILAGM, JI, 
+      INTEGER NSN, KJ
+ 
+      INTEGER L
+      INTEGER NTY, ILAGM, 
      .         N1, N2, N3, N4, N5, N6, ISMS, 
      .         NMN, ILEV
       INTEGER IK
@@ -1707,6 +1715,7 @@ C-----------------------------------------------
 !||    spmd_allglob_isum9   ../engine/source/mpi/generic/spmd_allglob_isum9.F
 !||    spmd_exch_nodnx      ../engine/source/mpi/ams/spmd_exch_nodnx.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod          ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod        ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    intstamp_mod         ../engine/share/modules/intstamp_mod.F
 !||    message_mod          ../engine/share/message_module/message_mod.F
@@ -1732,6 +1741,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD
       USE MESSAGE_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1774,9 +1784,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, JJ, KK, II, IJ, M, N, IERROR, KL
-      INTEGER MSR, NSN, KI, KJ, NSR
-      INTEGER SIZE, LENR, IAD, L, LLT
+      INTEGER I, J, K, KK, II, IJ, N
+      INTEGER NSN, KJ
+      INTEGER SIZE, LENR, L
       INTEGER NTY, ILAGM, K10, K11, K12, K13, K14, JI, 
      .         N1, N2, N3, N4,
      .         NMN, ILEV, ERROR
@@ -2213,7 +2223,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER K1, K, I, N, J, IC, NSN, ISMS,
      .         ICSIZE, IMOV, ITYP, ILAGM, ICOUNT        
-      INTEGER NTY, ILEV, NMN, NRTS, NRTM,
+      INTEGER 
      .        NLINS, NLINM, II, SIZE, LENR
       my_real
      .        IDMAX,ID
@@ -2588,7 +2598,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER K, I, N, J
+      INTEGER N, J
       INTEGER NTY, ILEV, NSN, NMN, NRTS, NRTM,
      .        NLINS, NLINM, II, SIZE, LENR
       INTEGER,DIMENSION(:), ALLOCATABLE :: TAG
@@ -2749,9 +2759,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, K, M, N, NSN,
+      INTEGER I, 
      .        N1, N2, N3, N4, N5, N6
-      INTEGER ITY, IMOV, ILAGM, ISMS, IERR
+      INTEGER ISMS, IERR
 C-----------------------------------------------
 C
       IERR=0

@@ -69,6 +69,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_mod                 ../common_source/modules/ale/ale_mod.F
 !||    dt_mod                  ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod            ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod             ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod          ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod            ../common_source/modules/groupdef_mod.F
 !||    h3d_mod                 ../engine/share/modules/h3d_mod.F
@@ -144,6 +145,7 @@ C-----------------------------------------------
       use glob_therm_mod
       USE PRELOAD_SOLID_INI_MOD
       USE S6ZFORC3_MOD
+      use element_mod , only : nixs,nixq,nixt,nixr,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -244,15 +246,15 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       DOUBLE PRECISION, POINTER :: pFBSAV6
-      INTEGER INDXOF(MVSIZ), IERROR, NV46,IPREID,FUN_ID,SENS_ID
-      INTEGER I,II,J,N, NG, NVC, MLW, JFT, JLT,ISOLNOD,ITHK,IPLA,IFAIL,
-     .   K1, K2, KAD,NF1,IPRI, OFFSET, NSGRP, K,
-     .   K0, K3, K5, K6, K7, K8, K9, NSG, NEL, KFTS,IOFC, ISTRA,
-     .   JJ19,NPE,NIPMAX,ICNOD,NFT1,IBID,NN,
+      INTEGER  IERROR, NV46,IPREID,FUN_ID,SENS_ID
+      INTEGER I,J,N, NG, NVC, MLW, JFT, JLT,ISOLNOD,ITHK,IPLA,IFAIL,
+     .   K1, K2, KAD,NF1,IPRI, OFFSET,
+     .   K0, K3, K6, K7, K8, NSG, NEL, KFTS, ISTRA,
+     .   NPE,NIPMAX,ICNOD,IBID,NN,
      .   L1,L2,L3,L4,L5,L6,L7,L8,L9,L10,L11,L12,L13,L14,L15,L16,
      .   L17,L18,L19,L20,L21,L22,L23,L24,L25,L26,L27,L28,L29,L30,
-     .   ICP,ICS,IMATVIS,IEXPAN,NPTS,MPT,NPTT,NPTR,NPT0,IG,OFF_IGRTH,
-     .   NCTRL,DIM6,IPARSENS,ISECT,GAMA(6),PX,PY,PZ,ISENS_ENERGY
+     .   ICP,ICS,IMATVIS,IEXPAN,NPT0,IG,OFF_IGRTH,
+     .   NCTRL,IPARSENS,ISECT,GAMA(6),PX,PY,PZ,ISENS_ENERGY
       my_real BID,QMVBID,PRELOAD1,STF_F
       my_real SBID
       my_real VOLN(MVSIZ)

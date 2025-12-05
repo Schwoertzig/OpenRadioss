@@ -84,13 +84,13 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NDX, I, J, II, INRT, NELS, NELC, NELTG, NEL,
+      INTEGER NDX, I, J, II, INRT, NEL,
      .        N1,N2,N3,N4, IX, N, L, LLT, NN, IP, STAT
       INTEGER ITMP(NUMNOD)
 C     REAL
       my_real
-     .   DXM, GAPMX, GAPMN, AREA, DX,GAPS1,GAPS2, GAPM, DDX, 
-     .   GAPTMP, XXX, YYY, ZZZ, X0, X1, Y0, Y1, Z0, Z1
+     .   DXM, GAPMX, GAPMN, DX,GAPS1,GAPS2, GAPM, 
+     .    XXX, YYY, ZZZ, X0, X1, Y0, Y1, Z0, Z1
       my_real
      .        X12(MVSIZ),Y12(MVSIZ),Z12(MVSIZ),
      .        X13(MVSIZ),Y13(MVSIZ),Z13(MVSIZ),
@@ -113,7 +113,7 @@ C------------------------------------
         CALL I4GMX3(X,IRECTS,INRT,GAPMX)
   250 CONTINUE
 C-------------------------------------------------------
-C     THICKNESS PART ON SECND NODES FOR GAP CALCULATION
+C     THICKNESS PART ON SECOND NODES FOR GAP CALCULATION
 C-------------------------------------------------------
       IF(IGAP>=1)THEN
          ALLOCATE (THK_PART_NODS(NUMNOD)        ,STAT=stat)
@@ -146,7 +146,7 @@ C-------------------------------------------------------
       ENDIF
 
 C------------------------------------
-C     GAP VARIABLE NOEUDS SECONDS
+C     GAP VARIABLE NODES SECONDS
 C------------------------------------
       IF(IGAP>=1)THEN
        DO I=1,NSN

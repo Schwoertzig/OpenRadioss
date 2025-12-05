@@ -34,6 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE ALEW6( 
      1     X             , V        ,W       ,WA       ,
@@ -56,6 +57,7 @@ C     M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       USE ELBUFDEF_MOD            
+      use element_mod , only : nixs,nixq
 C-----------------------------------------------
 C     I m p l i c i t   T y p e s
 C-----------------------------------------------

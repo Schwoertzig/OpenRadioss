@@ -39,7 +39,7 @@ C   I n f o r m a t i o n s
 C-----------------------------------------------
 C   This routine computes the local  
 C   ILOCS (i.e. main nodes on the SPMD domain 
-C   of each secnd).
+C   of each second).
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -63,7 +63,6 @@ C     REAL
      .   X(3,*),DISTANCE(*),
      .   XI(*), YI(*), ZI(*), XFACE(*)
       my_real  , INTENT(INOUT) :: DISTLIN(NSN)
-      TYPE(INT8_STRUCT_) :: T8
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------

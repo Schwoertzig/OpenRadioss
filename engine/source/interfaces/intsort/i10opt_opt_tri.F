@@ -58,7 +58,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NOINT, I_STOK,CT
+      INTEGER NOINT, I_STOK
 C     REAL
       my_real
      .   STARTT, GAP, STOPT
@@ -81,7 +81,7 @@ C
       IF(TT>STOPT)  RETURN
 C
 C-----------------------------------------------------------
-C     Filtrage des candidats a l'impact
+C     Filtrage des CANDIDATES a l'impact
 C     (si candidat retenu, cand_n(i) = - cand_n(i))
 C-----------------------------------------------------------
        I_STOK = INTBUF_TAB%I_STOK(1)

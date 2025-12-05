@@ -28,6 +28,7 @@ C I17MAIN_LAG split in 3 routines for SPMD reorganization
 !||--- calls      -----------------------------------------------------
 !||    i17crit            ../engine/source/interfaces/int17/i17crit.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod       ../common_source/modules/groupdef_mod.F
 !||    intbufdef_mod      ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    output_mod         ../common_source/modules/output/output_mod.F90
@@ -43,6 +44,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD    
       USE GROUPDEF_MOD
       USE OUTPUT_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C
@@ -50,7 +52,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  
@@ -75,7 +77,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NIN,ITASK ,NC,N_MUL_MX ,NKMAX , NME, NMES  
+      INTEGER NIN,ITASK   , NME, NMES  
       INTEGER IPARI(NPARI,NINTER),
      .        IXS(NIXS,*)  ,IXS16(8,*)  ,IXS20(12,*)
 C     REAL
@@ -89,11 +91,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NAD,EAD,LWAT,
-     .        IGN,IGE,MULTIMP,NOINT,I,MX_CAND 
+      INTEGER 
+     .        IGN,IGE,MULTIMP,I,MX_CAND 
 C     REAL
       my_real
-     .        STARTT, STOPT,XX,XY,XZ,TZINF,MINBOX,
+     .        STARTT, STOPT,
      .        AZERO(3,NUMNOD)
 C-----------------------------------------------
 C   S o u r c e   L i n e s
@@ -115,7 +117,7 @@ C -------------------------------------------------------------
 C=======================================================================
 C      Test to know whether to retriate + initialization
 C=======================================================================
-C       SIZE_T(NIN)=ZERO init dans inttri
+C       SIZE_T(NIN)=ZERO init in inttri
        CALL I17CRIT(
      1   X     ,AZERO       ,AZERO     ,IGRBRIC(IGE)%ENTITY ,EMINX        ,
      2   NME   ,ITASK       ,INTBUF_TAB%XSAV,IXS    ,IXS16        ,
@@ -147,6 +149,7 @@ C
 !||    startime        ../engine/source/system/timer_mod.F90
 !||    stoptime        ../engine/source/system/timer_mod.F90
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod    ../common_source/modules/groupdef_mod.F
 !||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    message_mod     ../engine/share/message_module/message_mod.F
@@ -165,6 +168,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD
       USE GROUPDEF_MOD   
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C
@@ -172,7 +176,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  
@@ -220,11 +224,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NAD,EAD,LWAT,RESULT,
+      INTEGER LWAT,RESULT,
      .        IGN,IGE,MULTIMP,NOINT,I,MX_CAND, NB_N_B
 C     REAL
       my_real
-     .   STARTT, STOPT,XX,XY,XZ,TZINF,MINBOX,DIST,
+     .   STARTT, STOPT,TZINF,MINBOX,DIST,
      .   XMAXL, YMAXL, ZMAXL, XMINL, YMINL, ZMINL,
      .   AZERO(3,NUMNOD)
 C-----------------------------------------------
@@ -278,7 +282,7 @@ C=======================================================================
 C BARRIER INIT BMINMA
          CALL MY_BARRIER
 C -------------------------------------------------------------
-C     CALCUL BORNE DOMAINE REMONTE DANS I17XSAVE
+C     CALCULATION BORNE DOMAINE REMONTE IN I17XSAVE
 C -------------------------------------------------------------
            CALL I17XSAVE(
      1       X     ,V    ,AZERO  ,IXS       ,IXS16,
@@ -363,6 +367,7 @@ C
 !||    i17for3         ../engine/source/interfaces/int17/i17for3.F
 !||    my_barrier      ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod    ../common_source/modules/groupdef_mod.F
 !||    h3d_mod         ../engine/share/modules/h3d_mod.F
 !||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
@@ -380,6 +385,7 @@ C-----------------------------------------------
       USE H3D_MOD
       USE GROUPDEF_MOD
       USE OUTPUT_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C
@@ -387,7 +393,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  
@@ -428,8 +434,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NME,NAD,EAD,
-     .        IGN,IGE,MULTIMP,NOINT,I,MX_CAND,NMES,LSKYI17
+      INTEGER NME,
+     .        IGN,IGE,MULTIMP,NOINT,MX_CAND,NMES,LSKYI17
 C     REAL
       my_real
      .        STARTT, STOPT

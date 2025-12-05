@@ -65,7 +65,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, IC, N, K1, K2, K3, IK, ISK, IFUN, NNO, ISMOOTH
+      INTEGER  J, IC, N, K1, K2, K3, IK, ISK, IFUN, NNO, ISMOOTH
       my_real
      .  TS, DERI, VF, FAC, FACX, FINTER, FINTER_SMOOTH
       EXTERNAL FINTER, FINTER_SMOOTH
@@ -73,7 +73,7 @@ C-----------------------------------------------
 C        NC: number of cinematic condition
 C        ic: number of the kinematic condition (1,nc)
 C        IK :
-C        I  : numero global du noeud (1,NUMNOD)
+C        I  : global node number (1,NUMNOD)
 C        J ': direction 1,2,3,4,5,6
 C------
 C        IADLL(NC)        : IAD = IADLL(IC)
@@ -202,7 +202,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, IC, N, K1, K2, K3, ISK, IFUN, NNO,ISMOOTH
+      INTEGER  J, N, K1, K2, K3, ISK, IFUN, NNO,ISMOOTH
       my_real
      .        TS, DERI, VF, FAC, FACX, FINTER, FINTER_SMOOTH
       EXTERNAL FINTER, FINTER_SMOOTH
@@ -211,7 +211,7 @@ C-----------------------------------------------
 C        NC: number of cinematic condition
 C        ic: number of the kinematic condition (1,nc)
 C        IK :
-C        I  : numero global du noeud (1,NUMNOD)
+C        I  : global node number (1,NUMNOD)
 C        J ': direction 1,2,3,4,5,6
 C------
 C        BLL => Lagcomc (2)
@@ -226,7 +226,7 @@ C======================================================================|
          NNO = IABS(IBFV(1,N))
          node_id = NNO
          IF(WEIGHT(NNO)==1) THEN  ! Only once in SPMD
-C   numerotation globale
+C   global numbering
           FACX   = VEL(5,N)
           TS = (TT + HALF*DT2)*FACX
           NNO = NODGLOB(NNO)

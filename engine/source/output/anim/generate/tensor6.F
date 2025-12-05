@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_r_c          ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
@@ -45,6 +46,7 @@ C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -73,11 +75,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      my_real OFF, FAC, A1, A2, A3, THK, GAMA(6),EVAR_TMP(6)
+      my_real   GAMA(6),EVAR_TMP(6)
       REAL R4(18)
-      INTEGER I,I1,I2,II,N,J,NG,NEL,IPT,MT1,MLW, ISTRAIN,TSHELL,
-     .        IPID, NS1, NS2 ,IALEL, ISTRE,IPRT,PTI,IADPG,PID,
-     .        NN1,NN2,NN3,NN4,ICSIG,IOR_TSH,NUVAR,BUF,L_PLA,L_STRA,KHBE,
+      INTEGER I,N,J,NG,NEL,IPT,MT1,MLW, ISTRAIN,TSHELL,
+     .        IPID ,IPRT,PTI,PID,
+     .        NN1,NN2,NN3,NN4,ICSIG,IOR_TSH,NUVAR,BUF,
      .        KCVT,ISOLNOD,NLAY,NPTR,NPTS,NPTT,NPTG,IL,IS,IR,IT,IVISC,IOK,
      .        JJ(6),IR0,IS0,IT0
       REAL,DIMENSION(:),ALLOCATABLE :: WA
@@ -3400,6 +3402,7 @@ C-----------
 !||    srota6             ../engine/source/output/anim/generate/srota6.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE TENSGPS1(FUNC1   ,FUNC2   ,IPARG   ,GEO     ,
@@ -3410,7 +3413,8 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD
+      use element_mod , only : nixs,nixq,nixc,nixtg,nixr,nixt,nixp   
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3440,14 +3444,14 @@ C-----------------------------------------------
 C     REAL
       my_real
      .   EVAR(6,MVSIZ),GAMA(6),
-     .   OFF, P, VONM2, VONM, S1, S2, S12, S3, VALUE,
-     .   A1,B1,B2,B3,YEQ,F1,M1,M2,M3,FOR,AREA(MVSIZ)
-      INTEGER I,II, NG, NEL, ISS, ISC,NBGAMA,KCVT,
-     .        IADD, N, J, MLW,  
-     .        ISTRAIN,NN, JTURB,MT, IMID, IALEL,IPID,
-     .        NN1,NF,OFFSET,K,INC,KK, IUS, NUVAR,
-     .        INOD, ISOLNOD, IPRT, LIAD, NPTR, NPTS, NPTT, IPT,
-     .        IS, IR, IT, NPTG,NC(20,MVSIZ),NNOD,IEXPAN,IHBE,MPT,
+     .     
+     .   AREA(MVSIZ)
+      INTEGER I, NG, NEL,KCVT,
+     .         N, J, MLW,  
+     .        
+     . NN1,K,
+     .         ISOLNOD,
+     .          NC(20,MVSIZ),NNOD,IHBE,
      .        IVISC,JJ(6)
       INTEGER MLW2                
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
@@ -3644,6 +3648,7 @@ C-----------------------------------------------
 !||    srota6             ../engine/source/output/anim/generate/srota6.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE TENSGPS2(FUNC1   ,FUNC2   ,IPARG   ,GEO     ,
@@ -3654,7 +3659,8 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD
+      use element_mod , only : nixs,nixq,nixc,nixtg,nixr,nixt,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3684,14 +3690,14 @@ C-----------------------------------------------
 C     REAL
       my_real
      .   EVAR(6,MVSIZ),GAMA(6),VOL(MVSIZ),THK0,
-     .   OFF, P, VONM2, VONM, S1, S2, S12, S3, VALUE,
-     .   A1,B1,B2,B3,YEQ,F1,M1,M2,M3,FOR,AREA(MVSIZ)
-      INTEGER I,II, NG, NEL, ISS, ISC,KCVT,
-     .        IADD, N, J, MLW,  
-     .        ISTRAIN,NN, K1, K2,JTURB,MT, IMID, IALEL,IPID,
-     .        NN1,NF,OFFSET,K,INC,KK, IUS, NUVAR,
-     .        INOD, ISOLNOD, IPRT, LIAD, NPTR, NPTS, NPTT, IPT,
-     .        IS, IR, IT, NPTG,NC(20,MVSIZ),NNOD,IEXPAN,IHBE,MPT,
+     .   OFF,
+     .   AREA(MVSIZ)
+      INTEGER I, NG, NEL,KCVT,
+     .         N, J, MLW,  
+     .        
+     . NN1,K,
+     .         ISOLNOD,
+     .          NC(20,MVSIZ),NNOD,IHBE,
      .        IVISC,JJ(6)
       INTEGER MLW2                
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
@@ -3898,6 +3904,7 @@ C-----------
 !||    szsigpara          ../engine/source/elements/solid/solidez/szsigpara.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
 !||    outmax_mod         ../common_source/modules/outmax_mod.F
@@ -3913,6 +3920,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD            
       USE OUTMAX_MOD
       USE MY_ALLOC_MOD
+      use element_mod , only : nixs,nixq,nixc,nixtg,nixr,nixt,nixp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3942,38 +3950,38 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 C     REAL
       my_real :: GAMA(6),
-     .   OFF, P, VONM2, VONM, S1, S2, S12, S3, VALUE,
-     .   A1,B1,B2,B3,YEQ,F1,M1,M2,M3,FOR,AREA(MVSIZ),
+     .     
+     .   
      .   A_GAUSS_R,A_GAUSS_S,A_GAUSS_T,N1,
      .   A_GAUSS_R1,A_GAUSS_S1,A_GAUSS_T1,
      .   A_GAUSS_P_R,A_GAUSS_P_S,A_GAUSS_P_T,
      .   KSI,ETA,ZETA
       my_real,ALLOCATABLE,DIMENSION(:,:) :: EVAR
-      INTEGER I,II, NG, NEL, ISS, ISC,NBGAMA,KCVT,
-     .        IADD, N, J, MLW,  
-     .        ISTRAIN,NN, JTURB,MT, IMID, IALEL,IPID,
-     .        NN1,NF,OFFSET,K,INC,KK, IUS, NUVAR,
-     .        INOD, ISOLNOD, IPRT, LIAD, NPTR, NPTS, NPTT, IPT,
-     .        IS, IR, IT, NPTG,NC(20,MVSIZ),NNOD,IEXPAN,IHBE,MPT,ILAY,
-     .        ICSIG,DIR,IVISC,JJ(6),MAT(MVSIZ)
+      INTEGER I, NG, NEL,KCVT,
+     .         N, J, MLW,  
+     .        
+     . NN1,K,
+     .         ISOLNOD, NPTR, NPTS, NPTT,
+     .        IS, IR, IT,NC(20,MVSIZ),NNOD,ILAY,
+     .        ICSIG,IVISC,JJ(6),MAT(MVSIZ)
       INTEGER MLW2,NLAY
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
       TYPE(L_BUFEL_)  ,POINTER :: LBUF   
       my_real
      .  A_GAUSS(9,9),EVAR_TMP(6),ALPHA,BETA,ALPHA_1,BETA_1,
      .  JR0(MVSIZ),JS0(MVSIZ),JT0(MVSIZ),NU(MVSIZ),SIG_HOUR(MVSIZ,6),
-     .   XD1(MVSIZ), XD2(MVSIZ), XD3(MVSIZ), XD4(MVSIZ), XD5(MVSIZ),
-     .   XD6(MVSIZ), XD7(MVSIZ), XD8(MVSIZ), 
-     .   YD1(MVSIZ), YD2(MVSIZ), YD3(MVSIZ), YD4(MVSIZ), YD5(MVSIZ), 
-     .   YD6(MVSIZ), YD7(MVSIZ), YD8(MVSIZ), 
-     .   ZD1(MVSIZ), ZD2(MVSIZ), ZD3(MVSIZ), ZD4(MVSIZ), ZD5(MVSIZ),
-     .   ZD6(MVSIZ), ZD7(MVSIZ), ZD8(MVSIZ),
-     .   R11(MVSIZ),R12(MVSIZ),R13(MVSIZ),
-     .   R21(MVSIZ),R22(MVSIZ),R23(MVSIZ),
-     .   R31(MVSIZ),R32(MVSIZ),R33(MVSIZ),
-     .   RX(MVSIZ),RY(MVSIZ),RZ(MVSIZ),SX(MVSIZ),SY(MVSIZ),SZ(MVSIZ),
-     .   TX(MVSIZ),TY(MVSIZ),TZ(MVSIZ),
-     .   XDL(MVSIZ), YDL(MVSIZ), ZDL(MVSIZ),EVAR_T10(6,10),A_HEPH(3,8)
+     .       
+     .      
+     .        
+     .      
+     .       
+     .     
+     .   
+     .   
+     .   
+     .   
+     .   
+     .     EVAR_T10(6,10),A_HEPH(3,8)
       INTEGER SOL_NODE(3,8), IPERM1(10),IPERM2(10),NN2,ITSH
       DATA IPERM1/0,0,0,0,1,2,3,1,2,3/
       DATA IPERM2/0,0,0,0,2,3,1,4,4,4/
@@ -4624,17 +4632,20 @@ C-----------------------------------------------
       RETURN
       END SUBROUTINE TENSGPS3
 !||====================================================================
-!||    shlrotg    ../engine/source/output/anim/generate/tensor6.F
+!||    shlrotg       ../engine/source/output/anim/generate/tensor6.F
 !||--- called by ------------------------------------------------------
-!||    tencgps1   ../engine/source/output/anim/generate/tensorc.F
-!||    tencgps2   ../engine/source/output/anim/generate/tensorc.F
-!||    tensgps1   ../engine/source/output/anim/generate/tensor6.F
-!||    tensgps2   ../engine/source/output/anim/generate/tensor6.F
+!||    tencgps1      ../engine/source/output/anim/generate/tensorc.F
+!||    tencgps2      ../engine/source/output/anim/generate/tensorc.F
+!||    tensgps1      ../engine/source/output/anim/generate/tensor6.F
+!||    tensgps2      ../engine/source/output/anim/generate/tensor6.F
 !||--- calls      -----------------------------------------------------
-!||    clskew3    ../engine/source/elements/sh3n/coquedk/cdkcoor3.F
+!||    clskew3       ../engine/source/elements/sh3n/coquedk/cdkcoor3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE SHLROTG(JFT     ,JLT     ,NFT     ,X       ,TENS    ,
      1                   ITY     ,IXC     ,IXTG    ,IHBE    ,AREA    )
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4652,7 +4663,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, N, IREP
+      INTEGER I, N, IREP
       my_real
      .   R11(MVSIZ),R12(MVSIZ),R13(MVSIZ),R21(MVSIZ),R22(MVSIZ),
      .   R23(MVSIZ),R31(MVSIZ),R32(MVSIZ),R33(MVSIZ),CDET(MVSIZ),
@@ -4741,12 +4752,14 @@ C-----------------------------------------------
 !||    szsigpara             ../engine/source/elements/solid/solidez/szsigpara.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod          ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod           ../engine/share/resol/initbuf.F
 !||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE TENSGPS_SKIN(ELBUF_TAB,FUNC1   ,FUNC2   ,IPARG   ,
      .                        IXS      ,IXS10   ,IXS16   ,IXS20   ,X        ,
      .                        ITAGPS  ,PM       ,TAG_SKIN_ND )
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -4779,38 +4792,38 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       my_real GAMA(6),
-     .   OFF, P, VONM2, VONM, S1, S2, S12, S3, VALUE,
-     .   A1,B1,B2,B3,YEQ,F1,M1,M2,M3,FOR,AREA(MVSIZ),
+     .     
+     .   
      .   A_GAUSS_R,A_GAUSS_S,A_GAUSS_T,N1,
      .   A_GAUSS_R1,A_GAUSS_S1,A_GAUSS_T1,
      .   A_GAUSS_P_R,A_GAUSS_P_S,A_GAUSS_P_T,
      .   KSI,ETA,ZETA
       my_real,ALLOCATABLE,DIMENSION(:,:) :: EVAR
-      INTEGER I,II, NG, NEL, ISS, ISC,NBGAMA,KCVT,
-     .        IADD, N, J, MLW,  
-     .        ISTRAIN,NN, JTURB,MT, IMID, IALEL,IPID,
-     .        NN1,NF,OFFSET,K,INC,KK, IUS, NUVAR,
-     .        INOD, ISOLNOD, IPRT, LIAD, NPTR, NPTS, NPTT, IPT,
-     .        IS, IR, IT, NPTG,NC(20,MVSIZ),NNOD,IEXPAN,IHBE,MPT,ILAY,
-     .        ICSIG,DIR,IVISC,JJ(6),MAT(MVSIZ),ISKIN(MVSIZ)
+      INTEGER I, NG, NEL,KCVT,
+     .         N, J, MLW,  
+     .        
+     . NN1,K,
+     .         ISOLNOD, NPTR, NPTS, NPTT,
+     .        IS, IR, IT,NC(20,MVSIZ),NNOD,ILAY,
+     .        ICSIG,IVISC,JJ(6),MAT(MVSIZ),ISKIN(MVSIZ)
       INTEGER MLW2,NLAY
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
       TYPE(L_BUFEL_)  ,POINTER :: LBUF   
       my_real
      .  A_GAUSS(9,9),EVAR_TMP(6),ALPHA,BETA,ALPHA_1,BETA_1,
      .  JR0(MVSIZ),JS0(MVSIZ),JT0(MVSIZ),NU(MVSIZ),SIG_HOUR(MVSIZ,6),
-     .   XD1(MVSIZ), XD2(MVSIZ), XD3(MVSIZ), XD4(MVSIZ), XD5(MVSIZ),
-     .   XD6(MVSIZ), XD7(MVSIZ), XD8(MVSIZ), 
-     .   YD1(MVSIZ), YD2(MVSIZ), YD3(MVSIZ), YD4(MVSIZ), YD5(MVSIZ), 
-     .   YD6(MVSIZ), YD7(MVSIZ), YD8(MVSIZ), 
-     .   ZD1(MVSIZ), ZD2(MVSIZ), ZD3(MVSIZ), ZD4(MVSIZ), ZD5(MVSIZ),
-     .   ZD6(MVSIZ), ZD7(MVSIZ), ZD8(MVSIZ),
-     .   R11(MVSIZ),R12(MVSIZ),R13(MVSIZ),
-     .   R21(MVSIZ),R22(MVSIZ),R23(MVSIZ),
-     .   R31(MVSIZ),R32(MVSIZ),R33(MVSIZ),
-     .   RX(MVSIZ),RY(MVSIZ),RZ(MVSIZ),SX(MVSIZ),SY(MVSIZ),SZ(MVSIZ),
-     .   TX(MVSIZ),TY(MVSIZ),TZ(MVSIZ),
-     .   XDL(MVSIZ), YDL(MVSIZ), ZDL(MVSIZ),EVAR_T10(6,10),A_HEPH(3,8)
+     .       
+     .      
+     .        
+     .      
+     .       
+     .     
+     .   
+     .   
+     .   
+     .   
+     .   
+     .     EVAR_T10(6,10),A_HEPH(3,8)
       INTEGER 
      .  SOL_NODE(3,8), IPERM1(10),IPERM2(10),NN2
       DATA IPERM1/0,0,0,0,1,2,3,1,2,3/
@@ -5445,8 +5458,11 @@ C-----------------------------------------------
 !||--- calls      -----------------------------------------------------
 !||    sortho3         ../engine/source/elements/solid/solide/sortho3.F
 !||    srepisot3       ../engine/source/elements/solid/solide/srepisot3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod     ../common_source/modules/elements/element_mod.F90
 !||====================================================================
         SUBROUTINE PRE_HEPH(X,IXS,JR0,JS0,JT0,PM,MAT,NU,NFT,NEL)
+        use element_mod , only : nixs
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 #include      "implicit_f.inc"
 c-----------------------------------------------

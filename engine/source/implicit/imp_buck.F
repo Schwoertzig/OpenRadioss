@@ -55,6 +55,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod              ../engine/share/modules/drape_mod.F
 !||    dsgraph_mod            ../engine/share/modules/dsgraph_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod         ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod           ../common_source/modules/groupdef_mod.F
 !||    h3d_mod                ../engine/share/modules/h3d_mod.F
@@ -123,6 +124,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       use glob_therm_mod
       USE OUTPUT_MOD , ONLY : OUTPUT_
+      use element_mod , only : nixs,nixq,nixc,nixt,nixtg,nixp,nixr
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

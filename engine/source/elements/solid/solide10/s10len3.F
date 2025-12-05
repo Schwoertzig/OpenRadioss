@@ -67,7 +67,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,IP,N,M,J
+      INTEGER I,IP,N,J
       INTEGER ITER,NITER,INIT_PITER
       my_real
      .   UL(MVSIZ,10),
@@ -76,10 +76,10 @@ C-----------------------------------------------
       my_real
      .   D(MVSIZ),GFAC,BFAC,LD,P,MASS,MREF,FAC,
      .   AA,BB,A1,A2,A3,A4,
-     .   A1X,A2X,A3X,A4X,A1Y,A2Y,A3Y,A4Y,A1Z,A2Z,A3Z,A4Z,AA0
+     .   A1X,A2X,A3X,A4X,A1Y,A2Y,A3Y,A4Y,A1Z,A2Z,A3Z,A4Z
       my_real
      .   UX(MVSIZ,10), UY(MVSIZ,10), UZ(MVSIZ,10), VX(MVSIZ,10), VY(MVSIZ,10), VZ(MVSIZ,10), 
-     .   NV(MVSIZ), LL, BU(MVSIZ,6), NINV(MVSIZ)
+     .   NV(MVSIZ), BU(MVSIZ,6), NINV(MVSIZ)
       my_real
      .   B1(MVSIZ), B2(MVSIZ), B3(MVSIZ), BB4(MVSIZ), 
      .   C1(MVSIZ), C2(MVSIZ), C3(MVSIZ), C4(MVSIZ),
@@ -97,13 +97,13 @@ C-----------------------------------------------
 
         IF(IDTMINS==0)THEN
           DO I=1,NEL
-            FACEIGV(I)=TRHEE_OVER_14    ! computing eigenvalues of Me-1 Ke
+            FACEIGV(I)=THREE_OVER_14    ! computing eigenvalues of Me-1 Ke
           END DO
         ELSE
 C-------- AMS (possible mix of elements inside the group)
           DO I=1,NEL
             IF(TAGELEM_SMS(I)==0)THEN
-              FACEIGV(I)=TRHEE_OVER_14    ! computing eigenvalues of Me-1 Ke, TRHEE_OVER_14 = (1/32) / (7/48) rapport des masses
+              FACEIGV(I)=THREE_OVER_14    ! computing eigenvalues of Me-1 Ke, THREE_OVER_14 = (1/32) / (7/48) rapport des masses
             ELSE
               FACEIGV(I)=ONE           ! compute here maximum eigenvalue K of Ke 
                                       ! => Retrieve K in mqviscb.F
@@ -960,7 +960,7 @@ C
             BB = MAX(UL(I,5),UL(I,6),UL(I,7),UL(I,8),UL(I,9),UL(I,10))
             DELTAX2(I) = AA/MAX(AA,BB)
             AA = AA*THIRTY2
-            BB = BB*FOURTY8/SEVEN
+            BB = BB*FORTY8/SEVEN
             DELTAX(I) = SQRT(TWO*VOLG(I)/MAX(AA,BB))
           ENDDO
 
@@ -1088,7 +1088,7 @@ C
               A4 = A4X*A4X+A4Y*A4Y+A4Z*A4Z
       
               DELTAX(I) = SIX*VOLG(I)/SQRT(MAX(A1,A2,A3,A4))
-cc minoration deltax car inertie constante avec marge 
+cc reduction of deltax because inertia constant with margin 
 cc by a sqrt(8) factor on edge aa0
 cthat’s from the initial volume
 c            AA0 = ((SIX*SQR2*VOLO(I))**TWO_THIRD) * EIGHT

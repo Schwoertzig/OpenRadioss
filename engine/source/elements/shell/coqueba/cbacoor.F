@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    cortdir3       ../engine/source/elements/shell/coque/cortdir3.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    plyxfem_mod    ../engine/share/modules/plyxfem_mod.F
 !||====================================================================
        SUBROUTINE CBACOOR(ELBUF_STR,JFT,JLT,X,V,
@@ -49,6 +50,7 @@ C   M o d u l e s
 C----------------------------------------------- 
       USE ELBUFDEF_MOD
       USE PLYXFEM_MOD
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
@@ -128,7 +130,7 @@ c  I  INOD(NUMNOD)        - Node numbers for PLYXFEM
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER I,II(6),J,K,L,M,I1,I2,I3,I4,EP,SPLAT,JJ
+      INTEGER I, II(6), J, K, L, M, I1, I2, I3, I4, EP, SPLAT
       INTEGER NN(4),JPLAT(MVSIZ)
       MY_REAL 
      .   XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4
@@ -1170,6 +1172,7 @@ C-------------
 !||    clskew3        ../engine/source/elements/sh3n/coquedk/cdkcoor3.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
        SUBROUTINE CBACOORT(ELBUF_STR,JFT,JLT,X,V,
      .            VR,DR,IXC,PM,OFFG,AREA,
@@ -1181,6 +1184,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
       USE ELBUFDEF_MOD
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------

@@ -21,9 +21,11 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    s10coor3   ../engine/source/elements/solid/solide10/s10coor3.F
+!||    s10coor3      ../engine/source/elements/solid/solide10/s10coor3.F
 !||--- called by ------------------------------------------------------
-!||    s10forc3   ../engine/source/elements/solid/solide10/s10forc3.F
+!||    s10forc3      ../engine/source/elements/solid/solide10/s10forc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE S10COOR3(
      1   X,       IXS,     IXS10,   V,
@@ -40,6 +42,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      C   NEL,     CONDEG,  G_EPSD,  JALE,
      D   ISMSTR,  JEUL,    JLAG,    ISRAT,
      E   ISROT)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

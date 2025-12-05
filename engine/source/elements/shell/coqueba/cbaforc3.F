@@ -85,6 +85,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    dt_mod              ../engine/source/modules/dt_mod.F
 !||    dttherm_mod         ../engine/source/time_step/dttherm.F90
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    failwave_mod        ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod      ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod        ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -126,7 +127,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      S   FPINCH,      STIFPINCH,   INDX_DRAPE,  IGRE,
      T   JTUR,        DT       ,    NCYCLE,     SNPC,
      Y   STF ,        GLOB_THERM ,  NXLAYMAX,   IDEL7NOK,
-     U   USERL_AVAIL, MAXFUNC,     SBUFMAT)
+     U   USERL_AVAIL, MAXFUNC,     SBUFMAT,IPART     ,LIPART1  )
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
@@ -143,6 +144,7 @@ C-----------------------------------------------
       USE DT_MOD
       use glob_therm_mod
       use dttherm_mod
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
@@ -209,17 +211,20 @@ C     real or real*8
       TYPE (SENSORS_) ,INTENT(INOUT) :: SENSORS
       TYPE (DT_) ,INTENT(IN) :: DT
       type (glob_therm_) ,intent(inout)   :: glob_therm
+      integer, intent(in) :: LIPART1
+      INTEGER, DIMENSION(LIPART1, NPART), INTENT(IN)     :: IPART
+
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
       INTEGER 
-     .   I,II,J,JJ,JG,IR,IS,IT,IPT,NPTR,NPTS,NPTT,NLAY,MX, 
-     .   NPLAT,IDRIL,LENE,LENF,LENM,LENS,NNOD,N1,N2,N3,N4,
-     .   NG,NPG,PT1,PT2,PT3,PT4,PTF,PTM,PTE,PTS,L_DIRA,L_DIRB,
+     . I,J,JG,IR,IS,IT,NPTR,NPTS,NPTT,NLAY,MX,
+     . NPLAT,IDRIL,LENF,LENM,LENS,NNOD,
+     . NG,NPG,PT1,PT2,PT3,PT4,PTF,PTM,PTS,L_DIRA,L_DIRB,
      .   IPPID,JPID,IPTHK,IPPOS,IPMAT,IPMAT_IPLY,MATLY,IFAILWAVE,
-     .   J1,J2,IIGEO,IADI ,IADR,IPANG,IGTYP,IGMAT,ILAY,NPTTOT,IREP,KK(5),K,
+     . J1,J2 ,IPANG,IGTYP,IGMAT,ILAY,NPTTOT,IREP,KK(5),
      .   LENFPINCH,LENMPINCH,LENEPINCHXZ,LENEPINCHYZ,LENEPINCHZZ,
-     .   PTFP,PTMP,PTEPXZ,PTEPYZ,PTEPZZ,MT,NPINCH,IDRAPE,ACTIFXFEM,
+     . PTFP,PTMP,PTEPXZ,PTEPYZ,PTEPZZ,NPINCH,IDRAPE,ACTIFXFEM,
      .   SEDRAPE,NUMEL_DRAPE
       INTEGER  MAT(MVSIZ), PID(MVSIZ), NGL(MVSIZ),MAT_IPLY(MVSIZ,NPT),
      .   IPLAT(MVSIZ),ISTACK(MVSIZ,NPT),FWAVE_EL(NEL)
@@ -251,10 +256,10 @@ C-----------------------------------------------
      .   FLY14(MVSIZ, NPT), FLY24(MVSIZ, NPT), FLY34(MVSIZ, NPT),
      .   PLY_EXX(MVSIZ,NPT), PLY_EYY(MVSIZ,NPT), PLY_EXY(MVSIZ,NPT), 
      .   PLY_EZX(MVSIZ,NPT), PLY_EYZ(MVSIZ,NPT), PLY_FN(MVSIZ,12,NPT),
-     .   THKLY(MVSIZ,NPT),VOL0_LY(MVSIZ,NPT),POSLY(MVSIZ,NPT),
+     . THKLY(MVSIZ,NPT),POSLY(MVSIZ,NPT),
      .   DEL_PLY(MVSIZ,12,NPT),TH_IPLY(MVSIZ,NPT),
      .   SIG_IPLY(MVSIZ,3,NPT),VNI(4,4),
-     .   VFI(MVSIZ,12,NPT),DELG_PLY(MVSIZ,3,NPT),AMOM(MVSIZ,3,4),
+     . VFI(MVSIZ,12,NPT),DELG_PLY(MVSIZ,3,NPT),
      .   R11(MVSIZ),R12(MVSIZ),R13(MVSIZ),
      .   R21(MVSIZ),R22(MVSIZ),R23(MVSIZ),
      .   R31(MVSIZ),R32(MVSIZ),R33(MVSIZ),
@@ -296,7 +301,7 @@ C-----------------------------------------------
 !
 C-----------------------------------------------
       INTEGER, DIMENSION(NEL) :: OFFLY
-      my_real, DIMENSION(:) ,POINTER     :: DIR_A, DIR_B,CRKDIR,DADV
+      my_real, DIMENSION(:) ,POINTER     :: DIR_A, DIR_B, DADV
       my_real, ALLOCATABLE, DIMENSION(:) :: DIR1_CRK,DIR2_CRK,DIRA,DIRB
       my_real
      .   EZZPG(MVSIZ,4)
@@ -306,10 +311,10 @@ C-----------------------------------------------
       my_real, 
      .   DIMENSION(:,:), ALLOCATABLE :: VAR_REG
 C-------------------------------------
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
-      TYPE(L_BUFEL_) ,POINTER :: LBUF1,LBUF2,LBUF3,LBUF4     
+ 
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF 
-      TYPE(L_BUFEL_) ,POINTER :: LBUF
+ 
       TYPE(L_BUFEL_DIR_) ,POINTER :: LBUF_DIR
       TYPE(PINCH_LOCAL_STRUCT_) :: PINCH_LOCAL
       INTEGER SDIR_A    ! Size of DIR_A
@@ -835,7 +840,8 @@ C-----------------
      R    INDX_DRAPE ,THKE     ,SEDRAPE   ,NUMEL_DRAPE  ,DT   ,
      Q    NCYCLE     ,SNPC     ,STF       ,NXLAYMAX,    IDEL7NOK    ,
      S    USERL_AVAIL ,MAXFUNC ,NPTTOT    ,SBUFMAT,     SDIR_A      ,
-     T    SDIR_B     ,GBUF%FORPG_G(PTF)   ,SSP_EQ)        
+     T    SDIR_B     ,GBUF%FORPG_G(PTF)   ,SSP_EQ,
+     X    IPART      ,LIPART1  ,IPARTC     )   
         ENDIF
         SSP_MAX(JFT:JLT) = MAX(SSP_MAX(JFT:JLT),SSP_EQ(JFT:JLT))
 C-----------------

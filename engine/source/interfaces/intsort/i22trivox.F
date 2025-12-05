@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    isonsh3n         ../engine/source/interfaces/int22/i22intersect.F
 !||    my_barrier       ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod   ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22edge_mod      ../common_source/modules/interfaces/cut-cell-buffer_mod.F
 !||    i22tri_mod       ../common_source/modules/interfaces/cut-cell-search_mod.F
@@ -58,6 +59,7 @@ C-----------------------------------------------
       USE I22EDGE_MOD
       USE REALLOC_MOD
       USE I22BUFBRIC_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -76,7 +78,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   role of the routine:
 C   ===================
-C   RECHERCHE DE CANDIDATS AU CALCUL D'INTERSECTION : (BRIQUE, FACETTE)
+C   RECHERCHE DE CANDIDATES AU CALCULATION D'INTERSECTION : (BRIQUE, FACETTE)
 C
 C STEP DESCRIPTIONS
 C=======================================================================
@@ -97,19 +99,19 @@ C   D u m m y   A r g u m e n t s
 C
 C     NOM          DESCRIPTION                       E/S
 C
-C     IRECT(4,*)     : TABLEAU DES CONEC FACETTES        E
+C     IRECT(4,*)     : ARRAY OF CONEC FACETTES        E
 C     X(3,*)         : COORDONNEES NODALES               E
-C     NSV            : NOS SYSTEMES DES NOEUDS           E
+C     NSV            : NOS SYSTEMES DES NODES E
 C     Xmax: larger abcisse existing e
 C     YMAX: greater order.existing E
 C     Zmax: larger existing side E
 C     I_STOK         : storage level of pairs
-C                                candidats impact    E/S
+C                                CANDIDATES impact    E/S
 C     CAND_B         : boites resultats bricks
 C     Cand_e: Addresses of the Facets result boxes
 C                      MULNSN = MULTIMP*NSN maximum size allowed now for the
-C                      COUPLES NOEUDS,ELT CANDIDATS
-C     NOINT          : NUMERO USER DE L'INTERFACE
+C                      COUPLES NODES,ELT CANDIDATES
+C     NOINT          : INTERFACE USER NUMBER
 C     TZINF          : TAILLE ZONE INFLUENCE
 C
 C     VOXEL(ix,iy,iz): contains the address of the first link in the chain array for the concerned voxel.
@@ -469,7 +471,7 @@ C                           +------------+-----------+
 C=======================================================================
 C 2   from the voxels occupied by a brick, we are able
 C     to know all the shells in its neighborhood.
-C     On creer alors les couples candidats.
+C     On creer alors les couples CANDIDATES.
 C=======================================================================
       NC      = 0
       I_STOK  = 0
@@ -572,7 +574,7 @@ c     .     "  i22trivox : BOUCLE BRIQUE, I=",IXS(11,BUFBRIC(I))
                 !-------------------------------------------!
                 IF(I_STOK>=NVSIZ)THEN
 c              if(ibug22_trivox==1)print *,
-c     .             "  i22trivox.F:purge des candidats prov",
+c     .             "  i22trivox.F:purge des CANDIDATES prov",
 c     .             II_STOK+I_STOK, "CORE=",ITASK+1, "BRIQUE=",
 c     .             IXS(11,BUFBRIC(I))
                   CALL I22STO(

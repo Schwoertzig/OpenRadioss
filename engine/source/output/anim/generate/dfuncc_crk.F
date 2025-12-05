@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    crackxfem_mod      ../engine/share/modules/crackxfem_mod.F
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
@@ -48,6 +49,7 @@ C-----------------------------------------------
       USE CRACKXFEM_MOD
       USE ELBUFDEF_MOD
       USE my_alloc_mod
+      use element_mod , only : nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -89,18 +91,18 @@ C     REAL
      .   A1,B1,B2,B3,YEQ,F1,M1,M2,M3, FAC, DAM1(MVSIZ),DAM2(MVSIZ),
      .   WPLA(MVSIZ), DMAX(MVSIZ),WPMAX(MVSIZ),
      .   FAIL(MVSIZ),THK0,THKE0(MVSIZ)
-      INTEGER I,NG,NEL,ISC,N,J,MLW,NUVAR,
+      INTEGER I, NG, NEL, N, MLW, NUVAR, 
      .        ISTRAIN,NN,K1,K2,MT,IMID,IPID,
      .        NN1,NN2,NN3,NN4,NN5,NN6,NF,
      .        OFFSET,K,II,KK,IHBE,I1,MPT,IPT,BUF,NUVARR,
      .        IPMAT,PID(MVSIZ),MAT(MVSIZ),
      .        IEXPAN,NEL_CRK,NLEVXF,NI,JTURB,
      .        NLAY,NPTT,IXEL,ILAY,IL,IUS,JJ(5)
-      INTEGER IXFEM,IP,JPID,CRKS,ICRK,ILAYCRK,ELCRK,NPT0
+      INTEGER IXFEM, CRKS, ICRK, ILAYCRK, ELCRK, NPT0
       INTEGER NELCRK(NCRKPART),IE(NCRKPART)
       REAL R4
 C
-      TYPE(BUF_LAY_) ,POINTER :: BUFLY
+ 
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF
 C

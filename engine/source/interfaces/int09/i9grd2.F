@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    initbuf        ../engine/share/resol/initbuf.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod    ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE I9GRD2(IERR  ,AREA  ,TSTIF    ,T      ,VOL     ,
@@ -37,7 +38,8 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD  
+      use element_mod , only : nixq          
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +60,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, N1, N2, N3, N4, IE, NG,MAT, IFA
+      INTEGER I, N1, N2, NG,MAT
       my_real
      .  Y1, Y2, Z1, Z2,NY, NZ, DY, DZ,NORM,COND
       INTEGER :: LLT ,NFT ,MTN ,IAD ,ITY ,NPT ,JALE ,ISMSTR ,JEUL ,JTUR ,JTHE ,JLAG ,JMULT ,JHBE
@@ -123,7 +125,7 @@ C
      .          -X(3,IXQ(2))-X(3,IXQ(3))
      .          -X(3,IXQ(4))-X(3,IXQ(5))
 C----------------------------------------------------------
-C         CALCUL DISTANCE ET 1/2 SURFACE(SURFACE NODALE))
+C         CALCULATION DISTANCE ET 1/2 SURFACE(SURFACE NODALE))
 C----------------------------------------------------------
             DIST = FOURTH*(DY*NY+DZ*NZ) / MAX(EM15,NORM) 
             AREA = HALF*NORM

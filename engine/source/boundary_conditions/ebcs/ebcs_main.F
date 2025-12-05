@@ -49,6 +49,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ebcs8_inlet_mod         ../engine/source/boundary_conditions/ebcs/ebcs8_inlet.F90
 !||    ebcs_mod                ../common_source/modules/boundary_conditions/ebcs_mod.F90
 !||    elbufdef_mod            ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod             ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod            ../common_source/modules/groupdef_mod.F
 !||    matparam_def_mod        ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    multi_fvm_mod           ../common_source/modules/ale/multi_fvm_mod.F90
@@ -87,6 +88,7 @@ C-----------------------------------------------
       USE EBCS10_NRF_MOD        , ONLY : EBCS10_NRF
       USE EBCS11_PROPELLANT_MOD , ONLY : EBCS11_PROPELLANT
       USE EBCS12_CYCLIC_MOD     , ONLY : EBCS12_CYCLIC
+      use element_mod , only : nixs,nixq,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -88,6 +88,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_mod                ../common_source/modules/ale/ale_mod.F
 !||    dt_mod                 ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    glob_therm_mod         ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    mmain_mod              ../engine/source/materials/mat_share/mmain.F90
@@ -139,6 +140,7 @@ C-----------------------------------------------
       use glob_therm_mod
       USE SENSOR_MOD
       USE sz_dt1_mod, only : sz_dt1
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -309,7 +311,7 @@ C 8-nodes Solid Connectivities
      .  XGXYA(MVSIZ),XGYZA(MVSIZ),XGZXA(MVSIZ),
      .  XGXA2(MVSIZ),XGYA2(MVSIZ),XGZA2(MVSIZ),
      .  STI_C(MVSIZ),LL(MVSIZ),L_MAX(MVSIZ),FLD(MVSIZ),
-     .  CNS2,RHO0_1,NU,C1,CAQ,FQMAX
+     .  CNS2,RHO0_1,NU,FQMAX
       my_real, dimension(mvsiz) :: fheat
       my_real ,DIMENSION(:), POINTER :: EINT
 C-----

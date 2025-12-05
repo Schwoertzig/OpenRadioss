@@ -29,11 +29,13 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    arret         ../engine/source/system/arret.F
 !||    nintrn        ../engine/source/fluid/nintrn.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||    message_mod   ../engine/share/message_module/message_mod.F
 !||====================================================================
       SUBROUTINE LECFLSW (NSFLSW,NTFLSW,NEFLSW,NNFLSW,CRFLSW,
      .                    X,IXS,IPARG,ITMP)
       USE MESSAGE_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -96,10 +98,10 @@ C
 C     CALCULATE INTERNAL NUMBERING OF ELEMENTS AND ADDRESS
 C     IN THE ELEMENTS BUFFER
 C       IL               :  LOCAL NUMBER OF THE FACE AND ELEMENT
-C       IE               :  NUMERO EXTERNE DE L'ELEMENT
-C       NEL=NNFLSW(1,IL) :  NOMBRE D'ELEMENTS DANS LE GROUPE D'ELEMENTS
-C       IB2=NNFLSW(7,IL) :  ADRESSE DE LA PRESSION (ECRASE NUMERO EXTERNE)
-C       IB3=NNFLSW(8,IL) :  ADRESSE DE L'ENERGIE
+C       IE               :  EXTERNAL NUMBER OF THE ELEMENT
+C       NEL=NNFLSW(1,IL) :  NUMBER OF ELEMENTS IN THE ELEMENT GROUP
+C       IB2=NNFLSW(7,IL) :  ADDRESS OF THE PRESSURE (OVERWRITES EXTERNAL NUMBER)
+C       IB3=NNFLSW(8,IL) :  ADDRESS OF THE ENERGY
 C       ITMP(II) = IL    :  LOCAL NUMBERING OF SECTION ELEMENTS
 C
       DO 300 I = 1, NUMELS

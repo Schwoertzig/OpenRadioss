@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    czforc3            ../engine/source/elements/shell/coquez/czforc3.F
 !||--- calls      -----------------------------------------------------
 !||    double_flot_ieee   ../engine/source/system/parit.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CUPDT3F(JFT   ,JLT  ,I8F   ,I8M   ,NVC    ,
      2                  OFFG   ,OFF  ,STI   ,STIR  ,I8STIFN,
@@ -38,6 +40,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      7                  M14    ,M21  ,M22   ,M23   ,M24    ,
      8                  M31    ,M32  ,M33   ,M34   ,EINT   ,
      9                  PARTSAV,MAT  ,IPARTC,NODADT_THERM)
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -501,9 +504,11 @@ C
       END
 C
 !||====================================================================
-!||    cupdt3   ../engine/source/elements/shell/coque/cupdt3.F
+!||    cupdt3        ../engine/source/elements/shell/coque/cupdt3.F
 !||--- called by ------------------------------------------------------
-!||    cforc3   ../engine/source/elements/shell/coque/cforc3.F
+!||    cforc3        ../engine/source/elements/shell/coque/cforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CUPDT3(JFT  ,JLT  ,F      ,M    ,NVC  ,
      2                  OFFG ,OFF  ,STI    ,STIR ,STIFN,
@@ -515,6 +520,7 @@ C
      8                  M31  ,M32  ,M33    ,M34  ,EINT ,
      9                  PARTSAV,MAT,IPARTC ,JTHE  ,THEM   ,
      A                  FTHE ,CONDN,CONDE,NODADT_THERM)
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -951,9 +957,11 @@ C
       END
 C
 !||====================================================================
-!||    cupdt3p   ../engine/source/elements/shell/coque/cupdt3.F
+!||    cupdt3p       ../engine/source/elements/shell/coque/cupdt3.F
 !||--- called by ------------------------------------------------------
-!||    cforc3    ../engine/source/elements/shell/coque/cforc3.F
+!||    cforc3        ../engine/source/elements/shell/coque/cforc3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CUPDT3P(JFT  ,JLT    ,OFFG   ,OFF   ,STI  ,
      2                   STIR ,FSKY   ,FSKYV  ,IADC  ,IXC  ,
@@ -965,6 +973,7 @@ C
      8                   EINT ,PARTSAV,MAT    ,IPARTC,PM   ,
      9                   AREA ,THK    ,JTHE   ,THEM,FTHESKY,
      A                   CONDNSKY,CONDE,NODADT_THERM)
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -70,7 +70,7 @@ C-----------------------------------------------
 #ifdef MPI
       INTEGER MSGOFF,MSGTYP,P,SIZ,NIN,I,J,L,LOC_PROC,
      .        IERROR,I_LEN,NBIRECV,KK,
-     .        IADS,INDEXI,MSGTYP2,
+     .        INDEXI,
      .        IRINDEXI(NSPMD),IADR(NSPMD),REQ_R(NSPMD),
      .        STATUS(MPI_STATUS_SIZE)
       PARAMETER (I_LEN = 46)
@@ -89,7 +89,7 @@ C
 C Compactage min/max, newfront, tzinf
 C
       IF(LOC_PROC/=IRING) THEN
-C si proc participe aux interfaces
+C if proc participates in interfaces
         IF(IRCVFROM(NINTER+1,LOC_PROC)>0.OR.
      +     ISENDTO(NINTER+1,LOC_PROC)>0) THEN
           L = 0

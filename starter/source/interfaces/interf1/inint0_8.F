@@ -48,7 +48,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER II, I, JJ, J, K, L, N, SEG1
       my_real
-     .   CMS, DMS,XMAX_M,YMAX_M,ZMAX_M,XMAX_S,YMAX_S,ZMAX_S,
+     .    XMAX_M,YMAX_M,ZMAX_M,XMAX_S,YMAX_S,ZMAX_S,
      .   XMIN_M,YMIN_M,ZMIN_M,XMIN_S,YMIN_S,ZMIN_S,
      .   XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,XS,YS,ZS,DIST,MINDIST,
      .   X1,Y1,Z1,AAA
@@ -298,7 +298,7 @@ C
       END DO
       KNOD2SEG(1)=0
 C----------------------------------------------------------------
-c 4 Remplissage LCSEG : List of Connected Segments to secnd nodes
+c 4 Remplissage LCSEG : List of Connected Segments to second nodes
 C----------------------------------------------------------------
       II=0
       DO I=1,NSN

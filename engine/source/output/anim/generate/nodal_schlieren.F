@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod         ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22edge_mod            ../common_source/modules/interfaces/cut-cell-buffer_mod.F
 !||    i22tri_mod             ../common_source/modules/interfaces/cut-cell-search_mod.F
@@ -59,6 +60,7 @@ C-----------------------------------------------
       USE I22EDGE_MOD    
       USE I22TRI_MOD           
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only : nixs,nixq
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -83,15 +85,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER IADI, IADR, I, ITYP, NINOUT, NNO, NEL, II1, II2,
+      INTEGER I, ITYP, NEL, 
      .        IR1, IR2, J, JJ, NNO_L, NNI_L, II3, II4, JJJ, NNI,
      .        IALEL,NNOD,IPOS,NGv,IDLOCv,K, IAD2
       INTEGER IV(6), IE
-      INTEGER MLW, NG, KCVT, II, NBF, NBL, IB, ICELL, NIN, MCELL
-      TYPE(G_BUFEL_)  ,POINTER :: GBUF,GBUFv     
+      INTEGER NG
+      TYPE(G_BUFEL_)  ,POINTER :: GBUF
       my_real, ALLOCATABLE, DIMENSION(:) :: COUNT_VOL    
       my_real D,V, DPHI(MVSIZ)
-      INTEGER,DIMENSION(:,:), POINTER   :: pAdjBRICK 
+ 
       my_real :: GRAD(6,MVSIZ)     
 C-----------------------------------------------
 C   D e s c r i p t i o n

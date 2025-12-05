@@ -27,10 +27,13 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    cforc3_crk    ../engine/source/elements/xfem/cforc3_crk.F
 !||    czforc3       ../engine/source/elements/shell/coquez/czforc3.F
 !||    czforc3_crk   ../engine/source/elements/xfem/czforc3_crk.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE THERMC(JFT  ,JLT   ,PM   ,MAT   ,THK   ,IXC , 
      2                  PX1  ,PX2   ,PY1  ,PY2   ,AREA  ,DT1C ,
      3                  TEMPNC ,TEMPEL   ,DIE  ,FPHI    ,THEACCFACT)
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -52,7 +55,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J,MX
+      INTEGER I,MX
       my_real :: CA,CB ,KC ,PHIX,PHIY,A
 !=======================================================================
         MX  =MAT(JFT)

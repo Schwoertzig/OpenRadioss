@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod    ../common_source/modules/ale/ale_connectivity_mod.F
 !||    elbufdef_mod            ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod             ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod             ../engine/share/resol/initbuf.F
 !||    multi_fvm_mod           ../common_source/modules/ale/multi_fvm_mod.F90
 !||    timer_mod               ../engine/source/system/timer_mod.F90
@@ -46,6 +47,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE MULTI_FVM_MOD
       USE ALE_CONNECTIVITY_MOD
+      use element_mod , only : nixs,nixq,nixtg
 C-----------------------------------------------
 C     I m p l i c i t   T y p e s
 C-----------------------------------------------

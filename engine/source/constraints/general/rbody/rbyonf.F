@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_ibcast       ../engine/source/mpi/generic/spmd_ibcast.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE RBYONF(IPARG   ,IPARI         ,MS     ,IN     ,
      2                  IXS     ,IXQ    ,IXC   ,IXT    ,IXP    ,
@@ -42,6 +43,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD            
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -72,8 +74,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J ,ITEMP(10),K, K0, N,NSL,NN,IAD,ONOF1,ISENS,IACTI,
-     .        ONFELT,K1,K2,K3,K4,K5,K6,K7,K8,K9
+      INTEGER I, J ,ITEMP(10),K, N,NSL,NN,IAD,ONOF1,ISENS,IACTI,
+     .        ONFELT,K1,K2,K3,K4,K5,K6,K7
 C======================================================================|
 C     modification of the rigid bodies
 C-------------------------------------------
@@ -122,7 +124,7 @@ C reduction to find the value of n (n = 0 everywhere except on the main processo
 C broadcast of n to all processors
                 CALL SPMD_IBCAST(N,N,1,1,0,2)
               ENDIF
-C si N = 0, alors le rby n avait ete trouve sur aucun proc
+C if N = 0, then the rby had not been found on any proc
               IF(N==0) GOTO 120
 C
               IF(ONOF==0)THEN
@@ -218,6 +220,7 @@ C-----------
 !||    rbypid         ../engine/source/constraints/general/rbody/rbypid.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||    sensor_mod     ../common_source/modules/sensor_mod.F90
 !||====================================================================
       SUBROUTINE RBYSENS(IPARG,IPARI      ,MS    ,IN   ,
@@ -234,6 +237,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD            
       USE SENSOR_MOD
+      use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -269,10 +273,10 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J ,ITEMP(10),K, K0, N,NSL,NN,IAD,ONOF,ONOF1,ISENS,IACTI,
-     .        N2, ISU,ADRSRF,IM, IDEB, IGET,IMAXNSN, IMAXP,
-     .        NSN, NSNP, PROC, ND, PP, II, NSLARB_L, P,
-     .        ONFELT,K1,K2,K3,K4,K5,K6,K7,K8,K9,IFAIL,ELT_ACTIV,PRI_OFF
+      INTEGER I ,K, N,NSL,NN,IAD,ONOF,ONOF1,ISENS,IACTI,
+     .        
+     .          
+     .        ONFELT,K1,K2,K3,K4,K5,K6,K7,IFAIL,ELT_ACTIV,PRI_OFF
       my_real
      .        CRIT
 C======================================================================|

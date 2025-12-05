@@ -65,6 +65,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    drape_mod         ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||    inoutfile_mod     ../common_source/modules/inoutfile_mod.F
 !||    output_mod        ../common_source/modules/output/output_mod.F90
 !||    stack_mod         ../engine/share/modules/stack_mod.F
@@ -87,6 +88,7 @@ C-----------------------------------------------
       USE INOUTFILE_MOD
       USE DRAPE_MOD
       USE OUTPUT_MOD , ONLY : OUTPUT_
+      use element_mod , only : nixs,nixq,nixc,nixp,nixr,nixt,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -134,7 +136,7 @@ C-----------------------------------------------
       CHARACTER CHOUTP*4,FILNAM*100,T10*10,MES*40,VAR_CHAR*11,CHAR_JJ*2,
      .          TITRE*40
       INTEGER FILEN,I,INNODA,J,JJ
-      INTEGER LENR,SIZLOC,SIZP0,SIZP0_95_96
+      INTEGER SIZLOC,SIZP0
       INTEGER I161,I16A,I16B,I16C,I16D,I16E,I16F,I16G,I16H,I16I
       INTEGER SIZWR_CT(3),SIZP0_CT(3),SIZLOC_CT(3),
      .        SIZWR_CS(2),SIZP0_CS(2),SIZLOC_CS(2),

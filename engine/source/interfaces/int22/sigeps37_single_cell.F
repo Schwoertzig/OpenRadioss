@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    alefvm_mod             ../common_source/modules/ale/alefvm_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod            ../engine/share/resol/initbuf.F
 !||====================================================================
       SUBROUTINE SIGEPS37_SINGLE_CELL (
@@ -51,6 +52,7 @@ C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD
       USE ALEFVM_MOD
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

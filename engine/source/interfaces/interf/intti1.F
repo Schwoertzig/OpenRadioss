@@ -103,8 +103,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER N, NTY, JI, JB, NMN, NINT, LWA, I2OK,K,ITIED,
-     .        LCOMI2M, I0, NIR, SIZE, LENS, LENR, I, J, ILEV,
+      INTEGER N, NTY, JI, JB, NMN, NINT, I2OK,
+     .        LCOMI2M, I0, NIR, LENS, LENR, I, J, ILEV,
      .         K10, K11, K12, NSN, KSN,I25PENA,
      .        I2SIZETH,INTTH2, SIZE_INER_POFF,II
       INTEGER,DIMENSION(:), ALLOCATABLE   :: TAGNOD
@@ -360,7 +360,7 @@ C         version spmd p/on
 C
 C Routine assemblage parith/ON
 C
-C Rare case where type2 interfaces are defined with no more active secnd nodes
+C Rare case where type2 interfaces are defined with no more active second nodes
         IF(I2NSNT > 0)
      *    CALL ASSPARI2(nodes%NUMNOD0,
      1       A    ,AR    ,STIFN ,STIFR  ,MS               ,

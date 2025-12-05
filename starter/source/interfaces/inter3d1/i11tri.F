@@ -61,25 +61,25 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER NB_SC,NB_MC,I_ADD,MAXSIZ,I_STOK,J_STOK,I_MEM
-      INTEGER I_BID, I_AMAX,NB_N_B, NOINT, NSN,MULTIMP,ISTOP,
+      INTEGER  I_AMAX,NB_N_B, NOINT, NSN,MULTIMP,ISTOP,
      .        IADFIN,II_STOK
       INTEGER ADD(2,0:*),IRECTS(2,*),IRECTM(2,*),BPE(*),PE(*)
       INTEGER CAND_S(*),CAND_M(*),BPN(*),PN(*)
       INTEGER ADDCM(*),CHAINE(*)
       INTEGER PROV_S(2*MVSIZ),PROV_M(2*MVSIZ)
       my_real
-     .   X(3,*),XYZM(6,*),TZINF,DBUC,
+     .   X(3,*),XYZM(6,*),TZINF,
      .   MAXBOX,MINBOX
       INTEGER ID
       CHARACTER(LEN=NCHARTITLE) :: TITR
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NB_SCN1,NB_MCN1,NB_SCN,NB_MCN,ADDNN,ADDNE,IPOS,
-     .        I,IP,J,K,L
+      INTEGER NB_SCN1,NB_MCN1,NB_SCN,NB_MCN,ADDNN,ADDNE,
+     .        I,J,K,L
       INTEGER INF,SUP,DIR,N1,N2,NN1,NN2,NN,NE,MEMX,NCAND_PROV
       my_real
-     .   DX,DY,DZ,DSUP,SEUIL,XMX,XMN,XX1,XX2,XMIN, XMAX
+     .   DX,DY,DZ,DSUP,SEUIL,XX1,XX2,XMIN, XMAX
 CC      integer idb1,idb2,idb3,idb4
 CC      save idb1,idb2,idb3,idb4
 C-----------------------------------------------
@@ -100,40 +100,38 @@ C   D u m m y   A r g u m e n t s
 C
 C     NOM          DESCRIPTION                       E/S
 C
-C     BPE          TABLEAU DES FACETTES A TRIER      E/S
+C     BPE          ARRAY OF FACETTES TO SORT      E/S
 C                  AND OF THE RESULT ON THE MAX SIDE
-C     PE           TABLEAU DES FACETTES              S
+C     PE           ARRAY OF FACETTES              S
 C                  RESULTAT COTE MIN
-C     BPN          TABLEAU DES NOEUDS A TRIER        E/S
+C     BPN          SORTED NODES ARRAY        E/S
 C                  AND OF THE RESULT ON THE MAX SIDE
-C     PN           TABLEAU DES NOEUDS                S
+C     PN           NODES ARRAY S
 C                  RESULTAT COTE MIN
-C     ADD(2,*)     TABLEAU DES ADRESSES              E/S 
-C          1.......ADRESSES NOEUDS
-C          2.......ADRESSES ELEMENTS
-C     ZYZM(6,*)     TABLEAU DES XYZMIN               E/S 
+C     ADD(2,*)     ARRAY OF ADRESSES              E/S 
+C          1.......ADRESSES NODES C          2.......ADRESSES ELEMENTS
+C     ZYZM(6,*)     ARRAY OF XYZMIN               E/S 
 C          1.......XMIN BOITE
 C          2.......YMIN BOITE
 C          3.......ZMIN BOITE
 C          4.......XMAX BOITE
 C          5.......YMAX BOITE
 C          6.......ZMAX BOITE
-C     IRECT(4,*)   TABLEAU DES CONEC FACETTES        E
+C     IRECT(4,*)   ARRAY OF CONEC FACETTES        E
 C     X(3,*)       COORDONNEES NODALES               E
-C     NB_SC        NOMBRE DE NOEUDS CANDIDATS        E/S
-C     NB_MC        NOMBRE D'ELTS CANDIDATS           E/S
+C     NB_SC        NUMBER OF CANDIDATE NODES        E/S
+C     NB_MC        NUMBER OF CANDIDATE ELEMENTS           E/S
 C     I_ADD        POSITION IN THE E/S ADDRESS TAB
 C     Xmax larger abcisse existing e
 C     XMAX largest order.existing E
 C     Xmax larger existing side E
 C     MAXSIZ       TAILLE MEMOIRE MAX POSSIBLE       E
 C     I_STOK       storage level of the couples
-C                                candidats impact    E/S
-C     CAND_S       boites resultats noeuds
-C     CAND_M       adresses des boites resultat elements
+C                                CANDIDATES impact    E/S
+C     CAND_S       boites resultats nodes C     CAND_M       adresses des boites resultat elements
 C     NSN          4*NSN MAX SIZE NOW ALLOWED FOR
-C                  COUPLES NOEUDS,ELT CANDIDATS
-C     NOINT        NUMERO USER DE L'INTERFACE
+C                  COUPLES NODES,ELT CANDIDATES
+C     NOINT        INTERFACE USER NUMBER
 C     TZINF        TAILLE ZONE INFLUENCE
 C     MAXBOX       TAILLE MAX BUCKET
 C     MINBOX       TAILLE MIN BUCKET
@@ -142,8 +140,7 @@ C
 C
 C    1- TEST ARRET = BOITE VIDE
 C                    BOITE TROP PETITE 
-C                    BOITE NE CONTENANT QU'ONE NOEUD
-C                    NOT ENOUGH MEMORY AVAILABLE
+C                    BOITE NE CONTENANT QU'ONE NODE C                    NOT ENOUGH MEMORY AVAILABLE
 C
 C-----------------------------------------------------------
 C
@@ -350,7 +347,7 @@ C-----we fill the mins of the next box and the maxs of the current one
 C     (i.e. threshold is a max for the current one)
 C     We're going to go down and so we define a new box
 C     we fill the maxs of the new box
-C     initialises dans i7buc1 a 1.E30 comme ca on recupere
+C     initialises in i7buc1 a 1.E30 comme ca on recupere
 C     either XMAX or the max of the box
       XYZM(1,I_ADD+1) = XYZM(1,I_ADD) 
       XYZM(2,I_ADD+1) = XYZM(2,I_ADD)

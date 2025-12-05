@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_rbcast       ../engine/source/mpi/generic/spmd_rbcast.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE I9WAL2(X,V   ,W         ,A         ,CRST      ,
      2   NSV       ,ILOC      ,IRTL      ,ICODE     ,ISKEW     ,
@@ -44,7 +45,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-      USE ELBUFDEF_MOD            
+      USE ELBUFDEF_MOD      
+      use element_mod , only : nixq      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -74,8 +76,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER II, N, L, JJ, NN, LL, LL1, LL2, LG, KK, KKK, K1, K2,
-     .   I1, I2, IERR, IGROU, IELN,
+      INTEGER II, N, L, JJ, NN, LL, LL1, LL2, LG, KK, KKK, K1, 
+     . I1, IERR, IGROU, IELN,
      .   IXX(4), IPERM(2), JPERM(2),
      .   ITEMP(2), IS, IM, ILEN,
      .   TAGS(ISIZES),TAGM(ISIZEM), LISTS(ISIZES),LISTM(ISIZEM),
@@ -83,13 +85,13 @@ C-----------------------------------------------
      .   ICOMNEL(ISIZEM+ISIZES)
 C     REAL
       my_real H(2),
-     .   VMX, VMY, VMZ, VX, VY, VZ, VV, NX, NY, NZ, VT,
-     .   NNX, NNY, NNZ, FAC, P, X1, Y1, Z1,X2, Y2, Z2, TX, TY, TZ,
+     . VMY, VMZ, VY, VZ, VV, NY, NZ, VT,
+     . NNY, NNZ, FAC, P, TY, TZ,
      .   EFRIC, VOLS, VOLM, TS, TM ,TSTIFM, TSTIFS, DVN,
      .   TSTIFT, PHI, AREAS, AREAM, VN, WN, STENSY, STENSZ,
      .   COMAREA(ISIZEM+ISIZES),COMSTF(ISIZEM+ISIZES),
      .   COMT(ISIZEM+ISIZES),COMVOL(ISIZEM+ISIZES),COMBUF(ISIZEM+ISIZES)
-      TYPE(G_BUFEL_)  ,POINTER :: GBUF     
+ 
 c
       DATA IPERM/ 2, 1/,JPERM/ 1, -1/
 C-----------------------------------------------
@@ -324,7 +326,7 @@ C       grid boundary conditions
 C---------------------------------
         IF(ICODE(N)/=0)THEN
 C---------------------------------
-C       W LAGRANGIEN SUIVANT N
+C       W LAGRANGIEN ACCORDING TO N
 C---------------------------------
           DVN = VY * NNY + VZ * NNZ
           W(2,N) = W(2,N) + DVN * NNY
@@ -333,7 +335,7 @@ C---------------------------------
           VN = V(2,N)*NNY + V(3,N)*NNZ
           WN = W(2,N)*NNY + W(3,N)*NNZ
 C-------------------------------------
-C         W LAGRANGIEN SUIVANT N + BCS
+C         W LAGRANGIEN ACCORDING TO N + BCS
 C-------------------------------------
           IF(ABS(WN)>EM30)THEN
             FAC = VN / WN
@@ -342,16 +344,16 @@ C-------------------------------------
           ENDIF
         ELSEIF(IEULT/=0)THEN
 C-------------------------------------
-C         W LAGRANGIEN SUIVANT N
-C         W EULERIEN SUIVANT T
+C         W LAGRANGIEN ACCORDING TO N
+C         W EULERIEN ACCORDING TO T
 C---------------------------------
           VN = V(2,N) * NNY + V(3,N) * NNZ
           W(2,N) = VN * NNY
           W(3,N) = VN * NNZ
         ELSE
 C-------------------------------------
-C         W LAGRANGIEN SUIVANT N
-C         LIBRE SUIVANT T
+C         W LAGRANGIEN ACCORDING TO N
+C         LIBRE ACCORDING TO T
 C---------------------------------
           DVN = VY * NNY + VZ * NNZ
           W(2,N) = W(2,N) + DVN * NNY
@@ -367,7 +369,7 @@ C
       IF(INTTH/=ZERO) THEN
        IF(NSPMD > 1) THEN
 C
-C Envoi buffer elems updates
+C Envoi buffer elements updates
 C
          CALL SPMD_RBCAST(COMBUF,COMBUF,1,ILEN,0,2)
        END IF

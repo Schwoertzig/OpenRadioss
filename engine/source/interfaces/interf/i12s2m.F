@@ -53,7 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NIR, I, J, II, L, JJ,KVAR,SEGAD,ADS,ADM,PB,TEST
+      INTEGER NIR, I, II, L, JJ,KVAR,SEGAD,ADS,ADM,PB,TEST
       my_real,DIMENSION(:),POINTER :: ptr
 C-----------------------------------------------
       TEST=0
@@ -113,7 +113,7 @@ C-----------------------------------------------
          
       ENDDO
 
-      !CALCUL PARTICULIER SI IL EXISTE ONE SEGMENT SANS NOEUD SECOND. DETECTE
+      !CALCULATION PARTICULIER SI IL EXISTE ONE SEGMENT SANS NODE SECOND. DETECTE
       PB=0
       DO I=1,NRTM
         IF(MCOUNT(I)==ZERO)PB=1

@@ -79,7 +79,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER KD(50), JD(50), KFI, JFI, 
+      INTEGER   
      .   INACTI,NOINT, NGROUS, NGROUM, NG, IGIMP,INTY,IFRICF,IFRICV,
      .   IDAMPV,IDAMPF
       INTEGER LOLD(MVSIZ)
@@ -143,7 +143,7 @@ c
 c
       CALL I6INI3(INTBUF_TAB%FS,INTBUF_TAB%FM,NSN,NMN)
 c
-c---  Loop over secnd group
+c---  Loop over second group
 c
       DO NG=1,NGROUS
         NFT=(NG-1)*NVSIZ
@@ -253,7 +253,7 @@ c
 
       ENDDO
 c------------------
-C      INVERSION DES FM (PASSAGE SECND/MAIN)
+C      INVERSION DES FM (PASSAGE SECOND/MAIN)
 c
        FMX=-FMX
        FMY=-FMY

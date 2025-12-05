@@ -21,11 +21,14 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    s10eoff   ../engine/source/elements/solid/solide10/s10eoff.F
+!||    s10eoff       ../engine/source/elements/solid/solide10/s10eoff.F
 !||--- called by ------------------------------------------------------
-!||    s10ke3    ../engine/source/elements/solid/solide10/s10ke3.F
+!||    s10ke3        ../engine/source/elements/solid/solide10/s10ke3.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE S10EOFF(JFT , JLT , IXS ,IXS10, ETAG, OFF)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -42,7 +45,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER IEL, I, N1, N2, N3, N4,NI, J,NALL
+      INTEGER IEL, N1, N2, N3, N4,NI, J,NALL
 C
       DO IEL=JFT,JLT
         N1=IXS(2,IEL)

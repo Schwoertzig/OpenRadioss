@@ -30,6 +30,7 @@ C
 !||    spmd_exchseg_idel   ../engine/source/mpi/kinematic_conditions/spmd_exchseg_idel.F
 !||    spmd_init_idel      ../engine/source/mpi/interfaces/spmd_init_idel.F
 !||--- uses       -----------------------------------------------------
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    nodal_arrays_mod    ../common_source/modules/nodal_arrays.F90
 !||====================================================================
       SUBROUTINE CHKLOAD(
@@ -40,6 +41,7 @@ C
      5    ILOADP ,LLOADP  ,IAD_ELEM)
 C-----------------------------------------------
       USE nodal_arrays_mod
+      use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -71,10 +73,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
+      INTEGER I, J, N1, N2, N3, N4, 
      .        NN, II, IX, K, NIND,  N, IRSIZE, IRECV(NSPMD),
      .        OFC, OFQ, OFT, OFP ,OFR ,OFTG, OFUR,NCONLDF ,
-     .        NCONLDL,NL ,ICOMP ,IDBS ,IDB , IERR, NIND2  ,
+     .        NCONLDL,NL    , NIND2  ,
      .        NINDPLOAD ,NUMPRESLOAD, JJ, IAD, NPRES, NP
 
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: NINDL      

@@ -21,11 +21,13 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i16buce   ../engine/source/interfaces/int16/i16buce.F
+!||    i16buce       ../engine/source/interfaces/int16/i16buce.F
 !||--- called by ------------------------------------------------------
-!||    i16main   ../engine/source/interfaces/int16/i16main.F
+!||    i16main       ../engine/source/interfaces/int16/i16main.F
 !||--- calls      -----------------------------------------------------
-!||    i16tri    ../engine/source/interfaces/int16/i16tri.F
+!||    i16tri        ../engine/source/interfaces/int16/i16tri.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
        SUBROUTINE I16BUCE(
      1   NSV        ,IXS      ,IXS16    ,IXS20    ,NELEM    ,
@@ -33,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3   NOINT    ,I_STOK_GLOB,TZINF    ,MINBOX   ,EMINX    ,
      4   XSAV     ,ITASK      ,X        ,V        ,A        ,
      5   MX_CAND  ,IXS10      ,ESH_T)
+      use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -50,7 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NME, NSN, NOINT,IDT,ITASK,MX_CAND,
+      INTEGER NME, NSN, NOINT,ITASK,MX_CAND,
      .        ESH_T, I_STOK_GLOB
       INTEGER CAND_E(*),CAND_N(*),IXS(NIXS,*),IXS16(8,*),
      .        NSV(*),MWA(*),NELEM(*),IXS20(12,*),IXS10(6,*)
@@ -63,8 +66,8 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 C
-      INTEGER I, J, K, CONT,NB_N_B,I_STOK   ,NSNF,NSNL,
-     .        IP0, IP1, IP2, IP21, IP22, IP31, MAXSIZ,
+      INTEGER I, J, K, CONT,NB_N_B   ,NSNF,NSNL,
+     .         IP1, IP2, IP21, IP22, IP31, MAXSIZ,
      .        NE,N8,N10,N20,N16
 C-----------------------------------------------
 C   S o u r c e  L i n e s

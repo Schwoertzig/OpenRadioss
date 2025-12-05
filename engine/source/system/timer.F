@@ -61,7 +61,7 @@ C-----------------------------------------------
         INTEGER :: NF,NFIELDS,FIELDS(NTIMAX) 
         INTEGER I,J
         REAL :: TOTAL
-        REAL ::  ZEROS = 0.0 
+        REAL :: ZEROS = 0.0
 
         IF (IMPL_S==1) THEN
          NFIELDS = 4
@@ -428,7 +428,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-        CHARACTER(LEN=22) :: FORMAT1="(1x,A4,1x,15(1x,E9.4))"
+        CHARACTER(LEN=22) :: FORMAT1="(1x, A4, 1x, 15(1x, E9.4))"
         CHARACTER(LEN=22) :: FORMAT2="(1x,A5,1x,15(1x,A9))"
         CHARACTER(LEN=22) :: FORMAT3="(17x,A20)"
         CHARACTER(LEN=22) :: FORMAT4="(I4,2x,15(1x,E9.4))"
@@ -555,9 +555,9 @@ C-----------------------------------------------
       INTEGER VMPEAK, VMSIZE,VMRSS,VMHWM, VMSTK,MEMSTAT(5,NSPMD),
      .        GOT_MEM_MAP
       CHARACTER(LEN=9) TITLES(MAX_NB_TIMER)
-      INTEGER FIELDS(11),NFIELDS
+ 
       REAL ZEROS
-      INTEGER :: NF,IJK,IJKL,LEN_RST_NAME
+      INTEGER :: LEN_RST_NAME
       CHARACTER*8  DATE
       CHARACTER*10  TIME
       LOGICAL :: BOOL_FILE
@@ -1162,8 +1162,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------        
-        INTEGER :: I,IJK,IJKL,CURRENT_RUN
-        REAL(kind=8) :: TOTAL_TIME,RESULT
+        INTEGER :: I, IJK, IJKL
+        REAL(kind=8) :: TOTAL_TIME
         INTEGER, DIMENSION(GLOBAL_COMP_TIME%RUN_NBR+2) :: IH_TAB,IM_TAB,IS_TAB
 !       ----------------------------------------
 
@@ -1447,9 +1447,15 @@ C
 !||    printtet10       ../engine/source/system/timer.F
 !||    printtet4        ../engine/source/system/timer.F
 !||    printtriangles   ../engine/source/system/timer.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||====================================================================
-      SUBROUTINE PRINTIMEG(IPARG,PM,IPM,IXC,IXTG,IXS)
+      SUBROUTINE PRINTIMEG(IPARG,PM,IPM,IXC,IXTG,IXS)        
 C     timers display routine
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+        use element_mod , only : nixs,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1477,7 +1483,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, NPROC, MSGTAG, MSGTAG2, ISTART, NGROUP_R,
+      INTEGER 
      .        NEL,PROC,NGF, NGL,
      .        J, NELT,
      .        NG,IRSIZE, MSGTAG3 ,NES,NEQ,NEC,NETG,NET,NEP,NER,NEUR,
@@ -1843,8 +1849,14 @@ C
 !||    printimeg     ../engine/source/system/timer.F
 !||--- calls      -----------------------------------------------------
 !||    my_fsort      ../engine/source/system/timer.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE PRINTCOQUES(IPARG,IXC,IPM,THEOGP,NUMSHG)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1874,9 +1886,9 @@ C-----------------------------------------------
      .       ITY,MTN,NELEM,NPT,NSG,MID,MUID,
      .        NFT,IHBE,MMA,NFUNC,I,J
       REAL DIFFTT,DIFFTTSH(NUMSHG),TEMP(NUMSHG)
-      REAL THEOTP(NUMSHG),REELTP(NUMSHG)
-      REAL TABX(3),TABMAT(3),NPTR,TIMMAT,TELT
-      REAL TPSTHTOT,TPSREEL,PCT
+ 
+ 
+      REAL PCT
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -1964,8 +1976,14 @@ c     .                '         TIMETHEO             DIFF      PCT'
 !||    printimeg      ../engine/source/system/timer.F
 !||--- calls      -----------------------------------------------------
 !||    my_fsort       ../engine/source/system/timer.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod    ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE PRINTSOLIDES(IPARG,THEOGP,NUMSOLG,IPM,IXS)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+        use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1995,9 +2013,9 @@ C-----------------------------------------------
      .       NFT,IHBE,MMA,NFUNC,I,J,ISOLNOD,
      .       MID,MUID
       REAL DIFFTT,DIFFTTSH(NUMSOLG),TEMP(NUMSOLG)
-      REAL THEOTP(NUMSOLG),REELTP(NUMSOLG)
-      REAL TABX(3),TABMAT(3),NPTR,TIMMAT,TELT
-      REAL TPSTHTOT,TPSREEL,PCT
+ 
+ 
+      REAL PCT
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -2067,13 +2085,19 @@ C-----------------------------------------------
 
       END
 !||====================================================================
-!||    printtet4   ../engine/source/system/timer.F
+!||    printtet4     ../engine/source/system/timer.F
 !||--- called by ------------------------------------------------------
-!||    printimeg   ../engine/source/system/timer.F
+!||    printimeg     ../engine/source/system/timer.F
 !||--- calls      -----------------------------------------------------
-!||    my_fsort    ../engine/source/system/timer.F
+!||    my_fsort      ../engine/source/system/timer.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE PRINTTET4(IPARG,THEOGP,NUMSOLG,IPM,IXS)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+        use element_mod , only : nixs
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2102,9 +2126,9 @@ C-----------------------------------------------
      .       ITY,MTN,NELEM,NPT,NSG,ISOLNOD,
      .        NFT,IHBE,MMA,NFUNC,I,J,MID,MUID
       REAL DIFFTT,DIFFTTSH(NUMSOLG),TEMP(NUMSOLG)
-      REAL THEOTP(NUMSOLG),REELTP(NUMSOLG)
-      REAL TABX(3),TABMAT(3),NPTR,TIMMAT,TELT
-      REAL TPSTHTOT,TPSREEL,PCT
+ 
+ 
+      REAL PCT
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -2209,9 +2233,9 @@ C-----------------------------------------------
      .       ITY,MTN,NELEM,NPT,NSG,ISOLNOD,
      .        NFT,IHBE,MMA,NFUNC,I,J
       REAL DIFFTT,DIFFTTSH(NUMSOLG),TEMP(NUMSOLG)
-      REAL THEOTP(NUMSOLG),REELTP(NUMSOLG)
-      REAL TABX(3),TABMAT(3),NPTR,TIMMAT,TELT
-      REAL TPSTHTOT,TPSREEL,PCT
+ 
+ 
+      REAL PCT
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -2312,9 +2336,9 @@ C-----------------------------------------------
      .       ITY,MTN,NELEM,NPT,NSG,
      .        NFT,IHBE,MMA,NFUNC,I,J
       REAL DIFFTT,DIFFTTSH(NUMTRIG),TEMP(NUMTRIG)
-      REAL THEOTP(NUMTRIG),REELTP(NUMTRIG)
-      REAL THEOGP(NGROUP),TABX(3),TABMAT(3),NPTR,TIMMAT,TELT
-      REAL TPSTHTOT,TPSREEL,PCT
+ 
+      REAL THEOGP(NGROUP)
+      REAL PCT
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -2458,7 +2482,7 @@ C   mon tri flottant
 !||====================================================================
       SUBROUTINE ELAPSTIME(T,ETIME)
         USE TIMER_MOD
-C     reset timer elapsed time et calcul tu temps elapsed courant
+C     reset timer elapsed time and calculate current elapsed time
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2503,7 +2527,7 @@ C-----------------------------------------------
 #else
       IF(CLOCK1 > 0 ) THEN
         SECS = CLOCK1-CLOCK0         ! Different time common - Initial time (which may not be 0!)
-        IF(SECS<ZERO) SECS = SECS + NBMAX   ! cas depassement nb de periode maximum
+        IF(SECS<ZERO) SECS = SECS + NBMAX   ! case overflow of maximum period number
         SECS = SECS/CLOCKRATE
         CLOCK0 = CLOCK1              !retrieval of the current time in clock0
         ELAPSED = ELAPSED + SECS
@@ -2535,7 +2559,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER I
+ 
       
       CALL CPU_TIME(TIMER_MP(1,EVENT))
      
@@ -2563,9 +2587,9 @@ C-----------------------------------------------
       my_real, DIMENSION(NBR_GR) :: CPUTIME_MP
       my_real, DIMENSION(2,NBR_GR) :: TIMER_MP
 C
-      INTEGER CLOCK1, CLOCKRATE, NBMAX
+ 
       DOUBLE PRECISION  SECS
-      INTEGER NBR_ELEM,I
+ 
 C      **********************************
 C
           CALL CPU_TIME(TIMER_MP(2,EVENT))
@@ -2582,6 +2606,8 @@ C
 !||--- calls      -----------------------------------------------------
 !||    printime_mp       ../engine/source/system/timer.F
 !||    spmd_ex_cputime   ../engine/source/mpi/output/spmd_ex_cputime.F
+!||--- uses       -----------------------------------------------------
+!||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||====================================================================
       SUBROUTINE CUMULTIME_MP(
      1          TAILLE,IPARG,
@@ -2590,7 +2616,10 @@ C
      4          IGEO,GEO,POIN_UMP,CPUTIME_MP,
      5          NBR_GPMP,CPUTIME_MP_GLOB,TAB_UMP,PM,
      6          BUFMAT,TABMP_L,TAB_MAT )
-C     
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+        use element_mod , only : nixs,nixq,nixc,nixtg,nixq,nixp,nixr,nixt
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2638,30 +2667,30 @@ C-----------------------------------------------
       
       
       
-      INTEGER  NPROC, MSGTAG, MSGTAG2, ISTART, NGROUP_R,
+      INTEGER 
      .        NEL,PROC,NGF, NGL,
      .         NELT,
      .        IRSIZE, MSGTAG3 ,NES,NEQ,NEC,NETG,NET,NEP,NER,NEUR,
      .        MPT,NPTS,NPTT,NPTOT,ISOLNOD,JSROT
 
-       CHARACTER FILNAM*100,PROCNAM*4
+       CHARACTER FILNAM*100, PROCNAM*4
        my_real
      .     TS, TQ, TC, TTG, TT, TP, TR, TUR, DTU,MINS,MAXS,MINQ,
      .     MAXQ,MINC,MAXC,MINTG,MAXTG,MINP,MAXP,MINT,MAXT,MINR,
      .     MAXR,MINUR,MAXUR, CPUG, CPUELEM, T(8,2),CC
 C
-      INTEGER NUMSOLG,NUMSHG,NUMTRIG,NUMOTHER,MTN,NELEM,NPT,NSG,
+      INTEGER MTN, NELEM, NPT, NSG, 
      .        IHBE,NFUNC,FILEN,NUMSOL4G,NUMSOL10G,JHBE
 
       REAL
      .   THEOGP(NGROUP),TABX(3),TABMAT(3),NPTR,TIMMAT,TELT,TPSTHTOT,
      .   TPSREEL,BATOZMULT,TPPOND
-      INTEGER RECHERCHE,OFF,NUMEL_RE
+ 
       my_real INVTREF
-      my_real, DIMENSION(NUMMAT,NUMGEO) :: SOLTELT1_OLD,SOLTELT6_OLD,
+      my_real, DIMENSION(NUMMAT,NUMGEO) :: 
      .             SOLTELT8_OLD,SOLTELT16_OLD,SOLTELT20_OLD,TETRA4_OLD,
      .             TETRA10_OLD,SHTNL_OLD,TRITNL_OLD
-      REAL WD
+ 
 C-----------------------------------------------
 
       T1 = 0
@@ -3094,7 +3123,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         TYPE(TIMER_), INTENT(INOUT) :: T
-        INTEGER I, NPROC
+        INTEGER I
         DOUBLE PRECISION  SECS
         INTEGER :: LEN_RST_NAME
         LOGICAL :: BOOL_FILE

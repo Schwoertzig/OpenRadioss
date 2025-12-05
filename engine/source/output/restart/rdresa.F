@@ -43,6 +43,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    pblast_mod             ../common_source/modules/loads/pblast_mod.F90
 !||    pinchtype_mod          ../common_source/modules/pinchtype_mod.F
 !||    rbe3_mod               ../common_source/modules/constraints/rbe3_mod.F90
+!||    rwall_mod              ../common_source/modules/constraints/rwall_mod.F90
 !||    sensor_mod             ../common_source/modules/sensor_mod.F90
 !||    skew_mod               ../common_source/modules/skew_mod.F90
 !||    state_mod              ../common_source/modules/state_mod.F
@@ -51,7 +52,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                  PRESFIL,MULTI_FVM,H3D_DATA,
      .                  PINCH_DATA,DYNAIN_DATA,INTERFACES,SENSORS,LOADS,
      .                  MAT_ELEM, NAMES_AND_TITLES,SKEWS ,GLOB_THERM,PBLAST,
-     .                  RBE3)
+     .                  RBE3,RWALL)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -70,6 +71,7 @@ C-----------------------------------------------
       use glob_therm_mod               !< Global parameters and flags for thermal analysis
       use PBLAST_MOD                   !< PBLAST parameters
       use RBE3_MOD                     !< RBE3 type
+      use RWALL_MOD                    !< RWALL type
       use output_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -104,6 +106,7 @@ C-----------------------------------------------
       type (glob_therm_)    ,intent(inout)   :: glob_therm
       TYPE (PBLAST_)        ,INTENT(INOUT)   :: PBLAST
       TYPE (RBE3_)          ,INTENT(INOUT)   :: RBE3
+      TYPE (RWALL_)         ,INTENT(INOUT)   :: RWALL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -183,7 +186,7 @@ C----------------------------
       CALL READ_I_C(TABVINT,LVARINT)
       CALL RDCOMI(output,TABVINT,MULTI_FVM,H3D_DATA,DYNAIN_DATA,
      .            INTERFACES%PARAMETERS,SENSORS,LOADS  ,MAT_ELEM,SKEWS,
-     .            GLOB_THERM,PBLAST,RBE3 )
+     .            GLOB_THERM,PBLAST,RBE3 ,RWALL)
 
 C
       IF(ANIM_PLY > 0 .AND.IPLYXFEM == 0) THEN
@@ -402,7 +405,7 @@ C  INDEX VECTOR
 C  If I2S> 0 (Type 2 Connectivitis Interface Connectivitis Interface)
         IF (I2NSNT>0) THEN
            SADDCNI2 = NUMNOD+1
-C Rajout numnod pour index machine vectorielle
+C Add numnod for vector machine index
            IF(IVECTOR==1) SADDCNI2 = SADDCNI2 + NUMNOD
         ELSE
            SADDCNI2 = 0

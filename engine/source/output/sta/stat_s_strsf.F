@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tab_strs_txt50      ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod         ../engine/share/resol/initbuf.F
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
@@ -44,7 +45,8 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD
-      USE MY_ALLOC_MOD         
+      USE MY_ALLOC_MOD
+      use element_mod , only : nixs         
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -63,7 +65,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER SIZLOC,SIZP0,IGLOB
+      INTEGER SIZP0,IGLOB
       INTEGER IXS(NIXS,*),IPARG(NPARG,*),IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IPARTS(*), IPART_STATE(*), STAT_INDXS(*),IPART(LIPART1,*)
       my_real  X(3,*)
@@ -72,9 +74,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,N,J,K,JJ,LEN,ISOLNOD,IUS,MT,TSHELL,
-     .        NLAY,NPTR,NPTS,NPTT,NPTG,NGF,NGL,NN,NG,NEL,MLW,
-     .        ID, IPRT0, IPRT, NPG, IPG, IPT, IE,IP,IL,IR,IS,IT,PID,IOFF,
+      INTEGER I,N,J,K,JJ,LEN,ISOLNOD,TSHELL,
+     .        NLAY,NPTR,NPTS,NPTT,NPTG,NG,NEL,MLW,
+     .        ID, IPRT0, IPRT, IPT, IE,IL,IR,IS,IT,PID,IOFF,
      .        KK(6),KHBE
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA
       INTEGER,DIMENSION(:),ALLOCATABLE :: PTWA_P0

@@ -21,17 +21,19 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    admnorm4     ../engine/source/model/remesh/admnorm.F
+!||    admnorm4      ../engine/source/model/remesh/admnorm.F
 !||--- called by ------------------------------------------------------
-!||    admdiv       ../engine/source/model/remesh/admdiv.F
+!||    admdiv        ../engine/source/model/remesh/admdiv.F
 !||--- uses       -----------------------------------------------------
-!||    remesh_mod   ../engine/share/modules/remesh_mod.F
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
+!||    remesh_mod    ../engine/share/modules/remesh_mod.F
 !||====================================================================
       SUBROUTINE ADMNORM4(N,IXC,X)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE REMESH_MOD
+      use element_mod , only : nixc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -97,17 +99,19 @@ C
       END     
 
 !||====================================================================
-!||    admnorm3     ../engine/source/model/remesh/admnorm.F
+!||    admnorm3      ../engine/source/model/remesh/admnorm.F
 !||--- called by ------------------------------------------------------
-!||    admdiv       ../engine/source/model/remesh/admdiv.F
+!||    admdiv        ../engine/source/model/remesh/admdiv.F
 !||--- uses       -----------------------------------------------------
-!||    remesh_mod   ../engine/share/modules/remesh_mod.F
+!||    element_mod   ../common_source/modules/elements/element_mod.F90
+!||    remesh_mod    ../engine/share/modules/remesh_mod.F
 !||====================================================================
       SUBROUTINE ADMNORM3(N,IXTG,X)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE REMESH_MOD
+      use element_mod , only : nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

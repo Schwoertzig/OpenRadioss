@@ -55,7 +55,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,IW,I1,I2,I3,MG,M,IP,IGTYP,
+      INTEGER I,J,M,
      .        NMNF,NMNL,NRTMF,NRTML,IERROR
       my_real,
      .       DIMENSION(:), ALLOCATABLE :: WA
@@ -71,7 +71,7 @@ C-----------------------------------------------
       NRTML = (ITASK+1) * NRTM / NTHREAD
       MAXDGAP_L = -EP30
 C------------------------------------
-C GAP_S = Secnds nodes gap [NSN]
+C GAP_S = Seconds nodes gap [NSN]
 C GAPN_M = gap for each node on main [NMN]
 C GAP_NM = gap of each node on each main segment [4*NRTM]
 C GAP_M = for each main segment, max of gap of its connected nodes [NRTM]
