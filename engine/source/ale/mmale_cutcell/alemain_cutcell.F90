@@ -31,7 +31,7 @@
         subroutine  alemain_cutcell(nixtg, nixq, numeltg, numelq, ixtg, ixq, numnod, x, ale_connect, ncycle, &
                                     ityptstt, neltstt, t1s, tt, &
                                     ngrnod, igrnod, dt_scale, dt1, dt2t, multi_cutcell, &
-                                    ngroup, elbuf, nparg, iparg)
+                                    ngroup, elbuf, nparg, iparg, ebcs_tab, n2d)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -45,6 +45,7 @@
           use multicutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell, build_full_states
           use elbufdef_mod , only : elbuf_struct_
           use multicutcell_solver_mod , only : multicutcell_initial_state
+          use ebcs_mod !, only : t_ebcs_tab, t_ebcs
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -65,6 +66,7 @@
           integer,intent(in) :: ixtg(nixtg,numeltg)                     !< elem connectivity (1:6 : mat_id,n1,n2,n3,n4,pid,user_id for each elem 1:numetg)
           integer,intent(in) :: numnod                                  !< number of nodes in the input file
           integer,intent(in) :: ncycle                                  !< resol cycle number (time loop)
+          integer,intent(in) :: n2d                                     !< analysis flag : 0(3d), 1(axi), 2(plane strain)
           real(kind=wp),intent(in) :: x(3,numnod)                       !< node coordinates
           real(kind=wp),intent(in) :: tt                                !< current time
           type(t_ale_connectivity), intent(inout) :: ale_connect
@@ -72,6 +74,7 @@
           type(group_)  ,dimension(ngrnod)  :: igrnod                   !< group of nodes (data structure)
           real(kind=WP), intent(in) :: dt_scale
           real(kind=wp),intent(in) :: dt1
+          type(t_ebcs_tab), target, intent(in) :: ebcs_tab              !< data structure for user boundary conditions
 
           !output
           real(kind=wp),intent(out) :: dt2t
@@ -97,8 +100,12 @@
           integer :: iad2,lgth, iadj, JJ !< ale_connectivity usage (elem-elem)
           real(kind=WP) :: gamma(2)
           integer :: sign !Not used for now
-          integer :: nb_phase, n2d !TODO should be input
+          integer :: nb_phase  !< number of phases
           integer(kind=8) :: nb_polygon
+          class (t_ebcs), pointer :: ebcs !< pointer to ebcs data structure (in order to retrieve list of elems annd related faces)
+          integer :: ibc !< boundary condition (several may be defined in the input file)
+          integer :: ebcs_ityp !< boundary condition type
+          integer :: nelem
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Precondition
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -117,6 +124,7 @@
                  !user input
                  part_id = ALE%solver%multimat%list(1)%part_id ! by default we can take into account all elem and ignore part_id
                  polyg_id = ALE%solver%multimat%list(1)%surf_id
+                 nb_phase = ALE%solver%multimat%nb ; print *, "nb_phase=", nb_phase
 
                  ! EXAMPLE OF USAGE
                  if(ncycle == 0)then
@@ -146,12 +154,29 @@
                  end if ! ncycle == 0
 
 
+
+
+                 !-------------BOUNDARY CONDITION EXEMPLE OF USAGE  (polymorphism) -------------!
+                 !TODO : usage example witten here but this can be added in one of the following subroutines below
+                  DO IBC = 1, EBCS_TAB%nebcs_fvm
+                     EBCS => EBCS_TAB%tab(IBC)%poly
+                     ebcs_ityp = EBCS%type  ! ebcs can be identified by member %type (9) or by its class 'TYPE IS(t_ebcs_fluxout)'
+                     NELEM = EBCS%nb_elem ! number of element to treat (elems which have a user BC)
+
+                     SELECT TYPE (twf => EBCS)
+                        TYPE IS(t_ebcs_fluxout)
+                          !CALL FLUX_CALCULATION(twf%ielem, twf%iface)
+                          !   twf%ielem : list of elem ids which have a user BC
+                          !   twf%iface : corresponding (local) face number ( iface \in {1,2,3,4} )
+                     END SELECT
+                 ENDDO
+
+
                  ! -------------------------------CALL 2D POC HERE
                  ! -----------------------------------------------
-                 gamma(1) = 1.4
-                 gamma(2) = 1.4
+                 gamma(1) =  ALE%SOLVER%MULTIMAT%gamma(1)   !defined in input file
+                 gamma(2) =  ALE%SOLVER%MULTIMAT%gamma(2)   !defined in input file
                  sign = 1 !not used for now
-                 n2d = 2 ! 2D simulation
 
                  if (dt1>0) then
                   call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
@@ -162,7 +187,6 @@
                          dt2t, multi_cutcell%sound_speed)
                  else
                   !Initialization
-                  nb_phase = 2
                   call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
                   nb_polygon = ALE%solver%multimat%nb
                   call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &

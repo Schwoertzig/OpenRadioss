@@ -3637,7 +3637,7 @@ C===============================================================================
                 CALL ALEMAIN_CUTCELL(NIXTG,NIXQ,NUMELTG,NUMELQ,IXTG,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
      .                               ITYPTSTT, NELTSTT, T1S, TT,
      .                               NGRNOD,IGRNOD,DTFAC1(102),DT1,DT2TT,MULTI_CUTCELL,
-     .                               ngroup, elbuf_tab, nparg, iparg)
+     .                               ngroup, elbuf_tab, nparg, iparg, ebcs_tab, n2d)
                 IF(DT2TT < DT2T)THEN
                    DT2T   = DT2TT
                    ITYPTST= ITYPTSTT
