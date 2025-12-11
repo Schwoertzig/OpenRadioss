@@ -701,7 +701,6 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:, :), intent(out) :: full_vel 
   
     !Local variables
-    integer(kind=8) :: nb_pts
     integer(kind=8) :: i, j, k
     integer(kind=8) :: nb_cell, nb_regions, nb_edges
     integer(kind=8) :: ind_targ
@@ -779,23 +778,31 @@ module multicutcell_solver_mod
     normalVecEdgez(:) = 0.0
     call compute_normals_clipped_fortran(normalVecy, normalVecz, &
                                           normalVecEdgey, normalVecEdgez, min_pos_Se)
+    write(*,*) "normalVecy = ", normalVecy
+    write(*,*) "normalVecz = ", normalVecz
 
 
     call compute_all_id_pt_cell(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
+    write(*,*) "id_pt_cell = ", id_pt_cell
     pressure_edge(:) = 0.0
     call compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell, &
                                 normalVecy, normalVecz, normalVecEdgey, normalVecEdgez, &
                                 vec_move_clippedy, vec_move_clippedz, pressure_edge)
+    write(*,*) "vec_move_clippedy = ", vec_move_clippedy
+    write(*,*) "vec_move_clippedz = ", vec_move_clippedz
+    write(*,*) "pressure_edge = ", pressure_edge
   
     call smooth_vel_clipped_fortran(vec_move_clippedy, vec_move_clippedz, min_pos_Se, dt)
+    write(*,*) "After smoothing:"
+    write(*,*) "vec_move_clippedy = ", vec_move_clippedy
+    write(*,*) "vec_move_clippedz = ", vec_move_clippedz
+    write(*,*) "pressure_edge = ", pressure_edge
     !!Modification for debugging!!
     !vec_move_clippedy(:) = 0
     !vec_move_clippedz(:) = 0
     !vec_move_clippedz(6:8) = -0.2
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, minimal_length, maximal_length, minimal_angle)
   
-    call nb_pts_clipped_fortran(nb_pts)
-
     call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) 
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
@@ -826,12 +833,21 @@ module multicutcell_solver_mod
     
         !Add numerical fluxes
         nb_edges = max_nb_edges_in_cell(NUMELQ, NUMELTG)
+        write(*,*) "dW before fluxes: ", dW(ind_targ, k)%rho, ", ", dW(ind_targ, k)%rhovy,&
+                     ", ", dW(ind_targ, k)%rhovz, ", ", dW(ind_targ, k)%rhoE
+        write(*,*) "Cell ", i, ", region ", k
+        write(*,*) "Flux rho: ", fx(i, k)%rho
+        write(*,*) "Flux rhovy: ", fx(i, k)%rhovy
+        write(*,*) "Flux rhovz: ", fx(i, k)%rhovz
+        write(*,*) "Flux rhoE: ", fx(i, k)%rhoE
         do j = 1,nb_edges
           dW(ind_targ, k)%rho = dW(ind_targ, k)%rho - dt * fx(i, k)%rho(j) * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhovy = dW(ind_targ, k)%rhovy - dt * fx(i, k)%rhovy(j) * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz - dt * fx(i, k)%rhovz(j) * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhoE = dW(ind_targ, k)%rhoE - dt * fx(i, k)%rhoE(j) * grid(i, k)%lambda_per_edge(j) 
         end do
+        write(*,*) "dW after fluxes: ", dW(ind_targ, k)%rho, ", ", dW(ind_targ, k)%rhovy,&
+                   ", ", dW(ind_targ, k)%rhovz, ", ", dW(ind_targ, k)%rhoE
     
         !Add swept quantities
         mean_normal = grid(i, 1)%normal_intern_face_space
@@ -894,7 +910,7 @@ module multicutcell_solver_mod
       end do
     end do
     dt_next = threshold * dx / largest_speed_wave
-  
+
     !Deallocate local memory
     deallocate(lambdan_prev)
     deallocate(fx)
@@ -1081,6 +1097,8 @@ module multicutcell_solver_mod
                      do imat=1,2
                        multi_cutcell%phase_rho(elem_iid,imat) = elbuf(ng)%BUFLY(imat)%LBUF(1,1,1)%rho(ii)
                        multi_cutcell%phase_pres(elem_iid,imat) = -elbuf(ng)%BUFLY(imat)%LBUF(1,1,1)%sig(ii)
+                       multi_cutcell%phase_vely(elem_iid,imat) = 0.0
+                       multi_cutcell%phase_velz(elem_iid,imat) = 0.0
                      end do
 
                    end do
