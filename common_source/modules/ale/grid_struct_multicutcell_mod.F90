@@ -47,7 +47,8 @@ module grid2D_struct_multicutcell_mod
 
   function makegrid(NUMELQ, NUMELTG, IXQ, IXTG, X, i_cell) result(grid)
     implicit none
-    integer :: N2D, NUMELQ, NUMELTG, i_cell
+    integer :: N2D, NUMELQ, NUMELTG
+    integer(kind=8) :: i_cell
     integer, dimension(:,:) :: IXQ, IXTG
     my_real, dimension(:,:) :: X
     type(grid2D_struct_multicutcell) :: grid

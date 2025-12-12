@@ -182,7 +182,7 @@
                   call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
                          multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
                          multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
-                         gamma, dt1, dt_scale, sign, &
+                         gamma, dt1, dt_scale, sign, ebcs_tab, &
                          multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot, &
                          dt2t, multi_cutcell%sound_speed)
                  else
@@ -203,6 +203,17 @@
                  end if
                    
 
+  
+                write(*,*) "vely1 = ", multi_cutcell%phase_vely(:,1)
+                write(*,*) "velz1 = ", multi_cutcell%phase_velz(:,1)
+                write(*,*) "vely2 = ", multi_cutcell%phase_vely(:,2)
+                write(*,*) "velz2 = ", multi_cutcell%phase_velz(:,2)
+                write(*,*) "rho1 = ", multi_cutcell%phase_rho(:,1)
+                write(*,*) "pres1 = ", multi_cutcell%phase_pres(:,1)
+                write(*,*) "rho2 = ", multi_cutcell%phase_rho(:,2)
+                write(*,*) "pres2 = ", multi_cutcell%phase_pres(:,2)
+                write(*,*) "vol frac phase 1 = ", multi_cutcell%grid(:,1)%lambdanp1_per_cell
+                write(*,*) "vol frac phase 2 = ", multi_cutcell%grid(:,2)%lambdanp1_per_cell
 
 
 

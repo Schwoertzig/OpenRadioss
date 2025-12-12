@@ -283,11 +283,11 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:,:), intent(in) :: X
     TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
     real(kind=wp), dimension(:), INTENT(IN) :: gamma
-    real(kind=wp), dimension(:,:) :: vely
-    real(kind=wp), dimension(:,:) :: velz
-    real(kind=wp), dimension(:,:) :: rho
-    real(kind=wp), dimension(:,:) :: p
-    type(ConservativeFlux2D), dimension(:, :) :: fx
+    real(kind=wp), dimension(:,:), intent(in) :: vely
+    real(kind=wp), dimension(:,:), intent(in) :: velz
+    real(kind=wp), dimension(:,:), intent(in) :: rho
+    real(kind=wp), dimension(:,:), intent(in) :: p
+    type(ConservativeFlux2D), dimension(:, :), intent(out) :: fx
 
     !Local variables
     integer(kind=8) :: i, j, k
@@ -326,6 +326,128 @@ module multicutcell_solver_mod
       end do
     end do
   end subroutine multicutcell_compute_fluxes
+  
+  subroutine multicutcell_compute_fluxes_boundary(NUMELQ, NUMELTG, IXQ, IXTG, X, &
+                                                  gamma, rho, vely, velz, p, ebcs_tab, fx)
+    use grid2D_struct_multicutcell_mod
+    use ALE_CONNECTIVITY_MOD
+    use ebcs_mod !, only : t_ebcs_tab, t_ebcs
+
+    implicit none
+    !Dummy arguments
+    integer, intent(in) :: NUMELQ, NUMELTG
+    integer, dimension(:,:), intent(in) :: IXQ, IXTG
+    real(kind=wp), dimension(:,:), intent(in) :: X
+    real(kind=wp), dimension(:), INTENT(IN) :: gamma
+    real(kind=wp), dimension(:,:), intent(in) :: vely
+    real(kind=wp), dimension(:,:), intent(in) :: velz
+    real(kind=wp), dimension(:,:), intent(in) :: rho
+    real(kind=wp), dimension(:,:), intent(in) :: p
+    type(t_ebcs_tab), target, intent(in) :: ebcs_tab              !< data structure for user boundary conditions
+    type(ConservativeFlux2D), dimension(:, :), intent(out) :: fx
+
+    !Local variables
+    integer :: IBC, k, i_edge, nb_regions, NELEM, ielem
+    integer(kind=8) :: ii, jj, nb_edges
+    class (t_ebcs), pointer :: EBCS !< pointer to ebcs data structure (in order to retrieve list of elems annd related faces)
+    integer :: ebcs_ityp !< boundary condition type
+    real(kind=wp) :: rhoii, velyii, velzii, pii
+    real(kind=wp) :: rhojj, velyjj, velzjj, pjj
+    real(kind=wp) :: gammaii
+    type(Point2D), dimension(4) :: normals
+    type(Point2D) :: normal
+
+    nb_regions = size(vely, 2)
+
+    DO k=1,nb_regions
+      gammaii = gamma(k)
+      DO IBC = 1, EBCS_TAB%nebcs_fvm
+        EBCS => EBCS_TAB%tab(IBC)%poly
+        ebcs_ityp = EBCS%type  ! ebcs can be identified by member %type (9) or by its class 'TYPE IS(t_ebcs_fluxout)'
+        NELEM = EBCS%nb_elem ! number of element to treat (elems which have a user BC)
+        
+        SELECT TYPE (twf => EBCS)
+          TYPE IS(t_ebcs_fluxout)
+            DO ielem=1,NELEM
+              ii = twf%ielem(ielem)
+              rhoii = rho(ii, k)
+              velyii = vely(ii, k)
+              velzii = velz(ii, k)
+              pii = p(ii, k)
+              i_edge = EBCS%iface(ielem)
+              call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, ii, normals, nb_edges)
+              normal = normals(i_edge)
+
+              jj = twf%ielem(ielem)
+              rhojj = rho(jj, k)
+              velyjj = vely(jj, k)
+              velzjj = velz(jj, k)
+              pjj = p(jj, k)
+
+              call FV_flux_hllc_Euler(gammaii, rhoii, rhojj, &
+                                  velyii, velyjj, velzii, velzjj, pii, pjj, normal, &
+                                  fx(ii, k)%rho(i_edge), fx(ii, k)%rhovy(i_edge), &
+                                  fx(ii, k)%rhovz(i_edge), fx(ii, k)%rhoE(i_edge))
+            ENDDO
+          TYPE IS(t_ebcs_nrf)
+            DO ielem=1,NELEM
+              ii = twf%ielem(ielem)
+              rhoii = rho(ii, k)
+              velyii = vely(ii, k)
+              velzii = velz(ii, k)
+              pii = p(ii, k)
+              i_edge = EBCS%iface(ielem)
+              call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, ii, normals, nb_edges)
+              normal = normals(i_edge)
+
+              jj = twf%ielem(ielem)
+              rhojj = rho(jj, k)
+              pjj = p(jj, k)
+              velyjj = -(vely(jj, k)*normal%y + velz(jj, k)*normal%z)*normal%y &
+                       - (-vely(jj, k)*normal%z + velz(jj, k)*normal%y)*normal%z
+              velzjj = -(vely(jj, k)*normal%y + velz(jj, k)*normal%z)*normal%z &
+                       + (-vely(jj, k)*normal%z + velz(jj, k)*normal%y)*normal%y
+
+              call FV_flux_hllc_Euler(gammaii, rhoii, rhojj, &
+                                  velyii, velyjj, velzii, velzjj, pii, pjj, normal, &
+                                  fx(ii, k)%rho(i_edge), fx(ii, k)%rhovy(i_edge), &
+                                  fx(ii, k)%rhovz(i_edge), fx(ii, k)%rhoE(i_edge))
+            ENDDO
+          TYPE IS (t_ebcs_inlet)
+            write(6,*) 'MULTI_EBCS: Inlet EBCS not yet implemented'
+            write(6,*) "NUMELQ=",NUMELQ,"NUMELTG=",NUMELTG
+            CALL ARRET(2)
+          TYPE IS(t_ebcs_propellant)
+            write(6,*) 'MULTI_EBCS: Propellant EBCS not yet implemented'
+            write(6,*) "NUMELQ=",NUMELQ,"NUMELTG=",NUMELTG
+            CALL ARRET(2)
+          class default
+            DO ielem=1,NELEM
+              ii = twf%ielem(ielem)
+              rhoii = rho(ii, k)
+              velyii = vely(ii, k)
+              velzii = velz(ii, k)
+              pii = p(ii, k)
+              i_edge = EBCS%iface(ielem)
+              call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, ii, normals, nb_edges)
+              normal = normals(i_edge)
+
+              jj = twf%ielem(ielem)
+              rhojj = rho(jj, k)
+              velyjj = vely(jj, k)
+              velzjj = velz(jj, k)
+              pjj = p(jj, k)
+
+              call FV_flux_hllc_Euler(gammaii, rhoii, rhojj, &
+                                  velyii, velyjj, velzii, velzjj, pii, pjj, normal, &
+                                  fx(ii, k)%rho(i_edge), fx(ii, k)%rhovy(i_edge), &
+                                  fx(ii, k)%rhovz(i_edge), fx(ii, k)%rhoE(i_edge))
+            ENDDO
+        END SELECT
+
+      ENDDO
+    ENDDO
+  end subroutine multicutcell_compute_fluxes_boundary
   
   function max_nb_edges_in_cell(NUMELQ, NUMELTG)
     integer :: NUMELQ, NUMELTG
@@ -672,11 +794,12 @@ module multicutcell_solver_mod
   end subroutine compute_vec_move_clipped
 
   subroutine update_fluid_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ALE_CONNECT, &
-                          grid, vely, velz, rho, p, gamma, dt, threshold, sign, &
+                          grid, vely, velz, rho, p, gamma, dt, threshold, sign, ebcs_tab, &
                           full_rho, full_pres, full_vel, full_etot, dt_next, sound_speed)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
     use ALE_CONNECTIVITY_MOD
+    use ebcs_mod, only : t_ebcs_tab
   
     IMPLICIT NONE
   
@@ -688,6 +811,7 @@ module multicutcell_solver_mod
     real(kind=wp), intent(in) :: threshold, dt
     real(kind=wp), dimension(:), intent(in) :: gamma
     integer, intent(in) :: sign
+    type(t_ebcs_tab), target, intent(in) :: ebcs_tab              !< data structure for user boundary conditions
     ! IN/OUTPUT arguments
     type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
     real(kind=wp), dimension(:,:) :: vely
@@ -708,7 +832,6 @@ module multicutcell_solver_mod
     real(kind=wp) :: mean_normal_time
     !real(kind=wp) :: lambdan
     real(kind=wp) :: lambdanp1
-    real(kind=wp) :: gamma_k
     type(ConservativeState2D), dimension(:, :), allocatable :: W
     type(ConservativeState2D), dimension(:, :), allocatable :: dW
     type(ConservativeFlux2D), dimension(:, :), allocatable :: fx
@@ -808,6 +931,8 @@ module multicutcell_solver_mod
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
 
     call multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
+    call multicutcell_compute_fluxes_boundary(NUMELQ, NUMELTG, IXQ, IXTG, X, gamma, &
+                                              rho, vely, velz, p, ebcs_tab, fx)
     
     !Compute right hand side for non-fused or target cells
     grid(:, :)%lambdanp1_per_cell_target = 0.
@@ -975,7 +1100,7 @@ module multicutcell_solver_mod
 
     !DUMMY ARGUMENTS
     integer nb_cell, nb_regions, nb_pts_poly
-    integer i, k
+    integer(kind=8) i, k
     real(kind=wp), dimension(:), allocatable :: vec_move_clippedy, vec_move_clippedz
     real(kind=wp) :: dt, minimal_length, minimal_angle, maximal_length
     real(kind=wp), dimension(:), allocatable :: y_polygon, z_polygon
