@@ -124,7 +124,7 @@
                  !user input
                  part_id = ALE%solver%multimat%list(1)%part_id ! by default we can take into account all elem and ignore part_id
                  polyg_id = ALE%solver%multimat%list(1)%surf_id
-                 nb_phase = ALE%solver%multimat%nb ; print *, "nb_phase=", nb_phase
+                 nb_phase = 2 !currently 2, possible further extension to nb_phase > 2
 
                  ! EXAMPLE OF USAGE
                  if(ncycle == 0)then

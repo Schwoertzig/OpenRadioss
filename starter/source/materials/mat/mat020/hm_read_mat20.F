@@ -114,7 +114,6 @@ C     Material proportions
       MATPARAM%multimat%nb = 2
       IF(.NOT.ALLOCATED(MATPARAM%multimat%vfrac))ALLOCATE(MATPARAM%multimat%vfrac(2))
       IF(.NOT.ALLOCATED(MATPARAM%multimat%mid))  ALLOCATE(MATPARAM%multimat%mid(2))
-      MATPARAM%multimat%nb = 2
       MATPARAM%multimat%vfrac(1:2) = AMAT(1:2)
       MATPARAM%multimat%mid(1:2) = MAT(1:2)
 
