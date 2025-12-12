@@ -925,9 +925,11 @@ C-----------------------------------------------
       RETURN
       END
 !||====================================================================
-!||    i20rstn   ../engine/source/interfaces/int16/i20lagm.F
+!||    i20rstn        ../engine/source/interfaces/int16/i20lagm.F
 !||--- called by ------------------------------------------------------
-!||    i20rst    ../engine/source/interfaces/int16/i20lagm.F
+!||    i20rst         ../engine/source/interfaces/int16/i20lagm.F
+!||--- uses       -----------------------------------------------------
+!||    constant_mod   ../common_source/modules/constant_mod.F
 !||====================================================================
       SUBROUTINE I20RSTN(LLT,RR,SS    ,TT    ,NI    ,CONV  ,
      2            DRDX  ,DRDY  ,DRDZ  ,DSDX  ,DSDY  ,DSDZ  ,
@@ -936,13 +938,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-c#include      "implicit_f.inc"
+      use constant_mod, only : ZERO, ONE, TWO, EM4
       implicit none
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
 #include      "mvsiz_p.inc"
-#include      "constant.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------

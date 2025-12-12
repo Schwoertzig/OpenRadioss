@@ -80,7 +80,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE S6CFORC3(TIMERS, OUTPUT, ELBUF_TAB,NG     , 
      1                   PM       ,GEO     ,IXS     ,X      ,
-     2                   A        ,V       ,MS      ,W      ,FLUX   ,
+     2                   A        ,V       ,MS      ,W      ,
      3                   FLU1     ,VEUL    ,FV      ,ALE_CONNECT  ,IPARG  ,
      4                   TF       ,NPF     ,BUFMAT  ,PARTSAV,
      5                   DT2T     ,NELTST  ,ITYPTST ,STIFN  ,FSKY   ,
@@ -161,7 +161,7 @@ C-----------------------------------------------
      .   DT2T
       my_real
      .   PM(NPROPM,*),  X(*), A(*), V(*), MS(*), W(*),
-     .   FLUX(6,*),GEO(NPROPG,*),
+     .   GEO(NPROPG,*),
      .   FLU1(*), VEUL(*), FV(*), TF(*), BUFMAT(*),
      .   PARTSAV(*),STIFN(*), FSKY(*),EANI(*),
      .   F11(MVSIZ),F21(MVSIZ),F31(MVSIZ),
@@ -174,6 +174,7 @@ C-----------------------------------------------
       my_real, INTENT(INOUT) :: TEMP(NUMNOD),FTHE(IFTHE),FTHESKY(LSKY),
      .   CONDN(ICONDN),CONDNSKY(LSKY)
       my_real, DIMENSION(MVSIZ,6), INTENT(INOUT) :: SVIS
+C     ENSURE DOUBLE-PRECISION (64-BIT) FLOATING-POINT CALCULATIONS, EVEN WHEN COMPILING IN SINGLE-PRECISION MODE.
       DOUBLE PRECISION, DIMENSION(3,NUMNOD), INTENT(IN   ) :: XDP
       TYPE (TTABLE) TABLE(*)
       TYPE (ELBUF_STRUCT_), TARGET, DIMENSION(NGROUP) :: ELBUF_TAB
@@ -278,6 +279,7 @@ C
      .   N4Z(MVSIZ), N5Z(MVSIZ), N6Z(MVSIZ),AMU(MVSIZ),AREA(MVSIZ)
       my_real THEM(MVSIZ,6),TEMPEL(MVSIZ),DIE(MVSIZ),CONDEN(MVSIZ)
       my_real, dimension(mvsiz) :: fheat
+C     ENSURE DOUBLE-PRECISION (64-BIT) FLOATING-POINT CALCULATIONS, EVEN WHEN COMPILING IN SINGLE-PRECISION MODE.
       DOUBLE PRECISION 
      .   VOLDP(MVSIZ),FACDP
       INTEGER INLOC,L_NLOC,IPOS(6),INOD(6)
@@ -286,6 +288,8 @@ C
       my_real, DIMENSION(:), POINTER :: DNL
       my_real :: STI_C(MVSIZ),LL(MVSIZ),FLD(MVSIZ),
      .           CNS2,FQMAX,DN
+      integer :: fake_size = 0
+      my_real, dimension(1) :: fake_array     
 C-----
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF     
@@ -661,11 +665,12 @@ C
         DIVDE(1:NEL) = DT1*(DXX(1:NEL)+ DYY(1:NEL)+ DZZ(1:NEL))+DSV(1:NEL)  
         CALL SRHO3(
      1   PM,         LBUF%VOL,   LBUF%RHO,   LBUF%EINT,
-     2   DIVDE,      FLUX(1,NF1),FLU1(NF1),  VOLN,
+     2   DIVDE,      fake_array,FLU1(NF1),  VOLN,
      3   DVOL,       NGL,        MXT,        OFF,
      4   0,          GBUF%TAG22, VOLDP,      LBUF%VOL0DP,
      5   AMU,        GBUF%OFF,   NEL,        MTN,
-     6   JALE,       ISMSTR,     JEUL,       JLAG)
+     6   JALE,       ISMSTR,     JEUL,       JLAG,
+     .   fake_size,fake_size,0)
 C
 C-----------------------------
 C Gather stresses

@@ -23,6 +23,8 @@
 !||====================================================================
 !||    precision_mod                            ../common_source/modules/precision_mod.F90
 !||--- called by ------------------------------------------------------
+!||    ale51_gradient_reconstruction            ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
+!||    ale51_gradient_reconstruction2           ../engine/source/ale/alemuscl/ale51_gradient_reconstruction2.F
 !||    alevec                                   ../engine/source/output/anim/generate/monvol_anim.F90
 !||    alevflu                                  ../engine/source/output/anim/generate/monvol_anim.F90
 !||    alew8                                    ../engine/source/ale/grid/alew8.F90
@@ -50,6 +52,7 @@
 !||    compaction_tab                           ../common_source/eos/compaction_tab.F90
 !||    compaction_tab_init                      ../common_source/eos/compaction_tab.F90
 !||    compute_voxel_dimensions                 ../engine/source/interfaces/intsort/voxel_dimensions.F90
+!||    conjugate_gradient_vec                   ../engine/source/ale/alemuscl/conjugate_gradient_vec.F90
 !||    connectivity_mod                         ../common_source/modules/connectivity.F90
 !||    coupling_advance                         ../engine/source/coupling/coupling_adapter.F90
 !||    coupling_initialize                      ../engine/source/coupling/coupling_adapter.F90
@@ -125,6 +128,7 @@
 !||    fractal_elem_renum                       ../starter/source/materials/fail/fractal/fractal_elem_spmd_renum.F90
 !||    func_table_copy                          ../starter/source/materials/tools/func_table_copy.F90
 !||    funct_python_update_elements             ../engine/source/tools/curve/funct_python_update_elements.F90
+!||    geom_vec                                 ../engine/source/ale/alemuscl/geom_vec.F90
 !||    get_convexity_normals                    ../engine/source/interfaces/interf/get_convexity_normals.F90
 !||    get_list_remnode                         ../starter/source/interfaces/inter3d1/get_list_remnode.F90
 !||    get_neighbour_surface                    ../engine/source/interfaces/interf/get_neighbour_surface.F90
@@ -136,6 +140,7 @@
 !||    get_volume_area                          ../engine/source/airbag/get_volume_area.F90
 !||    ghost_shells_mod                         ../engine/source/engine/node_spliting/ghost_shells.F90
 !||    glob_therm_mod                           ../common_source/modules/mat_elem/glob_therm_mod.F90
+!||    gradient_reconstruction_new              ../engine/source/ale/alemuscl/gradient_reconstruction.F90
 !||    granular51                               ../engine/source/materials/mat/mat051/granular51.F90
 !||    group_param_mod                          ../common_source/modules/mat_elem/group_param_mod.F90
 !||    gruneisen                                ../common_source/eos/gruneisen.F
@@ -301,6 +306,15 @@
 !||    real_insertion_sort_with_index           ../common_source/tools/sort/insertion_sort.F90
 !||    redef3                                   ../engine/source/elements/spring/redef3.F90
 !||    redef_seatbelt                           ../engine/source/tools/seatbelts/redef_seatbelt.F90
+!||    resol_alloc_phase1                       ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase10                      ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase2                       ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase4                       ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase5                       ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase6                       ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase7                       ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase8                       ../engine/source/engine/resol_alloc.F90
+!||    resol_alloc_phase9                       ../engine/source/engine/resol_alloc.F90
 !||    retractor_table_inv                      ../engine/source/tools/seatbelts/retractor_table_inv.F90
 !||    retractor_table_inv2                     ../engine/source/tools/seatbelts/retractor_table_inv2.F90
 !||    rgwal0_pen                               ../engine/source/constraints/general/rwall/rgwall_pen.F90
@@ -321,6 +335,7 @@
 !||    s6zinit3                                 ../starter/source/elements/solid/solide6z/s6zinit3.F90
 !||    s6zrcoor3                                ../engine/source/elements/solid/solide6z/s6zrcoor3.F90
 !||    s6zrrota3                                ../engine/source/elements/solid/solide6z/s6zrrota3.F90
+!||    s6zsav3                                  ../engine/source/elements/solid/solide6z/s6zsav3.F90
 !||    sdistor_ini                              ../engine/source/elements/solid/solide/sdistror_ini.F90
 !||    select_s2s                               ../starter/source/interfaces/inter3d1/select_s2s.F90
 !||    sensor_mod                               ../common_source/modules/sensor_mod.F90
@@ -366,6 +381,8 @@
 !||    spmd_exch_flow_tracking_data2            ../engine/source/ale/grid/spmd_exch_flow_tracking_data2.F90
 !||    spmd_exch_flow_tracking_data3            ../engine/source/ale/grid/spmd_exch_flow_tracking_data3.F90
 !||    spmd_exch_flow_tracking_data4            ../engine/source/ale/grid/spmd_exch_flow_tracking_data4.F90
+!||    spmd_exch_min_max                        ../engine/source/mpi/ale/spmd_exch_min_max.F90
+!||    spmd_exch_n_neighbor                     ../engine/source/mpi/ale/spmd_exch_n_neighbor.F90
 !||    spmd_exch_neighbour_segment              ../engine/source/mpi/interfaces/spmd_exch_neighbour_segment.F90
 !||    spmd_exchange_component                  ../engine/source/mpi/interfaces/spmd_exch_component.F90
 !||    spmd_exchange_ghost_shells               ../engine/source/engine/node_spliting/ghost_shells.F90

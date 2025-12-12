@@ -86,6 +86,7 @@ C-----------------------------------------------
 !||    ig3dmass3                       ../starter/source/elements/ige3d/ig3dmass3.F
 !||    ingrbric_nodes                  ../starter/source/interfaces/interf1/ingrbric_nodes.F
 !||    iniresa                         ../engine/source/output/restart/rdresa.F
+!||    init_ale                        ../engine/source/ale/init_ale.F90
 !||    intti12a                        ../engine/source/interfaces/interf/intti12.F
 !||    lecint                          ../starter/source/interfaces/interf1/lecint.F
 !||    lectur                          ../engine/source/input/lectur.F
@@ -222,6 +223,9 @@ C-----------------------------------------------
           INTEGER :: SIELVS
           INTEGER :: IS_DEFINED_ALE    !not needed for RST
           INTEGER :: IS_DEFINED_EULER  !not needed for RST
+          integer :: nv46 !< number of facet (2d : 4, 3d : 6)
+          integer :: s_flux !< first dimension of flux array
+          integer :: s_qmv !< first dimension of qmv array
         END TYPE ALE_GLOBAL_
 
         !ALE SUBCCLING (obsolete)
@@ -263,13 +267,15 @@ C-----------------------------------------------
 
       CONTAINS
 !||====================================================================
-!||    init   ../common_source/modules/ale/ale_mod.F
+!||    init           ../common_source/modules/ale/ale_mod.F
+!||--- uses       -----------------------------------------------------
+!||    constant_mod   ../common_source/modules/constant_mod.F
 !||====================================================================
         subroutine init(this)
           !initialization is done : - during Starter before reading Starter input file
           !                         - during Engine before reading Restart file and Engine input file.
+          use constant_mod
           implicit none
-#include "constant.inc"
           class(ALE_), intent(inout) :: this
           !---ALE%GRID
           this%GRID%ALPHA = ZERO

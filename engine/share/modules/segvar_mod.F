@@ -46,8 +46,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ebcs8_inlet                      ../engine/source/boundary_conditions/ebcs/ebcs8_inlet.F90
 !||    ebcs_main                        ../engine/source/boundary_conditions/ebcs/ebcs_main.F
 !||    ebcs_vol2seg                     ../engine/source/boundary_conditions/ebcs/ebcs_vol2seg.F
-!||    gradient_reconstruction          ../engine/source/ale/alemuscl/gradient_reconstruction.F
 !||    gradient_reconstruction2         ../engine/source/ale/alemuscl/gradient_reconstruction2.F
+!||    gradient_reconstruction_new      ../engine/source/ale/alemuscl/gradient_reconstruction.F90
 !||    i12m2s                           ../engine/source/interfaces/interf/i12m2s.F
 !||    i12nod3                          ../engine/source/interfaces/interf/i12nod3.F
 !||    i12s2m                           ../engine/source/interfaces/interf/i12s2m.F
@@ -114,11 +114,12 @@ C-----------------------------------------------
 !||    segvar_create   ../engine/share/modules/segvar_mod.F
 !||--- uses       -----------------------------------------------------
 !||    ale_mod         ../common_source/modules/ale/ale_mod.F
+!||    constant_mod    ../common_source/modules/constant_mod.F
 !||====================================================================
       SUBROUTINE SEGVAR_CREATE(this,NBMAT)
       USE ALE_MOD      
+      USE constant_mod, ONLY: ZERO
       IMPLICIT NONE
-#include "constant.inc"       
 #include "../includes/com04_c.inc" 
       CLASS(T_SEGVAR), INTENT(INOUT) :: this
        INTEGER,INTENT(IN) :: NBMAT

@@ -1175,15 +1175,16 @@ C
       END
 
 !||====================================================================
-!||    checkaxes   ../engine/source/materials/mat/mat038/sigeps38.F
+!||    checkaxes      ../engine/source/materials/mat/mat038/sigeps38.F
 !||--- called by ------------------------------------------------------
-!||    sigeps38    ../engine/source/materials/mat/mat038/sigeps38.F
+!||    sigeps38       ../engine/source/materials/mat/mat038/sigeps38.F
+!||--- uses       -----------------------------------------------------
+!||    constant_mod   ../common_source/modules/constant_mod.F
 !||====================================================================
       SUBROUTINE CHECKAXES(TRAN1,TRAN2,AMIN,AMAX,UNCHANGED,TOL)
 C----------------------------------------------------------------
+      use constant_mod, only : ZERO, ONE
       IMPLICIT NONE
-#include      "constant.inc"
-
       my_real
      . TRAN1(3,3),TRAN2(3,3),ANG(3),AMAX,TOL,AMIN
       INTEGER J,K

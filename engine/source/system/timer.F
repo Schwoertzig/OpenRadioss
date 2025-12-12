@@ -26,8 +26,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    printime        ../engine/source/system/timer.F
 !||--- calls      -----------------------------------------------------
 !||    print_block     ../engine/source/system/timer.F
+!||--- uses       -----------------------------------------------------
+!||    timer_mod       ../engine/source/system/timer_mod.F90
 !||====================================================================
-      SUBROUTINE PRINT_SUMMARY(FLAG,NTIMAX,TABTIME,TITLES,OUT_ID,ITHERM) 
+      SUBROUTINE PRINT_SUMMARY(FLAG,NTIMAX,TABTIME,TITLES,OUT_ID,ITHERM)
+        use timer_mod , only : timer_ale_elm
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -251,7 +254,8 @@ C
             FIELDS(3) = MACRO_TIMER_MULTIFVM                           
             FIELDS(4) = MACRO_TIMER_SPMDCFD                           
             FIELDS(5) = MACRO_TIMER_MUSCL
-            NFIELDS = 5
+            fields(6) = timer_ale_elm
+            NFIELDS = 6
             CALL PRINT_BLOCK("** ALE TIME **",TABTIME,NTIMAX,
      .                      FLAG,OUT_ID,NFIELDS,FIELDS,TITLES)
 
@@ -514,7 +518,7 @@ C-----------------------------------------------
       USE TIMER_MOD
       USE TIME_MOD
       USE INOUTFILE_MOD
-      USE OUTPUT_MOD  
+      USE OUTPUT_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -589,6 +593,7 @@ C-----------------------------------------------
       TITLES(MACRO_TIMER_MULTIFVM   ) = "MULTIFVM"
       TITLES(MACRO_TIMER_SPMDCFD    ) = "SPMDCFD"
       TITLES(MACRO_TIMER_MUSCL    ) = "MUSCL"
+      titles(timer_ale_elm) = "ALE_ELM"
 
       
       TITLES(31) = '[K]SETUP'
@@ -1341,6 +1346,7 @@ C
 !||====================================================================
 !||    startimeg       ../engine/source/system/timer.F
 !||--- called by ------------------------------------------------------
+!||    alemain         ../engine/source/ale/alemain.F
 !||    err_thk         ../engine/source/elements/shell/err_thk.F
 !||    forint          ../engine/source/elements/forint.F
 !||    forintc         ../engine/source/elements/forintc.F
@@ -1391,6 +1397,7 @@ C
 !||====================================================================
 !||    stoptimeg       ../engine/source/system/timer.F
 !||--- called by ------------------------------------------------------
+!||    alemain         ../engine/source/ale/alemain.F
 !||    err_thk         ../engine/source/elements/shell/err_thk.F
 !||    forint          ../engine/source/elements/forint.F
 !||    forintc         ../engine/source/elements/forintc.F
