@@ -85,14 +85,23 @@ void compute_lambdas2d_fortran_(const my_real_c *dt, \
                         my_real_c *ptr_lambdas_arr,   \
                         my_real_c *ptr_big_lambda_n,  \
                         my_real_c *ptr_big_lambda_np1,\
-                        Point3D *mean_normal, long long *is_narrowband_ptr)
+                        my_real_c *mean_normal_x, my_real_c *mean_normal_y, my_real_c *mean_normal_t, \
+                        my_real_c *pressure_face_x, my_real_c *pressure_face_y, my_real_c *pressure_face_t, \
+                        long long int *is_narrowband_ptr)
 {
     Array_double *lambdas;
     Vector_double *Lambda_n;
     Vector_double *Lambda_np1;
     bool is_narrowband;
-
-    compute_lambdas2D(grid, clipped3D, *dt, &lambdas, &Lambda_n, &Lambda_np1, mean_normal, &is_narrowband);
+    Point3D mean_normal, pressure_face;
+ 
+    compute_lambdas2D(grid, clipped3D, *dt, &lambdas, &Lambda_n, &Lambda_np1, &mean_normal, &pressure_face, &is_narrowband);
+    *mean_normal_x = mean_normal.x;
+    *mean_normal_y = mean_normal.y;
+    *mean_normal_t = mean_normal.t;
+    *pressure_face_x = pressure_face.x;
+    *pressure_face_y = pressure_face.y;
+    *pressure_face_t = pressure_face.t;
     if (is_narrowband) {
         *is_narrowband_ptr = 1;
     } else {
@@ -219,10 +228,10 @@ void get_clipped_edges_ith_vertex_fortran_(long long *k_signed, long long *signe
     GrB_free(&I_vec_e_k);      
 }                              
                                
-void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, \
+void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, const my_real_c* pressure_edge, \
                             my_real_c *minimal_length, my_real_c *maximal_length, my_real_c *minimal_angle){
 
-    update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, \
+    update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, pressure_edge, \
                     *minimal_length, *maximal_length, *minimal_angle);
 }                              
 

@@ -19,6 +19,7 @@ void dealloc_vec_double(Vector_double* v);
 my_real_c* get_ith_elem_vec_double(const Vector_double* v, uint64_t i);
 void set_ith_elem_vec_double(Vector_double* v, uint64_t i, my_real_c* d);
 void copy_vec_double(const Vector_double* src, Vector_double* dest);
+Vector_double* cat_vec_double(const Vector_double* v1, const Vector_double* v2);
 void print_vec_double(const Vector_double* v);
 void sort_vec_double(const Vector_double* src, Vector_double* sorted_array, Vector_uint* permutation_inds);
 

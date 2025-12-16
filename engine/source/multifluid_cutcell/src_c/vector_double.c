@@ -94,6 +94,14 @@ void copy_vec_double(const Vector_double* src, Vector_double* dest){
     }
 }
 
+Vector_double* cat_vec_double(const Vector_double* v1, const Vector_double* v2){
+    Vector_double *catv = alloc_with_capacity_vec_double(v1->size + v2->size);
+    catv->size = v1->size + v2->size;
+    memcpy(catv->data, v1->data, v1->size*sizeof(my_real_c));
+    memcpy(catv->data+v1->size, v2->data, v2->size*sizeof(my_real_c));
+    return catv;
+}
+
 void print_vec_double(const Vector_double* v){
     unsigned int i;
     my_real_c* vi;

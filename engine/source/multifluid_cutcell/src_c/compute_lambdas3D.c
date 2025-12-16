@@ -118,10 +118,11 @@ Polyhedron3D* clip3D(const Polyhedron3D *clipper, const Polyhedron3D *clipped){
 /// @param mean_normal [OUT] normal vector of the surface of `initial_p` clipped inside `grid`.
 /// @param is_narrowband [OUT] true if the intersection of `grid` and `initial_p` is not empty, false otherwise.
 void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initial_p, \
-                            Vector_points3D **lambdas, Point3D *mean_normal, bool *is_narrowband){
+                            Vector_points3D **lambdas, Point3D *mean_normal, Point3D* total_pressure_face, bool *is_narrowband){
     Polyhedron3D *p = clip3D(grid, initial_p);
     GrB_Index nb_edge, nb_cols_vol, nb_cols_fac, i, j;//, e;
     Point3D *nvpi, *lam;
+    my_real_c press_f;
     int8_t pvij_int;
     long int *psfi;
     my_real_c pvij;
@@ -145,6 +146,7 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
         for(i=0; i<nb_cols_fac; i++){
             psfi = get_ith_elem_vec_int(p->status_face, i);
             nvpi = get_ith_elem_vec_pts3D(norm_vec_poly, i);
+            press_f = *get_ith_elem_vec_double(p->pressure_face, i);
             for (j=0; j<nb_cols_vol; j++){
                 pvij_int = 0; //if volumes[i,j] does not exist, it won't change the value of pvij_int.
                 GrB_Matrix_extractElement(&pvij_int, *(p->volumes), i, j);
@@ -152,6 +154,10 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
                     if (*psfi<1){
                         pvij = (my_real_c) pvij_int;
                         inplace_xpay_points3D(mean_normal, pvij, nvpi);
+                        nvpi->x *= press_f;
+                        nvpi->y *= press_f;
+                        nvpi->t *= press_f;
+                        inplace_xpay_points3D(total_pressure_face, pvij, nvpi); 
                         *is_narrowband = true;
                     }
                     else {
@@ -190,7 +196,7 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
 /// @param is_narrowband [OUT] True if the intersection of `grid` and `clipped` is not empty at time t^n or t^n+`dt`, false otherwise.
 void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, const my_real_c dt, \
                         Array_double **lambdas_arr, Vector_double** big_lambda_n, Vector_double** big_lambda_np1, \
-                        Point3D *mean_normal, bool *is_narrowband){
+                        Point3D *mean_normal, Point3D* pressure_clipped, bool *is_narrowband){
     const unsigned int nb_regions = 2;
     my_real_c *val = (my_real_c*)malloc(sizeof(my_real_c));
     my_real_c nm;
@@ -199,7 +205,7 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
     //Polygon2D *mini_clipped;
     Polyhedron3D *cell3D = NULL;
     //long *sfj;
-    Point3D *pt3D, local_mean_normal, *local_l;
+    Point3D *pt3D, local_mean_normal, *local_l, local_pressure_face;
     bool local_narrowband;
     //Vector_points2D *vec_move_grid;
     my_real_c *vec_move_gridx = NULL, *vec_move_gridy = NULL;
@@ -222,6 +228,7 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
         set_ith_elem_vec_double(*big_lambda_np1, i, val);
     }
     
+    *pressure_clipped = (Point3D){0.,0.,0.};
     *mean_normal = (Point3D){0.,0.,0.};
     for (i=0; i<nb_edge + 2; i++){
         set_ith_elem_vec_pts3D(occupied_area, i, mean_normal);
@@ -230,18 +237,22 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
     *is_narrowband = false;
     vec_move_gridx = calloc(grid->vertices->size, sizeof(my_real_c));
     vec_move_gridy = calloc(grid->vertices->size, sizeof(my_real_c));
-    cell3D = build_space2D_time_cell(grid, vec_move_gridx, vec_move_gridy, grid->vertices->size, dt, false, NULL);
+    cell3D = build_space2D_time_cell(grid, vec_move_gridx, vec_move_gridy, grid->vertices->size, dt, NULL, false, NULL);
     surfaces = points3D_from_matrix(surfaces_poly3D(cell3D));
 
     if ((clipped3D) && (clipped3D->vertices->size>2)){
         k = 0; //should be k = clipped->status_edge[i], or another variable to indicate what region covers face nb i.
         
-        compute_lambdas2D_time(cell3D, clipped3D, &lambdas3D, &local_mean_normal, &local_narrowband);
+        compute_lambdas2D_time(cell3D, clipped3D, &lambdas3D, &local_mean_normal, &local_pressure_face, &local_narrowband);
 
         mean_normal->x += local_mean_normal.x;
         mean_normal->y += local_mean_normal.y;
         mean_normal->t += local_mean_normal.t;
+        pressure_clipped->x += local_pressure_face.x;
+        pressure_clipped->y += local_pressure_face.y;
+        pressure_clipped->t += local_pressure_face.t;
         *is_narrowband |= local_narrowband;
+
         
         //λe += λ[2:end]
         for (j=0; j<lambdas3D->size; j++){
@@ -283,10 +294,10 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
         for (i=2; i<nb_edge + 2; i++){
             area = get_ith_elem_vec_pts3D(surfaces, i);
             occupied = get_ith_elem_vec_pts3D(occupied_area, i);
-            *val = fmax(0., norm_pt3D(*area) - norm_pt3D(*occupied));
+            *val = fmax(0., norm_pt3D(*area) - norm_pt3D(*occupied)) / dt;
             set_ijth_elem_arr_double(*lambdas_arr, i-2, 0, val);
             for(k = 1; k<nb_regions; k++){
-                nm = norm_pt3D(*get_ijth_elem_arr_pts3D(local_lambdas, i, k-1));
+                nm = norm_pt3D(*get_ijth_elem_arr_pts3D(local_lambdas, i, k-1)) / dt;
                 set_ijth_elem_arr_double(*lambdas_arr, i-2, k, &nm); 
             }
         }
@@ -307,7 +318,7 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
         }
 
         for (i=2; i<nb_edge + 2; i++){
-            *val = norm_pt3D(*get_ith_elem_vec_pts3D(surfaces, i));
+            *val = norm_pt3D(*get_ith_elem_vec_pts3D(surfaces, i)) / dt;
             set_ijth_elem_arr_double(*lambdas_arr, i-2, 0, val);
 
             for(k = 1; k<nb_regions; k++){

@@ -30,7 +30,9 @@ void compute_lambdas2d_fortran_(const my_real_c *dt, \
                         my_real_c *ptr_lambdas_arr,    \
                         my_real_c *ptr_big_lambda_n,   \
                         my_real_c *ptr_big_lambda_np1, \
-                        Point3D *mean_normal, long long *is_narrowband);
+                        my_real_c *mean_normal_x, my_real_c *mean_normal_y, my_real_c *mean_normal_t, \
+                        my_real_c *pressure_face_x, my_real_c *pressure_face_y, my_real_c *pressure_face_t, \
+                        long long int *is_narrowband_ptr);
 void nb_pts_clipped_fortran_(long long int* signed_nb_pts_solid);
 void nb_edge_clipped_fortran_(long long int* signed_nb_edges_solid);
 void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVecy, \
@@ -39,7 +41,7 @@ void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVe
 void smooth_vel_clipped_fortran_(my_real_c* vec_move_clippedx, my_real_c* vec_move_clippedy, my_real_c* min_pos_Se, my_real_c *dt);
 void get_clipped_ith_vertex_fortran_(long long int *k, Point2D *pt);
 void get_clipped_edges_ith_vertex_fortran_(long long int *k, long long int *signed_eR, long long int *signed_eL);
-void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, \
+void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, const my_real_c* pressure_edge, \
                             my_real_c *minimal_length, my_real_c *maximal_length, my_real_c *minimal_angle);
 /// @brief List all points of the clipped polygon into x_v_clipped and y_v_clipped arrays.
 /// @details The limits_polygons array gives the start index of each polygon in the clipped solid. 
