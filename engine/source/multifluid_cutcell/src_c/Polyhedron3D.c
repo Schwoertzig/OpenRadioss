@@ -1001,9 +1001,6 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
             for(j_f = 0; j_f < ncols_new_faces; j_f++){
                 GrB_Vector_extractElement(&j, face_indices, j_f);
                 set_ith_elem_vec_int(new_status_face, j_f, get_ith_elem_vec_int(p->status_face, j));
-                if (j >= p->pressure_face->size){
-                    printf("j = %lu, p->status_face->size = %lu, p->pressure_face->size = %lu\n", j, p->status_face->size, p->pressure_face->size);
-                }
                 set_ith_elem_vec_double(new_pressure_face, j_f, get_ith_elem_vec_double(p->pressure_face, j));
             }
 

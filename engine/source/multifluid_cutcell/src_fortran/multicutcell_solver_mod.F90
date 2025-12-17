@@ -73,7 +73,6 @@ module multicutcell_solver_mod
         ys(1:nb_edges) = X(2, IXQ(2:2+nb_edges-1, i))
         zs(1:nb_edges) = X(3, IXQ(2:2+nb_edges-1, i))
         call build_grid_from_points_fortran(ys, zs, nb_edges) 
-        !write(*,*) "In multicutcell_compute_lambdas: Cell ", i, " : build grid from points done."
         mean_normal%y = 0.0_wp
         mean_normal%z = 0.0_wp 
         mean_normal%t = 0.0_wp
@@ -84,8 +83,6 @@ module multicutcell_solver_mod
                                       mean_normal%y, mean_normal%z, mean_normal%t,&
                                       pressure_face%y, pressure_face%z, pressure_face%t,&
                                       is_narrowband)
-        write(*,*) "mean_normal fortran = (", mean_normal%y, ", ", mean_normal%z, ", ", mean_normal%t, ")"
-        write(*,*) "pressure_face fortran = (", pressure_face%y, ", ", pressure_face%z, ", ", pressure_face%t, ")"
 
         do j=1,nb_regions
           grid(i,j)%lambdan_per_cell = ptr_big_lambda_n(j)
@@ -377,24 +374,15 @@ module multicutcell_solver_mod
     normalVecEdgez(:) = 0.0
     call compute_normals_clipped_fortran(normalVecy, normalVecz, &
                                           normalVecEdgey, normalVecEdgez, min_pos_Se)
-    !write(*,*) "normalVecy = ", normalVecy
-    !write(*,*) "normalVecz = ", normalVecz
 
 
     call compute_all_id_pt_cell(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
-    !write(*,*) "id_pt_cell = ", id_pt_cell
     pressure_edge(:) = 0.0
     call compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell, &
                                 normalVecy, normalVecz, normalVecEdgey, normalVecEdgez, &
                                 vec_move_clippedy, vec_move_clippedz, pressure_edge)
-    !write(*,*) "vec_move_clippedy = ", vec_move_clippedy
-    !write(*,*) "vec_move_clippedz = ", vec_move_clippedz
-    write(*,*) "pressure_edge = ", pressure_edge
   
     call smooth_vel_clipped_fortran(vec_move_clippedy, vec_move_clippedz, min_pos_Se, dt)
-    !write(*,*) "After smoothing:"
-    !write(*,*) "vec_move_clippedy = ", vec_move_clippedy
-    !write(*,*) "vec_move_clippedz = ", vec_move_clippedz
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, pressure_edge, &
                                 minimal_length, maximal_length, minimal_angle)
   
@@ -430,37 +418,22 @@ module multicutcell_solver_mod
         dW(ind_targ, k)%rhoE = dW(ind_targ, k)%rhoE + grid(i, k)%lambdan_per_cell * W(i, k)%rhoE  
     
         !Add numerical fluxes
-        write(*,*) "Cell ", i, ", region ", k
-        write(*,*) "dW before fluxes: ", dW(ind_targ, k)%rho, ", ", dW(ind_targ, k)%rhovy,&
-                     ", ", dW(ind_targ, k)%rhovz, ", ", dW(ind_targ, k)%rhoE
-        !write(*,*) "Flux rho: ", fx(i, k)%rho
-        !write(*,*) "Flux rhovy: ", fx(i, k)%rhovy
-        !write(*,*) "Flux rhovz: ", fx(i, k)%rhovz
-        !write(*,*) "Flux rhoE: ", fx(i, k)%rhoE
-        !write(*,*) "lambda = : ", grid(i, k)%lambda_per_edge
         do j = 1,nb_edges
           dW(ind_targ, k)%rho = dW(ind_targ, k)%rho - dt * fx(i, k)%rho(j) * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhovy = dW(ind_targ, k)%rhovy - dt * fx(i, k)%rhovy(j) * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz - dt * fx(i, k)%rhovz(j) * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhoE = dW(ind_targ, k)%rhoE - dt * fx(i, k)%rhoE(j) * grid(i, k)%lambda_per_edge(j) 
         end do
-        write(*,*) "dW after fluxes: ", dW(ind_targ, k)%rho, ", ", dW(ind_targ, k)%rhovy,&
-                   ", ", dW(ind_targ, k)%rhovz, ", ", dW(ind_targ, k)%rhoE
     
         !Add swept quantities
         mean_normal = grid(i, 1)%normal_intern_face_space
         mean_normal_time = grid(i, 1)%normal_intern_face_time
         pressure_mean_normal = grid(i, 1)%p_normal_intern_face_space
         pressure_mean_normal_time = grid(i, 1)%p_normal_intern_face_time
-        write(*,*) "pressure_mean_normal = (", pressure_mean_normal%y, ", ", pressure_mean_normal%z, ")"
-        write(*,*) "pressure_mean_normal_time = ", pressure_mean_normal_time
 
         dW(ind_targ, k)%rhovy = dW(ind_targ, k)%rhovy + odd_k*pressure_mean_normal%y
         dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz + odd_k*pressure_mean_normal%z
         dW(ind_targ, k)%rhoE  = dW(ind_targ, k)%rhoE  - odd_k*pressure_mean_normal_time
-
-        write(*,*) "dW after interface flux: ", dW(ind_targ, k)%rho, ", ", dW(ind_targ, k)%rhovy,&
-                   ", ", dW(ind_targ, k)%rhovz, ", ", dW(ind_targ, k)%rhoE
 
         !Update size of fluid part
         grid(ind_targ, k)%lambdanp1_per_cell_target = grid(ind_targ, k)%lambdanp1_per_cell_target + grid(i, k)%lambdanp1_per_cell
@@ -469,7 +442,6 @@ module multicutcell_solver_mod
       end do
       odd_k = -1
     end do
-    write(*,*) ""
     
     !Update non-fused or target cells
     do k = 1,nb_regions
@@ -1075,7 +1047,6 @@ module multicutcell_solver_mod
           velzR = velz(i, 2)
           pR = p(i, 2)
 
-          !write(*,*), "k = ", k, ", normalVecy = ", normalVecy(k), ", normalVecz = ", normalVecz(k)
           call solve_riemann_problem(gamma(1), gamma(2), rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
                                       normalVecy(k), normalVecz(k), &
                                       us, vsL, vsR, ps)
@@ -1086,9 +1057,6 @@ module multicutcell_solver_mod
                                     normalVecEdgey(eR), normalVecEdgez(eR), uREdge, vREdgeL, vREdgeR, pEdgeR)
           pressure_edge(eL) = pEdgeL 
           pressure_edge(eR) = pEdgeR 
-        
-          !write(*,*), "k = ", k, ", velyL = ", velyL, ", velzL = ", velzL, ", velyR = ", velyR, ", velzR = ", velzR
-          !write(*,*), ", us = ", us, ", vsL+vsR = ", vsL+vsR
         
           vec_move_clippedy(k) = us * normalVecy(k) - 0.5 * (vsL + vsR) * normalVecz(k) !Choice of the mean of left and right tangential velocities, another choice could be made!
           vec_move_clippedz(k) = us * normalVecz(k) + 0.5 * (vsL + vsR) * normalVecy(k) !Choice of the mean of left and right tangential velocities, another choice could be made!
