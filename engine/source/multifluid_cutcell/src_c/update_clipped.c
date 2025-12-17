@@ -401,8 +401,6 @@ static void split_edge(Polygon2D* p, uint64_t i_e, const Point2D *new_pt){
     infogrb = GrB_Matrix_resize(*(p->faces), nb_rows + 1, nb_cols);
     infogrb = GxB_Matrix_concat(*(p->faces), (GrB_Matrix[]){copy_mat, new_line}, 2, 1, GrB_NULL); //faces = [faces ; faces[i_e,:]]
 
-    //push!(p.pressure_edge, p.pressure_edge[i_e]) //TODO Report this
-    //push!(p.status_edge, p.status_edge[i_e]) //TODO Report this
     i_s = *get_ith_elem_vec_int(p->status_edge, i_e);
     push_back_vec_int(&(p->status_edge), &i_s);
 
@@ -846,7 +844,7 @@ static Vector_points2D* build_vertices_tnp1(const Polygon2D* p, const my_real_c*
 
 //Compute the polyhedron in space-time given vertices at time tn+dt.
 //It supposes no intersection occurs at time tn+dt.
-static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* fn, const Vector_points2D* vertices_tnp1, my_real_c dt, const my_real_c* pressure_edge, bool split){
+static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* fn, const Vector_points2D* vertices_tnp1, my_real_c dt, bool split){
     uint64_t i, j, ie, size_edge_indices;
     int8_t fne_ptind;
     long int val;
@@ -1017,17 +1015,9 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
                 val = 3+i;
                 set_ith_elem_vec_int(status_faces, curr_face    , &val);
                 set_ith_elem_vec_int(status_faces, curr_face + 1, &val);
-                if (pressure_edge) {
-                    val_r = pressure_edge[i];
-                } else {
-                    val_r = 0.0;
-                }
-                set_ith_elem_vec_double(pressure_faces, curr_face    , &val_r);
-                set_ith_elem_vec_double(pressure_faces, curr_face + 1, &val_r);
 
-                //pressure_face[curr_face] = fn.pressure_edge[i] //TODO Report this
-                //pressure_face[curr_face+1] = fn.pressure_edge[i] //TODO Report this
-
+                set_ith_elem_vec_double(pressure_faces, curr_face    , get_ith_elem_vec_double(fn->pressure_edge, i));
+                set_ith_elem_vec_double(pressure_faces, curr_face + 1, get_ith_elem_vec_double(fn->pressure_edge, i));
 
                 GrB_Matrix_extractElement(&fne_ptind, *(fn->faces), i, j);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face    , 0);
@@ -1066,14 +1056,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
 
                 val = 3+i;
                 set_ith_elem_vec_int(status_faces, curr_face, &val);
-                if (pressure_edge) {
-                    val_r = pressure_edge[i];
-                } else {
-                    val_r = 0.0;
-                }
-                set_ith_elem_vec_double(pressure_faces, curr_face, &val_r);
-
-                //pressure_face[curr_face] = fn.pressure_edge[i] //TODO Report this
+                set_ith_elem_vec_double(pressure_faces, curr_face, get_ith_elem_vec_double(fn->pressure_edge, i));
 
                 GrB_Matrix_extractElement(&fne_ptind, *(fn->faces), i, j);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face, 0);
@@ -1110,7 +1093,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
 
 //Compute the polyhedron in space-time given the polygon at time tn+dt.
 //It supposes some intersections occur at time tn+dt and where already treated in fn (at time tn, with all the backpropagation) and at time tn+dt (with all intersection points added, edges modified, etc).
-static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn, const Polygon2D* fnp1, my_real_c dt, const my_real_c* pressure_edge,\
+static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn, const Polygon2D* fnp1, my_real_c dt,\
                                                     const Vector_int8* pt_in_or_out_split, const Vector_int8* pt_in_or_out_fuse){
     Vector_points3D* new_vertices;
     uint64_t i, nb_pts1, nb_pts2, nb_pts_in; 
@@ -1288,9 +1271,8 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
                     val = -(3+i);
                     set_ith_elem_vec_int(status_faces, curr_face    , &val);
                     set_ith_elem_vec_int(status_faces, curr_face + 1, &val);
-                    val_r = pressure_edge[i];
-                    set_ith_elem_vec_double(pressure_faces, curr_face    , &val_r);
-                    set_ith_elem_vec_double(pressure_faces, curr_face + 1, &val_r);
+                    set_ith_elem_vec_double(pressure_faces, curr_face    , get_ith_elem_vec_double(fn->pressure_edge, i));
+                    set_ith_elem_vec_double(pressure_faces, curr_face + 1, get_ith_elem_vec_double(fn->pressure_edge, i));
 
 
                     GrB_Matrix_extractElement(&in_out_f1, *(fn->faces), i, j);
@@ -1307,8 +1289,7 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
 
                     val = -(3+i);
                     set_ith_elem_vec_int(status_faces, curr_face, &val);
-                    val_r = pressure_edge[i];
-                    set_ith_elem_vec_double(pressure_faces, curr_face, &val_r);
+                    set_ith_elem_vec_double(pressure_faces, curr_face, get_ith_elem_vec_double(fn->pressure_edge, i));
 
                     GrB_Matrix_extractElement(&in_out_f1, *(fn->faces), i, j);
                     GrB_Matrix_setElement(*new_volume, in_out_f1, curr_face, 0);
@@ -1360,9 +1341,9 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
 /// @param vs* [IN] Vector translating points of `fn` over time `dt` to form the polygon at time t^{n+1}
 /// @param dt [IN] time-step 
 /// @param split [IN] flag to triangulate (or not) faces in time linking the edges at time t^n and t^{n+1}.
-Polyhedron3D* build_space2D_time_cell(const Polygon2D *fn, const my_real_c *vsx, const my_real_c* vsy, uint64_t size_vs, const my_real_c dt, const my_real_c* pressure_edge, bool split, Array_int *list_del_pts){
+Polyhedron3D* build_space2D_time_cell(const Polygon2D *fn, const my_real_c *vsx, const my_real_c* vsy, uint64_t size_vs, const my_real_c dt, bool split, Array_int *list_del_pts){
     Vector_points2D* vertices_tnp1 = build_vertices_tnp1(fn, vsx, vsy, size_vs, dt, list_del_pts);
-    Polyhedron3D* p = build_space_time_cell_given_tnp1_vertices(fn, vertices_tnp1, dt, pressure_edge, split);
+    Polyhedron3D* p = build_space_time_cell_given_tnp1_vertices(fn, vertices_tnp1, dt, split);
     
     dealloc_vec_pts2D(vertices_tnp1); free(vertices_tnp1);
     return p;
@@ -1418,7 +1399,7 @@ static void coarsen_interface(Polygon2D *p, Array_int *list_changed_edges){
 /// @param minimal_length [IN] minimal length the path linking three consecutive points should have.
 /// @param maximal_length [IN] maximal length an edge should have.
 /// @param minimal_angle [IN] minimal value (in rad) the angle formed by three consecutive points should have.
-void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* vec_move_solidx, const my_real_c* vec_move_solidy, my_real_c dt, const my_real_c* pressure_edge, \
+void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* vec_move_solidx, const my_real_c* vec_move_solidy, my_real_c dt, \
                     my_real_c minimal_length, my_real_c maximal_length, my_real_c minimal_angle){
     Array_int *list_del_pts,  *list_changed_edges;
     Vector_points2D* vertices_tnp1;
@@ -1584,14 +1565,14 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
         if (*solid3D){
             dealloc_Polyhedron3D(*solid3D); free(*solid3D);
         }
-        *solid3D = build_space_time_cell_with_intersection(*solid, solid_tnp1, dt, pressure_edge, pt_in_or_out_split, pt_in_or_out_fuse);
+        *solid3D = build_space_time_cell_with_intersection(*solid, solid_tnp1, dt, pt_in_or_out_split, pt_in_or_out_fuse);
     } else {
         copy_Polygon2D(solid_tnp1, solid_new);
         //Create 3D space-time solid interface
         if (*solid3D){
             dealloc_Polyhedron3D(*solid3D); free(*solid3D);
         }
-        *solid3D = build_space_time_cell_given_tnp1_vertices(*solid, vertices_tnp1, dt, pressure_edge, true);
+        *solid3D = build_space_time_cell_given_tnp1_vertices(*solid, vertices_tnp1, dt, true);
         for(i=0; i<(*solid3D)->status_face->size; i++){
             if ((*solid3D)->status_face->data[i] > 2)
                 (*solid3D)->status_face->data[i] = -(*solid3D)->status_face->data[i]; //Face status numbered negatively for solid space-time reconstructions

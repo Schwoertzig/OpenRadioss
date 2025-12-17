@@ -231,7 +231,18 @@ void get_clipped_edges_ith_vertex_fortran_(long long *k_signed, long long *signe
 void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, const my_real_c* pressure_edge, \
                             my_real_c *minimal_length, my_real_c *maximal_length, my_real_c *minimal_angle){
 
-    update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, pressure_edge, \
+    unsigned long nb_edges;
+    GrB_Matrix_ncols(&nb_edges, *(clipped->edges));
+
+    if (clipped->pressure_edge != NULL){
+        free(clipped->pressure_edge->data);
+    }
+    clipped->pressure_edge->data = (my_real_c*)malloc(nb_edges*sizeof(my_real_c));
+    memcpy(clipped->pressure_edge->data, pressure_edge, nb_edges*sizeof(my_real_c));
+    clipped->pressure_edge->size = nb_edges;
+    clipped->pressure_edge->capacity = nb_edges;
+    
+    update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, \
                     *minimal_length, *maximal_length, *minimal_angle);
 }                              
 

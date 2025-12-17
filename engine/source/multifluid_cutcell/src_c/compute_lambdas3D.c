@@ -8,6 +8,7 @@
 static void build_clipped_in_partial(Polyhedron3D* p, Point3D *n_face, Point3D *pt_face, long int mark_edge, int8_t sign_taken){
     Vector_points3D *pts_copy = alloc_empty_vec_pts3D();
     Vector_int *status_face = alloc_empty_vec_int();
+    Vector_double *pressure_face = alloc_empty_vec_double();
     GrB_Matrix *edges_in, *faces_in, *volumes_in;
     
     edges_in = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
@@ -16,16 +17,19 @@ static void build_clipped_in_partial(Polyhedron3D* p, Point3D *n_face, Point3D *
 
     cut_edges3D(p, n_face, pt_face, sign_taken, pts_copy, edges_in);
 
-    close_cells(edges_in, p->faces, NULL, -1, faces_in);
+    close_cells(edges_in, p->faces, NULL, NULL, -1, faces_in);
 
     copy_vec_int(p->status_face, status_face);
-    close_cells(faces_in, p->volumes, status_face, mark_edge, volumes_in);
+    copy_vec_double(p->pressure_face, pressure_face);
+    close_cells(faces_in, p->volumes, status_face, pressure_face, mark_edge, volumes_in);
 
     //Copy new polyhedron in p.
     copy_vec_pts3D(pts_copy, p->vertices);
     dealloc_vec_pts3D(pts_copy); free(pts_copy);
     copy_vec_int(status_face, p->status_face);
+    copy_vec_double(pressure_face, p->pressure_face);
     dealloc_vec_int(status_face); free(status_face);
+    dealloc_vec_double(pressure_face); free(pressure_face);
     GrB_Matrix_dup(p->edges, *edges_in);
     GrB_Matrix_dup(p->faces, *faces_in);
     GrB_Matrix_dup(p->volumes, *volumes_in);
@@ -237,7 +241,7 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
     *is_narrowband = false;
     vec_move_gridx = calloc(grid->vertices->size, sizeof(my_real_c));
     vec_move_gridy = calloc(grid->vertices->size, sizeof(my_real_c));
-    cell3D = build_space2D_time_cell(grid, vec_move_gridx, vec_move_gridy, grid->vertices->size, dt, NULL, false, NULL);
+    cell3D = build_space2D_time_cell(grid, vec_move_gridx, vec_move_gridy, grid->vertices->size, dt, false, NULL);
     surfaces = points3D_from_matrix(surfaces_poly3D(cell3D));
 
     if ((clipped3D) && (clipped3D->vertices->size>2)){

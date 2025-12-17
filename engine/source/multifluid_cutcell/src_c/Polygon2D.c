@@ -11,12 +11,12 @@ Polygon2D* new_Polygon2D(){
     infogrb = GrB_Matrix_new(p->faces, GrB_INT8, 1,1);
     p->status_edge = alloc_empty_vec_int();
     p->phase_face = alloc_empty_vec_int();
-    //p->pressure_edge = alloc_empty_vec_double();
+    p->pressure_edge = alloc_empty_vec_double();
     
     return p;
 }
 
-Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix* edges, const Vector_int* status_edge, const Vector_int* phase_face){
+Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix* edges, const Vector_int* status_edge, const Vector_int* phase_face, const Vector_double* pressure_edge){
     GrB_Info infogrb;
     GrB_Index nb_rows;
     Polygon2D* p = (Polygon2D*) malloc(sizeof(Polygon2D));
@@ -36,16 +36,14 @@ Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix*
     p->phase_face = alloc_empty_vec_int();
     copy_vec_int(phase_face, p->phase_face);
 
-    //p->pressure_edge = alloc_empty_vec_double();
-    //p->pressure_edge->data = (my_real_c*) calloc(nb_rows, sizeof(my_real_c)); //all zeros
-    //p->pressure_edge->capacity = nb_rows;
-    //p->pressure_edge->size = nb_rows;
+    p->pressure_edge = alloc_empty_vec_double();
+    copy_vec_double(pressure_edge, p->pressure_edge);
 
     return p;
 }
 
 Polygon2D* new_Polygon2D_vefsp(const Vector_points2D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces,\
-                                 const Vector_int* status_edge, const Vector_int* phase_face){
+                                 const Vector_int* status_edge, const Vector_int* phase_face, const Vector_double* pressure_edge){
     //GrB_Index nb_rows;
     Polygon2D* p = (Polygon2D*) malloc(sizeof(Polygon2D));
 
@@ -59,13 +57,9 @@ Polygon2D* new_Polygon2D_vefsp(const Vector_points2D* vertices, const GrB_Matrix
     copy_vec_int(status_edge, p->status_edge);
     p->phase_face = alloc_empty_vec_int();
     copy_vec_int(phase_face, p->phase_face);
+    p->pressure_edge = alloc_empty_vec_double();
+    copy_vec_double(pressure_edge, p->pressure_edge);
 
-    //GrB_Matrix_ncols(&nb_rows, *(p->edges));
-    //p->pressure_edge = alloc_empty_vec_double();
-    //p->pressure_edge->data = (my_real_c*) calloc(nb_rows, sizeof(my_real_c)); //all zeros
-    //p->pressure_edge->capacity = nb_rows;
-    //p->pressure_edge->size = nb_rows;
-    
     return p;
 }
 
@@ -81,6 +75,7 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
     Vector_int* status_edge, *phase_face;
     GrB_Matrix* edges = (GrB_Matrix*) malloc(sizeof(GrB_Matrix));
     GrB_Matrix* faces = (GrB_Matrix*) malloc(sizeof(GrB_Matrix));
+    Vector_double* pressure_edge;
     Polygon2D* res_p;
 
     if (n_x<2 || n_y<2)
@@ -227,11 +222,17 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
     phase_face->data = (long int*) calloc(nb_faces, sizeof(long int)); //all zeros
     phase_face->capacity = nb_faces;
     phase_face->size = nb_faces;
-    res_p = new_Polygon2D_vefsp(vertices, edges, faces, status_edge, phase_face);
+
+    pressure_edge = alloc_empty_vec_double();
+    pressure_edge->data = (my_real_c*) calloc(nb_edges, sizeof(my_real_c)); //all zeros
+    pressure_edge->capacity = nb_edges;
+    pressure_edge->size = nb_edges;
+    res_p = new_Polygon2D_vefsp(vertices, edges, faces, status_edge, phase_face, pressure_edge);
 
     dealloc_vec_pts2D(vertices); free(vertices);
     dealloc_vec_int(status_edge); free(status_edge);
     dealloc_vec_int(phase_face); free(phase_face);
+    dealloc_vec_double(pressure_edge); free(pressure_edge);
     GrB_free(edges);free(edges);
     GrB_free(faces);free(faces);
 
@@ -243,6 +244,7 @@ Polygon2D* polygon_from_consecutive_points(const my_real_c *x_v, const my_real_c
     unsigned long int nb_edges, nb_faces;
     Vector_points2D* vertices;
     Vector_int* status_edge, *phase_face;
+    Vector_double* pressure_edge;
     GrB_Matrix* edges = (GrB_Matrix*) malloc(sizeof(GrB_Matrix));
     GrB_Matrix* faces = (GrB_Matrix*) malloc(sizeof(GrB_Matrix));
     Point2D pt;
@@ -258,6 +260,7 @@ Polygon2D* polygon_from_consecutive_points(const my_real_c *x_v, const my_real_c
 
     vertices = alloc_with_capacity_vec_pts2D(nb_pts);
     status_edge = alloc_with_capacity_vec_int(nb_pts);
+    pressure_edge = alloc_with_capacity_vec_double(nb_pts);
     phase_face = alloc_with_capacity_vec_int(nb_faces);
     infogrb = GrB_Matrix_new(edges, GrB_INT8, nb_pts, nb_edges);
     infogrb = GrB_Matrix_new(faces, GrB_INT8, nb_edges, nb_faces);
@@ -281,12 +284,17 @@ Polygon2D* polygon_from_consecutive_points(const my_real_c *x_v, const my_real_c
 
     for(i=0; i<nb_edges; i++)
         infogrb = GrB_Matrix_setElement(*faces, 1, i, 0);
+
+    for(i=0; i<nb_edges; i++){
+        push_back_vec_double(&pressure_edge, &(my_real_c){0.0});
+    }
     
-    res_p = new_Polygon2D_vefsp(vertices, edges, faces, status_edge, phase_face);
+    res_p = new_Polygon2D_vefsp(vertices, edges, faces, status_edge, phase_face, pressure_edge);
 
     dealloc_vec_pts2D(vertices); free(vertices);
     dealloc_vec_int(status_edge); free(status_edge);
     dealloc_vec_int(phase_face); free(phase_face);
+    dealloc_vec_double(pressure_edge); free(pressure_edge);
     GrB_free(edges); free(edges);
     GrB_free(faces); free(faces);
 
@@ -311,6 +319,7 @@ void copy_Polygon2D(const Polygon2D *src, Polygon2D *dest){
             dest->faces = NULL;
             dest->status_edge = NULL;
             dest->phase_face = NULL;
+            dest->pressure_edge = NULL;
         }
     } else {
         if (dest != NULL){
@@ -345,6 +354,10 @@ void copy_Polygon2D(const Polygon2D *src, Polygon2D *dest){
                 dest->phase_face = alloc_empty_vec_int();
             }
             copy_vec_int(src->phase_face, dest->phase_face);
+            if (!dest->pressure_edge){
+                dest->pressure_edge = alloc_empty_vec_double();
+            }
+            copy_vec_double(src->pressure_edge, dest->pressure_edge);
         }
     }
 }
@@ -361,6 +374,8 @@ void dealloc_Polygon2D(Polygon2D* p){
         if(p->status_edge) free(p->status_edge);
         dealloc_vec_int(p->phase_face);
         if(p->phase_face) free(p->phase_face);
+        dealloc_vec_double(p->pressure_edge);
+        if(p->pressure_edge) free(p->pressure_edge);
     }
 }
 
@@ -403,6 +418,7 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     GrB_Matrix *fused_edges = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     GrB_Matrix *fused_faces = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     Vector_int *fused_status, *fused_phase;
+    Vector_double *fused_pressure;
     GrB_Index nrows1, ncols1, nrows2, ncols2;
     GrB_Matrix zeros1, zeros2;
     Polygon2D* res_p;
@@ -410,6 +426,7 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     fused_vertices = cat_vec_pts2D(p1->vertices, p2->vertices);
     fused_status = cat_vec_int(p1->status_edge, p2->status_edge);
     fused_phase = cat_vec_int(p1->phase_face, p2->phase_face);
+    fused_pressure = cat_vec_double(p1->pressure_edge, p2->pressure_edge);
 
     GrB_Matrix_nrows(&nrows1, *(p1->edges));
     GrB_Matrix_ncols(&ncols1, *(p1->edges));
@@ -434,13 +451,14 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     //                [spzeros(Int8, size(p2.faces, 1), size(p1.faces, 2)) p2.faces]];
     //fused_pressure = vcat(p1.pressure_edge, p2.pressure_edge) //TODO Report this
 
-    res_p = new_Polygon2D_vefsp(fused_vertices, fused_edges, fused_faces, fused_status, fused_phase);
+    res_p = new_Polygon2D_vefsp(fused_vertices, fused_edges, fused_faces, fused_status, fused_phase, fused_pressure);
     
     GrB_free(&zeros1);
     GrB_free(&zeros2);
     dealloc_vec_pts2D(fused_vertices); free(fused_vertices);
     dealloc_vec_int(fused_status); free(fused_status);
     dealloc_vec_int(fused_phase); free(fused_phase);
+    dealloc_vec_double(fused_pressure); free(fused_pressure);
     GrB_free(fused_edges); free(fused_edges);
     GrB_free(fused_faces); free(fused_faces);
 
@@ -555,6 +573,7 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
     Vector_points2D* new_vertices;
     GrB_Matrix new_edges, new_faces;
     Vector_int *new_status_edge = NULL, *new_phase_face = NULL;
+    Vector_double *new_pressure_edge = NULL;
     GrB_Vector grb_ind_kept_pts, justone;
     GrB_Info infogrb;
     GrB_Index nb_edges, nb_faces, size_edge_indices, size_pt_indices, val, nb_pts;
@@ -643,14 +662,23 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
                 GrB_Vector_extractElement(&j, edge_indices, j_f);
                 set_ith_elem_vec_int(new_status_edge, j_f, get_ith_elem_vec_int(p->status_edge, j));
             }
+            if (new_pressure_edge){
+                dealloc_vec_double(new_pressure_edge);
+                free(new_pressure_edge);
+            }
+            new_pressure_edge = alloc_with_capacity_vec_double(ncols_new_edges);
+            for(j_f = 0; j_f < ncols_new_edges; j_f++){
+                GrB_Vector_extractElement(&j, edge_indices, j_f);
+                set_ith_elem_vec_double(new_pressure_edge, j_f, get_ith_elem_vec_double(p->pressure_edge, j));
+            }
             set_ith_elem_vec_int(new_phase_face, 0, get_ith_elem_vec_int(p->phase_face, i));
 
             if (new_p){ //Faces already exist
                 copy_Polygon2D(new_p, copy_p);
                 dealloc_Polygon2D(new_p); free(new_p);
-                new_p = fuse_polygons(copy_p, new_Polygon2D_vefsp(new_vertices, &new_edges, &new_faces, new_status_edge, new_phase_face));
+                new_p = fuse_polygons(copy_p, new_Polygon2D_vefsp(new_vertices, &new_edges, &new_faces, new_status_edge, new_phase_face, new_pressure_edge));
             } else { //First face created
-                new_p = new_Polygon2D_vefsp(new_vertices, &new_edges, &new_faces, new_status_edge, new_phase_face);
+                new_p = new_Polygon2D_vefsp(new_vertices, &new_edges, &new_faces, new_status_edge, new_phase_face, new_pressure_edge);
             }
         }
     }
@@ -661,10 +689,11 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
     *res_p = new_p;
 
     dealloc_Polygon2D(copy_p);free(copy_p);
-    dealloc_vec_uint(ind_kept_pts);free(ind_kept_pts);
-    dealloc_vec_int(new_status_edge);free(new_status_edge);
-    dealloc_vec_pts2D(new_vertices);free(new_vertices);
-    dealloc_vec_int(new_phase_face);free(new_phase_face);
+    if(ind_kept_pts) {dealloc_vec_uint(ind_kept_pts);free(ind_kept_pts);}
+    if (new_status_edge) {dealloc_vec_int(new_status_edge);free(new_status_edge);}
+    if(new_vertices) {dealloc_vec_pts2D(new_vertices);free(new_vertices);}
+    if (new_phase_face){dealloc_vec_int(new_phase_face);free(new_phase_face);}
+    if(new_pressure_edge) {dealloc_vec_double(new_pressure_edge);free(new_pressure_edge);}
     GrB_free(&new_edges);
     GrB_free(&new_faces);
     GrB_free(&grb_ind_kept_pts);
@@ -682,6 +711,7 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
     GrB_Matrix *new_faces, *intermediate_faces, *new_edges;
     Vector_points2D *new_vertices;
     Vector_int *new_status_edge, *new_phase_face;
+    Vector_double *new_pressure_edge;
     GrB_Vector val_extr, J_vect, pt_indices;
     GrB_Index ncols_faces, ncols_edges;
     GrB_Index nrows_faces, nrows_edges;
@@ -745,9 +775,11 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
     }
     //Build the new list of status of each edge
     new_status_edge = alloc_with_capacity_vec_int(length_edge_ind);
+    new_pressure_edge = alloc_with_capacity_vec_double(length_edge_ind);
     for (i=0; i<length_edge_ind; i++){
         indpt1 = edge_indices[i];
         push_back_vec_int(&new_status_edge, get_ith_elem_vec_int(p->status_edge, indpt1));
+        push_back_vec_double(&new_pressure_edge, get_ith_elem_vec_double(p->pressure_edge, indpt1));
     }
 
     new_phase_face = alloc_with_capacity_vec_int(1);
@@ -761,7 +793,7 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
     GrB_Matrix_new(new_faces, GrB_INT8, length_edge_ind, 1);
     infogrb = GrB_Matrix_extract(*new_faces, GrB_NULL, GrB_NULL, *intermediate_faces, edge_indices, length_edge_ind, (GrB_Index[]){0}, 1, GrB_NULL);
   
-    res_p = new_Polygon2D_vefsp(new_vertices, new_edges, new_faces, new_status_edge, new_phase_face);
+    res_p = new_Polygon2D_vefsp(new_vertices, new_edges, new_faces, new_status_edge, new_phase_face, new_pressure_edge);
 
     free(I_);
     free(edge_indices);
@@ -776,6 +808,7 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
     GrB_free(new_faces); free(new_faces);
     dealloc_vec_int(new_status_edge); free(new_status_edge);
     dealloc_vec_int(new_phase_face); free(new_phase_face);
+    dealloc_vec_double(new_pressure_edge); free(new_pressure_edge);
 
     return res_p;
 }

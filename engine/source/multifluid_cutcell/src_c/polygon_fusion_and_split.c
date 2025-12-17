@@ -57,7 +57,7 @@ void break_edges_split_fusion(const Polygon2D* old_p, const Vector_uint* edge_in
     GrB_Info infogrb;
     
     if (old_p != *result_p){
-        *result_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face);
+        *result_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face, old_p->pressure_edge);
     }
     p = *result_p;
 
@@ -121,7 +121,7 @@ void fuse_faces(const Polygon2D* old_p, Vector_uint** faces_to_fuse, uint64_t si
     Polygon2D* p;
     
     if (old_p != *result_p)
-        *result_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face);
+        *result_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face, old_p->pressure_edge);
     p = *result_p; 
 
     GrB_Matrix_nrows(&nb_edges, *(p->faces));
@@ -206,7 +206,7 @@ void polygons_fusion(const Polygon2D* old_p, const GrB_Matrix* original_edges, c
     GrB_Info infogrb;
 
     if (old_p != *p)
-        *p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face);
+        *p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face, old_p->pressure_edge);
 
     GrB_Matrix_ncols(&former_nb_pts, *original_edges);
     GrB_Vector_new(&ej_orig, GrB_INT8, former_nb_pts);
@@ -405,7 +405,7 @@ void polygons_fusion(const Polygon2D* old_p, const GrB_Matrix* original_edges, c
             infogrb = GxB_Matrix_concat(*((*p)->edges), (GrB_Matrix[]){copy_mat, new_edges}, 1, 2, GrB_NULL);
             for(j=0; j<indices_sorted->size/2; j++){
                 push_back_vec_int(&((*p)->status_edge), get_ith_elem_vec_int((*p)->status_edge, i));
-                //push_back_vec_double((*p)->pressure_edge, get_ith_elem_vec_double((*p)->pressure_edge, i));
+                push_back_vec_double(&((*p)->pressure_edge), get_ith_elem_vec_double((*p)->pressure_edge, i));
             }
 
             //new_faces = spzeros(Int8, div(length(indices_sorted), 2), former_nb_faces)
@@ -466,7 +466,7 @@ void create_new_faces_split(const Polygon2D* old_p, Vector_uint** faces_to_split
     uint64_t lek;
 
     if (old_p != *result_p)
-        *result_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face);
+        *result_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face, old_p->pressure_edge);
 
     p  = *result_p;
 
@@ -598,7 +598,7 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
     Polygon2D *p;
 
     if (old_p != *res_p){
-        *res_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face);
+        *res_p = new_Polygon2D_vefsp(old_p->vertices, old_p->edges, old_p->faces, old_p->status_edge, old_p->phase_face, old_p->pressure_edge);
     }
     p = *res_p;
 
@@ -792,7 +792,7 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
             infogrb = GxB_Matrix_concat(*(p->edges), (GrB_Matrix[]){copy_mat, new_edges}, 1, 2, GrB_NULL);
             for(j=0; j<indices_sorted->size/2; j++){
                 push_back_vec_int(&(p->status_edge), get_ith_elem_vec_int(p->status_edge, i));
-                //push_back_vec_double(p->pressure_edge, get_ith_elem_vec_double(p->pressure_edge, i));
+                push_back_vec_double(&(p->pressure_edge), get_ith_elem_vec_double(p->pressure_edge, i));
             }
 
             //new_faces = spzeros(Int8, div(length(indices_sorted), 2), former_nb_faces)

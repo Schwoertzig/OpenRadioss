@@ -479,7 +479,7 @@ void push_back_unique_vec_int64(Vector_int64** v_ptr, const int64_t* point){
     Vector_int64* v = *v_ptr;
 
     if ((v->size == 0) || (v->data == NULL)){
-        dealloc_vec_uint(*v_ptr);
+        dealloc_vec_int64(*v_ptr);
         free(*v_ptr);
         *v_ptr = alloc_with_init_vec_int64(point, 1);
         return;

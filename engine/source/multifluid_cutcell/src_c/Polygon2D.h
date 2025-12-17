@@ -13,13 +13,13 @@ typedef struct {
     GrB_Matrix* faces;
     Vector_int* status_edge;
     Vector_int* phase_face;
-    //Vector_double* pressure_edge;
+    Vector_double* pressure_edge;
 } Polygon2D;
 
 Polygon2D* new_Polygon2D();
-Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix* edges, const Vector_int* status_edge, const Vector_int* phase_face);
+Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix* edges, const Vector_int* status_edge, const Vector_int* phase_face, const Vector_double* pressure_edge);
 Polygon2D* new_Polygon2D_vefsp(const Vector_points2D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces,\
-                                 const Vector_int* status_edge, const Vector_int* phase_face);
+                                 const Vector_int* status_edge, const Vector_int* phase_face, const Vector_double* pressure_edge);
 Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, const my_real_c* y_v, unsigned long int n_y);
 Polygon2D* polygon_from_consecutive_points(const my_real_c *x_v, const my_real_c* y_v, unsigned long int nb_pts);
 void copy_Polygon2D(const Polygon2D *src, Polygon2D *dest);

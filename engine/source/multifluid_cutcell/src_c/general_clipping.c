@@ -116,7 +116,7 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
 //[INOUT] status_cell
 //[IN] mark_cells
 //[OUT] supercells_in
-void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int *status_cell, long int mark_cells, GrB_Matrix *supercells_in){
+void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int *status_cell, Vector_double *pressure_cell, long int mark_cells, GrB_Matrix *supercells_in){
         GrB_Info infogrb;
         GrB_Matrix temp_tab, in_m_ones;
         GrB_Matrix new_cells_in;
@@ -126,6 +126,7 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
         GrB_Vector temp_v, clipped_in_cells, sum_abs, open_supercells_in;
         GrB_Vector nz_osi, vals_osi;
         GrB_Index i, size_e, size_v;
+        my_real_c val = 0;
         //GrB_Index *J_range, *I_range;
         uint64_t nb_open_supercells, j;
         //GrB_Scalar one;
@@ -223,7 +224,8 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
 
         if (mark_cells > 0){
             for(i = 0; i<nb_open_supercells; i++){
-                push_back_vec_int(&status_cell, &mark_cells); 
+                if(status_cell) push_back_vec_int(&status_cell, &mark_cells); 
+                if(pressure_cell) push_back_vec_double(&pressure_cell, &val); 
             }
         }
 
