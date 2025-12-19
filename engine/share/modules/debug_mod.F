@@ -23,11 +23,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
 !||    debug_mod                             ../engine/share/modules/debug_mod.F
 !||--- called by ------------------------------------------------------
-!||    ale51_gradient_reconstruction         ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
-!||    ale51_init                            ../engine/source/ale/ale51/ale51_init.F
-!||    alemain                               ../engine/source/ale/alemain.F
 !||    ebcs8_inlet                           ../engine/source/boundary_conditions/ebcs/ebcs8_inlet.F90
-!||    geom_vec                              ../engine/source/ale/alemuscl/geom_vec.F90
 !||    get_hashtable_for_neighbour_segment   ../engine/source/interfaces/interf/get_hashtable_for_neighbour_segment.F90
 !||    i24ass2                               ../engine/source/interfaces/int24/i24for3.F
 !||    i24cor3                               ../engine/source/interfaces/int24/i24cor3.F
@@ -43,7 +39,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol                                 ../engine/source/engine/resol.F
 !||    spmd_collect_multi_fvm                ../engine/source/mpi/output/spmd_collect_multi_fvm.F
 !||    spmd_collect_nlocal                   ../engine/source/mpi/output/spmd_collect_nlocal.F
-!||    spmd_exch_min_max                     ../engine/source/mpi/ale/spmd_exch_min_max.F90
 !||    spmd_exch_n_neighbor                  ../engine/source/mpi/ale/spmd_exch_n_neighbor.F90
 !||    spmd_fiadd25e_poff                    ../engine/source/mpi/interfaces/spmd_fiadd25e_poff.F
 !||    spmd_fiadd25e_pon                     ../engine/source/mpi/interfaces/spmd_fiadd25e_pon.F
@@ -55,6 +50,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         USE ISO_C_BINDING
         INTEGER, DIMENSION(:),ALLOCATABLE :: ITAB_DEBUG !< User Node Identifiers
         INTEGER :: NCYCLE_DEBUG                         !< Engine Cycle number
+        integer :: nspmd_debug !< number of processors
         integer :: ispmd_debug !< processor id
 !       Double precision, dimension (:), allocatable:: detach_shell
 
@@ -231,22 +227,24 @@ C     (s2 << 16) | s1
 !||--- uses       -----------------------------------------------------
 !||    debug_mod            ../engine/share/modules/debug_mod.F
 !||====================================================================
-      SUBROUTINE PREPARE_DEBUG(ITAB,NUMNOD,ispmd)
+      SUBROUTINE PREPARE_DEBUG(ITAB,NUMNOD,ispmd,nspmd)
         USE DEBUG_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
 C-----------------------------------------------
-            INTEGER, INTENT(IN) :: NUMNOD
-            integer, intent(in) :: ispmd !< processor id
-            INTEGER, DIMENSION(:), INTENT(IN) :: ITAB(NUMNOD)
+       INTEGER, INTENT(IN) :: NUMNOD
+       integer, intent(in) :: ispmd !< processor id
+       integer, intent(in) :: nspmd !< number of processors
+       INTEGER, DIMENSION(:), INTENT(IN) :: ITAB(NUMNOD)
 C-----------------------------------------------
        ALLOCATE (ITAB_DEBUG(NUMNOD))
        ITAB_DEBUG(1:NUMNOD)=ITAB(1:NUMNOD)
 C-----------------------------------------------
        NCYCLE_DEBUG = 0 ! updated in resol loop
        ispmd_debug = ispmd
+       nspmd_debug = nspmd
 C-----------------------------------------------
       END
       

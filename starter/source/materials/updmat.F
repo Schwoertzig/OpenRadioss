@@ -38,6 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    law114_upd             ../starter/source/materials/mat/mat114/law114_upd.F
 !||    law119_upd             ../starter/source/materials/mat/mat119/law119_upd.F
 !||    law120_upd             ../starter/source/materials/mat/mat120/law120_upd.F
+!||    law123_upd             ../starter/source/materials/mat/mat123/law123_upd.F90
 !||    law129_upd             ../starter/source/materials/mat/mat129/law129_upd.F90
 !||    law133_upd             ../starter/source/materials/mat/mat133/law133_upd.F90
 !||    law158_upd             ../starter/source/materials/mat/mat158/law158_upd.F
@@ -61,6 +62,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    elbuftag_mod           ../starter/share/modules1/elbuftag_mod.F
 !||    eosfun_usr2sys_mod     ../starter/source/materials/tools/eosfun_usr2sys.F90
+!||    law123_upd_mod         ../starter/source/materials/mat/mat123/law123_upd.F90
 !||    law129_upd_mod         ../starter/source/materials/mat/mat129/law129_upd.F90
 !||    law133_upd_mod         ../starter/source/materials/mat/mat133/law133_upd.F90
 !||    law163_upd_mod         ../starter/source/materials/mat/mat163/law163_upd.F90
@@ -86,6 +88,7 @@ C-----------------------------------------------
       USE LAW19_UPD_MOD  , ONLY : LAW19_UPD
       USE LAW81_UPD_MOD  , ONLY : LAW81_UPD
       USE LAW87_UPD_MOD  , ONLY : LAW87_UPD
+      USE LAW123_UPD_MOD , ONLY : LAW123_UPD
       USE LAW129_UPD_MOD , ONLY : LAW129_UPD
       USE LAW133_UPD_MOD , ONLY : LAW133_UPD
       USE LAW163_UPD_MOD , ONLY : LAW163_UPD
@@ -276,7 +279,7 @@ c------------------
 c------------------
             CALL LAW70_UPD(MAT_PARAM(IMAT)    ,TITR     ,MAT_ID   ,NPARAM   ,UPARAM   ,
      .                     NFUNC    ,IFUNC    ,NPC      ,PLD      ,IOUT     ,
-     .                     NFUNCT   ,FUNC_ID  ,NPROPM   ,PM(1,IMAT))       
+     .                     NFUNCT   ,FUNC_ID  ,NPROPM   ,PM(1,IMAT),MAT_PARAM(IMAT)%YOUNG0)       
 c------------------
           CASE (76) 
             CALL LAW76_UPD(IOUT   ,TITR    ,MAT_ID   ,NPARAM ,MAT_PARAM(IMAT) ,
@@ -305,7 +308,7 @@ c------------------
 c
             CALL LAW90_UPD(IOUT,TITR,MAT_ID   ,UPARAM,
      .                     IPM(1,IMAT),FUNC_ID,NPC,PLD,PM(1,IMAT),
-     .                     NFUNCT)
+     .                     NFUNCT,MAT_PARAM(IMAT)%YOUNG0)
 c------------------
           CASE (92) ! Arruda-Boyce hyperelastic law
 c------------------
@@ -387,7 +390,10 @@ c------------------
      .                      UPARAM,PM(1,IMAT),TITR    ,MAT_ID )          
 c------------------
           CASE (120)    ! TAPO material for adhesives
-            CALL LAW120_UPD(NPARAM ,NUMTABL ,ITABLE ,TABLE ,UPARAM)          
+            CALL LAW120_UPD(NPARAM ,NUMTABL ,ITABLE ,TABLE ,UPARAM)   
+c------------------
+          CASE (123)
+            CALL LAW123_UPD(MAT_PARAM(IMAT))       
 c------------------
           CASE (129)    
             CALL LAW129_UPD(MAT_PARAM(IMAT),SENSORS)          

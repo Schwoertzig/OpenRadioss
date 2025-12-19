@@ -83,6 +83,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    c_seatbelts                      ../starter/source/restart/ddsplit/c_seatbelts.F
 !||    c_sectio                         ../starter/source/restart/ddsplit/c_sectio.F
 !||    c_segquadfr                      ../starter/source/restart/ddsplit/c_segquadfr.F
+!||    c_sfem_exclude                   ../starter/source/restart/ddsplit/split_sfem_exclude.F90
 !||    c_spmd_ne_connect                ../starter/source/ale/spmd_ne_connect.F
 !||    c_vois                           ../starter/source/restart/ddsplit/c_vois.F
 !||    checksum_write_starter_restart   ../starter/source/output/checksum/checksum_option.F90
@@ -199,6 +200,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    w_secbuf                         ../starter/source/restart/ddsplit/w_secbuf.F
 !||    w_sectio                         ../starter/source/restart/ddsplit/w_sectio.F
 !||    w_segquadfr                      ../starter/source/restart/ddsplit/w_segquadfr.F
+!||    w_sfem_exclude                   ../starter/source/restart/ddsplit/split_sfem_exclude.F90
 !||    w_skwsph                         ../starter/source/restart/ddsplit/w_skwsph.F
 !||    w_skwsub                         ../starter/source/restart/ddsplit/w_skwsub.F
 !||    w_stack                          ../starter/source/restart/ddsplit/w_stack.F
@@ -232,6 +234,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    mid_pid_mod                      ../starter/share/modules1/mid_pid_mod.F
 !||    monvol_struct_mod                ../starter/share/modules1/monvol_struct_mod.F
 !||    split_cfd_mod                    ../starter/share/modules1/split_cfd_mod.F
+!||    split_sfem_exclude_mod           ../starter/source/restart/ddsplit/split_sfem_exclude.F90
 !||    stack_mod                        ../starter/share/modules1/stack_mod.F
 !||    stack_var_mod                    ../starter/share/modules1/stack_var_mod.F
 !||    submodel_mod                     ../starter/share/modules1/submodel_mod.F
@@ -333,7 +336,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      D   KLOADPINTER  , LOADPINTER ,DGAPLOADINT     ,S_LOADPINTER, LEN_CEP ,DYNAIN_DATA,
      E   DRAPEG       ,USER_WINDOWS,OUTPUT          ,INTERFACES  ,NUMBER_LOAD_CYL,
      F   LOADS_PER_PROC, PYTHON    ,DPL0CLD         ,VEL0CLD     ,NAMES_AND_TITLES,
-     G   BCS_PER_PROC,constraint_struct,glob_therm  ,PBLAST      ,RWSTIF_PEN,SLN_PEN )
+     G   BCS_PER_PROC,constraint_struct,glob_therm  ,PBLAST      ,RWSTIF_PEN,SLN_PEN,
+     H   IN_SFEM     , NE_SFEM )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -394,6 +398,7 @@ C-----------------------------------------------
       use checksum_starter_option_mod, only : checksum_write_starter_restart
       use w_bcs_proc_mod , only : w_bcs_proc
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
+      use split_sfem_exclude_mod
 
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -582,10 +587,9 @@ C-----------------------------------------------
       INTEGER, INTENT(INOUT) :: NINDX_NM,NINDX_SCRT
       INTEGER, DIMENSION(*), INTENT(INOUT) :: INDX_NM,INDX_SCRT
       INTEGER, DIMENSION(*) :: TAG_NM,TAG_SCRATCH
-!       -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-*-*-*-*-*-*
-!       INDX_XXX : size = NUMNOD
-!                 index of non-zero TAG_XXX value
-!                 used for optimize the initialization
+      INTEGER,INTENT(IN) :: NE_SFEM
+      INTEGER, DIMENSION(NE_SFEM), INTENT(IN   )  :: IN_SFEM
+!-----------------------------------------------
 !                 of TAG_XXX array (XXX = NM or SCRT for SCRATCH)
 !                 allocated array in lectur and threadprivate array
 !       NINDX_XXX : number of non-zero TAG_XXX value
@@ -796,7 +800,7 @@ C-----------------------------------------------
       INTEGER (KIND=8) :: FILE_SIZE
       real(kind=8) :: SECS
 C
-      INTEGER NPINCH_L
+      INTEGER NPINCH_L,NE_SFEM_L
       TYPE(t_ale_connectivity), INTENT(INOUT) :: ALE_CONNECTIVITY
       INTEGER, DIMENSION(:), ALLOCATABLE :: ELEMID_L
       INTEGER, DIMENSION(:), ALLOCATABLE :: NE_LERCVOIS  !(NE_NERVOIS)
@@ -1715,6 +1719,12 @@ C--------------------------------------
       IDAMP_VREL_L(1:NDAMP) = 0
       IF (NDAMP > 0) CALL C_DAMPVREL(DAMPR,IGRNOD,P,IDAMP_VREL_L,NDAMP_VREL_L,
      .                               NGRNOD,NDAMP,NRDAMP)
+C--------------------------------------
+C counts sfem_exclude
+C--------------------------------------
+      NE_SFEM_L = 0
+      IF (NE_SFEM > 0) 
+     .     CALL C_SFEM_EXCLUDE(NUMNOD,NODLOCAL,NE_SFEM,IN_SFEM,NE_SFEM_L)
 C--------------------------------------------
 C Open Restart FILE
 C--------------------------------------------
@@ -1804,7 +1814,7 @@ C--------------------------------------------
      4   N_ANCHOR_REMOTE_SEND_L,N_SEATBELT_L,N_SEATBELT_2D_L,DYNAIN_DATA,
      5   NUMSH4N_L,NUMSH3N_L,INTERFACES%PARAMETERS,SENSORS,LOADS_PER_PROC%NLOAD_CYL,
      6   NCLOAD_L,NPLOAD_L,NDAMP_VREL_L, UNITAB,
-     7   LWAMP_L,LWANMP_L,NINIVELT_L,GLOB_THERM,PBLAST)
+     7   LWAMP_L,LWANMP_L,NINIVELT_L,GLOB_THERM,PBLAST,NE_SFEM_L)
 
 
       CALL WRCOMR(LMXVREA,LVARREA,TABVREA,MSNDP(P),P,INTERFACES%PARAMETERS,
@@ -2358,6 +2368,11 @@ C--------------------------------------------
         CALL W_SEGQUADFR(SEGQUADFR ,CEP ,P-1 ,CEL, NSEGQUADFR_L,
      .                 LEN_IA  )
       ENDIF
+C--------------------------------------
+C sfem_exclude
+C--------------------------------------
+      IF (NE_SFEM > 0) 
+     .   CALL W_SFEM_EXCLUDE(NUMNOD,NODLOCAL,NE_SFEM,IN_SFEM,NE_SFEM_L,LEN_IA)
 C--------------------------------------
 C INTBUF_TAB
 C--------------------------------------

@@ -145,6 +145,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    rwall_mod                    ../common_source/modules/constraints/rwall_mod.F90
 !||    seatbelt_mod                 ../common_source/modules/seatbelt_mod.F
 !||    sensor_mod                   ../common_source/modules/sensor_mod.F90
+!||    sfem_mod                     ../common_source/modules/elements/sfem_mod.F90
 !||    skew_mod                     ../common_source/modules/skew_mod.F90
 !||    sph_mod                      ../engine/share/modules/sph_mod.F
 !||    stack_mod                    ../engine/share/modules/stack_mod.F
@@ -162,7 +163,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                   FORNEQS      ,UNITAB           ,
      .                   STACK            ,DRAPE_SH4N ,DRAPE_SH3N   ,DRAPEG           ,NDRAPE     ,
      .                   GLOB_THERM       ,PBLAST     ,ELEMENT      ,NODES            ,RBE3       ,
-     .                   RWALL            )
+     .                   RWALL            ,SFEM       )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -215,6 +216,7 @@ C-----------------------------------------------
       use element_mod , only : nixc
       use rwall_mod
       use restart_rwallpen_mod, only : get_nrwallpen_l,read_rrwallpen
+      use sfem_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -280,6 +282,7 @@ C-----------------------------------------------
       TYPE(nodal_arrays_)   ,INTENT(INOUT)                 :: NODES
       TYPE(RBE3_)           ,INTENT(INOUT)                 :: RBE3
       TYPE(RWALL_)          ,INTENT(INOUT)                 :: RWALL
+      TYPE(SFEM_)           ,INTENT(INOUT)                 :: SFEM
       INTEGER, INTENT(IN) :: LIFLOW
       INTEGER, INTENT(IN) :: LRFLOW
       my_real, INTENT(INOUT) :: FORNEQS(3,NUMNOD)
@@ -614,6 +617,8 @@ C
         CALL READ_I_C(FASOLFR,SFASOLFR)
 
         CALL READ_I_C(SEGQUADFR,SSEGQUADFR)
+
+        CALL READ_I_C(sfem%in_sfem,sfem%ne_sfem)
 
         CALL READ_I_C(IPARI,SIPARI)
 

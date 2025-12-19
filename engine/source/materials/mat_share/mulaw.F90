@@ -26,7 +26,7 @@
 !||    mmain       ../engine/source/materials/mat_share/mmain.F90
 !||====================================================================
       module mulaw_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   mmain
@@ -95,6 +95,7 @@
 !||    sigeps120              ../engine/source/materials/mat/mat120/sigeps120.F
 !||    sigeps121              ../engine/source/materials/mat/mat121/sigeps121.F
 !||    sigeps122              ../engine/source/materials/mat/mat122/sigeps122.F
+!||    sigeps123              ../engine/source/materials/mat/mat123/sigeps123.F90
 !||    sigeps124              ../engine/source/materials/mat/mat124/sigeps124.F
 !||    sigeps125              ../engine/source/materials/mat/mat125/sigeps125.F90
 !||    sigeps126              ../engine/source/materials/mat/mat126/sigeps126.F90
@@ -174,6 +175,7 @@
 !||    sensor_mod             ../common_source/modules/sensor_mod.F90
 !||    sigeps100_mod          ../engine/source/materials/mat/mat100/sigeps100.F90
 !||    sigeps106_mod          ../engine/source/materials/mat/mat106/sigeps106.F90
+!||    sigeps123_mod          ../engine/source/materials/mat/mat123/sigeps123.F90
 !||    sigeps125_mod          ../engine/source/materials/mat/mat125/sigeps125.F90
 !||    sigeps126_mod          ../engine/source/materials/mat/mat126/sigeps126.F90
 !||    sigeps127_mod          ../engine/source/materials/mat/mat127/sigeps127.F90
@@ -253,6 +255,7 @@
           use sigeps88_mod
           use sigeps100_mod
           use sigeps106_mod
+          use sigeps123_mod
           use sigeps125_mod
           use sigeps126_mod
           use sigeps127_mod
@@ -1134,16 +1137,16 @@
               sigbzx => vecnul(1:nel)
             end if
             call sigeps36(nel    ,nuvar  ,nfunc  ,ifunc  ,npf    ,tf    ,&
-                          dt1    ,uparam0,rho0   ,                       &
-                          de1    ,de2    ,de3    ,de4    ,de5    ,de6   ,&
-                          es1    ,es2    ,es3    ,es4    ,es5    ,es6   ,&
-                          so1    ,so2    ,so3    ,so4    ,so5    ,so6   ,&
-                          s1     ,s2     ,s3     ,s4     ,s5     ,s6    ,&
-                          ssp    ,vis    ,uvar   ,off    ,ngl    ,matparam%ieos, &
-                          ipm    ,mat    ,epsd   ,ipla   ,sigy   ,defp  ,&
-                          dpla   ,et     ,al_imp ,signor ,amu    ,dpdm  ,&
-                          yldfac ,nvartmp,vartmp ,lbuf%dmg,inloc,lbuf%planl,&
-                          sigbxx ,sigbyy ,sigbzz ,sigbxy ,sigbyz ,sigbzx )
+              dt1    ,uparam0,rho0   ,                       &
+              de1    ,de2    ,de3    ,de4    ,de5    ,de6   ,&
+              es1    ,es2    ,es3    ,es4    ,es5    ,es6   ,&
+              so1    ,so2    ,so3    ,so4    ,so5    ,so6   ,&
+              s1     ,s2     ,s3     ,s4     ,s5     ,s6    ,&
+              ssp    ,vis    ,uvar   ,off    ,ngl    ,matparam%ieos, &
+              ipm    ,mat    ,epsd   ,ipla   ,sigy   ,defp  ,&
+              dpla   ,et     ,al_imp ,signor ,amu    ,dpdm  ,&
+              yldfac ,nvartmp,vartmp ,lbuf%dmg,inloc,lbuf%planl,&
+              sigbxx ,sigbyy ,sigbzz ,sigbxy ,sigbyz ,sigbzx )
 
           else if (mtn == 37) then
             if (n2d == 0) then
@@ -1279,21 +1282,21 @@
             !numerical viscosity is managed inside sigeps51.f
             !facq0 = zero
             call sigeps51( snpc, stf, &
-                          nel       ,npar        ,nuvar   ,nfunc ,ifunc     ,lbuf%tb   ,&
-                          npf       ,tf          ,tt      ,dt1   ,uparam0   ,numel     ,&
-                          rho       ,vol         ,eint    ,vk    ,output%th%wfext     ,&
-                          ep1       ,ep2         ,ep3     ,ep4   ,ep5       ,ep6       ,&
-                          de1       ,de2         ,de3     ,de4   ,de5       ,de6       ,&
-                          so1       ,so2         ,so3     ,so4   ,so5       ,so6       ,&
-                          s1        ,s2          ,s3      ,s4    ,s5        ,s6        ,&
-                          sv1       ,sv2         ,sv3     ,sv4   ,sv5       ,sv6       ,&
-                          ssp       ,vis         ,uvar    ,off   ,nft       ,v         ,&
-                          w         ,x           ,ix      ,n48   ,nix       ,jthe      ,&
-                          geo       ,pid         ,ilay    ,ng    ,elbuf_tab , pm       ,&
-                          iparg     ,ale_connect ,bufvois ,ipm   ,bufmat    ,stifn     ,&
-                          vd2       ,vdx         ,vdy     ,vdz   ,sbufmat   ,&
-                          gbuf%qvis ,dvol        ,qold    ,nv46  ,numgeo    ,n2d       , &
-                          numnod    ,ngroup      ,nummat  ,mat_elem%mat_param,nvartmp, vartmp   )
+              nel       ,npar        ,nuvar   ,nfunc ,ifunc     ,lbuf%tb   ,&
+              npf       ,tf          ,tt      ,dt1   ,uparam0   ,numel     ,&
+              rho       ,vol         ,eint    ,vk    ,output%th%wfext     ,&
+              ep1       ,ep2         ,ep3     ,ep4   ,ep5       ,ep6       ,&
+              de1       ,de2         ,de3     ,de4   ,de5       ,de6       ,&
+              so1       ,so2         ,so3     ,so4   ,so5       ,so6       ,&
+              s1        ,s2          ,s3      ,s4    ,s5        ,s6        ,&
+              sv1       ,sv2         ,sv3     ,sv4   ,sv5       ,sv6       ,&
+              ssp       ,vis         ,uvar    ,off   ,nft       ,v         ,&
+              w         ,x           ,ix      ,n48   ,nix       ,jthe      ,&
+              geo       ,pid         ,ilay    ,ng    ,elbuf_tab , pm       ,&
+              iparg     ,ale_connect ,bufvois ,ipm   ,bufmat    ,stifn     ,&
+              vd2       ,vdx         ,vdy     ,vdz   ,sbufmat   ,&
+              gbuf%qvis ,dvol        ,qold    ,nv46  ,numgeo    ,n2d       , &
+              numnod    ,ngroup      ,nummat  ,mat_elem%mat_param,nvartmp, vartmp   )
           else if (mtn == 52) then
             idev = 1
             call mstrain_rate(nel    ,israte ,asrate ,epsd   ,idev   ,&
@@ -1656,7 +1659,7 @@
             &s1     ,s2      ,s3      ,s4      ,s5     ,s6      ,&
             &asrate ,et      ,gbuf%off,epsd   ,iresp   ,nvartmp ,&
             &vartmp ,lbuf%dmg,ngl     ,npg    )
-!            
+!
           elseif (mtn == 90) then
 
 !-------------------
@@ -1844,12 +1847,12 @@
           else if (mtn == 102) then
 
             call sigeps102(&
-             nel    ,npar    ,uparam0, rho0  ,rho       ,&
-             de1    ,de2     ,de3    ,de4    , de5      ,de6        ,&
-             so1    ,so2     ,so3    ,so4    , so5      ,so6        ,&
-             s1     ,s2      ,s3     ,s4     , s5       ,s6         ,&
-             off    ,&
-             psh    ,pnew    ,dpdm   ,ssp    , lbuf%pla ,pm(37,imat) )
+              nel    ,npar    ,uparam0, rho0  ,rho       ,&
+              de1    ,de2     ,de3    ,de4    , de5      ,de6        ,&
+              so1    ,so2     ,so3    ,so4    , so5      ,so6        ,&
+              s1     ,s2      ,s3     ,s4     , s5       ,s6         ,&
+              off    ,&
+              psh    ,pnew    ,dpdm   ,ssp    , lbuf%pla ,pm(37,imat) )
 !
 !
           else if (mtn == 103) then
@@ -2010,6 +2013,18 @@
             &ssp    ,nfunc  ,ifunc  ,npf    ,tf     ,nvartmp,&
             &vartmp )
 !
+          else if (mtn == 123) then
+            idev = 0
+            call mstrain_rate(nel    ,israte ,asrate ,epsd   ,idev   ,&
+            &ep1    ,ep2    ,ep3    ,ep4    ,ep5    ,ep6)
+            call sigeps123(&
+            &nel      ,nuvar    ,uvar     ,nvartmp, vartmp  , matparam ,&
+            &rho0     ,vol      , tt      , epsd                       , &
+            &de1      ,de2      ,de3      ,de4      ,de5      ,de6      ,&
+            &es1      ,es2      ,es3      ,es4      ,es5      ,es6      ,&
+            &so1      ,so2      ,so3      ,so4      ,so5      ,so6      ,&
+            &s1       ,s2       ,s3       ,s4       ,s5       ,s6       ,&
+            &off      ,ssp      ,lbuf%dmg  )
           else if (mtn == 124) then
 !
             idev = 0
@@ -2028,7 +2043,7 @@
             &ep1    ,ep2    ,ep3    ,ep4    ,ep5    ,ep6)
             call sigeps125(&
             &nel      ,nuvar    ,uvar     ,matparam ,rho0              ,&
-            &nfunc    ,ifunc    ,snpc     ,npf      ,stf      ,tf       ,&   
+            &nfunc    ,ifunc    ,snpc     ,npf      ,stf      ,tf       ,&
             &es1      ,es2      ,es3      ,es4      ,es5      ,es6      ,&
             &s1       ,s2       ,s3       ,s4       ,s5       ,s6       ,&
             &ssp     , epsd,  lbuf%dmg )
@@ -2080,7 +2095,7 @@
             call mstrain_rate(nel    ,israte ,asrate ,epsd     ,idev     ,     &
               ep1      ,ep2      ,ep3      ,ep4      ,ep5      ,ep6      )
             call sigeps130( &
-              nel      ,nuvar    ,uvar     ,matparam ,et       ,tt       ,     &    
+              nel      ,nuvar    ,uvar     ,matparam ,et       ,tt       ,     &
               epsd     ,sigy     ,ssp      ,nvartmp  ,vartmp   ,ngl      ,     &
               de1      ,de2      ,de3      ,de4      ,de5      ,de6      ,     &
               es1      ,es2      ,es3      ,es4      ,es5      ,es6      ,     &

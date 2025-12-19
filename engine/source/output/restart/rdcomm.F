@@ -48,13 +48,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    rbe3_mod         ../common_source/modules/constraints/rbe3_mod.F90
 !||    rwall_mod        ../common_source/modules/constraints/rwall_mod.F90
 !||    sensor_mod       ../common_source/modules/sensor_mod.F90
+!||    sfem_mod         ../common_source/modules/elements/sfem_mod.F90
 !||    skew_mod         ../common_source/modules/skew_mod.F90
 !||    state_mod        ../common_source/modules/state_mod.F
 !||    th_mod           ../engine/share/modules/th_mod.F
 !||====================================================================
       SUBROUTINE RDCOMI(OUTPUT,TABVINT,MULTI_FVM,H3D_DATA,DYNAIN_DATA,
      .                  INTER_PARAMETERS,SENSORS,LOADS ,MAT_ELEM,SKEWS,
-     .                  GLOB_THERM,PBLAST,RBE3 ,RWALL)
+     .                  GLOB_THERM,PBLAST,RBE3 ,RWALL,SFEM)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -82,6 +83,7 @@ C-----------------------------------------------
       USE OUTPUT_MOD
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
       USE RWALL_MOD
+      USE SFEM_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -100,6 +102,7 @@ C-----------------------------------------------
       TYPE (PBLAST_)        ,INTENT(INOUT) :: PBLAST
       TYPE (RBE3_)          ,INTENT(INOUT) :: RBE3
       TYPE (RWALL_)         ,INTENT(INOUT) :: RWALL
+      TYPE (SFEM_)          ,INTENT(INOUT) :: SFEM
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -1471,6 +1474,13 @@ C MUSCL keyword, compression parameter beta
 C ITETRA=3
       NEXT=NEXT+1
       ISFEM =TABVINT(NEXT)
+      IF (ISFEM>0) THEN     ! ISFEM=SFEM%isfem + SFEM%ne_sfem : will be removed from include file
+        SFEM%ne_sfem = ISFEM - 1 
+        SFEM%isfem = 1 
+      ELSE 
+        SFEM%isfem = 0 
+        SFEM%ne_sfem = 0
+      ENDIF
 C /LOAD/PBLAST
       NEXT       = NEXT + 1
       NLOADP_F   = TABVINT(NEXT)

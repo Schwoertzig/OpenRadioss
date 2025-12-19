@@ -111,7 +111,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      I   SNPC,            STF,        SBUFMAT,    SVIS,
      J   NSVOIS,          IDTMINS,    IDEL7NG,    MAXFUNC,
      V   USERL_AVAIL,     GLOB_THERM, impl_s,     idyna  ,
-     W   S_SFEM_NODVAR)
+     W   S_SFEM_NODVAR,  ITAG_NSFEM )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -176,6 +176,7 @@ C-----------------------------------------------
      .        IPARTS(*),IXS10(6,*),IADS10(6,*),IPM(*),ITASK,GRTH(*),
      .        IGRTH(*),IGEO(NPROPGI,*),IOUTPRT,H3D_STRAIN
       INTEGER NELTST,ITYPTST,OFFSET,NEL,NG,ISTRAIN,ISOLNOD,IEXPAN,ITAGDN(*)      
+      INTEGER, DIMENSION(NUMNOD), INTENT(IN)    :: ITAG_NSFEM
       DOUBLE PRECISION  XDP(3,*)
       
       my_real DT2T
@@ -199,7 +200,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J,IP,NF1,NF2,IFLAG,IOFFS,IPTR,IPTS,IPTT,ILAY,IMAT
-      INTEGER IBID,IBIDON(1),ITET,ISM12_11
+      INTEGER IBID,IBIDON(1),ITET,ISM12_11,IOFFG,ISUM
 C-----
       INTEGER MXT(MVSIZ),NGL(MVSIZ),NGEO(MVSIZ)
       my_real
@@ -497,6 +498,10 @@ C--- for /CST avoid multi-printout----
         ENDDO
        END IF 
       END IF 
+      IOFFG = 0
+      DO I=LFT,LLT
+       IF (GBUF%OFF(I)==ZERO) IOFFG=1
+      ENDDO
 C --------------------------
 C  --- UPDATE REF. CONFIGURATION 
 C --------------------------
@@ -533,8 +538,14 @@ C-----------------------------
       IF(ICP >0 .AND. ISMSTR/=10) THEN
          DO I=LFT,LLT
           IF(GBUF%OFF(I) == ZERO) CYCLE
-          SUM=SFEM_NODVAR(NC(I,1))+SFEM_NODVAR(NC(I,2))+SFEM_NODVAR(NC(I,3))+SFEM_NODVAR(NC(I,4))
-          JACGM(I)=FOURTH*SUM
+          ISUM = ITAG_NSFEM(NC(I,1)) + ITAG_NSFEM(NC(I,2)) +
+     .           ITAG_NSFEM(NC(I,3)) + ITAG_NSFEM(NC(I,4))
+          IF (ISUM < 3) CYCLE
+          SUM=SFEM_NODVAR(NC(I,1))*ITAG_NSFEM(NC(I,1))+
+     .        SFEM_NODVAR(NC(I,2))*ITAG_NSFEM(NC(I,2))+
+     .        SFEM_NODVAR(NC(I,3))*ITAG_NSFEM(NC(I,3))+
+     .        SFEM_NODVAR(NC(I,4))*ITAG_NSFEM(NC(I,4))
+          JACGM(I)=SUM/ISUM
          ENDDO
       ENDIF
 C-----------------------------
@@ -548,6 +559,11 @@ C-----------------------------
          IF (OFFS(I)<=TWO) LBUF%OFF(I)=OFFS(I)
         ENDDO
        END IF
+       IF (IOFFG ==1) THEN
+         DO I=LFT,LLT
+           IF (GBUF%OFF(I)==ZERO) OFF(I)=ZERO
+         ENDDO
+       END IF 
 C
         CALL S10DEFO3(
      1   PX(1,1,IP),PY(1,1,IP),PZ(1,1,IP),VX,
@@ -567,7 +583,7 @@ C
            IF (ISMSTR==10) THEN
              DO I=LFT,LLT
                IF(GBUF%OFF(I) == ZERO) CYCLE
-               JACGM(I)=SFEM_NODVAR(NC(I,IP))
+               JACGM(I)=SFEM_NODVAR(NC(I,IP))*ITAG_NSFEM(NC(I,IP))
              ENDDO
            END IF
            CALL S10_ICP(

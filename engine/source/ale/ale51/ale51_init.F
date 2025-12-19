@@ -32,7 +32,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    my_barrier             ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
 !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
-!||    debug_mod              ../engine/share/modules/debug_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    i22bufbric_mod         ../common_source/modules/interfaces/cut-cell-search_mod.F
@@ -53,12 +52,6 @@ C-----------------------------------------------
       USE I22TRI_MOD           
       USE ALE_CONNECTIVITY_MOD
       use element_mod , only : nixs
-
-
-
-
-
-      USE DEBUG_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

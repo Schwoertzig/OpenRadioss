@@ -141,8 +141,6 @@ C-----------------------------------------------
 !||    i7remnode_init   ../starter/source/interfaces/inter3d1/i7remnode.F
 !||--- called by ------------------------------------------------------
 !||    i7remnode        ../starter/source/interfaces/inter3d1/i7remnode.F
-!||--- calls      -----------------------------------------------------
-!||    bitget           ../starter/source/interfaces/inter3d1/bitget.F
 !||====================================================================
       SUBROUTINE I7REMNODE_INIT(ISELF_IMPACTANT,NTY    ,
      1         X       ,NRTM    ,IRECT    ,NSV     ,NSN    ,NUMNOD ,
@@ -169,11 +167,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,L,N,CPT,KMAX,IMS1,IMS2,ISS1,ISS2
+      INTEGER I,J,K,L,N,CPT,KMAX
+      LOGICAL :: IMS1,IMS2,ISS1,ISS2
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAGNOD
-C-----------------------------------------------
-      INTEGER BITGET
-      EXTERNAL BITGET
 C-----------------------------------------------
 c Build inverse connectivity for segments
 C-----------------------------------------------
@@ -204,12 +200,12 @@ C
           DO J=1,4
             N = TAGSECND(IRECT(J,I))
             IF( N  /= 0 ) THEN
-              IMS1 = BITGET(MBINFLG(I),0)
-              IMS2 = BITGET(MBINFLG(I),1)
-              ISS1 = BITGET(NBINFLG(N),0)
-              ISS2 = BITGET(NBINFLG(N),1)
-              IF(((IMS1 == 1 .and. ISS2==1).or.
-     .            (IMS2 == 1 .and. ISS1==1)))THEN
+              IMS1 = BTEST(MBINFLG(I),0)
+              IMS2 = BTEST(MBINFLG(I),1)
+              ISS1 = BTEST(NBINFLG(N),0)
+              ISS2 = BTEST(NBINFLG(N),1)
+              IF(((IMS1 .and. ISS2).or.
+     .            (IMS2 .and. ISS1)))THEN
                 ISELF_IMPACTANT = 1
               END IF
             END IF

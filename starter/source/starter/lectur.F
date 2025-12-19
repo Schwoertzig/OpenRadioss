@@ -409,6 +409,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    setmulti                            ../starter/source/restart/ddsplit/setlenwa.F
 !||    setrb2on                            ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||    setrbyon                            ../starter/source/constraints/general/rbody/hm_read_rbody.F
+!||    sfem_exclude_dim                    ../starter/source/elements/solid/solide4/sfem_exclude.F90
+!||    sfem_exclude_ini                    ../starter/source/elements/solid/solide4/sfem_exclude.F90
 !||    sgrhead                             ../starter/source/elements/solid/solide/sgrhead.F
 !||    sgrtails                            ../starter/source/elements/solid/solide/sgrtails.F
 !||    shell_offset_ini                    ../starter/source/elements/shell/shell_offset/shell_offset_ini.F90
@@ -521,6 +523,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    reorder_mod                         ../starter/share/modules1/reorder_mod.F
 !||    restmod                             ../starter/share/modules1/restart_mod.F
 !||    set_mod                             ../starter/share/modules1/set_mod.F
+!||    sfem_exclude_mod                    ../starter/source/elements/solid/solide4/sfem_exclude.F90
 !||    shell_offset_ini_mod                ../starter/source/elements/shell/shell_offset/shell_offset_ini.F90
 !||    shell_offsetp_mod                   ../starter/source/elements/shell/shell_offset/shell_offsetp.F90
 !||    sms_mod                             ../starter/share/modules1/sms_mod.F
@@ -650,6 +653,7 @@ C-----------------------------------------------
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
       use hm_preread_skw_mod, ONLY : hm_preread_skw
       use hierarchy_rbody_mod
+      use sfem_exclude_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -942,6 +946,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE :: LIST_NIN25
       INTEGER, DIMENSION(:), ALLOCATABLE :: ISKEW_TMP
       my_real, DIMENSION(:), ALLOCATABLE :: SKEW_TMP
+      INTEGER NE_SFEM
+      INTEGER, DIMENSION(:), ALLOCATABLE :: IN_SFEM
 C-----------------------------------------------
 C Model Checker Memory
       DATA IUN/1/
@@ -7966,7 +7972,8 @@ C     rigid body hierarchy
 C--------------------------------------------
       IF(NRBYKIN > 0) THEN
         call hierarchy_rbody(NRBYKIN ,NNPBY ,NPBY  ,SLRBODY ,LPBY  ,
-     .                       NRBY    ,RBY   ,NUMNOD,IOUT )
+     .                       NRBY    ,RBY   ,NUMNOD,IOUT    ,LNOPT1,
+     .                       NOM_OPT )
       ENDIF
 C--------------------------------------------
 C     Checking rigid structures
@@ -8824,6 +8831,23 @@ C
           CALL BULKFAKEIGEO3(ELBUF_TAB,IPARG,PM,KXIG3D,IGRSURF,STIFINT)
         ENDIF
       ENDIF
+C----------------------------------
+C -- SFEM (nodal pressure) exception initialization
+C----------------------------------
+      NE_SFEM = 0
+      IF(ISFEM>0) THEN
+        CALL SFEM_EXCLUDE_DIM(
+     &             NUMNOD,  NPARG,  NGROUP,  IPARG,      IXS,                   
+     &             NUMELS,NE_SFEM)
+      ENDIF
+      IF(NE_SFEM > 0) THEN
+          call my_alloc(IN_SFEM,NE_SFEM) 
+      ELSEIF(.NOT. ALLOCATED(IN_SFEM)) THEN
+          ALLOCATE(IN_SFEM(0))
+      END IF
+      CALL SFEM_EXCLUDE_INI(
+     &             NUMNOD,  NPARG,  NGROUP,  IPARG,      IXS,                   
+     &             NUMELS,IN_SFEM, NE_SFEM)
 C
 C----------------------------------
 C
@@ -11154,7 +11178,8 @@ c
      D         KLOADPINTER  ,LOADPINTER   ,DGAPLOADINT   ,S_LOADPINTER, SCEP,DYNAIN_DATA,
      E         DRAPEG       ,USER_WINDOWS ,OUTPUT        ,INTERFACES  ,NUMBER_LOAD_CYL ,
      F         LOADS_PER_PROC(P), PYTHON,DPL0CLD,VEL0CLD ,NAMES_AND_TITLES,
-     G         BCS_PER_PROC(P),constraint_struct,glob_therm,PBLAST,RWSTIF_PEN ,SLN_PEN )
+     G         BCS_PER_PROC(P),constraint_struct,glob_therm,PBLAST,RWSTIF_PEN ,SLN_PEN ,
+     H         IN_SFEM, NE_SFEM)
       GOTO 220
  221  CONTINUE
 

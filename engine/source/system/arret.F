@@ -38,7 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    c_fortran_dgssv                  ../engine/stub/superlu_stub.F
 !||    c_freemem                        ../engine/stub/superlu_stub.F
 !||    c_tricall                        ../engine/stub/fvmbags_stub.F
-!||    check_error_and_write            ../common_source/tools/memory/shrink_array.F90
+!||    check_error_and_write            ../common_source/tools/memory/extend_array.F90
 !||    cp_ifront                        ../engine/source/implicit/produt_v.F
 !||    create_h3d_1d_scalar             ../engine/source/output/h3d/h3d_build_fortran/create_h3d_1d_scalar.F
 !||    create_h3d_1d_tensor             ../engine/source/output/h3d/h3d_build_fortran/create_h3d_1d_tensor.F
@@ -356,7 +356,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_i7fcom_poff                 ../engine/source/mpi/forces/spmd_i7fcom_poff.F
 !||    spmd_i7fcom_pon                  ../engine/source/mpi/forces/spmd_i7fcom_pon.F
 !||    spmd_i7xvcom2                    ../engine/source/mpi/interfaces/spmd_i7xvcom2.F
-!||    spmd_ifront                      ../engine/source/mpi/interfaces/spmd_ifront.F
 !||    spmd_ifront_stamp                ../engine/source/mpi/interfaces/send_cand.F
 !||    spmd_inisph                      ../engine/source/mpi/sph/spmd_sptool.F
 !||    spmd_initfi                      ../engine/source/mpi/interfaces/spmd_i7tool.F
