@@ -88,7 +88,8 @@ c---------------------
       IF (JMULT > 0) THEN
         IF (MLAW_TAG(GMAT)%L_FRAC > 0) THEN                                   
           DO ILAY = 1,NLAY                                            
-            ELBUF_STR%BUFLY(ILAY)%L_FRAC = MLAW_TAG(GMAT)%L_FRAC             
+            ELBUF_STR%BUFLY(ILAY)%L_FRAC = MLAW_TAG(GMAT)%L_FRAC     ! volume fraction        
+            ELBUF_STR%BUFLY(ILAY)%L_VEL = MLAW_TAG(GMAT)%L_VEL       ! phase velocity
           ENDDO                                                     
         ENDIF                                                       
         DO ILAY = 1,JMULT                                             
