@@ -271,10 +271,10 @@
 
                      !velocity-phase1
                      elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,1)
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(numelq+ii) = multi_cutcell%phase_velz(elem_iid,1)
+                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,1)
                      !velocity-phase2
                      elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,2)
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(numelq+ii) = multi_cutcell%phase_velz(elem_iid,2)
+                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,2)
 
 
                    end do
