@@ -1,5 +1,5 @@
 !Copyright>        OpenRadioss
-!Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+!Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 !Copyright>
 !Copyright>        This program is free software: you can redistribute it and/or modify
 !Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -83,7 +83,7 @@
 !||====================================================================
         subroutine eosmain51(pmin, off, eint, mu, espe, dvol, df, v, psh, p, dpdm, dpde, rho0, &
           temp, v0 , sbufmat, bufmat, eos_struct, vareos, &
-          time, dt, npf   ,tf   ,snpf ,stf )
+          time, dt, npf   ,tf   ,snpf ,stf, mln )
 
 
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -129,6 +129,7 @@
           integer,intent(in) :: sbufmat
           integer,intent(in) :: snpf, stf
           integer,intent(in) :: npf(snpf)
+          integer,intent(in) :: mln !< material law number
           real(kind=WP),intent(in) :: tf(stf)
           real(kind=WP),intent(in) :: time
           real(kind=WP), intent(in) :: bufmat(sbufmat)
@@ -154,6 +155,7 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
           eostyp = eos_struct%eostype
+          if(mln==5)eostyp=15 !law5 has embedded EoS (JWL)
           iflag=2
           nvareos=6 !can be automatically set if BUFEER LAYER enabled for law51 (heavy work)
           tmax = fifteen * ep03

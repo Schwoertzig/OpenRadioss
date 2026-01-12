@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -254,10 +254,10 @@ C-----------------------------------------------
       INTEGER IPLA
       INTEGER IADBH, IAD22, NIN, NBRIC_L
       INTEGER SBUFVOIS,SZ_BUFVOIS
-      
+      integer :: j,ijk
       my_real FX(MVSIZ,10),FY(MVSIZ,10),FZ(MVSIZ,10),VOLN(MVSIZ) 
       my_real, TARGET  :: BID
-      my_real, DIMENSION(:,:),ALLOCATABLE,TARGET  :: QMV
+      my_real, DIMENSION(:,:),ALLOCATABLE,TARGET, save  :: QMV
       my_real, POINTER :: pQMV
       ! SPMD array for adjacent data ALE/CFD
       my_real, DIMENSION(:,:),ALLOCATABLE ::BUFVOIS
@@ -298,7 +298,7 @@ C  IOUTPRT (assembly report)
      .    .OR. (ALE%SUB%IALESUB /= 0 .AND. T1S+DT2S >= OUTPUT%TH%THIS1(8))
      .    .OR. (ALE%SUB%IALESUB /= 0 .AND. T1S+DT2S >= OUTPUT%TH%THIS1(9)) .OR. ISTAT==3) IOUTPRT=1
       
-      ALLOCATE(QMV(ale%global%s_qmv,2*ale%global%nv46)) !MM-ALE 51 only                       !OPTIM : SHOULD BE ALLOCATED IN ARRALOC
+      if(itask==0) ALLOCATE(QMV(ale%global%s_qmv,2*ale%global%nv46)) !MM-ALE 51 only                       !OPTIM : SHOULD BE ALLOCATED IN ARRALOC
       IF(M51_IFLG6 == 1)SBUFVOIS = M51_IFLG6_SIZE
       
       IF(ITASK==0)ALLOCATE(BUFVOIS(SBUFVOIS ,NSVOIS+NQVOIS)) !SPMD array of adjacent ALE/CFD elems           !OPTIM : SHOULD BE ALLOCATED IN ARRALOC,  same for FLUX_VOIS & N4_VOIS
@@ -426,7 +426,7 @@ C
         IF(ITASK==0) CALL STARTIME(TIMERS,MACRO_TIMER_IFSUB0)
         IF(IALE+IEULER+GLOB_THERM%ITHERM /= 0)THEN
           IF(ALE%GLOBAL%INCOMP == 0) THEN
-            IF(NSEGFLU > 0 .AND. N2D == 0) THEN
+            IF(NSEGFLU > 0) THEN
               CALL SEGGETV(IPARG,ELBUF_TAB,ALE_CONNECTIVITY,ITASK,SEGVAR)
               ! Comm SPMD SEGVAR Pi -> P0
               IF(NSPMD > 1) THEN
@@ -745,9 +745,20 @@ C     -------------------------
             !   "mmale=1: Staggered Upwind advection + von Neumann-Richtmyer artificial viscosity + diffuse interface"
             !   "mmale=2: Collocated HLLC + diffuse interface"
             !   "mmale=3: Collocated HLLC + lagrangian interface tracking"
-            !------------------------------------------------!
-            ! CONVECTION, CONDUCTION, REZONING               !
-            !------------------------------------------------!
+
+!------------------------------------------------!
+! CONVECTION, CONDUCTION, REZONING               !
+!------------------------------------------------!
+            call my_barrier()
+!$omp do
+            do j=1,2*ale%global%nv46
+              do ijk=1,ale%global%s_qmv
+                qmv(ijk,j) = zero
+              enddo
+            enddo
+!$omp end do
+            call my_barrier()
+
             CALL ALETHE(
      1   IPARG,           ELBUF_TAB,       WA,              VAL2,
      2   PHI,             ALE_CONNECTIVITY,IXS,             IXQ,
@@ -758,10 +769,10 @@ C     -------------------------
      7   LNRCVOIS,        LNSDVOIS,        NERCVOIS,        NESDVOIS,
      8   LERCVOIS,        LESDVOIS,        SEGVAR,
      9   MSNF,            NODFT,           NODLT,           WA(IADBH),
-     A   IPM,             QMV,             ITAB,            ITABM1,
+     A   IPM,             QMV,
      B   ale%global%s_flux,ale%global%s_qmv,ale%global%nv46,
      C   IAD_ELEM,        GLOB_THERM,
-     D   FR_ELEM,         MATPARAM  ,timers)
+     D   FR_ELEM,         MATPARAM  ,timers,nthread,int22)
          ENDIF
       ELSE
         ALE%SUB%IFSUBM=0
@@ -1216,7 +1227,7 @@ c      ENDIF
 
 
       CALL MY_BARRIER
-      DEALLOCATE(QMV)
+      if(itask==0) deallocate(qmv)
       IF(ITASK==0)DEALLOCATE(BUFVOIS)
 
 

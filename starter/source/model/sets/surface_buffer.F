@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -78,7 +78,7 @@ C=======================================================================
      .                            IXS      ,IXS10    ,IXC      ,IXTG      ,CLAUSE   ,
      .                            KNOD2ELS ,NOD2ELS  ,KNOD2ELC ,NOD2ELC   ,KNOD2ELTG,
      .                            NOD2ELTG ,NSEG     ,IEXT     ,BUFTMPSURF,IPARTS   ,
-     .                            IAD_SURF ,KEYSET)
+     .                            IPARTC   ,IPARTG   ,IAD_SURF ,KEYSET)
 !
 !     ---  shell + sh3n ---
 !

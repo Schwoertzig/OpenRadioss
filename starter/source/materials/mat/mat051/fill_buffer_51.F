@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -148,7 +148,8 @@ C-----------------------------------------------
       AV(1:4)  = UPARAM(13:16)
       UPARAM(4:6) = ZERO !av1-3
       UPARAM(46) = ZERO !av4
-      UPARAM(9:280)=ZERO
+      UPARAM(9:75)=ZERO  !do not erase UPARAM(76) = IFLG (0,1,10,11,12)
+      UPARAM(77:280)=ZERO
       UPARAM(31) = 12
       MID_VALID(1:4)=0
       COUNT_VALID_MAT = 0
@@ -162,11 +163,11 @@ C-----------------------------------------------
       UPARAM(173)=-INFINITY
       UPARAM(223)=-INFINITY
 
-      !Ei_INF
-      UPARAM(57) = -INFINITY
-      UPARAM(58) = -INFINITY
-      UPARAM(59) = -INFINITY
-      UPARAM(60) = ZERO !-INFINITY
+      ! IBIJ(1:4) (iform=12 only)
+      UPARAM(57) = ZERO
+      UPARAM(58) = ZERO
+      UPARAM(59) = ZERO
+      UPARAM(60) = ZERO
 
       IEXP     = 0
       NJWL     = 0
@@ -295,6 +296,8 @@ C-----------------------------------------------
          IPM(50+I,INTERNAL_ID) = NINT(UPARAM(276+I))           !storing bijective order of submaterial
          MLN      = IPM(2,IMID)
          EOS_TYPE = IPM(4,IMID)
+         IF(MLN == 5)EOS_TYPE = 15  !law5 has embedded EoS (JWL)
+         !!!MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%EOSTYPE = EOS_TYPE
          PM_      => PM(1:,IMID)
          RHO_MAX=MAX(RHO_MAX,PM(1,IMID))
          E0 = ZERO

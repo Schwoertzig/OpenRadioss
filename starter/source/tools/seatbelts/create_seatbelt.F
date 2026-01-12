@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -74,7 +74,7 @@ C-----------------------------------------------
      .        NB_2D_SEATBELT,COMPT_BELT_END,COMPT_FRAM,NEXT_NODE,NODE_CUR,COMPT_2D,MID_2D,NODE_LONGI,
      .        FUNC1,FUNC2,ISK,N1,N2,SEATBELT_ELEM_FOUND,IMOV,IECROU,NB_ELEM_1D,NB_BRANCH,
      .        BRANCH_CPT,NB_ELEM_2D,J1,NPT,NPT2,STAT,WARNFUNC,SAME_FUNC,MID2,MTYP2,FLAG_SHELL,
-     .        FLAG_ERR_LOOP_2D
+     .        FLAG_ERR_LOOP_2D,NLOOP_1D,NB_ELEM_1D_NOT_TAGED
       my_real DIST2,LMIN,RHO,XK,XC,AREA,LONGI_DIRECTION(3),EDGE_DIRECTION(3),SCAL,E11,E22,G12,DET,
      .        N12,N21,NU,FSCALE1,FSCALE2,A11,A22,A12,C1,SSP,RHO0,FSCALET,KMAX,A1C,A2C
       my_real X1,X2,Y1,Y2,SHIFT,DERI,MIN_SLOPE,MIN_SLOPE_ABS,DERI_P
@@ -82,7 +82,8 @@ C
       INTEGER , DIMENSION(:), ALLOCATABLE:: TAG_RES,TAG_SHELL,TAG_NOD,CC_ELEM,CPT_MAT,TAG_MAT_2D,
      .                                      TAG_NOD_SHELL,TAG_NOD_SPRING,FRAM_TAB,TAG_FRAM_SEATBELT,
      .                                      NNOD_FRAM_SEATBELT,BELT_END_NFRAM,BELT_END_ADDR,TAG_PROP_2D,
-     .                                      BRANCH_TAB,TAG_SPRING_2D,TAG_NOD_SPRI2D,TAG_COMN_1D_2D
+     .                                      BRANCH_TAB,TAG_SPRING_2D,TAG_NOD_SPRI2D,TAG_COMN_1D_2D,
+     .                                      NNOD_LOOP_SEATBELT,TAG_LOOP_SEATBELT
       my_real , DIMENSION(:), ALLOCATABLE:: AV_LEN_MAT,AV_AREA_MAT,ELEMSIZE_MAT,BELT_END_SECTION,
      .                                      SECTION_MAT
 C-----------------------------------------------
@@ -618,7 +619,21 @@ C
 C
 C       Check of seatbelt springs not taged in steabelt - steabelt in loop - seatbelt 1D only         
 C
+C       Couting number of 1D elements not tagged - possible number of loops
+        NB_ELEM_1D_NOT_TAGED = 0
         FLAG_ERR_LOOP_2D = 0
+        DO I=1,NUMELR
+          MID = IXR(5,I)
+          IF (MID > 0) THEN
+            MTYP = IPM(2,MID)
+            IF ((MTYP == 114).and.(TAG_RES(I) == 0)) THEN
+              NB_ELEM_1D_NOT_TAGED = NB_ELEM_1D_NOT_TAGED + 1
+            ENDIF
+          ENDIF  
+        ENDDO   
+        ALLOCATE(TAG_LOOP_SEATBELT(NB_ELEM_1D_NOT_TAGED)) 
+        ALLOCATE(NNOD_LOOP_SEATBELT(NB_ELEM_1D_NOT_TAGED))
+        NLOOP_1D = 0
         DO I=1,NUMELR
           MID = IXR(5,I)
           IF (MID > 0) THEN
@@ -632,12 +647,12 @@ C               Loop in seatbelt 2D - error message
               ELSE  
 C               Start of 1D seatbelt loop
                 SEATBELT_ID = SEATBELT_ID + 1
-                NNOD = NNOD + 1   
+                NNOD = 1   
+                NLOOP_1D = NLOOP_1D + 1
                 ELEM_CUR = I
                 NOD_START = N1
                 NB_BRANCH = 0
                 BRANCH_CPT = 0
-                COMPT_FRAM = 0
                 CALL NEW_SEATBELT(IXR,ITAB,KNOD2EL1D,NOD2EL1D,NOD_START,
      .                            ELEM_CUR,TAG_RES,TAG_NOD,SEATBELT_ID,FLAG,
      .                            NNOD,IPM,NB_ELEM_1D,NB_BRANCH,BRANCH_TAB,
@@ -653,6 +668,8 @@ C               Start of 1D seatbelt loop
      .                            BRANCH_CPT)
                   ENDDO                    
                 ENDIF  
+                TAG_LOOP_SEATBELT(NLOOP_1D)  = SEATBELT_ID
+                NNOD_LOOP_SEATBELT(NLOOP_1D) = NNOD
               ENDIF  
             ENDIF
           ENDIF
@@ -671,7 +688,17 @@ C---  Filling of seatbelt structure
 C----------------------------------------------------------------------------
 C
         N_SEATBELT = SEATBELT_ID
-        IF (IDDLEVEL == 0) ALLOCATE(SEATBELT_TAB(N_SEATBELT))
+C       SEATBELT_TAB reallocation for iddlevel=1 - needed for loop (order change because of element rordering))       
+        IF (ALLOCATED(SEATBELT_TAB)) THEN
+          DO I = 1, SIZE(SEATBELT_TAB)
+            IF (ALLOCATED(SEATBELT_TAB(I)%SPRING)) THEN
+              DEALLOCATE(SEATBELT_TAB(I)%SPRING)
+            ENDIF
+          ENDDO
+          DEALLOCATE(SEATBELT_TAB)
+        ENDIF
+C        
+        ALLOCATE(SEATBELT_TAB(N_SEATBELT))
         CALL MY_ALLOC(TAG_MAT_2D,NUMMAT)
         TAG_MAT_2D(1:NUMMAT) = 0
         IF (NB_2D_SEATBELT > 0) THEN
@@ -687,14 +714,20 @@ C
           SEATBELT_TAB(I)%NFRAM = 1
           SEATBELT_TAB(I)%NNOD = 0
           SEATBELT_TAB(I)%ELEM_SIZE = ZERO
+C         Loop on belt ends          
           DO J=1,COMPT_BELT_END
             IF (TAG_FRAM_SEATBELT(J)==I) THEN
-              SEATBELT_TAB(I)%NNOD = SEATBELT_TAB(I)%NNOD + NNOD_FRAM_SEATBELT(J)
-C             A incrementer si COMPT_BELT_END=0              
+              SEATBELT_TAB(I)%NNOD = SEATBELT_TAB(I)%NNOD + NNOD_FRAM_SEATBELT(J)            
               SEATBELT_TAB(I)%NFRAM = BELT_END_NFRAM(J)
               SEATBELT_TAB(I)%SECTION = BELT_END_SECTION(J)
             ENDIF
-          ENDDO  
+          ENDDO 
+C         Loop on loops
+          DO J=1,NLOOP_1D
+            IF (TAG_LOOP_SEATBELT(J)==I) THEN
+              SEATBELT_TAB(I)%NNOD = NNOD_LOOP_SEATBELT(J)
+            ENDIF
+          ENDDO     
           DO J=1,NUMELR
             IF (TAG_RES(J) == I) THEN
 C--           count of 1d elements of the seatbelt
@@ -714,7 +747,9 @@ C--           count and tag of 2d elements of the seatbelt
                 ENDDO
 C               FLAG_SHELL needed in case of 1D/2D connection
                 IF ((MTYP==119).AND.(FLAG_SHELL==1)) THEN
-                  IF (TAG_SHELL(ELEM_CUR)==0) THEN
+                  IF(ELEM_CUR > NUMELC .OR. ELEM_CUR <= 0) THEN
+                     write(6,*) 'Error in seatbelt element indexing. Material',IPM(2,MID_2D)
+                  ELSEIF (TAG_SHELL(ELEM_CUR)==0) THEN
                     TAG_SHELL(ELEM_CUR) = I
                     COMPT_2D = COMPT_2D + 1
                     TAG_MAT_2D(MID) = MID_2D
@@ -733,7 +768,7 @@ C               FLAG_SHELL needed in case of 1D/2D connection
           ENDDO        
           SEATBELT_TAB(I)%NSPRING = COMPT
           SEATBELT_TAB(I)%NSHELL = COMPT_2D
-          IF (IDDLEVEL == 0) CALL MY_ALLOC(SEATBELT_TAB(I)%SPRING,COMPT)
+          CALL MY_ALLOC(SEATBELT_TAB(I)%SPRING,COMPT)
           COMPT = 0
           DO J=1,NUMELR
             IF (TAG_RES(J) == I) THEN
@@ -744,6 +779,7 @@ C               FLAG_SHELL needed in case of 1D/2D connection
         ENDDO
 C
         DEALLOCATE(BELT_END_NFRAM,BELT_END_SECTION,BELT_END_ADDR,FRAM_TAB,TAG_RES,TAG_FRAM_SEATBELT,NNOD_FRAM_SEATBELT)
+        DEALLOCATE(NNOD_LOOP_SEATBELT,TAG_LOOP_SEATBELT)
 C
 C----------------------------------------------------------------------------
 C---  Computation of elem_size from retractor

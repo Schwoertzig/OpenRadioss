@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -629,6 +629,18 @@ C
           ! Compatibility with /MAT/LAW115 statistic formulation
           IF ((MLN == 115).AND.(((JHBE>2).AND.(JHBE<21)).OR.((ITET4>0).AND.(ITET4<3)))) THEN
             CALL ANCMSG(MSGID=1905,
+     .                  MSGTYPE=MSGWARNING,
+     .                  ANMODE=ANINFO_BLIND_2,
+     .                  I1=ID,
+     .                  C1=TITR,
+     .                  I2=MLN,
+     .                  PRMOD=MSG_CUMU)
+          ENDIF
+C
+          !< Compatibility of ITET4 = 3 with /MAT/LAW88 is not supported
+          IF ((MLN == 88).AND.(ITET4 == 3)) THEN
+            ITET4 = 0
+            CALL ANCMSG(MSGID=3123,
      .                  MSGTYPE=MSGWARNING,
      .                  ANMODE=ANINFO_BLIND_2,
      .                  I1=ID,
@@ -1608,6 +1620,10 @@ c-----------
      .                  MSGTYPE=MSGWARNING,
      .                  ANMODE=ANINFO_BLIND_2,
      .                  PRMOD=MSG_PRINT)
+      CALL ANCMSG(MSGID=3123,
+     .                  MSGTYPE=MSGWARNING,
+     .                  ANMODE=ANINFO_BLIND_2,
+     .                  PRMOD=MSG_PRINT)     
       CALL ANCMSG(MSGID=1573,
      .                  MSGTYPE=MSGWARNING,
      .                  ANMODE=ANINFO_BLIND_2,

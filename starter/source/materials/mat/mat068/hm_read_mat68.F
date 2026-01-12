@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -305,7 +305,7 @@ c
       CALL INIT_MAT_KEYWORD(MATPARAM,"HOOK")
       CALL INIT_MAT_KEYWORD(MATPARAM,"ORTHOTROPIC")
       ! Properties compatibility  
-      CALL INIT_MAT_KEYWORD(MATPARAM,"SOLID_ORTHOTROPIC")
+      CALL INIT_MAT_KEYWORD(MATPARAM,"SOLID_BRICK_ORTHOTROPIC")
 c
       !---LISTING OUTPUT
       WRITE(IOUT,1001) TRIM(TITR),MAT_ID,68

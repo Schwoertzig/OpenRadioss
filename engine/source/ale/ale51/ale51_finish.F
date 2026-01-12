@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -22,8 +22,6 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
 !||    ale51_finish           ../engine/source/ale/ale51/ale51_finish.F
-!||--- called by ------------------------------------------------------
-!||    alethe                 ../engine/source/ale/alethe.F
 !||--- calls      -----------------------------------------------------
 !||    ale51_upwind2          ../engine/source/ale/ale51/ale51_upwind2.F
 !||    ale51_upwind3          ../engine/source/ale/ale51/ale51_upwind3.F
@@ -151,13 +149,15 @@ C     ALE ON / OFF
         !  UPWIND, QMV, DDVOL          !
         !------------------------------!
         IF(N2D == 0)THEN
-          CALL ALE51_UPWIND3(PM,IXS,FLUX,FLU2(NF1),ALE_CONNECT,
+          CALL ALE51_UPWIND3(PM,IXS,FLUX,FLU2,ALE_CONNECT,
      +                       0 ,BID,QMV ,0  ,
-     +                       NV46,s_flux,s_qmv)
+     +                       NV46,s_flux,s_qmv,
+     .                       ALE_CONNECT%group(ng)%nb_element_with_bc,ALE_CONNECT%group(ng)%list_element_with_bc)
         ELSE
-          CALL ALE51_UPWIND2(PM,X,IXQ,FLUX,FLU2(NF1),ALE_CONNECT,
+          CALL ALE51_UPWIND2(PM,X,IXQ,FLUX,FLU2,ALE_CONNECT,
      +                       0,BID,QMV, 0,
-     +                       nv46,s_flux,s_qmv)
+     +                       nv46,s_flux,s_qmv,
+     .                       ALE_CONNECT%group(ng)%nb_element_with_bc,ALE_CONNECT%group(ng)%list_element_with_bc)     
         ENDIF
       END DO !next NG
 

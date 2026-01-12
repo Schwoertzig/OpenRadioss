@@ -1,5 +1,5 @@
-/*Copyright>    OpenRadioss
-//Copyright>    Copyright (C) 1986-2025 Altair Engineering Inc.
+//Copyright>    OpenRadioss
+//Copyright>    Copyright (C) 1986-2026 Altair Engineering Inc.
 //Copyright>
 //Copyright>    This program is free software: you can redistribute it and/or modify
 //Copyright>    it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +19,7 @@
 //Copyright>
 //Copyright>    As an alternative to this open-source version, Altair also offers Altair Radioss
 //Copyright>    software under a commercial license.  Contact Altair to discuss further if the
-//Copyright>    commercial version may interest you: https://www.altair.com/radioss/.*/
+//Copyright>    commercial version may interest you: https://www.altair.com/radioss/.
 
 
 #include "GlobalModelSDI.h"
@@ -2713,4 +2713,31 @@ void GlobalEntitySDIdeleteEntity()
     HandleEdit radEntityHEdit(radEntityHRead.GetType(), radEntityHRead.GetPointer());
 
     g_pModelViewSDI->Delete(radEntityHEdit);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Create main node in /RBODY when MAIN node is empty
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void GlobalEntitySDIRbodiesCreateMainNode(int *addedNodeId)
+{    
+    EntityType radNodeType = g_pModelViewSDI->GetEntityType("/NODE");
+    sdiValueEntity node1;
+    sdiValue tempVal(node1);
+     bool found =  g_pEntity->GetValue(sdiIdentifier("RBID"), tempVal);        
+    if(found) tempVal.GetValue(node1);
+
+    if(node1.GetId() == 0 || !found)
+    {
+        HandleEdit radNodeHEdit;
+        g_pModelViewSDI->CreateEntity(radNodeHEdit, "/NODE");
+        EntityEdit radNodeEdit(g_pModelViewSDI, radNodeHEdit);
+        radNodeEdit.SetValue(sdiIdentifier("X"), sdiValue(0.0));
+        radNodeEdit.SetValue(sdiIdentifier("Y"), sdiValue(0.0));
+        radNodeEdit.SetValue(sdiIdentifier("Z"), sdiValue(0.0));
+        *addedNodeId = radNodeHEdit.GetId(g_pModelViewSDI);
+
+        HandleRead rbodyHRead = g_pEntity->GetHandle();
+        HandleEdit rbodyHEdit(rbodyHRead.GetType(), rbodyHRead.GetPointer());
+        EntityEdit rbodyEdit(g_pModelViewSDI, rbodyHEdit);
+        rbodyEdit.SetValue(sdiIdentifier("independentnode"), sdiValue(sdiValueEntity(radNodeType, *addedNodeId)));
+    }
 }

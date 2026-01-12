@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -47,12 +47,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    akturb                           ../engine/source/ale/turbulence/akturb.F
 !||    ale51_antidiff2                  ../engine/source/ale/ale51/ale51_antidiff2.F
 !||    ale51_antidiff3                  ../engine/source/ale/ale51/ale51_antidiff3.F
+!||    ale51_apply_remote_flux          ../engine/source/ale/ale51/ale51_apply_remote_flux.F90
 !||    ale51_finish                     ../engine/source/ale/ale51/ale51_finish.F
 !||    ale51_gradient_reconstruction    ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
 !||    ale51_gradient_reconstruction2   ../engine/source/ale/alemuscl/ale51_gradient_reconstruction2.F
 !||    ale51_init                       ../engine/source/ale/ale51/ale51_init.F
-!||    ale51_spmd2                      ../engine/source/ale/ale51/ale51_spmd2.F
-!||    ale51_spmd3                      ../engine/source/ale/ale51/ale51_spmd3.F
 !||    ale51_upwind2                    ../engine/source/ale/ale51/ale51_upwind2.F
 !||    ale51_upwind3                    ../engine/source/ale/ale51/ale51_upwind3.F
 !||    aleconv3                         ../engine/source/ale/porous/aleconv.F
@@ -140,6 +139,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inigrav_m51                      ../starter/source/initial_conditions/inigrav/inigrav_m51.F
 !||    inint3                           ../starter/source/interfaces/inter3d1/inint3.F
 !||    inintr                           ../starter/source/interfaces/interf1/inintr.F
+!||    init_ale                         ../engine/source/ale/init_ale.F90
+!||    init_ale_boundary_condition      ../engine/source/ale/init_ale_boundary_condition.F90
+!||    init_ale_spmd                    ../engine/source/ale/init_ale_spmd.F90
 !||    init_bcs_wall                    ../starter/source/boundary_conditions/init_bcs_wall.F90
 !||    init_diffusion                   ../engine/share/modules/diffusion_mod.F
 !||    initia                           ../starter/source/elements/initia/initia.F
@@ -239,7 +241,15 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !     Extended type : + iface
         TYPE, PUBLIC, EXTENDS(T_CONNECTIVITY) :: T_CONNECTIVITY_EXT1
           INTEGER, DIMENSION(:), ALLOCATABLE :: IFACE2
-        END TYPET_CONNECTIVITY_EXT1
+          integer :: remote_neighb_elem !< number of remote elements
+          integer, dimension(:), allocatable :: index_elem_w_neigh !< for each element, index to access its neighbors
+          integer, dimension(:), allocatable :: id_facet_neighbor_elem !< for each element, id of the facet of the neighbor element
+        END TYPE T_CONNECTIVITY_EXT1
+
+        type group_connectivity_
+          integer :: nb_element_with_bc !< number of elements with boundary
+          integer, dimension(:), allocatable :: list_element_with_bc !< list of elements with boundary
+        end type group_connectivity_
 
 
 !     ******************    !
@@ -257,6 +267,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !     node-node, node-element, element-element
           TYPE(T_CONNECTIVITY) :: NN_CONNECT, NE_CONNECT
           TYPE(T_CONNECTIVITY_EXT1) :: EE_CONNECT
+          type(group_connectivity_), dimension(:), allocatable :: group
           LOGICAL :: HAS_NN_CONNECT = .FALSE.
           LOGICAL :: HAS_NE_CONNECT = .FALSE.
           LOGICAL :: HAS_IDGLOB = .FALSE.

@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -390,6 +390,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_exch_thknod                             ../engine/source/mpi/nodes/spmd_exch_thknod.F
 !||    spmd_exch_vmax                               ../engine/source/mpi/elements/spmd_exch_dttsh.F
 !||    spmd_exch_wave                               ../engine/source/mpi/nodes/spmd_exch_wave.F
+!||    spmd_exch_wave_init                          ../engine/source/mpi/nodes/spmd_exch_wave.F
 !||    spmd_exsum_fb6                               ../engine/source/mpi/generic/spmd_exsum_fb6.F
 !||    spmd_flush_accel                             ../engine/source/mpi/output/spmd_flush_accel.F
 !||    spmd_fvb_switch                              ../engine/source/mpi/airbags/spmd_fvb_switch.F
@@ -412,6 +413,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_rbcast                                  ../engine/source/mpi/generic/spmd_rbcast.F
 !||    spmd_sd_xv                                   ../engine/source/mpi/nodes/spmd_sd_xv.F
 !||    spmd_sort_sms                                ../engine/source/mpi/ams/spmd_sms.F
+!||    spmd_wait                                    ../engine/source/mpi/spmd_wait.F90
 !||    spmd_wiout                                   ../engine/source/mpi/generic/spmd_wiout.F
 !||    spmd_xv_inter_type1                          ../engine/source/mpi/nodes/spmd_sd_xv_inter1.F90
 !||    sponfv                                       ../engine/source/elements/sph/sponfv.F
@@ -549,6 +551,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sms_mod                                      ../engine/share/modules/sms_mod.F
 !||    sms_pcg_proj                                 ../engine/share/modules/sms_mod.F
 !||    sph_work_mod                                 ../common_source/modules/mat_elem/sph_work.F90
+!||    spmd_exch_wave_mod                           ../engine/source/mpi/nodes/spmd_exch_wave.F
 !||    spmd_mod                                     ../engine/source/mpi/spmd_mod.F90
 !||    spmd_xv_inter_type1_mod                      ../engine/source/mpi/nodes/spmd_sd_xv_inter1.F90
 !||    stack_mod                                    ../engine/share/modules/stack_mod.F
@@ -652,6 +655,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+              USE SPMD_EXCH_WAVE_MOD
               USE GHOST_SHELLS_MOD
               USE CONNECTIVITY_MOD
               USE NODAL_ARRAYS_MOD
@@ -741,7 +745,7 @@ C-----------------------------------------------
               USE INTER_SH_OFFSET_MOD , only:SH_OFFSET_
               USE OFFSET_NPROJ_MOD, only : OFFSET_NPROJ
               USE get_neighbour_surface_mod , only : get_neighbour_surface
-              USE spmd_mod , only : SPMD_MAX,spmd_allreduce,SPMD_BARRIER
+              USE spmd_mod
               USE SKEW_MOD
               USE ELBUFDEF_MOD
               USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
@@ -1332,8 +1336,10 @@ C-------------------------------------------------------------------------------
               ! Restart File Writing
               INTEGER STOP_OR_ADD_CYCLE  !< Check if additional cycle must be done after restart at termination
               INTEGER, PARAMETER :: MAXFUNC = 100
+              INTEGER :: GLOB_IDEL7NOK, RQ_SHOOTING_NODE
               integer :: numnod_old,numnodm_old
               integer :: new_crack,nsect_offset
+              TYPE(FR_WAVE_) :: FR_WAVE_BUF
 C-----------------------------------------------------------------------------------
 C Err THK
 C-----------------------------------------------------------------------------------
@@ -1721,7 +1727,12 @@ C===============================================================================
               GLOBAL_ACTIVE_ALE_ELEMENT = .FALSE.
               CALL CHECK_ALE_COMM(IPARG,ELBUF_TAB,GLOBAL_ACTIVE_ALE_ELEMENT,GLOB_THERM%ITHERM)
               ! initialization of some size and arrays for ALE solver
-              call init_ale(global_active_ale_element,n2d,numels,numelq,nmult,iale,ieuler,trimat,glob_therm%itherm,ale)
+              call init_ale(global_active_ale_element,n2d,numels,numelq,nmult,
+     .                      iale,ieuler,trimat,glob_therm%itherm,numnod,    
+     .                      nspmd,nsvois,nqvois,nparg,ngroup,slesdvois,slercvois,        
+     .                      nesdvois,nercvois,lesdvois,lercvois,nodes%itab, 
+     .                      nodes%itabm1,ixs,ixq,iparg,ale,ale_connectivity)
+
               IF(NADMESH/=0.AND.IDEL7NG>=1) IDEL7NOK = 0
 C     THERMAL TIME STEP : we don t check incompatible kinematic conditions anymore
 c      we constraint all DDLs
@@ -4658,7 +4669,16 @@ C
                 ENDIF
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
               ENDIF
-
+! shooting node, send
+              IF (N2D/=0.AND.IDEL7==2) THEN
+              ELSEIF(IDEL7NG>=1.OR.PDEL>0) THEN
+                IF (NSPMD>1.AND.(IDEL7NG>=1.OR.PDEL>0)) THEN
+                  GLOB_IDEL7NOK = IDEL7NG
+                  CALL SPMD_IALLREDUCE(IDEL7NOK,GLOB_IDEL7NOK,1,SPMD_SUM,RQ_SHOOTING_NODE)
+!                 CALL SPMD_ALLGLOB_ISUM9(IDEL7NOK/S1)
+                ENDIF
+              ENDIF
+ 
 C--- //------------------------------
 C       PARITH/ON ASSEMBLY OF FORCES AFTER COMMUNICATION
 C-------------------------------------
@@ -4819,7 +4839,6 @@ c--------------------------------------
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
-              CALL PYTHON_BEGIN_OPENMP(PYTHON)
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
                 ITSK = OMP_GET_THREAD_NUM()
                 NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
@@ -4835,7 +4854,6 @@ C===============================================================================
                   DMSPH(I)=ZERO
                 ENDDO
 !$OMP END PARALLEL
-                CALL PYTHON_END_OPENMP(PYTHON)
               ENDIF
 
 C========================================================================================
@@ -4930,23 +4948,9 @@ C-----------------------------------------------
                   LENGTH = 1
                   LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
 C FR_WAVE boundary exchange
-                  CALL SPMD_EXCH_WAVE(FR_WAVE,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENGTH,LENR)
+                  CALL SPMD_EXCH_WAVE_INIT(FR_WAVE_BUF, LENGTH, LENR, NSPMD)
+                  CALL SPMD_EXCH_WAVE(FR_WAVE,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,FR_WAVE_BUF,1,ISPMD,NSPMD)
                 END IF
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
-                ITSK = OMP_GET_THREAD_NUM()
-                NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-                DO I=NODFTSK,NODLTSK
-                  FR_WAVE(I)=ABS(FR_WAVE(I))
-                ENDDO
-
-!$OMP END PARALLEL
-
               ENDIF
 
 C========================================================================================
@@ -4969,14 +4973,13 @@ C IDEL7NG = 0 => nothing
 C IDEL7NG = 1 | 2 => deleted segments/nodes (for at least 1 interface)
 C IDEL7NOK = 1 : need all interface such as IPARI(17)= 1 | 2
               ELSEIF(IDEL7NG>=1.OR.PDEL>0) THEN
-C        IF (NCYCLE==97) IDEL7NOK = 1
-C        IF (NCYCLE==98) IDEL7NOK = 1
                 IF (NSPMD>1.AND.(IDEL7NG>=1.OR.PDEL>0)) THEN
 C recuperation IDEL7NOK global
                   IF (IMONM > 0 ) CALL STARTIME(TIMERS,76)
-                  CALL SPMD_ALLGLOB_ISUM9(IDEL7NOK,1)
+!                 CALL SPMD_ALLGLOB_ISUM9(IDEL7NOK,1)
+                  CALL SPMD_WAIT(RQ_SHOOTING_NODE)
                   IF (IMONM > 0 ) CALL STOPTIME(TIMERS,76)
-                  IDEL7NOK = MIN(1,IDEL7NOK)
+                  IDEL7NOK = MIN(1,GLOB_IDEL7NOK)
                 ENDIF
                 IDEL7NOK_SAV = IDEL7NOK
                 IF (R2R_SIU==1.AND.IDEL7NG>=1) THEN
@@ -8373,6 +8376,27 @@ C------------
                 ENDIF
               ENDIF
 C ---------------------------------
+C-----------------------------------------------
+C       COMMUNICATION BETWEEN BOUNDARY ELEMENTS AFTER ASSEMBLY
+C-----------------------------------------------
+              IF (IFRWV > 0) THEN
+                IF (NSPMD > 1) THEN
+                  CALL SPMD_EXCH_WAVE(FR_WAVE,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,FR_WAVE_BUF,2,ISPMD,NSPMD)
+                END IF
+C========================================================================================
+C                                     PARALLEL SECTION (SMP)
+C========================================================================================
+!$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
+                ITSK = OMP_GET_THREAD_NUM()
+                NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
+                NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
+                DO I=NODFTSK,NODLTSK
+                  FR_WAVE(I)=ABS(FR_WAVE(I))
+                ENDDO
+!$OMP END PARALLEL
+              ENDIF
+
+
               CALL PYTHON_UPDATE_TIME(TT,DT2)
 
 C----------------------------------

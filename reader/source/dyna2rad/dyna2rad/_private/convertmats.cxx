@@ -1,5 +1,5 @@
-/*Copyright>    OpenRadioss
-//Copyright>    Copyright (C) 1986-2025 Altair Engineering Inc.
+//Copyright>    OpenRadioss
+//Copyright>    Copyright (C) 1986-2026 Altair Engineering Inc.
 //Copyright>
 //Copyright>    This program is free software: you can redistribute it and/or modify
 //Copyright>    it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +19,7 @@
 //Copyright>
 //Copyright>    As an alternative to this open-source version, Altair also offers Altair Radioss
 //Copyright>    software under a commercial license.  Contact Altair to discuss further if the
-//Copyright>    commercial version may interest you: https://www.altair.com/radioss/.*/
+//Copyright>    commercial version may interest you: https://www.altair.com/radioss/.
 #include <dyna2rad/dyna2rad.h>
 #include <dyna2rad/dynamatlawkeywordmap.h>
 #include <dyna2rad/convertmats.h>
@@ -1455,6 +1455,7 @@ void ConvertMat::p_ConvertMatL24(const EntityRead& dynaMat,sdiString& destCard, 
         {
             p_ConvertToMatLAW44(dynaMat, destCard, attribMap, radMat);
             matLawNumChoice = 44;
+            radMat.SetValue(p_radiossModel,sdiIdentifier("B"), sdiValue(0.0));
 //-------
             if(matLawNum != 24) radMat.SetValue(p_radiossModel, sdiIdentifier("VP"), sdiValue((int)lsdVp));
 
@@ -1575,6 +1576,7 @@ void ConvertMat::p_ConvertMatL24(const EntityRead& dynaMat,sdiString& destCard, 
                 {
                     p_ConvertToMatLAW44(dynaMat, destCard, attribMap, radMat);
                     matLawNumChoice = 44;
+                    radMat.SetValue(p_radiossModel,sdiIdentifier("B"), sdiValue(0.0));
                     radMat.SetEntityHandle(p_radiossModel, sdiIdentifier("fct_IDp"), epsEsCurveHEdit);
                     radMat.SetValue(p_radiossModel, sdiIdentifier("Optional_card"), sdiValue(1)); 
 //-------
@@ -10657,6 +10659,7 @@ void ConvertMat::p_ConvertMatL105(const EntityRead& dynaMat,sdiString& destCard,
         else if (lsdC > 0.0 && lsdP > 0.0)
         {
             p_ConvertToMatLAW44(dynaMat, destCard, attribMap, radMat);
+            radMat.SetValue(p_radiossModel,sdiIdentifier("B"), sdiValue(0.0));
 //-------
             if(matLawNum == 105)
             {
@@ -10776,7 +10779,7 @@ void ConvertMat::p_ConvertMatL105(const EntityRead& dynaMat,sdiString& destCard,
                 if (lsdC > 0.0 && lsdP > 0.0)
                 {
                     p_ConvertToMatLAW44(dynaMat, destCard, attribMap, radMat);
-
+                    radMat.SetValue(p_radiossModel,sdiIdentifier("B"), sdiValue(0.0));
                     radMat.SetEntityHandle(p_radiossModel, sdiIdentifier("fct_IDp"), epsEsCurveHEdit);
                     radMat.SetValue(p_radiossModel, sdiIdentifier("Optional_card"), sdiValue(1)); 
 //-------

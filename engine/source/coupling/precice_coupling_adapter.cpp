@@ -1,5 +1,5 @@
 //Copyright>    OpenRadioss
-//Copyright>    Copyright (C) 1986-2025 Altair Engineering Inc.
+//Copyright>    Copyright (C) 1986-2026 Altair Engineering Inc.
 //Copyright>
 //Copyright>    This program is free software: you can redistribute it and/or modify
 //Copyright>    it under the terms of the GNU Affero General Public License as published by
@@ -101,8 +101,8 @@ bool PreciceCouplingAdapter::configure(const std::string& configFile) {
             } else if (key == "READ") {
                 const auto dataType = stringToDataType(value);
                 if (dataType == DataType::NOTHING) {
-                    std::cout << "Warning: Unknown data type '" << value << "' in read configuration." << std::endl;
-                    continue;
+                    std::cerr << "Error: Unknown read data type '" << value << "' in the preCICE adapter configuration file " << configFile << std::endl;
+                    return false;
                 }
                 readData_[static_cast<size_t>(dataType)].isActive = true;
                 if (DataType::POSITIONS == dataType) {
@@ -115,15 +115,16 @@ bool PreciceCouplingAdapter::configure(const std::string& configFile) {
             } else if (key == "WRITE") {
                 const auto dataType = stringToDataType(value);
                 if (dataType == DataType::NOTHING) {
-                    std::cout << "Warning: Unknown data type '" << value << "' in write configuration." << std::endl;
-                    continue;
+                    std::cerr << "Error: Unknown write data type '" << value << "' in the preCICE adapter configuration file " << configFile << std::endl;
+                    return false;
                 }
                 writeData_[static_cast<size_t>(dataType)].isActive = true;
             } else if (key == "GRNOD") {
                 try {
                     setGroupNodeId(std::stoi(value));
                 } catch (const std::exception& e) {
-                    std::cout << "Warning: Invalid GRNOD value '" << value << "': " << e.what() << std::endl;
+                    std::cerr << "Error: Invalid nodes group GRNOD '" << value << "' in the preCICE adapter configuration file " << configFile << ": " << e.what() << std::endl;
+                    return false;
                 }
             }
         } else {

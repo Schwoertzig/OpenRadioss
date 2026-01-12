@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -833,7 +833,7 @@ C-----------------------------------------------
      .                     KNOD2ELTG ,NOD2ELTG ,IPARTC    ,IPARTG    ,IPARTS    ,
      .                     IPART     ,SET      ,OPT_A     ,OPT_O     ,IXQ       ,
      .                     KNOD2ELQ  ,NOD2ELQ  ,X         ,KEYSET    ,DELBUF    ,
-     .                     .TRUE.   ,IPARTQ)
+     .                     .TRUE.   ,IPARTQ    ,OPT_E     )
 
         !--- void calling UNION_SURFACE with non allocated arrays
         IF(.NOT. ALLOCATED(SET%SURF_NODES))ALLOCATE(SET%SURF_NODES(1,4))

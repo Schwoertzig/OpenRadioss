@@ -1,5 +1,5 @@
 !Copyright>        OpenRadioss
-!Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+!Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 !Copyright>
 !Copyright>        This program is free software: you can redistribute it and/or modify
 !Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -29,6 +29,7 @@
 !||    geom_vec                        ../engine/source/ale/alemuscl/geom_vec.F90
 !||    h3d_oned_scalar                 ../engine/source/output/h3d/h3d_results/h3d_oned_scalar.F90
 !||    h3d_quad_scalar_1               ../engine/source/output/h3d/h3d_results/h3d_quad_scalar_1.F90
+!||    init_ale_boundary_condition     ../engine/source/ale/init_ale_boundary_condition.F90
 !||    mmain                           ../engine/source/materials/mat_share/mmain.F90
 !||    mulaw8                          ../engine/source/materials/mat_share/mulaw8.F90
 !||    redef3                          ../engine/source/elements/spring/redef3.F90

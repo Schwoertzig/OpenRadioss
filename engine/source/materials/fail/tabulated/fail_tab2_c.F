@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -287,6 +287,7 @@ c
               RETA = (THREE*BIAXF/(THREE*RGTR2 - TWO))*
      .               (RGTR2 - MIN(MAX(TRIAX(I),RGTR2),TWO_THIRD))
             ENDIF
+            RETA = MAX(ZERO, MIN(ONE, RETA))
             SIZEFAC(I) = SIZEFAC(I) + RETA*(ONE - SIZEFAC(I))
           ENDDO
         ENDIF

@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2025 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2026 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -41,6 +41,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_count_2d_element_seatbelt      ../starter/source/devtools/hm_reader/hm_count_2d_element_seatbelt.F
 !||    hm_get_max_id                     ../starter/source/devtools/hm_reader/hm_get_max_id.F
 !||    hm_messages                       ../starter/source/devtools/hm_reader/hm_messages.F
+!||    hm_rbodies_add_main_node          ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_checksum                  ../starter/source/output/checksum/checksum_option.F90
 !||    hm_read_submodel                  ../starter/source/model/assembling/hm_read_submodel.F
 !||    ini_msg                           ../starter/source/output/message/inimsg.F
@@ -69,6 +70,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    defaults_mod                      ../starter/source/modules/defaults_mod.F90
 !||    detonators_mod                    ../starter/share/modules1/detonators_mod.F
 !||    glob_therm_init_mod               ../starter/source/constraints/thermic/glob_therm_init.F90
+!||    hm_rbodies_add_main_node_mod      ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    message_mod                       ../starter/share/message_module/message_mod.F
 !||    submodel_mod                      ../starter/share/modules1/submodel_mod.F
 !||    th_mod                            ../starter/share/modules1/th_mod.F90
@@ -102,6 +104,7 @@ C-----------------------------------------------
       use checksum_starter_option_mod
       use checksum_check_mod
       use th_mod , only : TH_HAS_NODA_PEXT
+      use hm_rbodies_add_main_node_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -778,6 +781,10 @@ c 2d seatbelt translation
       IF (NB_SEATBELT_SHELLS > 0) 
      .  CALL HM_CONVERT_2D_ELEMENTS_SEATBELT(IDMAX_PART,IDMAX_PROP,IDMAX_MAT,IDMAX_ELEM,IDMAX_TH,
      .                                           SEATBELT_CONVERTED_ELEMENTS,NB_SEATBELT_SHELLS,LSUBMODEL)
+C-------------------------------------------------------------------
+C Add RBODY master node if not existing in /RBODY cards
+C------------------------------------------------------------------
+      CALL hm_rbodies_add_main_node(LSUBMODEL)
 C------------------------------------------------------------------
       ! Initialisation of glob_therm module
 C------------------------------------------------------------------
