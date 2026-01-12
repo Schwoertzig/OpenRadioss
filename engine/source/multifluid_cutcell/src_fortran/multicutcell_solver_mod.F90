@@ -55,6 +55,7 @@ module multicutcell_solver_mod
     type(Point3D) :: mean_normal, pressure_face
     integer(kind=8) :: is_narrowband
     real(kind=wp), dimension(4) :: ys, zs
+    integer :: print_nb_cell
 
     nb_cell = size(grid, 1)
     nb_regions = size(grid, 2)
@@ -63,7 +64,13 @@ module multicutcell_solver_mod
     allocate(ptr_big_lambda_n(nb_regions))
     allocate(ptr_big_lambda_np1(nb_regions))
 
+    print_nb_cell = nb_cell/10
+    write(*,*) "Doing cell number ", 1, "/", nb_cell
     do i = 1,nb_cell
+      if (i>print_nb_cell-1) then 
+        write(*,*) "Doing cell number ", i, "/", nb_cell
+        print_nb_cell = print_nb_cell + nb_cell/10
+      end if
       if (grid(i,1)%close_cells) then
         if (NUMELQ>0) then
           nb_edges = 4
@@ -1155,6 +1162,7 @@ module multicutcell_solver_mod
 
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, pressure_edge, &
                                 minimal_length, maximal_length, minimal_angle) !initialize clipped3D in C.
+    write(*,*) "Computing lambdas for the first time: this may take a while..."
     call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) !initialize lambda fields, close_cell and is_narrowband in grid
 
     deallocate(vec_move_clippedy)

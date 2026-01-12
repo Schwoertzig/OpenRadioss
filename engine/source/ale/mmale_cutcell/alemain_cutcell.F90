@@ -204,16 +204,16 @@
                    
 
   
-                write(*,*) "vely1 = ", multi_cutcell%phase_vely(:,1)
-                write(*,*) "velz1 = ", multi_cutcell%phase_velz(:,1)
-                write(*,*) "vely2 = ", multi_cutcell%phase_vely(:,2)
-                write(*,*) "velz2 = ", multi_cutcell%phase_velz(:,2)
-                write(*,*) "rho1 = ", multi_cutcell%phase_rho(:,1)
-                write(*,*) "pres1 = ", multi_cutcell%phase_pres(:,1)
-                write(*,*) "rho2 = ", multi_cutcell%phase_rho(:,2)
-                write(*,*) "pres2 = ", multi_cutcell%phase_pres(:,2)
-                write(*,*) "vol frac phase 1 = ", multi_cutcell%grid(:,1)%lambdanp1_per_cell
-                write(*,*) "vol frac phase 2 = ", multi_cutcell%grid(:,2)%lambdanp1_per_cell
+                !write(*,*) "vely1 = ", multi_cutcell%phase_vely(:,1)
+                !write(*,*) "velz1 = ", multi_cutcell%phase_velz(:,1)
+                !write(*,*) "vely2 = ", multi_cutcell%phase_vely(:,2)
+                !write(*,*) "velz2 = ", multi_cutcell%phase_velz(:,2)
+                !write(*,*) "rho1 = ", multi_cutcell%phase_rho(:,1)
+                !write(*,*) "pres1 = ", multi_cutcell%phase_pres(:,1)
+                !write(*,*) "rho2 = ", multi_cutcell%phase_rho(:,2)
+                !write(*,*) "pres2 = ", multi_cutcell%phase_pres(:,2)
+                !write(*,*) "vol frac phase 1 = ", multi_cutcell%grid(:,1)%lambdanp1_per_cell
+                !write(*,*) "vol frac phase 2 = ", multi_cutcell%grid(:,2)%lambdanp1_per_cell
 
 
 
