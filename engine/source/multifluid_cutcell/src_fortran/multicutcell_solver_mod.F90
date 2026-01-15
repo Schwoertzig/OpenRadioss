@@ -70,6 +70,7 @@ module multicutcell_solver_mod
       if (i>print_nb_cell-1) then 
         write(*,*) "Doing cell number ", i, "/", nb_cell
         print_nb_cell = print_nb_cell + nb_cell/10
+        call system('sync')
       end if
       if (grid(i,1)%close_cells) then
         if (NUMELQ>0) then

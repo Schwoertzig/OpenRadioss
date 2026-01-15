@@ -99,6 +99,7 @@
           integer :: elem_iid !< internal id
           integer :: iad2,lgth, iadj, JJ !< ale_connectivity usage (elem-elem)
           real(kind=WP) :: gamma(2)
+          real(kind=WP) :: largest_speed_wave
           integer :: sign !Not used for now
           integer :: nb_phase  !< number of phases
           integer(kind=8) :: nb_polygon
@@ -196,10 +197,19 @@
                               multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
                               gamma, &
                               multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot)
-                  multi_cutcell%sound_speed = multi_cutcell%grid(:,1)%lambdanp1_per_cell*& 
-                                sqrt(gamma(1) * multi_cutcell%phase_pres(:,1) / multi_cutcell%phase_rho(:,1)) + &
-                                multi_cutcell%grid(:,2)%lambdanp1_per_cell*&
-                                sqrt(gamma(2) * multi_cutcell%phase_pres(:,2) / multi_cutcell%phase_rho(:,2))
+                  do ng = 1,numelq+numeltg
+                    largest_speed_wave = -1.
+                    multi_cutcell%sound_speed(ng) = multi_cutcell%grid(ng,1)%lambdanp1_per_cell*& 
+                                  sqrt(gamma(1) * multi_cutcell%phase_pres(ng,1) / multi_cutcell%phase_rho(ng,1)) + &
+                                  multi_cutcell%grid(ng,2)%lambdanp1_per_cell*&
+                                  sqrt(gamma(2) * multi_cutcell%phase_pres(ng,2) / multi_cutcell%phase_rho(ng,2))
+                    do ii = 1,2
+                      largest_speed_wave = max(largest_speed_wave, &
+                                                max(abs(multi_cutcell%phase_vely(ng, ii)),&
+                                                 abs(multi_cutcell%phase_velz(ng, ii))) + multi_cutcell%sound_speed(ng))
+                    end do
+                  end do
+                  dt2t = dt_scale * sqrt(minval(multi_cutcell%grid(:, 1)%area)) / largest_speed_wave
                  end if
                    
 
