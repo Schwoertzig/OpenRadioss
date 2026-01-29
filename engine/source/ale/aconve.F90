@@ -623,7 +623,8 @@
                     var => null()
                   end if
 
-                  piad22 => elbuf_tab(ng)%gbuf%tag22(1:llt)
+                  nullify(piad22)
+                  if(int22 >0)piad22 => elbuf_tab(ng)%gbuf%tag22(1:llt)
                   ! -----------
                   iflg = 0
                   if(nvar==1.and.flag_mat_51==1) iflg = 1
