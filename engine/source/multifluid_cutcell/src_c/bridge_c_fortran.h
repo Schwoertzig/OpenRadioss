@@ -8,7 +8,7 @@
 void launch_grb_();
 void end_grb_();
 
-void build_grid_from_points_fortran_(const my_real_c* x_v, const my_real_c* y_v, const long long int *signed_nb_pts);
+void build_grid_from_points_fortran_(const my_real_c* x_v, const my_real_c* y_v, long long int* pt_indices, const long long int *signed_nb_pts);
 void build_clipped_from_pts_fortran_(const my_real_c* x_v, const my_real_c* y_v, const long long int* limits, const long long *nb_polygons);
 
 /// @brief 

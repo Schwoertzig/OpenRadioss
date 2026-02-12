@@ -3,6 +3,7 @@
 #include "edge_collision.h"
 #include "polygon_fusion_and_split.h"
 #include "AStar.h"
+#include <stdlib.h>
 
 //Project d in [min, max].
 static my_real_c clamp(my_real_c d, my_real_c min, my_real_c max) {
@@ -133,7 +134,7 @@ static void detect_pts_to_delete(Polygon2D* p, my_real_c dt, const my_real_c *vs
                     infogrb = GrB_Vector_extractElement(&i_pt0, nz_ej, 0);
                 else
                     infogrb = GrB_Vector_extractElement(&i_pt0, nz_ej, 1);
-                infogrb = GrB_extract(e_ipt0, GrB_NULL, GrB_NULL, *(p->edges), (GrB_Index[]){i_pt0}, 1, GrB_ALL, 1, GrB_DESC_T0); //Get indices of edges connected with point i_pt0
+                infogrb = GrB_extract(e_ipt0, GrB_NULL, GrB_NULL, *(p->edges), (GrB_Index[]){i_pt0}, 1, GrB_ALL, 1, GrB_NULL); //Get indices of edges connected with point i_pt0
                 infogrb = GxB_Matrix_extractTuples_Vector(I_vec, nz_e_ipt0, extr_vals_e_ipt0, e_ipt0, GrB_NULL);
                 infogrb = GrB_Vector_size(&size_nz_e_ipt0, nz_e_ipt0);
                 if (size_nz_e_ipt0 == 2){ //Exactly two edges connected to the point i_pt0
@@ -1430,6 +1431,7 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
     for (i=0; i<vertices_tnp1->size; i++){
         set_ith_elem_vec_pts2D(solid_tnp1->vertices, i, get_ith_elem_vec_pts2D(vertices_tnp1, i));
     }
+
 
     IntersecList = alloc_empty_vec_pts2D();
     edge_intersect1 = alloc_empty_vec_uint();

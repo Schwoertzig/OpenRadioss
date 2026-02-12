@@ -22,19 +22,19 @@
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
       module alemain_cutcell_mod
         implicit none
-      contains
-! ======================================================================================================================
-!                                                   procedures
-! ======================================================================================================================
-!! \brief Main Subroutine called by the resol loop to treat ALE MULTIMAT with cut-cell interface tracking
-!! \details ...
+        contains
+        ! ======================================================================================================================
+        !                                                   procedures
+        ! ======================================================================================================================
+        !! \brief Main Subroutine called by the resol loop to treat ALE MULTIMAT with cut-cell interface tracking
+        !! \details ...
         subroutine  alemain_cutcell(nixtg, nixq, numeltg, numelq, ixtg, ixq, numnod, x, ale_connect, ncycle, &
-                                    ityptstt, neltstt, t1s, tt, &
-                                    ngrnod, igrnod, dt_scale, dt1, dt2t, multi_cutcell, &
-                                    ngroup, elbuf, nparg, iparg, ebcs_tab, n2d)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Modules
-! ----------------------------------------------------------------------------------------------------------------------
+          ityptstt, neltstt, t1s, tt, &
+          ngrnod, igrnod, dt_scale, dt1, dt2t, multi_cutcell, &
+          ngroup, elbuf, nparg, iparg, ebcs_tab, n2d)
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !                                                   Modules
+          ! ----------------------------------------------------------------------------------------------------------------------
           use constant_mod, only : pi,zero,one,em01               !module containing all constant insitialized with either single or double precision
           use precision_mod, only : wp                            !provides kind for eigther single or double precision (wp means working precision)
           use ale_connectivity_mod , only : t_ale_connectivity    !data structure for ale elem-elem connectivities
@@ -46,17 +46,17 @@
           use elbufdef_mod , only : elbuf_struct_
           use multicutcell_solver_mod , only : multicutcell_initial_state
           use ebcs_mod !, only : t_ebcs_tab, t_ebcs
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Implicit none
-! ----------------------------------------------------------------------------------------------------------------------
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !                                                   Implicit none
+          ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Included files
-! ----------------------------------------------------------------------------------------------------------------------
-!
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Arguments
-! ----------------------------------------------------------------------------------------------------------------------
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !                                                   Included files
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !                                                   Arguments
+          ! ----------------------------------------------------------------------------------------------------------------------
           ! input
           integer,intent(in) :: nixq                                    !< array size for ixq array
           integer,intent(in) :: nixtg                                   !< array size for ixtg array
@@ -75,22 +75,22 @@
           real(kind=WP), intent(in) :: dt_scale
           real(kind=wp),intent(in) :: dt1
           type(t_ebcs_tab), target, intent(in) :: ebcs_tab              !< data structure for user boundary conditions
-
+          
           !output
           real(kind=wp),intent(out) :: dt2t
           type(multi_cutcell_struct), intent(inout) :: multi_cutcell        !< element buffer (storage for output files : pressure, density, velocity, ...)
           integer,intent(inout) :: ityptstt                             !< element type imposing the time step (here 2)
           integer,intent(inout) :: neltstt                              !< element user id imposing the time step
           real(kind=WP),intent(inout) :: t1s                            !< simulation time
-
+          
           ! post-treatment
           type(elbuf_struct_),dimension(ngroup) :: elbuf
           integer,intent(in) :: nparg  !< size IPARG
           integer,intent(in) :: ngroup !< number of group
           integer,intent(in) :: iparg(nparg,ngroup)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !                                                   Local variables
+          ! ----------------------------------------------------------------------------------------------------------------------
           integer :: part_id, polyg_id !< user parameters
           integer :: nel      !< number of element in the group
           integer :: nft      !< shift (group partitionning nel<=128)
@@ -107,191 +107,192 @@
           integer :: ibc !< boundary condition (several may be defined in the input file)
           integer :: ebcs_ityp !< boundary condition type
           integer :: nelem
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Precondition
-! ----------------------------------------------------------------------------------------------------------------------
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !                                                   Precondition
+          ! ----------------------------------------------------------------------------------------------------------------------
           if(ALE%solver%multimat%is_defined_mmale3 == 0) return  ! otherwise interface tracking with cut-cell is required
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Body
-! ----------------------------------------------------------------------------------------------------------------------
-! [ the code must be indented with 2 spaces]
-! [ the code must be commented ]
-! [ routines must be short, and should not exceed 200 lines for leaf routines, 1000 lines for main routines]
-
-! [ separators can be used between blocks of code]
-
-                 ! ---------------------------DO PRE-TRETMENT HERE
-                 ! -----------------------------------------------
-                 !user input
-                 part_id = ALE%solver%multimat%list(1)%part_id ! by default we can take into account all elem and ignore part_id
-                 polyg_id = ALE%solver%multimat%list(1)%surf_id
-                 nb_phase = 2 !currently 2, possible further extension to nb_phase > 2
-
-                 ! EXAMPLE OF USAGE
-                 if(ncycle == 0)then
-                   ! elem connecvitivy
-                   print *, "elem iid=1 : uid,n1,n2,n3,n4 =,", 1, ixq(7, 1), ixq(2:5, 1)   !iid : internal id, uid : user id
-                   print *, "elem iid=1  uid(n1),uid(n2),uid(n3),uid(n4) =,", ITAB_DEBUG(ixq(2:5, 1))   !iid : internal id, uid : user id
-
-                   ! polygon
-                   print *, "user polygon internal identifier : ", polyg_id
-                   print *, "     number of nodes : ", igrnod(polyg_id)%nentity
-                   print *, "     list of nodes   : ", igrnod(polyg_id)%entity (1:igrnod(polyg_id)%nentity)
-
-                   !ale_connectivity (elem-elem)
-                   ELEM_IID=1
-                   IAD2 = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID)
-                   LGTH = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID+1) - IAD2
-                   DO JJ=1,LGTH
-                     IADJ = ALE_CONNECT%ee_connect%connected(IAD2 + JJ - 1)
-                     IF(IADJ > 0)THEN
-                         !there is an adjacent elem on face J, its elem_iid is IADJ
-                      END IF
-                   ENDDO
-
-                   ! node coordinates
-                   print *, "node iid=3, x,y,z=", X(1:3, 3), "uid=", ITAB_DEBUG(3)
-
-                 end if ! ncycle == 0
-
-
-
-
-                 !-------------BOUNDARY CONDITION EXEMPLE OF USAGE  (polymorphism) -------------!
-                 !TODO : usage example witten here but this can be added in one of the following subroutines below
-                  DO IBC = 1, EBCS_TAB%nebcs_fvm
-                     EBCS => EBCS_TAB%tab(IBC)%poly
-                     ebcs_ityp = EBCS%type  ! ebcs can be identified by member %type (9) or by its class 'TYPE IS(t_ebcs_fluxout)'
-                     NELEM = EBCS%nb_elem ! number of element to treat (elems which have a user BC)
-
-                     SELECT TYPE (twf => EBCS)
-                        TYPE IS(t_ebcs_fluxout)
-                          !CALL FLUX_CALCULATION(twf%ielem, twf%iface)
-                          !   twf%ielem : list of elem ids which have a user BC
-                          !   twf%iface : corresponding (local) face number ( iface \in {1,2,3,4} )
-                     END SELECT
-                 ENDDO
-
-
-                 ! -------------------------------CALL 2D POC HERE
-                 ! -----------------------------------------------
-                 gamma(1) =  ALE%SOLVER%MULTIMAT%gamma(1)   !defined in input file
-                 gamma(2) =  ALE%SOLVER%MULTIMAT%gamma(2)   !defined in input file
-                 sign = 1 !not used for now
-
-                 if (dt1>0) then
-                  call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
-                         multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
-                         multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
-                         gamma, dt1, dt_scale, sign, ebcs_tab, &
-                         multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot, &
-                         dt2t, multi_cutcell%sound_speed)
-                 else
-                  !Initialization
-                  call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
-                  nb_polygon = ALE%solver%multimat%nb
-                  call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
-                              nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid)
-                  call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
-                  call build_full_states(multi_cutcell%grid, multi_cutcell%phase_rho, &
-                              multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
-                              gamma, &
-                              multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot)
-                  do ng = 1,numelq+numeltg
-                    largest_speed_wave = -1.
-                    multi_cutcell%sound_speed(ng) = multi_cutcell%grid(ng,1)%lambdanp1_per_cell*& 
-                                  sqrt(gamma(1) * multi_cutcell%phase_pres(ng,1) / multi_cutcell%phase_rho(ng,1)) + &
-                                  multi_cutcell%grid(ng,2)%lambdanp1_per_cell*&
-                                  sqrt(gamma(2) * multi_cutcell%phase_pres(ng,2) / multi_cutcell%phase_rho(ng,2))
-                    do ii = 1,2
-                      largest_speed_wave = max(largest_speed_wave, &
-                                                max(abs(multi_cutcell%phase_vely(ng, ii)),&
-                                                 abs(multi_cutcell%phase_velz(ng, ii))) + multi_cutcell%sound_speed(ng))
-                    end do
-                  end do
-                  dt2t = dt_scale * sqrt(minval(multi_cutcell%grid(:, 1)%area)) / largest_speed_wave
-                 end if
-                   
-
-  
-                !write(*,*) "vely1 = ", multi_cutcell%phase_vely(:,1)
-                !write(*,*) "velz1 = ", multi_cutcell%phase_velz(:,1)
-                !write(*,*) "vely2 = ", multi_cutcell%phase_vely(:,2)
-                !write(*,*) "velz2 = ", multi_cutcell%phase_velz(:,2)
-                !write(*,*) "rho1 = ", multi_cutcell%phase_rho(:,1)
-                !write(*,*) "pres1 = ", multi_cutcell%phase_pres(:,1)
-                !write(*,*) "rho2 = ", multi_cutcell%phase_rho(:,2)
-                !write(*,*) "pres2 = ", multi_cutcell%phase_pres(:,2)
-                !write(*,*) "vol frac phase 1 = ", multi_cutcell%grid(:,1)%lambdanp1_per_cell
-                !write(*,*) "vol frac phase 2 = ", multi_cutcell%grid(:,2)%lambdanp1_per_cell
-
-
-
-                 ! -------------------------DO POST-TREATMENT HERE
-                 ! -----------------------------------------------
-                 ! required for time loop
-                 dt2t = em01  ! time step used computed or imposed by the poc
-                 neltstt = 1  ! element user id imposing the minimal time step
-                 ityptstt = 2 !element type imposing the minimal time step
-                 T1S = TT     ! required to go to next cycle
-
-
-
-                 ! Retrieving cell data for post-treatment (ANIM / H3D output : resol > sortie_main)
-                 do ng=1,ngroup
-                   nel = iparg(2,ng)
-                   nft = iparg(3,ng) ! shift
-                   do ii=1,nel
-                     elem_iid = ii+nft
-                     !mass density
-                     elbuf(ng)%gbuf%rho(ii) = multi_cutcell%rho(elem_iid)
-                     !stress tensor
-                     elbuf(ng)%gbuf%sig(0*NEL+ii) = -multi_cutcell%pres(elem_iid)
-                     elbuf(ng)%gbuf%sig(1*NEL+ii) = -multi_cutcell%pres(elem_iid)
-                     elbuf(ng)%gbuf%sig(2*NEL+ii) = -multi_cutcell%pres(elem_iid)
-
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,1)
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,2)
-
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%ssp(ii) = multi_cutcell%sound_speed(elem_iid)
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%ssp(ii) = multi_cutcell%sound_speed(elem_iid)
-
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(0*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(1*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(2*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
-                     !
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(0*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(1*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(2*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
-
-                     ! note : MULTI_CUTCELL%EINT ! is output as internal energy per unit volume (SI:J/m3) :  rho.e = EINT/VOL
-                     !        consequently  MULTI_CUTCELL%EINT / MULTI_CUTCELL%RHO is internal energy density :  e
-                     ! + remove kinetic energy
-                     elbuf(ng)%gbuf%eint(ii) = multi_cutcell%rho(elem_iid) * (multi_cutcell%etot(elem_iid) - 0.5 * &
-                                                  (multi_cutcell%vel(1,elem_iid)*multi_cutcell%vel(1,elem_iid) + &
-                                                   multi_cutcell%vel(2,elem_iid)*multi_cutcell%vel(2,elem_iid)))
-
-                     !element time step
-                     elbuf(ng)%gbuf%dt(ii) = max(abs(multi_cutcell%vel(1,elem_iid)), abs(multi_cutcell%vel(2,elem_iid))) &
-                                             + multi_cutcell%sound_speed(elem_iid)
-
-                     !volume fraction
-                     ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 1)%lambdanp1_per_cell
-                     ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 2)%lambdanp1_per_cell
-
-                     !velocity-phase1
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,1)
-                     elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,1)
-                     !velocity-phase2
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,2)
-                     elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,2)
-
-
-                   end do
-                 enddo
-
-
-
-! ----------------------------------------------------------------------------------------------------------------------
-        end subroutine alemain_cutcell
-      end module alemain_cutcell_mod
+          ! ----------------------------------------------------------------------------------------------------------------------
+          !                                                   Body
+          ! ----------------------------------------------------------------------------------------------------------------------
+          ! [ the code must be indented with 2 spaces]
+          ! [ the code must be commented ]
+          ! [ routines must be short, and should not exceed 200 lines for leaf routines, 1000 lines for main routines]
+          
+          ! [ separators can be used between blocks of code]
+          
+          ! ---------------------------DO PRE-TRETMENT HERE
+          ! -----------------------------------------------
+          !user input
+          part_id = ALE%solver%multimat%list(1)%part_id ! by default we can take into account all elem and ignore part_id
+          polyg_id = ALE%solver%multimat%list(1)%surf_id
+          nb_phase = 2 !currently 2, possible further extension to nb_phase > 2
+          
+          ! EXAMPLE OF USAGE
+          if(ncycle == 0)then
+            ! elem connecvitivy
+            print *, "elem iid=1 : uid,n1,n2,n3,n4 =,", 1, ixq(7, 1), ixq(2:5, 1)   !iid : internal id, uid : user id
+            print *, "elem iid=1  uid(n1),uid(n2),uid(n3),uid(n4) =,", ITAB_DEBUG(ixq(2:5, 1))   !iid : internal id, uid : user id
+            
+            ! polygon
+            print *, "user polygon internal identifier : ", polyg_id
+            print *, "     number of nodes : ", igrnod(polyg_id)%nentity
+            print *, "     list of nodes   : ", igrnod(polyg_id)%entity (1:igrnod(polyg_id)%nentity)
+            
+            !ale_connectivity (elem-elem)
+            ELEM_IID=1
+            IAD2 = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID)
+            LGTH = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID+1) - IAD2
+            DO JJ=1,LGTH
+              IADJ = ALE_CONNECT%ee_connect%connected(IAD2 + JJ - 1)
+              IF(IADJ > 0)THEN
+                !there is an adjacent elem on face J, its elem_iid is IADJ
+              END IF
+            ENDDO
+            
+            ! node coordinates
+            print *, "node iid=3, x,y,z=", X(1:3, 3), "uid=", ITAB_DEBUG(3)
+            
+          end if ! ncycle == 0
+          
+          
+          
+          
+          !-------------BOUNDARY CONDITION EXEMPLE OF USAGE  (polymorphism) -------------!
+          !TODO : usage example witten here but this can be added in one of the following subroutines below
+          DO IBC = 1, EBCS_TAB%nebcs_fvm
+            EBCS => EBCS_TAB%tab(IBC)%poly
+            ebcs_ityp = EBCS%type  ! ebcs can be identified by member %type (9) or by its class 'TYPE IS(t_ebcs_fluxout)'
+            NELEM = EBCS%nb_elem ! number of element to treat (elems which have a user BC)
+            
+            SELECT TYPE (twf => EBCS)
+            TYPE IS(t_ebcs_fluxout)
+            !CALL FLUX_CALCULATION(twf%ielem, twf%iface)
+            !   twf%ielem : list of elem ids which have a user BC
+            !   twf%iface : corresponding (local) face number ( iface \in {1,2,3,4} )
+          END SELECT
+        ENDDO
+        
+        
+        ! -------------------------------CALL 2D POC HERE
+        ! -----------------------------------------------
+        gamma(1) =  ALE%SOLVER%MULTIMAT%gamma(1)   !defined in input file
+        gamma(2) =  ALE%SOLVER%MULTIMAT%gamma(2)   !defined in input file
+        sign = 1 !not used for now
+        
+        call system("sync")
+        if (dt1>0) then
+          call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
+          multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
+          multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
+          gamma, dt1, dt_scale, sign, ebcs_tab, &
+          multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot, &
+          dt2t, multi_cutcell%sound_speed)
+        else
+          !Initialization
+          call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
+          nb_polygon = ALE%solver%multimat%nb
+          call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
+          nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid)
+          call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
+          call build_full_states(multi_cutcell%grid, multi_cutcell%phase_rho, &
+          multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
+          gamma, &
+          multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot)
+          do ng = 1,numelq+numeltg
+            largest_speed_wave = -1.
+            multi_cutcell%sound_speed(ng) = (multi_cutcell%grid(ng,1)%lambdanp1_per_cell*& 
+                                          sqrt(gamma(1) * multi_cutcell%phase_pres(ng,1) / multi_cutcell%phase_rho(ng,1)) + &
+                                          multi_cutcell%grid(ng,2)%lambdanp1_per_cell*&
+                                          sqrt(gamma(2) * multi_cutcell%phase_pres(ng,2) / multi_cutcell%phase_rho(ng,2)))/&
+                                    (multi_cutcell%grid(ng,1)%lambdanp1_per_cell + multi_cutcell%grid(ng,2)%lambdanp1_per_cell)
+            largest_speed_wave = max(largest_speed_wave, &
+                                      max(abs(multi_cutcell%vel(2, ng)), abs(multi_cutcell%vel(3, ng)))&
+                                              + multi_cutcell%sound_speed(ng))
+          end do
+          dt2t = dt_scale * sqrt(minval(multi_cutcell%grid(:, 1)%area)) / largest_speed_wave
+        end if
+        call system("sync")
+        
+        
+        
+        !write(*,*) "vely1 = ", multi_cutcell%phase_vely(:,1)
+        !write(*,*) "velz1 = ", multi_cutcell%phase_velz(:,1)
+        !write(*,*) "vely2 = ", multi_cutcell%phase_vely(:,2)
+        !write(*,*) "velz2 = ", multi_cutcell%phase_velz(:,2)
+        !write(*,*) "rho1 = ", multi_cutcell%phase_rho(:,1)
+        !write(*,*) "pres1 = ", multi_cutcell%phase_pres(:,1)
+        !write(*,*) "rho2 = ", multi_cutcell%phase_rho(:,2)
+        !write(*,*) "pres2 = ", multi_cutcell%phase_pres(:,2)
+        !write(*,*) "vol frac phase 1 = ", multi_cutcell%grid(:,1)%lambdanp1_per_cell
+        !write(*,*) "vol frac phase 2 = ", multi_cutcell%grid(:,2)%lambdanp1_per_cell
+        
+        
+        
+        ! -------------------------DO POST-TREATMENT HERE
+        ! -----------------------------------------------
+        ! required for time loop
+        !dt2t = em01  ! time step used computed or imposed by the poc
+        neltstt = 1  ! element user id imposing the minimal time step
+        ityptstt = 2 !element type imposing the minimal time step
+        T1S = TT     ! required to go to next cycle
+        
+        
+        
+        ! Retrieving cell data for post-treatment (ANIM / H3D output : resol > sortie_main)
+        do ng=1,ngroup
+          nel = iparg(2,ng)
+          nft = iparg(3,ng) ! shift
+          do ii=1,nel
+            elem_iid = ii+nft
+            !mass density
+            elbuf(ng)%gbuf%rho(ii) = multi_cutcell%rho(elem_iid)
+            !stress tensor
+            elbuf(ng)%gbuf%sig(0*NEL+ii) = -multi_cutcell%pres(elem_iid)
+            elbuf(ng)%gbuf%sig(1*NEL+ii) = -multi_cutcell%pres(elem_iid)
+            elbuf(ng)%gbuf%sig(2*NEL+ii) = -multi_cutcell%pres(elem_iid)
+            
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,1)
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,2)
+            
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%ssp(ii) = multi_cutcell%sound_speed(elem_iid)
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%ssp(ii) = multi_cutcell%sound_speed(elem_iid)
+            
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(0*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(1*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%sig(2*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,1)
+            !
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(0*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(1*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%sig(2*NEL+ii) = -multi_cutcell%phase_pres(elem_iid,2)
+            
+            ! note : MULTI_CUTCELL%EINT ! is output as internal energy per unit volume (SI:J/m3) :  rho.e = EINT/VOL
+            !        consequently  MULTI_CUTCELL%EINT / MULTI_CUTCELL%RHO is internal energy density :  e
+            ! + remove kinetic energy
+            elbuf(ng)%gbuf%eint(ii) = multi_cutcell%rho(elem_iid) * (multi_cutcell%etot(elem_iid) - 0.5 * &
+            (multi_cutcell%vel(1,elem_iid)*multi_cutcell%vel(1,elem_iid) + &
+            multi_cutcell%vel(2,elem_iid)*multi_cutcell%vel(2,elem_iid)))
+            
+            !element time step
+            elbuf(ng)%gbuf%dt(ii) = max(abs(multi_cutcell%vel(1,elem_iid)), abs(multi_cutcell%vel(2,elem_iid))) &
+            + multi_cutcell%sound_speed(elem_iid)
+            
+            !volume fraction
+            ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 1)%lambdanp1_per_cell
+            ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 2)%lambdanp1_per_cell
+            
+            !velocity-phase1
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,1)
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,1)
+            !velocity-phase2
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,2)
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,2)
+            
+            
+          end do
+        enddo
+        
+        
+        
+        ! ----------------------------------------------------------------------------------------------------------------------
+      end subroutine alemain_cutcell
+    end module alemain_cutcell_mod

@@ -6,7 +6,7 @@ module FV_fluxes
   subroutine FV_flux_hllc_Euler(gamma, rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, normalVec, rho, rhovy, rhovz, rhoE)
     use grid2D_struct_multicutcell_mod
     use polygon_cutcell_mod
-    use precision_mod, only : wp                            !provides kind for eigther single or double precision (wp means working precision)
+    use precision_mod, only : wp                            !provides kind for either single or double precision (wp means working precision)
 
     implicit none
 

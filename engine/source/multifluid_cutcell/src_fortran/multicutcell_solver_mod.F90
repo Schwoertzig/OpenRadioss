@@ -55,6 +55,7 @@ module multicutcell_solver_mod
     type(Point3D) :: mean_normal, pressure_face
     integer(kind=8) :: is_narrowband
     real(kind=wp), dimension(4) :: ys, zs
+    integer(kind=8), dimension(4) :: pt_indices
     integer :: print_nb_cell
 
     nb_cell = size(grid, 1)
@@ -78,9 +79,10 @@ module multicutcell_solver_mod
         else
           nb_edges = 3
         end if
-        ys(1:nb_edges) = X(2, IXQ(2:2+nb_edges-1, i))
-        zs(1:nb_edges) = X(3, IXQ(2:2+nb_edges-1, i))
-        call build_grid_from_points_fortran(ys, zs, nb_edges) 
+        pt_indices = IXQ(2:2+nb_edges-1, i)
+        ys(1:nb_edges) = X(2, pt_indices)
+        zs(1:nb_edges) = X(3, pt_indices)
+        call build_grid_from_points_fortran(ys, zs, pt_indices, nb_edges) 
         mean_normal%y = 0.0_wp
         mean_normal%z = 0.0_wp 
         mean_normal%t = 0.0_wp
@@ -375,6 +377,7 @@ module multicutcell_solver_mod
         lambdan_prev(i, k) = grid(i, k)%lambdanp1_per_cell
       end do 
     end do
+    write(*,*) "p(7,:) = ", p(7,:)
   
     normalVecy(:) = 0.0
     normalVecz(:) = 0.0
@@ -399,8 +402,30 @@ module multicutcell_solver_mod
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
 
     call multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
+    write(*,*) "After compute_fluxes"
+    write(*,*) "Fluxes 1 are: " 
+    write(*,*) "rho: ", fx(7, 1)%rho
+    write(*,*) "rhovy", fx(7, 1)%rhovy
+    write(*,*) "rhovz", fx(7, 1)%rhovz
+    write(*,*) "rhoE: ", fx(7, 1)%rhoE
+    write(*,*) "Fluxes 2 are: " 
+    write(*,*) "rho: ", fx(7, 2)%rho
+    write(*,*) "rhovy", fx(7, 2)%rhovy
+    write(*,*) "rhovz", fx(7, 2)%rhovz
+    write(*,*) "rhoE: ", fx(7, 2)%rhoE
     call multicutcell_compute_fluxes_boundary(NUMELQ, NUMELTG, IXQ, IXTG, X, gamma, &
                                               rho, vely, velz, p, ebcs_tab, fx)
+    write(*,*) "After compute_fluxes_boundary"
+    write(*,*) "Fluxes 1 are: " 
+    write(*,*) "rho: ", fx(7, 1)%rho
+    write(*,*) "rhovy", fx(7, 1)%rhovy
+    write(*,*) "rhovz", fx(7, 1)%rhovz
+    write(*,*) "rhoE: ", fx(7, 1)%rhoE
+    write(*,*) "Fluxes 2 are: " 
+    write(*,*) "rho: ", fx(7, 2)%rho
+    write(*,*) "rhovy", fx(7, 2)%rhovy
+    write(*,*) "rhovz", fx(7, 2)%rhovz
+    write(*,*) "rhoE: ", fx(7, 2)%rhoE
     
     !Compute right hand side for non-fused or target cells
     grid(:, :)%lambdanp1_per_cell_target = 0.
@@ -425,12 +450,20 @@ module multicutcell_solver_mod
         dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz + grid(i, k)%lambdan_per_cell * W(i, k)%rhovz  
         dW(ind_targ, k)%rhoE = dW(ind_targ, k)%rhoE + grid(i, k)%lambdan_per_cell * W(i, k)%rhoE  
     
+        if ((.not. (grid(i,k)%is_narrowband)) .and. ((grid(i,k)%lambdan_per_cell>0) .or. ((grid(i,k)%lambdanp1_per_cell>0)))) then
+          write(*,*) "Cell number ", i, ", region ", k, ", sums of fluxes in this cell are:"
+          write(*,*) sum(fx(i,k)%rho)
+          write(*,*) sum(fx(i,k)%rhovy)
+          write(*,*) sum(fx(i,k)%rhovz)
+          write(*,*) sum(fx(i,k)%rhoE)
+        end if
+
         !Add numerical fluxes
         do j = 1,nb_edges
-          dW(ind_targ, k)%rho = dW(ind_targ, k)%rho - dt * fx(i, k)%rho(j) * grid(i, k)%lambda_per_edge(j) 
+          dW(ind_targ, k)%rho   = dW(ind_targ, k)%rho   - dt * fx(i, k)%rho(j)   * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhovy = dW(ind_targ, k)%rhovy - dt * fx(i, k)%rhovy(j) * grid(i, k)%lambda_per_edge(j) 
           dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz - dt * fx(i, k)%rhovz(j) * grid(i, k)%lambda_per_edge(j) 
-          dW(ind_targ, k)%rhoE = dW(ind_targ, k)%rhoE - dt * fx(i, k)%rhoE(j) * grid(i, k)%lambda_per_edge(j) 
+          dW(ind_targ, k)%rhoE  = dW(ind_targ, k)%rhoE  - dt * fx(i, k)%rhoE(j)  * grid(i, k)%lambda_per_edge(j) 
         end do
     
         !Add swept quantities
@@ -484,11 +517,13 @@ module multicutcell_solver_mod
     call build_full_states(grid, rho, vely, velz, p, gamma, &
                               full_rho, full_pres, full_vel, full_etot)
     
+    call system("sync")
     !Compute next dt
     largest_speed_wave = -1.
     do i = 1,nb_cell
-      sound_speed(i) = grid(i,1)%lambdanp1_per_cell*sqrt(gamma(1) * p(i,1) / rho(i,1)) + &
-                    grid(i,2)%lambdanp1_per_cell*sqrt(gamma(2) * p(i,2) / rho(i,2))
+      sound_speed(i) = (grid(i,1)%lambdanp1_per_cell*sqrt(gamma(1) * p(i,1) / rho(i,1)) + &
+                    grid(i,2)%lambdanp1_per_cell*sqrt(gamma(2) * p(i,2) / rho(i,2)))/&
+                    (grid(i,1)%lambdanp1_per_cell + grid(i,2)%lambdanp1_per_cell)
       do k = 1,nb_regions
         largest_speed_wave = max(largest_speed_wave, max(abs(vely(i, k)), abs(velz(i, k))) + sound_speed(i))
       end do
@@ -652,7 +687,10 @@ module multicutcell_solver_mod
               if (associated(target_cells(c, k)%ptr)) then
                 curr_targ => target_cells(c, k)%ptr
                 do while (associated(curr_targ))
-                  if ((cell_type(curr_targ%val, k) == NOT_FUSED) .or. (cell_type(curr_targ%val, k) == FUSED)) then
+                  if ((cell_type(curr_targ%val, k) == NOT_FUSED .and. &
+                        ((grid(curr_targ%val, k)%lambdan_per_cell >= threshold*grid(curr_targ%val, k)%area) .or. &
+                        (grid(curr_targ%val, k)%lambdanp1_per_cell >= threshold*grid(curr_targ%val, k)%area))) &
+                        .or. (cell_type(curr_targ%val, k) == FUSED)) then
                     call integer_LL_insert_after(targ_c, curr_targ%val)
                     size_list = size_list + 1
                   end if
@@ -799,6 +837,18 @@ module multicutcell_solver_mod
 
       do i=1,nb_cell
         call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i, normals, nb_edges)
+        if (i == 7) then
+          write(*,*) "Cell ", i, ", points are : " 
+          do j=2,5
+            write(*,*) X(:, IXQ(j, i))
+          end do
+          write(*,*) "Normals are:"
+          do j=1,nb_edges
+            write(*,*) normals(j)
+          end do
+          write(*,*) ""
+        end if
+
         do j=1,nb_edges
           call adjacency_edge(ALE_CONNECT, i, j, other_face, other_edge) 
           do k = 1,nb_regions
@@ -823,6 +873,18 @@ module multicutcell_solver_mod
             end if
           end do
         end do
+        if (i == 7) then
+          write(*,*) "Fluxes 1 are: " 
+          write(*,*) "rho: ", fx(i, 1)%rho
+          write(*,*) "rhovy", fx(i, 1)%rhovy
+          write(*,*) "rhovz", fx(i, 1)%rhovz
+          write(*,*) "rhoE: ", fx(i, 1)%rhoE
+          write(*,*) "Fluxes 2 are: " 
+          write(*,*) "rho: ", fx(i, 2)%rho
+          write(*,*) "rhovy", fx(i, 2)%rhovy
+          write(*,*) "rhovz", fx(i, 2)%rhovz
+          write(*,*) "rhoE: ", fx(i, 2)%rhoE
+        end if
       end do
     end subroutine multicutcell_compute_fluxes
   
@@ -848,7 +910,7 @@ module multicutcell_solver_mod
       !Local variables
       integer :: IBC, k, i_edge, nb_regions, NELEM, ielem
       integer(kind=8) :: ii, jj, nb_edges
-      class (t_ebcs), pointer :: EBCS !< pointer to ebcs data structure (in order to retrieve list of elems annd related faces)
+      class (t_ebcs), pointer :: EBCS !< pointer to ebcs data structure (in order to retrieve list of elems and related faces)
       integer :: ebcs_ityp !< boundary condition type
       real(kind=wp) :: rhoii, velyii, velzii, pii
       real(kind=wp) :: rhojj, velyjj, velzjj, pjj
@@ -887,6 +949,18 @@ module multicutcell_solver_mod
                                     velyii, velyjj, velzii, velzjj, pii, pjj, normal, &
                                     fx(ii, k)%rho(i_edge), fx(ii, k)%rhovy(i_edge), &
                                     fx(ii, k)%rhovz(i_edge), fx(ii, k)%rhoE(i_edge))
+                if (ii == 7) then
+                  write(*,*) "Fluxes 1, computed on boundary, are: " 
+                  write(*,*) "rho: ", fx(ii, 1)%rho
+                  write(*,*) "rhovy", fx(ii, 1)%rhovy
+                  write(*,*) "rhovz", fx(ii, 1)%rhovz
+                  write(*,*) "rhoE: ", fx(ii, 1)%rhoE
+                  write(*,*) "Fluxes 2 are: " 
+                  write(*,*) "rho: ", fx(ii, 2)%rho
+                  write(*,*) "rhovy", fx(ii, 2)%rhovy
+                  write(*,*) "rhovz", fx(ii, 2)%rhovz
+                  write(*,*) "rhoE: ", fx(ii, 2)%rhoE
+                end if
               ENDDO
             TYPE IS(t_ebcs_nrf)
               DO ielem=1,NELEM
@@ -911,6 +985,18 @@ module multicutcell_solver_mod
                                     velyii, velyjj, velzii, velzjj, pii, pjj, normal, &
                                     fx(ii, k)%rho(i_edge), fx(ii, k)%rhovy(i_edge), &
                                     fx(ii, k)%rhovz(i_edge), fx(ii, k)%rhoE(i_edge))
+                if (ii == 7) then
+                  write(*,*) "Fluxes 1, computed on boundary, are: " 
+                  write(*,*) "rho: ", fx(ii, 1)%rho
+                  write(*,*) "rhovy", fx(ii, 1)%rhovy
+                  write(*,*) "rhovz", fx(ii, 1)%rhovz
+                  write(*,*) "rhoE: ", fx(ii, 1)%rhoE
+                  write(*,*) "Fluxes 2 are: " 
+                  write(*,*) "rho: ", fx(ii, 2)%rho
+                  write(*,*) "rhovy", fx(ii, 2)%rhovy
+                  write(*,*) "rhovz", fx(ii, 2)%rhovz
+                  write(*,*) "rhoE: ", fx(ii, 2)%rhoE
+                end if
               ENDDO
             TYPE IS (t_ebcs_inlet)
               write(6,*) 'MULTI_EBCS: Inlet EBCS not yet implemented'
@@ -941,6 +1027,18 @@ module multicutcell_solver_mod
                                     velyii, velyjj, velzii, velzjj, pii, pjj, normal, &
                                     fx(ii, k)%rho(i_edge), fx(ii, k)%rhovy(i_edge), &
                                     fx(ii, k)%rhovz(i_edge), fx(ii, k)%rhoE(i_edge))
+                if (ii == 7) then
+                  write(*,*) "Fluxes 1, computed on boundary, are: " 
+                  write(*,*) "rho: ", fx(ii, 1)%rho
+                  write(*,*) "rhovy", fx(ii, 1)%rhovy
+                  write(*,*) "rhovz", fx(ii, 1)%rhovz
+                  write(*,*) "rhoE: ", fx(ii, 1)%rhoE
+                  write(*,*) "Fluxes 2 are: " 
+                  write(*,*) "rho: ", fx(ii, 2)%rho
+                  write(*,*) "rhovy", fx(ii, 2)%rhovy
+                  write(*,*) "rhovz", fx(ii, 2)%rhovz
+                  write(*,*) "rhoE: ", fx(ii, 2)%rhoE
+                end if
               ENDDO
           END SELECT
 
@@ -952,6 +1050,7 @@ module multicutcell_solver_mod
     subroutine compute_all_id_pt_cell(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
       use grid2D_struct_multicutcell_mod
       use polygon_cutcell_mod
+      USE CONSTANT_MOD , ONLY : EM8
   
       IMPLICIT NONE
   
@@ -980,18 +1079,19 @@ module multicutcell_solver_mod
         is_inside = .true.
 
         do j = 1,nb_cell
-          if (any(grid(j, :)%is_narrowband)) then
+          if (any(grid(j, :)%close_cells)) then
+          !if ((grid(j, 1)%is_narrowband) .or. (.not. grid(j,1)%is_narrowband)) then
             call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, j, normals, nb_normals)
 
             is_inside = .true.
             do k=1,nb_normals
               pt_grid%y = X(2, IXQ(k+1, j))
               pt_grid%z = X(3, IXQ(k+1, j))
-              if ((pt%y == pt_grid%y) .and. (pt%z == pt_grid%z)) then
-                is_inside = .true.
-                exit
-              end if
               d = normals(k)%y*(pt_grid%y-pt%y) + normals(k)%z*(pt_grid%z-pt%z)
+              !if ((abs(pt%y - pt_grid%y)<epsilon(d)) .and. ((abs(pt%z - pt_grid%z)<epsilon(d)))) then
+              !  is_inside = .true.
+              !  exit
+              !end if
               !d = d/sqrt(normals(k)%y*normals(k)%y + normals(k)%z*normals(k)%z)
               if (d<0) then
                 is_inside = .false.
@@ -1005,7 +1105,9 @@ module multicutcell_solver_mod
             endif
           endif
         enddo
+      
       end do
+      call system("sync")
 
     end subroutine compute_all_id_pt_cell
 
@@ -1098,10 +1200,10 @@ module multicutcell_solver_mod
     type(grid2D_struct_multicutcell), dimension(:, :), allocatable, intent(out) :: grid
 
     !DUMMY ARGUMENTS
-    integer nb_cell, nb_regions, nb_pts_poly
-    integer(kind=8) i, k
+    integer nb_cell, nb_regions
+    integer(kind=8) i, k, nb_pts_poly, old_nb_pts_poly
     real(kind=wp), dimension(:), allocatable :: vec_move_clippedy, vec_move_clippedz
-    real(kind=wp) :: dt, minimal_length, minimal_angle, maximal_length
+    real(kind=wp) :: dt, dx, minimal_length, minimal_angle, maximal_length
     real(kind=wp), dimension(:), allocatable :: y_polygon, z_polygon
     integer(kind=8) :: limits_polygon(nb_id_polygon + 1)
     integer :: polyg_id, nb_pts
@@ -1114,10 +1216,6 @@ module multicutcell_solver_mod
     end if
 
     dt = 1.0
-    minimal_length = -1.
-    minimal_angle = -1.
-    maximal_length = 1.
-    maximal_length = huge(maximal_length)
 
     nb_cell = NUMELQ+NUMELTG !size(vely, 1)
     nb_regions = 2
@@ -1160,9 +1258,33 @@ module multicutcell_solver_mod
     vec_move_clippedz(:) = 0.
     allocate(pressure_edge(nb_pts_poly))
     pressure_edge(:) = 0.0_wp
+    
+    dx = sqrt(minval(grid(:, 1)%area))
+    minimal_length = 0.5*dx
+    minimal_angle = -1._wp
+    maximal_length = dx
 
+    call nb_pts_clipped_fortran(old_nb_pts_poly)
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, pressure_edge, &
                                 minimal_length, maximal_length, minimal_angle) !initialize clipped3D in C.
+    call nb_pts_clipped_fortran(nb_pts_poly)
+    do while (nb_pts_poly /= old_nb_pts_poly)
+      old_nb_pts_poly = nb_pts_poly
+      deallocate(vec_move_clippedy)
+      deallocate(vec_move_clippedz)
+      allocate(vec_move_clippedy(nb_pts_poly))
+      allocate(vec_move_clippedz(nb_pts_poly))
+      vec_move_clippedy(:) = 0.
+      vec_move_clippedz(:) = 0.
+      deallocate(pressure_edge)
+      allocate(pressure_edge(nb_pts_poly))
+      pressure_edge(:) = 0.0_wp
+
+      call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, pressure_edge, &
+                                  minimal_length, maximal_length, minimal_angle)
+      call nb_pts_clipped_fortran(nb_pts_poly)
+    end do
+    
     write(*,*) "Computing lambdas for the first time: this may take a while..."
     call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) !initialize lambda fields, close_cell and is_narrowband in grid
 

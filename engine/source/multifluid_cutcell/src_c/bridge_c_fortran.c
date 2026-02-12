@@ -33,20 +33,101 @@ void end_grb_(){
 }
 
 ///  @brief Builds grid given consecutive points with coordinates (x_v, y_v).
-///  @details If grid is already built, it only changes the coordinates of the points (since this is always the same structure of edges and faces).
-///  @warning It supposes that all grid cells have the same number of points (usually 3 or 4).
-void build_grid_from_points_fortran_(const my_real_c* x_v, const my_real_c* y_v, const long long int *signed_nb_pts){
+///  @details This supposes that the grid is only 1 cell, defined through points given in the counter-clockwise order, and it builds a polygon out of it.
+///            This polygon is built such that all edges always go from the smaller index to the bigger index, and the orientation is then
+///            reversed in the faces matrix.
+///  @param x_v x-coordinates of the points
+///  @param y_v y-coordinates of the points
+///  @param pt_indices Global indices of the points in the mesh.
+///  @param signed_nb_pts Number of points in this cell.
+///  @warning For now, it only works with 4 points.
+void build_grid_from_points_fortran_(const my_real_c* x_v, const my_real_c* y_v, long long int* pt_indices, const long long int *signed_nb_pts){
     const unsigned long nb_pts = (unsigned long) *signed_nb_pts;
     Point2D p;
     unsigned long i;
+    GrB_Info infogrb;
+    unsigned long int nb_edges, nb_faces;
+    Vector_points2D* vertices;
+    Vector_int* status_edge, *phase_face;
+    Vector_double* pressure_edge;
+    GrB_Matrix* edges;
+    GrB_Matrix* faces;
+    Point2D pt;
+    long int zero = 0;
     
-    if (grid){
-        for(i=0; i<nb_pts; i++){
-            p = (Point2D){x_v[i], y_v[i]};
-            set_ith_elem_vec_pts2D(grid->vertices, i, &p);
+    if (nb_pts != 4) {
+        if (grid){
+            for(i=0; i<nb_pts; i++){
+                p = (Point2D){x_v[i], y_v[i]};
+                set_ith_elem_vec_pts2D(grid->vertices, i, &p);
+            }
+        } else {
+            grid = polygon_from_consecutive_points(x_v, y_v, nb_pts);
         }
     } else {
-        grid = polygon_from_consecutive_points(x_v, y_v, nb_pts);
+        nb_edges = nb_pts;
+        nb_faces = 1;
+
+        if (!(grid)){
+            grid = new_Polygon2D();
+            grid->edges = (GrB_Matrix*) malloc(sizeof(GrB_Matrix));
+            grid->faces = (GrB_Matrix*) malloc(sizeof(GrB_Matrix));
+            grid->vertices = alloc_with_capacity_vec_pts2D(nb_pts);
+            infogrb = GrB_Matrix_new(grid->edges, GrB_INT8, nb_pts, nb_edges);
+            infogrb = GrB_Matrix_new(grid->faces, GrB_INT8, nb_edges, nb_faces);
+            grid->status_edge = alloc_with_capacity_vec_int(nb_pts);
+            grid->pressure_edge = alloc_with_capacity_vec_double(nb_pts);
+            grid->phase_face = alloc_with_capacity_vec_int(nb_faces);
+        } 
+        vertices = grid->vertices;
+        if (grid->vertices->size > nb_pts)
+            grid->vertices->size = nb_pts;
+        edges = grid->edges;
+        infogrb = GrB_Matrix_clear(*edges);
+        faces = grid->faces;
+        infogrb = GrB_Matrix_clear(*faces);
+        status_edge = grid->status_edge;
+        if (grid->status_edge->size > nb_pts)
+            grid->status_edge->size = nb_pts;
+        pressure_edge = grid->pressure_edge;
+        if (grid->pressure_edge->size > nb_pts)
+            grid->pressure_edge->size = nb_pts;
+        phase_face = grid->phase_face;
+        if (grid->phase_face->size > nb_faces)
+            grid->phase_face->size = nb_faces;
+
+        for(i=0; i<nb_pts; i++){
+            pt = (Point2D){x_v[i], y_v[i]};
+            set_ith_elem_vec_pts2D(vertices, i, &pt);
+            set_ith_elem_vec_int(status_edge, i, &zero);
+            set_ith_elem_vec_double(pressure_edge, i, &(my_real_c){0.0});
+        }
+        zero = 2;
+        for(i=0; i<nb_faces; i++){
+            set_ith_elem_vec_int(phase_face, i, &zero);
+        }
+
+        for(i=0; i<(nb_pts-1); i++){
+            if (pt_indices[i] < pt_indices[i+1]){
+                infogrb = GrB_Matrix_setElement(*edges, -1, i, i);
+                infogrb = GrB_Matrix_setElement(*edges, 1, i+1, i);
+                infogrb = GrB_Matrix_setElement(*faces, 1, i, 0);
+            } else {
+                infogrb = GrB_Matrix_setElement(*edges, 1, i, i);
+                infogrb = GrB_Matrix_setElement(*edges, -1, i+1, i);
+                infogrb = GrB_Matrix_setElement(*faces, -1, i, 0);
+            }
+        }
+        i = nb_pts-1;
+        if (pt_indices[i] < pt_indices[0]){
+            infogrb = GrB_Matrix_setElement(*edges, -1, i, i);
+            infogrb = GrB_Matrix_setElement(*edges, 1, 0, i);
+            infogrb = GrB_Matrix_setElement(*faces, 1, i, 0);
+        } else {
+            infogrb = GrB_Matrix_setElement(*edges, 1, i, i);
+            infogrb = GrB_Matrix_setElement(*edges, -1, 0, i);
+            infogrb = GrB_Matrix_setElement(*faces, -1, i, 0);
+        }
     }
 }
 
