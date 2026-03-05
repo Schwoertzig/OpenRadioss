@@ -56,17 +56,17 @@
             multi_cutcell_var%nbmat = nbmat
             multi_cutcell_var%nelem = nelem
             multi_cutcell_var%sym = 1
-            allocate(multi_cutcell_var%vel(3, nelem))
-            allocate(multi_cutcell_var%sound_speed(nelem))
-            allocate(multi_cutcell_var%rho(nelem))
-            allocate(multi_cutcell_var%eint(nelem))
-            allocate(multi_cutcell_var%etot(nelem))
-            allocate(multi_cutcell_var%pres(nelem))
-            allocate(multi_cutcell_var%phase_pres(nelem, nbmat))
-            allocate(multi_cutcell_var%phase_rho(nelem, nbmat))
+            allocate(multi_cutcell_var%vel(3, nelem)) ; multi_cutcell_var%vel(1:3, 1:nelem) = 0._WP
+            allocate(multi_cutcell_var%sound_speed(nelem)) ; multi_cutcell_var%sound_speed(1:nelem) = 0._WP
+            allocate(multi_cutcell_var%rho(nelem)) ; multi_cutcell_var%rho(1:nelem) = 0._WP
+            allocate(multi_cutcell_var%eint(nelem)) ; multi_cutcell_var%eint(1:nelem) = 0._WP
+            allocate(multi_cutcell_var%etot(nelem)) ; multi_cutcell_var%etot(1:nelem) = 0._WP
+            allocate(multi_cutcell_var%pres(nelem)) ; multi_cutcell_var%pres(1:nelem) = 0._WP
+            allocate(multi_cutcell_var%phase_pres(nelem, nbmat)) ; multi_cutcell_var%phase_pres(1:nelem, 1:nbmat)= 0._WP
+            allocate(multi_cutcell_var%phase_rho(nelem, nbmat) ) ; multi_cutcell_var%phase_rho(1:nelem, 1:nbmat) = 0._WP
             !allocate(multi_cutcell_var%phase_velx(nelem, nbmat)) ! not allocated for now
-            allocate(multi_cutcell_var%phase_vely(nelem, nbmat))
-            allocate(multi_cutcell_var%phase_velz(nelem, nbmat))
+            allocate(multi_cutcell_var%phase_vely(nelem, nbmat)) ; multi_cutcell_var%phase_vely(1:nelem, 1:nbmat) = 0._WP
+            allocate(multi_cutcell_var%phase_velz(nelem, nbmat)) ; multi_cutcell_var%phase_velz(1:nelem, 1:nbmat) = 0._WP
         end subroutine allocate_multi_cutcell_type
 
         subroutine deallocate_multi_cutcell_type(multi_cutcell_var)
