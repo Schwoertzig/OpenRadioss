@@ -24,8 +24,8 @@ module FV_fluxes
 
     velpyL = velyL*normalVec%y + velzL*normalVec%z
     velpyR = velyR*normalVec%y + velzR*normalVec%z
-    velpzL = -velyL*normalVec%y + velzL*normalVec%z
-    velpzR = -velyR*normalVec%y + velzR*normalVec%z
+    velpzL = -velyL*normalVec%z + velzL*normalVec%y
+    velpzR = -velyR*normalVec%z + velzR*normalVec%y
 
     !Compute left and right speeds of sound
     aL = sqrt(gamma * pL / rhoL)
@@ -33,7 +33,7 @@ module FV_fluxes
   
     !Compute conservative variables
     rhoEL = 0.5*rhoL*(velpyL*velpyL + velpzL*velpzL) + pL/(gamma-1) !energy
-    rhoER = 0.5*rhoR*(velpyR*velpyR + velpzr*velpzr) + pR/(gamma-1)
+    rhoER = 0.5*rhoR*(velpyR*velpyR + velpzR*velpzR) + pR/(gamma-1)
   
     !Compute wave speeds
     SL = min(velpyL - aL, velpyR - aR)
@@ -48,8 +48,8 @@ module FV_fluxes
       !return flux(UL, normalVec)
       rho   = rhoL * velpyL
       rhovy = rhoL * velyL * velpyL + pL * normalVec%y
-      rhovz = rhoL * velzL * velpzL + pL * normalVec%z
-      rhoE  = velpzL * (0.5 * rhoL * (velyL*velyL + velzL*velzL) + gamma / (gamma - 1) * pL)
+      rhovz = rhoL * velzL * velpyL + pL * normalVec%z
+      rhoE  = velpyL * (0.5 * rhoL * (velyL*velyL + velzL*velzL) + gamma / (gamma - 1) * pL)
     elseif (SL <= 0 .and. 0 <= S_star) then
       ! Compute the left and right star region states: Equation (39) in Toro slides
       rho_star  = rhoL * (SL - velpyL) / (SL - S_star)
@@ -61,9 +61,10 @@ module FV_fluxes
       rho   = rhoL * velpyL + SL * (rho_star - rhoL)
       rhovy = rhoL * velyL * velpyL + pL * normalVec%y + &
               SL*((rhou_star - rhoL * velpyL) * normalVec%y - (rhov_star - rhoL * velpzL) * normalVec%z)
-      rhovz = rhoL * velzL * velpzL + pL * normalVec%z + &
+      rhovz = rhoL * velzL * velpyL + pL * normalVec%z + &
               SL*((rhou_star - rhoL * velpyL) * normalVec%z + (rhov_star - rhoL * velpzL) * normalVec%y)
-      rhoE  = velpzL * (0.5 * rhoL * (velyL*velyL + velzL*velzL) + gamma / (gamma - 1) * pL) + SL*(rhoE_star - rhoEL)
+      rhoE  = velpyL * (0.5 * rhoL * (velyL*velyL + velzL*velzL) + gamma / (gamma - 1) * pL) + SL*(rhoE_star - rhoEL)
+
     elseif (S_star <= 0 .and. 0 <= SR) then
       ! Compute the left and right star region states: Equation (39) in Toro slides
       rho_star  = rhoR * (SR - velpyR) / (SR - S_star)
@@ -75,14 +76,14 @@ module FV_fluxes
       rho   = rhoR * velpyR + SR * (rho_star - rhoR)
       rhovy = rhoR * velyR * velpyR + pR * normalVec%y + &
               SR*((rhou_star - rhoR * velpyR) * normalVec%y - (rhov_star - rhoR * velpzR) * normalVec%z)
-      rhovz = rhoR * velzR * velpzR + pR * normalVec%z + &
+      rhovz = rhoR * velzR * velpyR + pR * normalVec%z + &
               SR*((rhou_star - rhoR * velpyR) * normalVec%z + (rhov_star - rhoR * velpzR) * normalVec%y)
-      rhoE  = velpzR * (0.5 * rhoR * (velyR*velyR + velzR*velzR) + gamma / (gamma - 1) * pR) + SR*(rhoE_star - rhoER)
+      rhoE  = velpyR * (0.5 * rhoR * (velyR*velyR + velzR*velzR) + gamma / (gamma - 1) * pR) + SR*(rhoE_star - rhoER)
     else
       rho   = rhoR * velpyR
       rhovy = rhoR * velyR * velpyR + pR * normalVec%y
-      rhovz = rhoR * velzR * velpzR + pR * normalVec%z
-      rhoE  = velpzR * (0.5 * rhoR * (velyR*velyR + velzR*velzR) + gamma / (gamma - 1) * pR)
+      rhovz = rhoR * velzR * velpyR + pR * normalVec%z
+      rhoE  = velpyR * (0.5 * rhoR * (velyR*velyR + velzR*velzR) + gamma / (gamma - 1) * pR)
     end if
   end subroutine FV_flux_hllc_Euler
 
