@@ -174,6 +174,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ind_ktot                     ../engine/source/implicit/ind_glob_k.F
 !||    ini_k0h                      ../engine/source/implicit/imp_solv.F
 !||    ini_kisc                     ../engine/source/implicit/lin_solv.F
+!||    init_h3d_engine              ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    inivel_start                 ../engine/source/loads/general/inivel/inivel_start.F90
 !||    inter7_collision_detection   ../engine/source/interfaces/intsort/inter7_collision_detection.F90
 !||    inter_count_node_curv        ../engine/source/interfaces/generic/inter_count_node_curv.F
@@ -234,7 +235,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    s16deri3                     ../engine/source/elements/thickshell/solide16/s16deri3.F
 !||    s20deri3                     ../engine/source/elements/solid/solide20/s20deri3.F
 !||    s6cderi3                     ../engine/source/elements/thickshell/solide6c/s6cderi3.F
-!||    s6zderi3                     ../engine/source/elements/solid/solide6z/s6zderi3.F90
 !||    s8deri3                      ../engine/source/elements/solid/solide8/s8deri3.F
 !||    s8ederic3                    ../engine/source/elements/solid/solide8e/s8ederic3.F
 !||    s8edericm3                   ../engine/source/elements/solid/solide8e/s8edericm3.F
@@ -352,6 +352,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    user_windows_routine         ../engine/source/user_interface/user_windows.F
 !||    usermat_shell                ../engine/source/materials/mat_share/usermat_shell.F
 !||    usermat_solid                ../engine/source/materials/mat_share/usermat_solid.F
+!||    ush_force3                   ../engine/source/user_interface/ushforce3.F90
 !||    wciusc2                      ../engine/source/input/wciusc2.F
 !||    wriusc2                      ../engine/source/input/wriusc2.F
 !||    xforc28                      ../engine/source/elements/xelem/xforc28.F

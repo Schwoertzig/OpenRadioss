@@ -50,6 +50,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    arret                  ../starter/source/system/arret.F
 !||    athlen                 ../starter/source/ale/athlen.F
 !||    fretitl2               ../starter/source/starter/freform.F
+!||    law129_init            ../starter/source/materials/mat/mat129/law129_init.F90
 !||    m105init               ../starter/source/materials/mat/mat105/m105init.F
 !||    m24in2                 ../starter/source/materials/mat/mat024/m24in2.F
 !||    m24in3                 ../starter/source/materials/mat/mat024/m24in3.F
@@ -69,6 +70,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    mating                 ../starter/source/materials/mat_share/mating.F
 !||--- uses       -----------------------------------------------------
 !||    detonators_mod         ../starter/share/modules1/detonators_mod.F
+!||    law129_init_mod        ../starter/source/materials/mat/mat129/law129_init.F90
 !||    m36init_mod            ../starter/source/materials/mat/mat036/m36init.F90
 !||    message_mod            ../starter/share/message_module/message_mod.F
 !||====================================================================
@@ -89,6 +91,7 @@ C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE M36INIT_MOD
+      USE LAW129_INIT_MOD
       USE MATPARAM_DEF_MOD , ONLY : MATPARAM_STRUCT_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -134,7 +137,7 @@ C-----------------------------------------------
       CHARACTER(LEN=NCHARTITLE)::TITR
       INTEGER I,IADBUF,NPAR,NFUNC,NUVAR,IFORM,NUMEL
       INTEGER IFUNC(MAXFUNC)
-      INTEGER ID
+      INTEGER ID,IMAT
       my_real, DIMENSION(MVSIZ) :: RHO0,YLDFAC
       my_real, DIMENSION(MVSIZ) ,TARGET :: TMP,EPL,FILLO
       my_real, DIMENSION(:) ,POINTER ::
@@ -305,6 +308,7 @@ C=======================================================================
           IPARG(16)=1
         END IF
 
+        IMAT = MAT(1)
         NUVAR  = IPM(8,MAT(1))
         NPAR   = IPM(9,MAT(1))
         IADBUF = IPM(7,MAT(1))
@@ -384,6 +388,9 @@ C=======================================================================
      .                 NUVAR   ,MBUF%VAR  ,BUFMAT(IADBUF) ,X   ,
      .                 MAT     ,IPARG     ,IFORM          ,IX  ,NIX ,
      .                 BUFMAT  ,RHO0      ,TB)
+
+        ELSEIF (MTN == 129) THEN
+          CALL LAW129_INIT(MAT_PARAM(IMAT) ,NEL   ,NUVAR ,MBUF%VAR)
 
         ENDIF
       ENDIF

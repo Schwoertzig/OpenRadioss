@@ -47,6 +47,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    pload_cyl_mod    ../common_source/modules/loads/pload_cyl_mod.F
 !||    rbe3_mod         ../common_source/modules/constraints/rbe3_mod.F90
 !||    rwall_mod        ../common_source/modules/constraints/rwall_mod.F90
+!||    seatbelt_mod     ../common_source/modules/seatbelt_mod.F
 !||    sensor_mod       ../common_source/modules/sensor_mod.F90
 !||    sfem_mod         ../common_source/modules/elements/sfem_mod.F90
 !||    skew_mod         ../common_source/modules/skew_mod.F90
@@ -84,6 +85,7 @@ C-----------------------------------------------
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
       USE RWALL_MOD
       USE SFEM_MOD
+      USE SEATBELT_MOD , ONLY : NGUIDED_CABLE,NGUIDED_CABLE_G
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1772,9 +1774,13 @@ C-----Seatbelts - slipring / retractors
       NEXT       = NEXT + 1
       NRETRACTOR = TABVINT(NEXT)
       NEXT       = NEXT + 1
+      NGUIDED_CABLE = TABVINT(NEXT)
+      NEXT       = NEXT + 1
       NSLIPRING_G  = TABVINT(NEXT)
       NEXT       = NEXT + 1
       NRETRACTOR_G = TABVINT(NEXT)
+      NEXT       = NEXT + 1
+      NGUIDED_CABLE_G = TABVINT(NEXT)
       NEXT       = NEXT + 1
       N_ANCHOR_REMOTE  = TABVINT(NEXT)
       NEXT       = NEXT + 1

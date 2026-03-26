@@ -39,6 +39,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_rbody                ../starter/source/constraints/general/rbody/hm_preread_rbody.F
 !||    hm_preread_sphio                ../starter/source/loads/sph/hm_preread_sphio.F
 !||    hm_read_admas                   ../starter/source/tools/admas/hm_read_admas.F
+!||    hm_read_ale_link                ../starter/source/constraints/ale/hm_read_ale_link_vel.F
 !||    hm_read_cload                   ../starter/source/loads/general/cload/hm_read_cload.F
 !||    hm_read_cyljoint                ../starter/source/constraints/general/cyl_joint/hm_read_cyljoint.F
 !||    hm_read_friction_models         ../starter/source/interfaces/friction/reader/hm_read_friction_models.F
@@ -140,7 +141,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGSPHIO,TAGSPHBCS,TAGSPH2S
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGMPC,FRONT_R2R,FLAGKIN_R2R
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_ELCF,TAG_ELCF2,TAG_ELSF,TAG_ELSF2
-      INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_ELSP,NOM_OPT_TEMP,TAGGAU,TAG_INIVOL      
+      INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_ELSP,NOM_OPT_TEMP,TAGGAU,TAG_INIVOL   
+      INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_ALELINK(:)         
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: ISURF_R2R,ISLIN_R2R,IGRBRIC_R2R                          
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: ISUBDOM,IPART_R2R
       my_real ,DIMENSION(:), ALLOCATABLE :: PM_R2R,LINK_DOM               

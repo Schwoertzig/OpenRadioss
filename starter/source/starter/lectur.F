@@ -148,6 +148,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_skw                      ../starter/source/tools/skew/hm_preread_skw.F90
 !||    hm_preread_sphio                    ../starter/source/loads/sph/hm_preread_sphio.F
 !||    hm_preread_xelem                    ../starter/source/elements/reader/hm_preread_xelem.F
+!||    hm_print_inter_guided_cable         ../starter/source/tools/seatbelts/hm_print_inter_guided_cable.F90
 !||    hm_read_activ                       ../starter/source/tools/activ/hm_read_activ.F
 !||    hm_read_admas                       ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_link                    ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -189,6 +190,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_initemp                     ../starter/source/initial_conditions/thermic/hm_read_initemp.F
 !||    hm_read_inivel                      ../starter/source/initial_conditions/general/inivel/hm_read_inivel.F
 !||    hm_read_inivol                      ../starter/source/initial_conditions/inivol/hm_read_inivol.F90
+!||    hm_read_inter_guided_cable          ../starter/source/tools/seatbelts/hm_read_guided_cable.F90
 !||    hm_read_interfaces                  ../starter/source/interfaces/reader/hm_read_interfaces.F
 !||    hm_read_intsub                      ../starter/source/output/subinterface/hm_read_intsub.F
 !||    hm_read_lines                       ../starter/source/groups/hm_read_lines.F
@@ -492,9 +494,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_option_read_mod                  ../starter/share/modules1/hm_option_read_mod.F
 !||    hm_preread_inivel_mod               ../starter/source/initial_conditions/general/inivel/hm_preread_inivel.F90
 !||    hm_preread_skw_mod                  ../starter/source/tools/skew/hm_preread_skw.F90
+!||    hm_print_inter_guided_cable_mod     ../starter/source/tools/seatbelts/hm_print_inter_guided_cable.F90
 !||    hm_read_bcs_nrf_mod                 ../starter/source/boundary_conditions/hm_read_bcs_nrf.F90
 !||    hm_read_bcs_wall_mod                ../starter/source/boundary_conditions/hm_read_bcs_wall.F90
 !||    hm_read_inivol_mod                  ../starter/source/initial_conditions/inivol/hm_read_inivol.F90
+!||    hm_read_inter_guided_cable_mod      ../starter/source/tools/seatbelts/hm_read_guided_cable.F90
 !||    hm_read_preload_axial_mod           ../starter/source/loads/general/preload/hm_read_preload_axial.F90
 !||    iniebcs_propellant_                 ../starter/source/boundary_conditions/ebcs/iniebcs_propellant.F90
 !||    inigrav                             ../starter/share/modules1/inigrav_mod.F
@@ -654,6 +658,8 @@ C-----------------------------------------------
       use hm_preread_skw_mod, ONLY : hm_preread_skw
       use hierarchy_rbody_mod
       use sfem_exclude_mod
+      use hm_read_inter_guided_cable_mod, ONLY : hm_read_inter_guided_cable
+      use hm_print_inter_guided_cable_mod, ONLY : hm_print_inter_guided_cable
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -875,7 +881,7 @@ C
      .       , DIMENSION(:,:), ALLOCATABLE :: QP_RPERTURB,RBY_INIAXIS
 C
       my_real
-     .  EANIT2(10),COST_R2R,TOTMAS
+     .  EANIT2(10),COST_R2R,TOTMAS,TOTMAS1
       TARGET :: EANIT2
 C OpenMP specific
        INTEGER ITASK, NP
@@ -1663,7 +1669,8 @@ c
      +          NGJOINT+NUNIT0+NFUNCT+NADMESH+
      +          NSPHIO+NSPCOND+NRBYKIN+NEBCS+
      +          NINICRACK+NODMAS+NBGAUGE+NCLUSTER+NINTERFRIC+
-     +          NRBMERGE+NUMBCSN+NSLIPRING+NRETRACTOR
+     +          NRBMERGE+NUMBCSN+NSLIPRING+NRETRACTOR+
+     +          NGUIDED_CABLE
       SNOM_OPT = SNOM_OPT1*LNOPT1+1
       SINOM_OPT= 33
       SNOM_SECT= ncharline*NSECT
@@ -1805,7 +1812,7 @@ C --- Initialisations
       IF(SNOM_OPT > 0) NOM_OPT = 0
       IF(SINOM_OPT > 0) INOM_OPT = 0
       IF(NUMELR > 0) IXR_KJ = 0
-      IF(NUMELC+NUMELTG > 0) IWORKSH = 0
+      IF(NUMELC+NUMELTG > 0) IWORKSH(:,:) = 0
       IF(NUMELR > 0) R_SKEW = 0
       IF(NUMELP > 0) IBEAM_VECTOR(1:NUMELP) = ZERO
       IF(NUMELP > 0) RBEAM_VECTOR(1:3,1:NUMELP) = ZERO
@@ -1989,7 +1996,7 @@ C     .. TO BE MAINTAINED (cf doc/inom_opt.txt) ..
       INOM_OPT(2) = INOM_OPT(1) + NACCELM
       INOM_OPT(3) = INOM_OPT(2) + NVOLU + NMONVOL
       INOM_OPT(4) = INOM_OPT(3) + NINTER
-      INOM_OPT(5) = INOM_OPT(4) + NINTSUB
+      INOM_OPT(5) = INOM_OPT(4) + NINTSUB + NGUIDED_CABLE
       INOM_OPT(6) = INOM_OPT(5) + NRWALL
       INOM_OPT(7) = INOM_OPT(6) + 0 !obsolete option removed
       INOM_OPT(8) = INOM_OPT(7) + NJOINT
@@ -4257,7 +4264,7 @@ C--------------------------------------------
 
       CALL TRACE_OUT1()
 C--------------------------------------------
-C     READING SLIPRINGS AND RETRACTORS
+C     READING SLIPRINGS AND RETRACTORS AND /INTER/GUIDED_CABLE
 C--------------------------------------------
       ERR_MSG='SEATBELTS'
       ERR_CATEGORY='SEATBELTS'
@@ -4281,6 +4288,15 @@ C
       IF(NRETRACTOR > 0) CALL HM_READ_RETRACTOR(
      1                                           LSUBMODEL,ITABM1,IXR,ITAB,UNITAB,
      2                                           X,NPC1,NOM_OPT(LNOPT1*INOM_OPT(32)+1),ALEA,IPM)
+C     
+      IF (NGUIDED_CABLE > 0) CALL HM_READ_INTER_GUIDED_CABLE(LSUBMODEL,IGRNOD,NGRNOD,IGRPART,NGRPART,
+     .                                                       NPART,UNITAB,NUMELR,IPARTR,IXR,
+     .                                                       NIXR,NUMELP,IPARTP,IXP,NIXP,
+     .                                                       NUMELT,IPARTT,IXT,NIXT,NSPMD,
+     .                                                       KNOD2EL1D,NOD2EL1D,S_NOD2EL1D,NUMNOD,X,
+     .                                                       NUMELS,NUMELQ,NUMELC,NINTSUB,LTITR,
+     .                                                       LNOPT1,NOM_OPT(LNOPT1*INOM_OPT(4)+1),ITAB)
+C      
       CALL TRACE_OUT1()
 C--------------------------------------------
 C     READING BOUNDARY CONDITIONS
@@ -4493,7 +4509,7 @@ C--------------------------------------------
         ENDIF
         CALL HM_READ_ALE_LINK(ICODE, ISKEW, ITAB, ITABM1, D,
      .       IGRNOD, IBCSLAG, LAG_NCF, LAG_NKF, LAG_NHF,
-     .       IKINE1LAG, LINALE, LSUBMODEL, UNITAB)
+     .       IKINE1LAG, LINALE, LSUBMODEL, UNITAB,NSUBDOM)
       ELSE
         ALLOCATE(LINALE(0))
       ENDIF
@@ -4877,7 +4893,8 @@ C /BCS/CYCLIC ini&check
         ALLOCATE(ITAGCYC(0))
       END IF
 C--------------------------------------------
-      SFSAV = NTHVKI * (NINTER+NRWALL+NRBODY+NSECT+NJOINT+NRBAG+NVOLU+NMONVOL+NFXBODY+NINTSUB)
+      SFSAV = NTHVKI * (NINTER+NRWALL+NRBODY+NSECT+NJOINT+NRBAG+NVOLU+NMONVOL+NFXBODY
+     .                 +NINTSUB+NGUIDED_CABLE)
       ALLOCATE(FSAV(SFSAV)  ,STAT=stat)
       FSAV = ZERO
       CALL TRACE_OUT1()
@@ -5965,9 +5982,11 @@ C Average allowance normally sufficient if average group size> NVSIZ/2
      3     NSNT, NMNT_2,TABMP_L,IQUAOFF,
      4     IGRSURF  , FVMAIN,
      5     ITAB      ,IPART    ,IPARTC   ,IPARTG   ,IPARTS,
+     .     IPARTT, IPARTP  ,IPARTR   ,IPARTX   , IPARTQ,
      6     POIN_PART_SHELL,POIN_PART_TRI,POIN_PART_SOL,
      7     MID_PID_SHELL,MID_PID_TRI,MID_PID_SOL,T_MONVOL,
-     8     EBCS_TAG_CELL_SPMD,NPBY,LPBY,MAT_ELEM%MAT_PARAM)
+     8     EBCS_TAG_CELL_SPMD,NPBY,LPBY,MAT_ELEM%MAT_PARAM,
+     9     iworksh)
 
       DEALLOCATE(IWORK)
 C---------------------------
@@ -7483,7 +7502,9 @@ C Also initialized in Engine (RDRESA)
      .                  MSGTYPE=MSGWARNING,
      .                  ANMODE=ANINFO_BLIND_1)
       ENDIF
-
+C--------------------------------------------------------------   
+      IF(NINTER + NGUIDED_CABLE> 0) WRITE(ISTDO,'(A)')TITRE(38)   
+C      
       IF(NINTER > 0)THEN
        IF(IDDLEVEL == 0) THEN
          ALLOCATE(XFILTR(NINTER)       ,STAT=stat)
@@ -7505,8 +7526,7 @@ C Also initialized in Engine (RDRESA)
 C
        IF(IDDLEVEL == 0) CALL STARTIME(10,1)
        IF(IDDLEVEL == 1) CALL STARTIME(11,1)
-
-       WRITE(ISTDO,'(A)')TITRE(38)
+C 
        IF(NINTSUB/=0)THEN
           CALL HM_READ_INTSUB(IGRNOD ,IGRSURF,NOM_OPT(LNOPT1*INOM_OPT(3)+1),IGRSLIN,LSUBMODEL)
        END IF
@@ -7749,7 +7769,8 @@ C
      F               SEGQUADFR ,TAGPRT_FRIC,INTBUF_FRIC_TAB              ,IPARTT           ,
      G               IPARTP    ,IPARTX     ,IPARTR                       ,NSN_MULTI_CONNEC ,T2_NB_CONNEC,
      H               SICODE    ,ICODE      ,ISKEW                        ,MULTI_FVM        ,S_NOD2ELS   ,
-     I               SITAB     ,SITABM1    ,FLAG_ELEM_INTER25            ,LIST_NIN25       ,IRESP       )
+     I               SITAB     ,SITABM1    ,FLAG_ELEM_INTER25            ,LIST_NIN25       ,IRESP       ,
+     J               NIXX      ,S_NOD2EL1D )
       IF(IDDLEVEL == 0) CALL STOPTIME(12,1)
       IF(IDDLEVEL == 1) CALL STOPTIME(13,1)
 
@@ -7801,7 +7822,13 @@ C
         !--------------------------------------------!
 C
       ENDIF
-
+C--------------------------------------------------------------
+C     Printout for /INTER/GUIDED_CABLE
+C--------------------------------------------------------------
+      IF ((NGUIDED_CABLE > 0).AND.(IDDLEVEL==0)) THEN
+        CALL HM_PRINT_INTER_GUIDED_CABLE(NINTER,NINTSUB,NGRNOD,NGRPART,IGRNOD,IGRPART,
+     .                                   NPARI,IPARI,LTITR,LNOPT1,NOM_OPT(LNOPT1*INOM_OPT(4)+1))
+      ENDIF
 
 C--------------------------------------------
 C     Reading rigid walls
@@ -7981,7 +8008,8 @@ C--------------------------------------------
       IF(NRBYKIN > 0) THEN
         CALL CHECKRBY(
      1       RBY    ,NPBY    ,LPBY   ,ITAB   ,
-     2       D      ,IDDLEVEL,NOM_OPT,SLRBODY)
+     2       D      ,IDDLEVEL,NOM_OPT,SLRBODY,
+     3       ROOTNAM,ROOTLEN )
       ENDIF
 C--------------------------------------------
 C     READING RB LAGRANGE
@@ -8822,7 +8850,8 @@ C
      &            NPRELOAD_A , PRELOAD_A      , FAIL_FRACTAL     ,FAIL_BROKMANN       ,DEFAULTS  ,
      &            NDAMP_FREQ_RANGE,DAMPR      , IBEAM_VECTOR     , RBEAM_VECTOR       ,D         ,
      &            LSIGI      ,LSIGSP          , SRNOISE2         ,NPRW               ,LPRW       ,
-     &            RWSTIF_PEN ,SLN_PEN )
+     &            RWSTIF_PEN ,SLN_PEN         ,ROOTLEN           ,ROOTNAM          ,NGUIDED_CABLE,
+     &            TOTMAS1   )
 
 
       IF(NINTER>0.AND.NUMELIG3D>0) THEN
@@ -10320,7 +10349,7 @@ C     multidomains -> deallocation of arrays
 C--------------------------------------------
       IF(NSUBDOM>0) THEN
         DEALLOCATE(TAG_PART,TAGMON,TAGRBY,TAGINT,TAGCYL,TAGLNK)
-        DEALLOCATE(TAGRB3,TAGRB2,TAGJOIN,TAGMPC,TAG_MAT)
+        DEALLOCATE(TAGRB3,TAGRB2,TAGJOIN,TAGMPC,TAG_MAT,TAG_ALELINK)
       ENDIF
 C--------------------------------------------
 C     STOCKAGE DYNAMIQUE (CONNEXIONS RIGIDES a MADYMO).
@@ -10409,7 +10438,7 @@ C--------------------------------------------
       ERR_MSG='ADDED MASS ESTIMATION'
       ERR_CATEGORY='ADDED MASS ESTIMATION'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-      IF(N2D==0) CALL ADD_MASS_STAT(MS_B,IN_B,STIFFN,STIFFN(NUMNOD+1),ITAB,TOTMAS)
+      CALL ADD_MASS_STAT(MS_B,IN_B,STIFFN,STIFFN(NUMNOD+1),ITAB,TOTMAS,TOTMAS1)
 C---------------------------------
 C     MULTIDOMAINS SPEEDUP ESTIMATION
 C---------------------------------
@@ -10913,7 +10942,7 @@ C
 C         Dimensioning (computes NUMNOR == Nb of normals or vertices wrt ALL Interfaces TYPE25)
 C         and Initialization of IRT>LM(3:4,1:NSN)
           CALL PREPARE_INT25(INTBUF_TAB, IPARI, INTERCEP, NRTMT_25)
-          CALL PREPARE_SPLIT_I25E2E(NSPMD,INTBUF_TAB,IPARI,INTERCEP)
+          CALL PREPARE_SPLIT_I25E2E(NSPMD,INTBUF_TAB,IPARI,INTERCEP,CEP,SCEP)
 
 C
           ALLOCATE(ADDCSRECT(NUMNOR+1),CSRECT(4*NRTMT_25),STAT=stat)
@@ -10974,7 +11003,7 @@ c         start CPU timer for ddsplit
           ENDIF
           ! -----------------------------------------
           ! reverse connectivity for FVM solver : useful to ensure the parith/on
-          IF(IALE+IEULER+GLOB_THERM%ITHERM+IALELAG/=0) THEN
+          IF((IALE+IEULER+GLOB_THERM%ITHERM+IALELAG/=0).OR.(DETONATORS%IS_SHADOWING_REQUIRED)) THEN
                 ALLOCATE( INDX_S(NUMELS) )
                 ALLOCATE( INDX_Q(NUMELQ) )
                 ALLOCATE( INDX_TG(NUMELTG) )
@@ -11340,6 +11369,15 @@ C
             ENDDO
             DEALLOCATE(RETRACTOR)
           ENDIF
+C
+          IF (NGUIDED_CABLE > 0) THEN
+            DO I=1,NGUIDED_CABLE
+               IF (NSPMD > 1) DEALLOCATE(GUIDE(I)%NODES)
+               DEALLOCATE(GUIDE(I)%CONT)      
+            ENDDO
+            DEALLOCATE(GUIDE)
+          ENDIF
+C          
           IF((IPART_STACK > 0 .OR. IPART_PCOMPP > 0) .AND. NDRAPE > 0) DEALLOCATE(IWORK_T)
 
           IF(ALLOCATED(MPARAM_R2R))THEN

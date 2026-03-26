@@ -39,15 +39,12 @@
 !||    min_dist_grnod_to_surface   ../starter/source/model/transformation/min_distance_grnod_to_surface.F90
 !||--- called by ------------------------------------------------------
 !||    lectrans                    ../starter/source/model/transformation/lectrans.F
-!||--- calls      -----------------------------------------------------
-!||    ancmsg                      ../starter/source/output/message/message.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod                 ../starter/share/message_module/message_mod.F
 !||====================================================================
         subroutine min_dist_grnod_to_surface(nodes , n_nodes, surf_nodes, n_surf_nodes,x    , &
         &   numnod, pflag  , idir      , gap         ,isk  , &
-        &   skew  , lskew  , sskew     ,id           ,titr , &
-        &   nchartitle)
+        &   skew  , lskew  , sskew     )
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -73,9 +70,6 @@
           real(kind=WP),                             intent(inout) :: x(3, numnod)              !< Coordinates of all nodes in model
           real(kind=WP),                             intent(in) :: gap                          !< Gap between grnod and surface in idir direction
           real(kind=WP),                             intent(in) :: skew(lskew,sskew/lskew)      !< Skew matrices
-          integer,                                   intent(in) ::  nchartitle                  !< Length of title string
-          character(len=nchartitle),                 intent(in) ::  titr                        !< Title of transformation
-          integer,                                   intent(in) ::  id                          !< ID of transformation
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -189,14 +183,6 @@
               max_pos = minz_isurfnod
               min_pos = maxz_igrnod
             end if
-
-            if (max_pos - min_pos - gap < 0.0_WP) then
-              call ancmsg(msgid=3111,       &
-              &     msgtype=msgerror, &
-              &     anmode=aninfo,    &
-              &     i1=id,            &
-              &     c1=titr)
-            end if
           else if (pflag == 2) then
             if (idir == 1) then
               max_pos = minx_igrnod
@@ -207,14 +193,6 @@
             else ! if (idir == 3) then
               max_pos = minz_igrnod
               min_pos = maxz_isurfnod
-            end if
-
-            if (max_pos - min_pos - gap < 0.0_WP) then
-              call ancmsg(msgid=3111,       &
-              &     msgtype=msgerror, &
-              &     anmode=aninfo,    &
-              &     i1=id,            &
-              &     c1=titr)
             end if
           end if
 

@@ -65,7 +65,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4                  ITAB    ,KINET   ,TEMP    ,RENUM   ,
      5                  NSNFIOLD,NUM_IMP ,IND_IMP ,NODNX_SMS,
      6                  H3D_DATA,ESHIFT  ,NEDGE_T ,SSHIFT   ,NRTM_T ,
-     7                  ICODT   ,ISKEW   ,PARAMETERS,NODADT_THERM)
+     7                  ICODT   ,ISKEW   ,PARAMETERS,NODADT_THERM,INCONV)
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
@@ -78,6 +78,7 @@ C-----------------------------------------------
       USE H3D_MOD
       USE PARAMETERS_MOD
       use check_sorting_criteria_mod , only : check_sorting_criteria
+      USE i25xsave_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -108,6 +109,7 @@ C-----------------------------------------------
      .        WEIGHT(*), IAD_ELEM(2,*) ,FR_ELEM(*),
      .        RENUM(*), NSNFIOLD(NSPMD), NODNX_SMS(*), ICODT(*), ISKEW(*)
       INTEGER , INTENT(IN) :: NODADT_THERM
+      INTEGER , INTENT(IN) :: INCONV
 C     REAL
       my_real 
      .    X(3,*), V(*), MS(*),TEMP(*)
@@ -235,8 +237,8 @@ C
           CALL I25TRC_EDG(
      1      NEDGE_TOTAL            ,I_SK_OLD_E             ,INTBUF_TAB%CANDS_E2E ,INTBUF_TAB%CANDM_E2E,
      2      INTBUF_TAB%CAND_P      ,INTBUF_TAB%I25_CAND_A  ,NIN                  ,NEDGE,IFQ           ,
-     3      INTBUF_TAB%FTSAVX_E    ,INTBUF_TAB%FTSAVY_E    ,INTBUF_TAB%FTSAVZ_E  ,INTBUF_TAB%IFPEN_E)
-
+     3      INTBUF_TAB%FTSAVX_E    ,INTBUF_TAB%FTSAVY_E    ,INTBUF_TAB%FTSAVZ_E  ,INTBUF_TAB%IFPEN_E   ,
+     4      INTBUF_TAB%PENE_OLD_E  ,INTBUF_TAB%STIF_OLD_E   ,INTBUF_TAB%S_PENE_OLD_E )
           INTBUF_TAB%I_STOK_E(1)=I_SK_OLD_E
 
           ALLOCATE(INTBUF_TAB%I25_CAND_B(NEDGE_TOTAL + 3)) ! attention SPMD : NEDGE + NEDGEROLD + 3 
@@ -248,7 +250,8 @@ C
      .                                    INTBUF_TAB%CANDM_E2S,
      2      INTBUF_TAB%CAND_PS,INTBUF_TAB%I25_CAND_B   ,NIN               ,NEDGE,
      3      INTBUF_TAB%LEDGE,IFQ          ,INTBUF_TAB%FTSAVX_E2S,
-     4      INTBUF_TAB%FTSAVY_E2S, INTBUF_TAB%FTSAVZ_E2S,INTBUF_TAB%IFPEN_E2S )
+     4      INTBUF_TAB%FTSAVY_E2S, INTBUF_TAB%FTSAVZ_E2S,INTBUF_TAB%IFPEN_E2S,
+     5      INTBUF_TAB%PENE_OLD_E2S  ,INTBUF_TAB%STIF_OLD_E2S   ,INTBUF_TAB%S_PENE_OLD_E2S )
 
           INTBUF_TAB%I_STOK_E(2)=I_SK_OLD_E
 
@@ -264,13 +267,15 @@ C
 C -------------------------------------------------------------
 C     Bounds of the domains                                         
 C -------------------------------------------------------------
-      
-      CALL I7XSAVE(
+     
+      CALL I25XSAVE(
      1       X            ,INTBUF_TAB%NSV,INTBUF_TAB%MSR,NSN ,NMN     ,
      2       ITASK        ,INTBUF_TAB%XSAV,XMINL      ,YMINL ,ZMINL   ,
      3       XMAXL        ,YMAXL        ,ZMAXL        ,C_MAXL,CURV_MAX,
      4       IPARI(39,NIN),INTBUF_TAB%IRECTM(1+4*SSHIFT),NRTM_T       ,SX    ,SY      ,
-     5       SZ           ,SX2          ,SY2          ,SZ2            ,NMN_L)
+     5       SZ           ,SX2          ,SY2          ,SZ2            ,NMN_L,
+     6       IPARI(104,NIN),INTBUF_TAB%MSR_1D,NRTM    ,NUMNOD         ,INCONV,
+     7       NTHREAD      )
 C ITHK == 1 : main gap should be updated with change in thickness
       IF(ITHK == 1) THEN
         CALL I25GAPMSAVE(
@@ -340,7 +345,7 @@ C
         BGAPEMX=INTBUF_TAB%VARIABLES(bgapemx_index)
 
         CALL SPMD_TRI25VOX0(
-     1      X           ,BMINMA  ,NRTM_T,INTBUF_TAB%STFM(1+SSHIFT),MARGE ,
+     1      X           ,BMINMA  ,NRTM_T,INTBUF_TAB%STFM(1+SSHIFT)      ,MARGE ,
      2      CURV_MAX,INTBUF_TAB%GAP_M(1+SSHIFT),INTBUF_TAB%IRECTM(1+4*SSHIFT),GAP,
      +                                                    INTBUF_TAB%VARIABLES(bgapsmx_index),
      3      PMAX_GAP,VMAXDT,BGAPEMX,IEDGE,
@@ -359,7 +364,6 @@ C
         IF (IMONM > 0 .AND. ITASK == 0) CALL STOPTIME(TIMERS,26)
 
         IF(ITASK==0)THEN
-
 C
 C Get Remote Nodes in Xrem/Irem
 C
@@ -406,7 +410,7 @@ C Barrier comm spmd_tri7vox + bminma + return i7buce
 C      
       CALL MY_BARRIER
 C
-      IF (IMONM > 0) CALL STARTIME(TIMERS,30)
+      IF (IMONM > 0.and.itask==0) CALL STARTIME(TIMERS,30)
 C
 C     NCONT additional candidates (if all secondary nodes are already impacted, cf i25optcd)
       MULTIMP = IPARI(23,NIN)
@@ -417,7 +421,7 @@ C     NCONT additional candidates (if all secondary nodes are already impacted, 
      2 NMN    ,NRTM_T      ,NSN            ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
      3 GAP    ,NOINT       ,INTBUF_TAB%I_STOK(1)   ,MULNSN     ,BMINMA       ,
      4 MARGE  ,CURV_MAX    ,PMAX_GAP       ,VMAXDT       ,
-     5 SSHIFT ,NIN         ,INTBUF_TAB%STFM(1+SSHIFT) ,INTBUF_TAB%GAP_S,
+     5 SSHIFT ,NIN         ,INTBUF_TAB%STFM(1+SSHIFT)         ,INTBUF_TAB%GAP_S,
      6 NSNR   ,NCONT       ,INTBUF_TAB%GAP_M(1+SSHIFT)   ,ITASK      ,INTBUF_TAB%VARIABLES(bgapsmx_index),
      7 I_MEM  ,INTBUF_TAB%PENE_OLD,ITAB          ,INTBUF_TAB%NBINFLG,INTBUF_TAB%MBINFLG,
      8 ILEV   ,INTBUF_TAB%MSEGTYP24,
@@ -446,7 +450,7 @@ C New barrier needed for Dynamic MultiMP
         GOTO 40
       ENDIF
 
-      IF (IMONM > 0) CALL STOPTIME(TIMERS,30)
+      IF (IMONM > 0.and.itask==0) CALL STOPTIME(TIMERS,30)
 C--------------------------------------------------------------
 C     Edges
 C--------------------------------------------------------------
@@ -486,7 +490,7 @@ C Barrier comm spmd_tri7vox + bminma + return i7buce
 C      
       CALL MY_BARRIER
 C
-      IF (IMONM > 0) CALL STARTIME(TIMERS,30)
+      IF (IMONM > 0.and.itask==0) CALL STARTIME(TIMERS,30)
 C
       MULNSNE = INTBUF_TAB%S_CANDM_E2E
       MULNSNS = INTBUF_TAB%S_CANDM_E2S
@@ -508,7 +512,8 @@ C
      D INTBUF_TAB%GAP_E_L,NEDGE_LOCAL,IFQ  ,       INTBUF_TAB%FTSAVX_E,INTBUF_TAB%FTSAVY_E,
      E INTBUF_TAB%FTSAVZ_E,INTBUF_TAB%FTSAVX_E2S,INTBUF_TAB%FTSAVY_E2S, INTBUF_TAB%FTSAVZ_E2S,
      F INTBUF_TAB%IFPEN_E,INTBUF_TAB%IFPEN_E2S,INTBUF_TAB%S_KREMNODE_EDG ,INTBUF_TAB%S_REMNODE_EDG,
-     G INTBUF_TAB%S_KREMNODE_E2S,INTBUF_TAB%S_REMNODE_E2S,DGAPLOAD)
+     G INTBUF_TAB%S_KREMNODE_E2S,INTBUF_TAB%S_REMNODE_E2S,DGAPLOAD,INTBUF_TAB%PENE_OLD_E    ,INTBUF_TAB%STIF_OLD_E,
+     F INTBUF_TAB%S_PENE_OLD_E,INTBUF_TAB%PENE_OLD_E2S  ,INTBUF_TAB%STIF_OLD_E2S   ,INTBUF_TAB%S_PENE_OLD_E2S)
 C
 C Upgrade MultiMP
       IF (I_MEME(1)/=0)THEN
@@ -524,7 +529,6 @@ C Upgrade MultiMP
 
 C New barrier needed for Dynamic MultiMP
       CALL MY_BARRIER
-
       IF(I_MEMG_E /=0 .OR. I_MEMG_S/=0)THEN
 !$OMP SINGLE
         IF(I_MEMG_E/=0)THEN
@@ -547,7 +551,7 @@ C New barrier needed for Dynamic MultiMP
 C
       IF(ITASK==0)DEALLOCATE(INTBUF_TAB%I25_CAND_A,INTBUF_TAB%I25_CAND_B)
 C
-      IF (IMONM > 0) CALL STOPTIME(TIMERS,30)
+      IF (IMONM > 0.and.itask==0) CALL STOPTIME(TIMERS,30)
 C--------------------------------------------------------------
  200  CONTINUE
 C--------------------------------------------------------------

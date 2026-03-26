@@ -23,6 +23,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
 !||    debug_mod                             ../engine/share/modules/debug_mod.F
 !||--- called by ------------------------------------------------------
+!||    aconve                                ../engine/source/ale/aconve.F90
 !||    ale51_antidiff3                       ../engine/source/ale/ale51/ale51_antidiff3.F
 !||    ebcs8_inlet                           ../engine/source/boundary_conditions/ebcs/ebcs8_inlet.F90
 !||    get_hashtable_for_neighbour_segment   ../engine/source/interfaces/interf/get_hashtable_for_neighbour_segment.F90
@@ -45,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_fiadd25e_poff                    ../engine/source/mpi/interfaces/spmd_fiadd25e_poff.F
 !||    spmd_fiadd25e_pon                     ../engine/source/mpi/interfaces/spmd_fiadd25e_pon.F
 !||    update_failwave                       ../engine/source/materials/fail/failwave/update_failwave.F
+!||    update_slipring                       ../engine/source/tools/seatbelts/update_slipring.F
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       MODULE DEBUG_MOD

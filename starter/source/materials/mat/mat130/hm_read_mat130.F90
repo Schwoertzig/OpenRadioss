@@ -38,6 +38,7 @@
 !||    hm_read_mat              ../starter/source/materials/mat/hm_read_mat.F90
 !||--- calls      -----------------------------------------------------
 !||    hm_get_floatv            ../starter/source/devtools/hm_reader/hm_get_floatv.F
+!||    hm_get_floatv_dim        ../starter/source/devtools/hm_reader/hm_get_floatv_dim.F
 !||    hm_get_intv              ../starter/source/devtools/hm_reader/hm_get_intv.F
 !||    hm_option_is_encrypted   ../starter/source/devtools/hm_reader/hm_option_is_encrypted.F
 !||    init_mat_keyword         ../starter/source/materials/mat/init_mat_keyword.F
@@ -51,7 +52,7 @@
         subroutine hm_read_mat130(                                             &
           matparam ,nuvar    ,mtag     ,iout     ,parmat   ,unitab   ,         &
           lsubmodel,israte   ,mat_id   ,titr     ,table    ,ntable   ,         &
-          nvartmp  ,imatvis  )
+          nvartmp  ,imatvis  ,iunit    )
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                        Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -84,18 +85,18 @@
           type(ttable)  ,dimension(ntable) ,intent(in) :: table
           integer,                intent(inout) :: nvartmp           !< temporary number of user variables
           integer,                intent(inout) :: imatvis           !< material viscosity flag
+          integer,                intent(in)    :: iunit             !< material table unit number
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   local variables
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: ipru,lca,lcb,lcc,lcs,lcab,lcbc,lcca,lcsr,itype,shdflg,    &
-            lcsra,lcsrb,lcsrc,lcsrab,lcsrbc,lcsrca,ilaw,lcsrtmp
+            lcsra,lcsrb,lcsrc,lcsrab,lcsrbc,lcsrca,ilaw,lcsrtmp,i
           real(kind=WP) ::                                                     &
             rho0,young,nu,sigy,vf,mu,eaau,ebbu,eccu,gabu,gbcu,gcau,shear,bulk, &
             x1scale,x2scale,x3scale,x4scale,x2vect(14),x3vect(14),x4vect(14),  &
-            fscale(14),rfac,sigf,epsf,pruab,pruac,prubc,pruba,pruca,prucb,     &
-            sigyd0,sigyp0,fcut,dtime_step,tsef,ssef
+            fscale(14),rfac,pruab,pruac,prubc,pruba,pruca,prucb,     &
+            sigyd0,sigyp0,fcut,dtime_step,tsef,ssef,unit_pressure,unit_time
           logical :: is_encrypted, is_available
-          type (table_4d_), dimension(:), pointer :: table_mat
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -195,11 +196,14 @@
           !< Strain rate filtering equivalent frequency
           israte = 1
           rfac = max(min(rfac,one),zero)
-          dtime_step = ten*sqrt(rho0/(bulk + four_over_3*shear))
+          dtime_step = (ten*em3/unitab%fac_l_work)*sqrt(rho0/(bulk + four_over_3*shear))
           fcut = (one - rfac)/(two*pi*dtime_step)
           fcut = max(fcut,em20)
           if (tsef == zero) tsef = ep20
           if (ssef == zero) ssef = ep20
+          !< Recover pressure unit for loading curves unit conversion
+          call hm_get_floatv_dim('E' ,unit_pressure   ,is_available, lsubmodel, unitab)
+          unit_time = unitab%fac_t(iunit)
 !
 ! ----------------------------------------------------------------------------------------------------------------------
 !     Filling buffer tables
@@ -260,6 +264,7 @@
           matparam%uparam(17) = prucb
           matparam%uparam(18) = tsef
           matparam%uparam(19) = ssef
+          matparam%young0      = MAX(eaau,ebbu,eccu)
 !
           !< Material tables scaling factors and vectors
           x1scale = one
@@ -269,7 +274,13 @@
           x2vect(1:14) = one
           x3vect(1:14) = zero
           x4vect(1:14) = zero
-          fscale(1:14) = one
+          fscale(1:3)  = unit_pressure
+          if (itype == 1) then 
+            fscale(4:6) = unit_pressure
+          else
+            fscale(4:6) = one
+          endif
+          fscale(7:14) = one
 !
           !< Assign table IDs
           ! -> Classic clipping yield surface
@@ -294,6 +305,13 @@
             x1scale  ,x2scale  ,x3scale  ,x4scale  ,fscale   ,ntable   ,       &
             table    ,ilaw     )
 !
+          !< Include unit conversion for strain rate
+          if (lcsrtmp > 0) then
+            do i = 1, size(matparam%table(7)%x(1)%values) 
+              matparam%table(7)%x(1)%values(i) = matparam%table(7)%x(1)%values(i)/unit_time
+            enddo
+          endif
+!
           !< PARMAT table
           parmat(1) = bulk
           parmat(2) = young
@@ -306,6 +324,8 @@
           matparam%rho  = rho0
 !
           !< MTAG variable activation
+          mtag%g_pla  = 1
+          mtag%l_pla  = 1
           mtag%g_epsd = 1
           mtag%l_epsd = 1
 !

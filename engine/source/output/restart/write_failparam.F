@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_c_c              ../common_source/tools/input_output/write_routines.c
 !||    write_db               ../common_source/tools/input_output/write_db.F
 !||    write_i_c              ../common_source/tools/input_output/write_routines.c
+!||    write_mat_table        ../engine/source/materials/tools/write_mat_table.F
 !||--- uses       -----------------------------------------------------
 !||    fail_param_mod         ../common_source/modules/mat_elem/fail_param_mod.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
@@ -54,18 +55,20 @@ C-----------------------------------------------
       INTEGER ,DIMENSION(:) ,ALLOCATABLE :: IBUF
       my_real ,DIMENSION(:) ,ALLOCATABLE :: RBUF
 C=======================================================================
-      LENI = 9
+      LENI = 11
       ALLOCATE (IBUF(LENI))
 c
-      IBUF(1) = FAIL%IRUPT
-      IBUF(2) = FAIL%FAIL_ID
-      IBUF(3) = FAIL%NUPARAM
-      IBUF(4) = FAIL%NIPARAM
-      IBUF(5) = FAIL%NUVAR
-      IBUF(6) = FAIL%NFUNC
-      IBUF(7) = FAIL%NTABLE
-      IBUF(8) = FAIL%NMOD
-      IBUF(9) = FAIL%FAIL_IP
+      IBUF(1)  = FAIL%IRUPT
+      IBUF(2)  = FAIL%FAIL_ID
+      IBUF(3)  = FAIL%NUPARAM
+      IBUF(4)  = FAIL%NIPARAM
+      IBUF(5)  = FAIL%NUVAR
+      IBUF(6)  = FAIL%NVARTMP
+      IBUF(7)  = FAIL%NFUNC
+      IBUF(8)  = FAIL%NTABLE
+      IBUF(9)  = FAIL%NTABLE4D
+      IBUF(10) = FAIL%NMOD 
+      IBUF(11) = FAIL%FAIL_IP
 c
       CALL WRITE_I_C(IBUF,LENI)
       DEALLOCATE(IBUF)
@@ -113,6 +116,13 @@ c
       NUMTABL  = FAIL%NTABLE
       IF (NUMTABL > 0) THEN
         CALL WRITE_I_C(FAIL%TABLE,NUMTABL)
+      END IF
+
+!     write function tables 4D
+
+      NUMTABL = FAIL%NTABLE4D
+      IF (NUMTABL > 0) THEN
+        CALL WRITE_MAT_TABLE(FAIL%TABLE4D, NUMTABL)
       END IF
 c-----------
       RETURN

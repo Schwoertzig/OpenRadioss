@@ -39,10 +39,17 @@
 !||    s6fint_reg                      ../engine/source/elements/solid/solide6z/s6fint_reg.F90
 !||    s6for_distor                    ../engine/source/elements/thickshell/solide6c/s6for_distor.F90
 !||    s6get_xv                        ../engine/source/elements/thickshell/solide6c/s6get_xv.F90
+!||    s6zcoor_cp2sp                   ../engine/source/elements/solid/solide6z/s6zcoor_cp2sp.F90
 !||    s6zderi3                        ../engine/source/elements/solid/solide6z/s6zderi3.F90
+!||    s6zderit3                       ../engine/source/elements/solid/solide6z/s6zderit3.F90
+!||    s6zderito3                      ../engine/source/elements/solid/solide6z/s6zderito3.F90
 !||    s6zfint3                        ../engine/source/elements/solid/solide6z/s6zfint3.F90
 !||    s6zforc3                        ../engine/source/elements/solid/solide6z/s6zforc3.F90
 !||    s6zhour3                        ../engine/source/elements/solid/solide6z/s6zhourg3.F90
+!||    s6zhour3_or                     ../engine/source/elements/solid/solide6z/s6zhourg3_or.F90
+!||    s6zrcoor3                       ../engine/source/elements/solid/solide6z/s6zrcoor3.F90
+!||    s6zsav12                        ../engine/source/elements/solid/solide6z/s6zsav12.F90
+!||    s6zupd11t12                     ../engine/source/elements/solid/solide6z/s6zupd11t12.F90
 !||    sdistor_ini                     ../engine/source/elements/solid/solide/sdistror_ini.F90
 !||    sfor_3n2s3                      ../engine/source/elements/solid/solide/sfor_4n2s4.F90
 !||    sfor_4n2s4                      ../engine/source/elements/solid/solide/sfor_4n2s4.F90
@@ -52,7 +59,15 @@
 !||    sigeps130                       ../engine/source/materials/mat/mat130/sigeps130.F90
 !||    sigeps88                        ../engine/source/materials/mat/mat088/sigeps88.F90
 !||    sigeps88c                       ../engine/source/materials/mat/mat088/sigeps88c.F90
+!||    suser43                         ../engine/source/elements/solid/sconnect/suser43.F
 !||    sz_dt1                          ../engine/source/elements/solid/solidez/sz_dt1.F90
+!||    usermat_shell                   ../engine/source/materials/mat_share/usermat_shell.F
+!||    usermat_solid                   ../engine/source/materials/mat_share/usermat_solid.F
+!||    yield_criterion_barlat1989      ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
+!||    yield_criterion_barlat2000      ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat2000.F90
+!||    yield_criterion_hershey         ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
+!||    yield_criterion_hill            ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hill.F90
+!||    yield_criterion_vonmises        ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_vonmises.F90
 !||====================================================================
       module mvsiz_mod
       implicit none

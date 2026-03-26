@@ -217,7 +217,7 @@ c     user-type laws
         ENDDO
 c
         CALL MULAW8(TIMERS,OUTPUT,
-     1   1,        NEL,      MTN,
+     1   NEL,      MTN,
      2   NPT,      D1,       D2,       D3,
      3   D4,       D5,       D6,       PM,
      4   OFF,      GBUF%SIG, GBUF%EINT,GBUF%RHO,
@@ -330,9 +330,9 @@ c ---   extended mohr coulomb failure model
      5         OFF      ,DFMAX    ,TDELE)
 c ---   Biquadratic failure
              ELSEIF (IRUPT == 30) THEN
-               CALL FAIL_BIQUAD_S(
-     1         NEL      ,NUPARAM  ,NVARF    ,NFUNC    ,IFUNC    ,DELTAX   ,
-     2         NPF      ,TF       ,TT       ,BUFMAT   ,TDELE    ,
+               CALL FAIL_BIQUAD_S(mat_elem%mat_param(imat)%fail(ir),
+     1         NEL      ,NVARF    ,NFUNC    ,IFUNC    ,DELTAX   ,
+     2         NPF      ,TF       ,TT       ,TDELE    ,
      3         NGL      ,DPLA(J1) ,UVARF    ,OFF      ,DFMAX    ,LBUF%DMGSCL,
      4         SXX      ,SYY      ,SZZ      ,SXY      ,SYZ      ,SZX      )
 c

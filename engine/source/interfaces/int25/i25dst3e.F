@@ -40,10 +40,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      D   FY     ,FZ    ,LEDGE ,IRECT ,CAND_P ,
      E   IAM    ,JAM    ,IBM    ,JBM    ,IAS    ,
      F   JAS    ,IBS    ,JBS    ,ITAB   ,EDGE_ID,
-     G   DGAPLOADPMAX)
+     G   DGAPLOADPMAX,PENE_OLD_E,STIF_OLD_E,SIZ,TYPEDGS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      USE TRI7BOX
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -74,6 +75,9 @@ C-----------------------------------------------
      .     GAPVE(*), EX(*), EY(*), EZ(*), FX(*), FY(*), FZ(*), 
      .     CAND_P(*)
       my_real  , INTENT(IN) :: DGAPLOADPMAX
+      INTEGER , INTENT(IN) :: SIZ
+      my_real , INTENT(INOUT) :: PENE_OLD_E(SIZ),STIF_OLD_E(SIZ)
+      INTEGER  , INTENT(IN) :: TYPEDGS(MVSIZ)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -185,7 +189,6 @@ C!!!!!!!!!!!!!!!!!!!!!!!!
        GAP2 = (GAPVE(I)+DGAPLOADPMAX)*(GAPVE(I)+DGAPLOADPMAX)
        PENE2(I) = GAP2 - NN(I)
        PENE2(I) = MAX(ZERO,PENE2(I)) 
-
       ENDDO
 C
       SOL_EDGE =IEDGE/10 ! solids
@@ -205,11 +208,11 @@ C                                |
 C                                  |      
 
           P1=ZERO
-          IF(IBM(I)==0)
+          IF(IBM(I)==0.AND.IABS(LEDGE(7,CAND_M(I)))/=3)
      .      P1=-(NX(I)*EX(I)+NY(I)*EY(I)+NZ(I)*EZ(I)) ! (n(M),SM) > 45 degrees
 
           P2=ZERO
-          IF(IBS(I)==0)
+          IF(IBS(I)==0.AND.TYPEDGS(I)/=3)
      .      P2=  NX(I)*FX(I)+NY(I)*FY(I)+NZ(I)*FZ(I)  ! (n(S),MS) > 45 degrees
 
           NN(I)=SQRT(NN(I))
@@ -221,7 +224,11 @@ C
 C---------------------------------------
 C
       DO I=1,JLT
-        IF(PENE2(I)==ZERO) CAND_P(INDEX(I))=ZERO ! Reset CAND_P
+        IF(PENE2(I)==ZERO) THEN
+          CAND_P(INDEX(I))=ZERO ! Reset CAND_P
+          PENE_OLD_E(INDEX(I))=ZERO
+          STIF_OLD_E(INDEX(I))=STIF(I)
+        ENDIF
       ENDDO
 C
           DO I=1,JLT

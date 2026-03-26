@@ -76,6 +76,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    glob_therm_mod               ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    groupdef_mod                 ../common_source/modules/groupdef_mod.F
 !||    h3d_mod                      ../engine/share/modules/h3d_mod.F
+!||    i22tri_mod                   ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    initbuf_mod                  ../engine/share/resol/initbuf.F
 !||    intbufdef_mod                ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    mat_elem_mod                 ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -148,6 +149,7 @@ C-----------------------------------------------
       use glob_therm_mod
       use element_mod , only : nixs,nixq,nixtg,nixt
       use sfem_mod
+      use i22tri_mod , only : nb
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -772,7 +774,7 @@ C     -------------------------
      A   IPM,             QMV,
      B   ale%global%s_flux,ale%global%s_qmv,ale%global%nv46,
      C   IAD_ELEM,        GLOB_THERM,
-     D   FR_ELEM,         MATPARAM  ,timers,nthread,int22)
+     D   FR_ELEM,         MATPARAM  ,timers,nthread,nb,int22,i22len)
          ENDIF
       ELSE
         ALE%SUB%IFSUBM=0

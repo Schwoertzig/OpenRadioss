@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    amomt3                 ../engine/source/elements/solid/solide/amomt3.F
 !||    boltst                 ../engine/source/elements/solid/solide/boltst.F
 !||    check_off_ale          ../engine/source/elements/solid/solide/check_off_ale.F
+!||    degenes8               ../engine/source/elements/solid/solide/degenes8.F
 !||    emomt3b                ../engine/source/elements/solid/solide/emomt3b.F
 !||    epxle3                 ../engine/source/elements/solid/solide/epxle3.F
 !||    fe_close               ../engine/source/elements/solid/solide/fe_close.F
@@ -322,16 +323,17 @@ C-----
 C-----
 C----- 
 C     IBOLTP : flag bolt preloading
-      INTEGER IBOLTP,NBPRELD,IMAT,ISM12_11,NN_DEL,PID,ISCTL,ISTAB(MVSIZ)
+      INTEGER IBOLTP,NBPRELD,IMAT,ISM12_11,NN_DEL,PID,ISCTL,ISTAB(MVSIZ),IDEGE(MVSIZ)
       my_real, DIMENSION(:), ALLOCATABLE :: VAR_REG
       my_real, DIMENSION(:), POINTER :: BPRELD,DNL
-      my_real :: P(MVSIZ)
+      my_real :: P(MVSIZ), OFFG11(MVSIZ)
       INTEGER SZ_IX
       integer :: fake_size = 0
       my_real, dimension(1) :: fake_array          
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C=======================================================================
+      
       GBUF => ELBUF_TAB(NG)%GBUF
       LBUF => ELBUF_TAB(NG)%BUFLY(1)%LBUF(1,1,1)
       ISM12_11 = ELBUF_TAB(NG)%BUFLY(1)%L_SIGL
@@ -383,6 +385,9 @@ C Gather nodal variables and compute rotation
      .   XDP, X0 , Y0 , Z0 , NEL, XGXA, XGYA, XGZA,
      .   XGXA2,XGYA2,XGZA2,XGXYA,XGYZA,XGZXA,IPARG(1,NG),
      .   GBUF%GAMA_R) 
+
+
+
 C
       NN_DEL = 0
       PID  = NGEO(1)
@@ -410,6 +415,7 @@ C
       END IF
       ISCTL = IGEO(97,PID)
 C Total strain Pij are in global system for ISMSTR=10,12 and in local system for ISMSTR=11
+   
       IF ((ISMSTR >= 10.AND.ISMSTR <= 12).AND.JLAG > 0) THEN
         CALL SGCOOR3(
      1   TT,        8,         X,         IXS(1,NF1),
@@ -417,6 +423,9 @@ C Total strain Pij are in global system for ISMSTR=10,12 and in local system for
      3   VY0,       VZ0,       GBUF%SMSTR,D,
      4   GBUF%OFF,  OFFG0,     NEL,       XDP,
      5   MTN,       ISMSTR)
+
+
+     
         IF (ISMSTR == 11) THEN
         CALL SRROTADP(
      1   R11,     R12,     R13,     R21,
@@ -455,12 +464,14 @@ C Total strain Pij are in global system for ISMSTR=10,12 and in local system for
      .    JAC1,JAC2,JAC3,
      .    JAC4,JAC5,JAC6,JAC9,JLAG)
         ELSE
+          
           CALL SZDERITO3(
      1   OFF,       VOLN,      PX1,       PX2,
      2   PX3,       PX4,       PY1,       PY2,
      3   PY3,       PY4,       PZ1,       PZ2,
      4   PZ3,       PZ4,       GBUF%JAC_I,NEL,
      5   JLAG)
+
         END IF
          CALL SDEFOT3(
      1   PX1,     PX2,     PX3,     PX4,
@@ -475,6 +486,7 @@ C Total strain Pij are in global system for ISMSTR=10,12 and in local system for
      A   MFXX,    MFXY,    MFXZ,    MFYX,
      B   MFYY,    MFYZ,    MFZX,    MFZY,
      C   MFZZ,    NEL)
+
 c
         IF (ISMSTR==10.OR.ISMSTR==12.OR.ISORTH/=0) THEN
           CALL SZTORTH3(LFT,LLT,ISORTH,NEL,
@@ -484,6 +496,7 @@ c
      .         MFZX, MFZY, MFZZ,
      .         G1X, G1Y, G1Z, G2X, G2Y, G2Z, G3X, G3Y, G3Z)
         ENDIF
+
       ENDIF   !  ISMSTR==10.AND.JLAG>0
 C-----------
 C
@@ -651,11 +664,21 @@ C
 C Extract stresses + small strain
        CALL SRMALLA3(GBUF%SIG,S1,S2,S3,S4,S5,S6,
      .             GBUF%OFF,OFF,NEL)
-       CALL SRMALLA11(
-     1   GBUF%SMSTR,GBUF%OFF,  WXX,       WYY,
+      IF (ISMSTR == 11.OR.ISMSTR == 12) THEN
+        CALL DEGENES8(IXS(1,NF1),IDEGE,   NEL)
+        DO I=1,NEL
+          IF (IDEGE(I) == 0) THEN
+             OFFG11(I) = GBUF%OFF(I)
+          ELSE 
+             OFFG11(I) = ZERO
+          END IF
+        END DO
+        CALL SRMALLA11(
+     1   GBUF%SMSTR,OFFG11  ,  WXX,       WYY,
      2   WZZ,       R11,       R12,       R13,
      3   R21,       R22,       R23,       R31,
      4   R32,       R33,       NEL,       ISMSTR)
+      END IF  !(ISMSTR == 11.OR.ISMSTR == 12) THEN
 C
 C  Update reference configuration (possible future change to small strain option)
 C  Total strain option doesn't change the reference configuration

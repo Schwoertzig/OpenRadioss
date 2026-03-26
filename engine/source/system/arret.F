@@ -38,7 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    c_fortran_dgssv                  ../engine/stub/superlu_stub.F
 !||    c_freemem                        ../engine/stub/superlu_stub.F
 !||    c_tricall                        ../engine/stub/fvmbags_stub.F
-!||    check_error_and_write            ../common_source/tools/memory/shrink_array.F90
+!||    check_error_and_write            ../common_source/tools/memory/my_alloc.F90
 !||    cp_ifront                        ../engine/source/implicit/produt_v.F
 !||    create_h3d_1d_scalar             ../engine/source/output/h3d/h3d_build_fortran/create_h3d_1d_scalar.F
 !||    create_h3d_1d_tensor             ../engine/source/output/h3d/h3d_build_fortran/create_h3d_1d_tensor.F
@@ -227,6 +227,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ini_k0h                          ../engine/source/implicit/imp_solv.F
 !||    ini_kisc                         ../engine/source/implicit/lin_solv.F
 !||    inipar                           ../engine/source/mpi/init/inipar.F
+!||    init_h3d_engine                  ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    intbuf_ini                       ../common_source/interf/intbuf_ini.F
 !||    inter7_collision_detection       ../engine/source/interfaces/intsort/inter7_collision_detection.F90
 !||    inter_count_node_curv            ../engine/source/interfaces/generic/inter_count_node_curv.F
@@ -401,14 +402,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tritri3                          ../engine/stub/fvmbags_stub.F
 !||    upd_aspc0                        ../engine/source/constraints/general/bcs/bc_imp0.F
 !||    update_slipring                  ../engine/source/tools/seatbelts/update_slipring.F
-!||    upgrade_cand_opt                 ../common_source/interf/upgrade_multimp.F
-!||    upgrade_lcand_e2s                ../common_source/interf/upgrade_multimp.F
-!||    upgrade_lcand_edg                ../common_source/interf/upgrade_multimp.F
-!||    upgrade_multimp                  ../common_source/interf/upgrade_multimp.F
 !||    upgrade_rem_2ry                  ../engine/source/mpi/interfaces/spmd_i7tool.F
 !||    user_windows_routine             ../engine/source/user_interface/user_windows.F
 !||    usermat_shell                    ../engine/source/materials/mat_share/usermat_shell.F
 !||    usermat_solid                    ../engine/source/materials/mat_share/usermat_solid.F
+!||    ush_force3                       ../engine/source/user_interface/ushforce3.F90
 !||    wciusc2                          ../engine/source/input/wciusc2.F
 !||    write_intbuf                     ../engine/source/output/restart/write_intbuf.F
 !||    wriusc2                          ../engine/source/input/wriusc2.F
@@ -416,6 +414,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- calls      -----------------------------------------------------
 !||    c_h3d_close_file                 ../engine/source/output/h3d/h3d_build_cpp/c_h3d_close_file.cpp
 !||    checksum_option_checksum_file    ../common_source/modules/output/checksum_mod.F90
+!||    checksum_option_out_file         ../common_source/modules/output/checksum_mod.F90
 !||    close_c                          ../common_source/tools/input_output/write_routines.c
 !||    compute_binary_checksum          ../common_source/output/checksum/checksum.cpp
 !||    cur_fil_c                        ../common_source/tools/input_output/write_routines.c
@@ -666,28 +665,31 @@ C
 
               ENDIF
 
+              if (ispmd==0)then
+                if (output_ptr%checksum%checksum_count > 0) then
+                    ! Write Checksum digest in output file
+                    CALL checksum_option_out_file(output_ptr%checksum)   ! Deck checksums print
+                end if
+              endif
               CLOSE(UNIT=IOUT)
-              IF (ISPMD==0)THEN
-                 IF (OUTPUT_PTR%CHECKSUM%CHECKSUM_COUNT > 0 ) THEN
-                     IZIP=0
-                     CALL COMPUTE_BINARY_CHECKSUM(OUTPUT_PTR%checksum%files_checksum , 
+
+              if (ispmd==0)then
+                if (output_ptr%checksum%checksum_count > 0) then
+                    IZIP=0
+                    CALL COMPUTE_BINARY_CHECKSUM(OUTPUT_PTR%checksum%files_checksum , 
      *                                            C_LOC(OUTPUT_PTR%OUT_FILENAME),
      *                                            LEN_TRIM(OUTPUT_PTR%OUT_FILENAME),
      *                                            IZIP)
-                 ENDIF
-              ENDIF
 
+                    CALL checksum_option_checksum_file(output_ptr%checksum,rootnam,rootlen,chrun)   ! Deck checksums print
+                end if
+              endif
+              
               IF(ISPMD /=0) THEN
                  CALL DELETE_USER_FILE(IUSC4_FNAM,LEN_IUSC4_FNAM)
               ENDIF
 
               CLOSE(UNIT=IUHIS)
-
-              if (ispmd==0)then
-                if (output_ptr%checksum%checksum_count > 0) then
-                    CALL checksum_option_checksum_file(output_ptr%checksum,ROOTNAM,ROOTLEN,CHRUN)   ! Deck checksums print
-                end if
-              endif
 
               CALL MY_EXIT(0)
  

@@ -24,7 +24,7 @@
 !||    elbufdef_mod                        ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||--- called by ------------------------------------------------------
 !||    a22conv3                            ../engine/source/ale/alefvm/cut_cells/a22conv3.F
-!||    aconve                              ../engine/source/ale/aconve.F
+!||    aconve                              ../engine/source/ale/aconve.F90
 !||    admdiv                              ../engine/source/model/remesh/admdiv.F
 !||    admerr                              ../engine/source/model/remesh/admerr.F
 !||    admgvid                             ../engine/source/model/remesh/admgvid.F
@@ -34,16 +34,15 @@
 !||    admregul                            ../engine/source/model/remesh/admregul.F
 !||    admthke                             ../engine/source/model/remesh/admthke.F
 !||    aeturb                              ../engine/source/ale/turbulence/aeturb.F
-!||    aflut_int22                         ../engine/source/ale/ale51/afluxt_int22.F90
 !||    aflux0                              ../engine/source/ale/aflux0.F
 !||    aflux3_int22_fvm                    ../engine/source/ale/alefvm/cut_cells/aflux3_int22_fvm.F
 !||    afluxt                              ../engine/source/ale/ale51/afluxt.F
+!||    afluxt_int22                        ../engine/source/ale/ale51/afluxt_int22.F90
 !||    agauge                              ../engine/source/ale/agauge.F
 !||    agrad0                              ../engine/source/ale/agrad0.F
 !||    airbagb1                            ../engine/source/airbag/airbagb1.F
 !||    akturb                              ../engine/source/ale/turbulence/akturb.F
 !||    ale51_antidiff3_int22               ../engine/source/ale/alefvm/cut_cells/ale51_antidiff3_int22.F
-!||    ale51_finish                        ../engine/source/ale/ale51/ale51_finish.F
 !||    ale51_finish_int22                  ../engine/source/ale/ale51/ale51_finish_int22.F90
 !||    ale51_gradient_reconstruction       ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
 !||    ale51_gradient_reconstruction2      ../engine/source/ale/alemuscl/ale51_gradient_reconstruction2.F
@@ -57,7 +56,6 @@
 !||    alew6                               ../engine/source/ale/grid/alew6.F
 !||    alewdx                              ../engine/source/ale/grid/alewdx.F
 !||    alloc_elbuf_imp                     ../engine/source/elements/elbuf/alloc_elbuf_imp.F
-!||    allocbuf_auto                       ../engine/source/elements/elbuf/allocbuf_auto.F
 !||    anim_nodal_p_elems                  ../engine/source/output/anim/generate/anim_nodal_p_elems.F
 !||    anim_nodal_ssp_elems                ../engine/source/output/anim/generate/anim_nodal_ssp_elems.F90
 !||    animig3d                            ../engine/source/output/anim/generate/animig3d.F
@@ -69,7 +67,7 @@
 !||    aniofff                             ../engine/source/output/anim/generate/aniofff.F
 !||    anioffs                             ../engine/source/output/anim/generate/anioff6.F
 !||    aniskew                             ../engine/source/output/anim/generate/aniskew.F
-!||    arezon                              ../engine/source/ale/arezon.F
+!||    arezon                              ../engine/source/ale/arezon.F90
 !||    atherm                              ../engine/source/ale/atherm.F
 !||    bcs_nrf                             ../engine/source/boundary_conditions/bcs_nrf.F90
 !||    bforc2                              ../engine/source/ale/bimat/bforc2.F
@@ -338,6 +336,9 @@
 !||    inintr_thkvar                       ../starter/source/interfaces/interf1/inintr_thkvar.F
 !||    iniphase                            ../starter/source/initial_conditions/inivol/iniphase.F
 !||    inirig_mat                          ../starter/source/elements/initia/inirig_mat.F
+!||    init_ale                            ../engine/source/ale/init_ale.F90
+!||    init_ale_arezon                     ../engine/source/ale/init_ale_arezon.F90
+!||    init_h3d_engine                     ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    init_inivol                         ../starter/source/initial_conditions/inivol/init_inivol.F90
 !||    init_inivol_2d_polygons             ../starter/source/initial_conditions/inivol/init_inivol_2D_polygons.F90
 !||    init_rwall_penalty                  ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
@@ -515,6 +516,7 @@
 !||    s6fint_reg                          ../engine/source/elements/solid/solide6z/s6fint_reg.F90
 !||    s6zforc3                            ../engine/source/elements/solid/solide6z/s6zforc3.F90
 !||    s6zhour3                            ../engine/source/elements/solid/solide6z/s6zhourg3.F90
+!||    s6zhour3_or                         ../engine/source/elements/solid/solide6z/s6zhourg3_or.F90
 !||    s6zinit3                            ../starter/source/elements/solid/solide6z/s6zinit3.F90
 !||    s8_is17jac_i                        ../engine/source/elements/solid/solide8e/s8_is17jac_i.F
 !||    s8cfint_reg                         ../engine/source/elements/thickshell/solide8c/s8cfint_reg.F
@@ -691,6 +693,8 @@
 !||    upxfem_tagxp                        ../engine/source/elements/xfem/upxfem_tagxp.F
 !||    usermat_shell                       ../engine/source/materials/mat_share/usermat_shell.F
 !||    usermat_solid                       ../engine/source/materials/mat_share/usermat_solid.F
+!||    ush_force3                          ../engine/source/user_interface/ushforce3.F90
+!||    ush_init                            ../starter/source/elements/elbuf_init/ush_init.F90
 !||    velvecc22                           ../engine/source/output/anim/generate/velvec.F
 !||    velvecz22                           ../engine/source/output/anim/generate/velvecz22.F
 !||    viper_mod                           ../engine/source/coupling/viper/viper_interface_mod.F90
@@ -1140,6 +1144,7 @@
           integer  :: lf_off
           integer, dimension(:)  , pointer ::  indx => null()
           integer, dimension(:)  , pointer ::  off => null()
+          integer, dimension(:)  , pointer ::  vartmp => null()
           real(kind=WP), dimension(:)  , pointer ::  dam => null()
           real(kind=WP), dimension(:)  , pointer ::  var => null()
           real(kind=WP), dimension(:)  , pointer ::  dammx => null()

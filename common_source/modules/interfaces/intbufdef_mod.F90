@@ -1188,6 +1188,7 @@
           integer ::   s_adrects!  4*nrts    :adrects : address of each secnd node of the segment in ixs/ixs10/ixs20/ixs16
           integer ::   s_facnrts!  nrts      :facnrts : corresponding facet in element ielnrts
           integer ::   s_e2s_actnor!
+          integer ::   s_msr_1d ! nodes for 1D edges inter 25
 !=======================================================================
 ! define sizes (float arrays)
 !=======================================================================
@@ -1233,6 +1234,10 @@
           integer ::   s_ftsavx_e2s !  multimp*nconte    :ftsavx_e2s : friction for saving   :            25
           integer ::   s_ftsavy_e2s !  multimp*nconte    :ftsavx_e2s : friction for saving   :            25
           integer ::   s_ftsavz_e2s !  multimp*nconte    :ftsavx_e2s : friction for saving   :            25
+          integer ::   s_pene_old_e !  multimp*nconte  :pene_old_e : previous stiffness  :            25
+          integer ::   s_stif_old_e !  multimp*nconte  :stif_old_e : previous stiffness  :            25
+          integer ::   s_pene_old_e2s !  multimp*nconte  :pene_old_e2s : previous stiffness  :            25
+          integer ::   s_stif_old_e2s !  multimp*nconte  :stif_old_e2s : previous stiffness  :            25
 !---- ige
           integer ::   s_rige
           integer ::   s_xige
@@ -1470,6 +1475,7 @@
           integer, dimension(:), allocatable :: edge_type1_0
           integer, dimension(:) , allocatable ::  ielem_m
           integer, dimension(:) , allocatable ::  proc_mvoisin
+          integer, dimension(:) , allocatable ::  msr_1d
 
 !---- inter friction parts
           integer, dimension(:) , allocatable ::  ipartfrics
@@ -1646,6 +1652,10 @@
           real(kind=WP), dimension(:) , allocatable ::   stifmsdt_s
           real(kind=WP), dimension(:) , allocatable ::   stifmsdt_m
           real(kind=WP), dimension(:) , allocatable ::   stifmsdt_edg
+          real(kind=WP), dimension(:) , allocatable ::   pene_old_e
+          real(kind=WP), dimension(:) , allocatable ::   stif_old_e
+          real(kind=WP), dimension(:) , allocatable ::   pene_old_e2s
+          real(kind=WP), dimension(:) , allocatable ::   stif_old_e2s
           integer :: nrtm_free
 
 ! mpi communicators
@@ -1693,7 +1703,7 @@
 
 ! intbuf_size array maximum length defined as parameter
 ! (maximum number of different arrays composing intbuf_tab structure)
-        integer, parameter :: l_intbuf_size_max = 516
+        integer, parameter :: l_intbuf_size_max = 521
         integer :: inter_ithknod !flag to fill thknod array  (enabled with ithick parameter from interface type 25 or 21)
 
         ! -------------------------

@@ -29,13 +29,17 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    compaction_tab_init           ../common_source/eos/compaction_tab.F90
 !||    condamage                     ../engine/source/materials/mat/mat190/condamage.F
 !||    conversion                    ../engine/source/materials/mat/mat190/conversion.F
+!||    fail_biquad_c                 ../engine/source/materials/fail/biquad/fail_biquad_c.F
+!||    fail_biquad_s                 ../engine/source/materials/fail/biquad/fail_biquad_s.F
 !||    granular51                    ../engine/source/materials/mat/mat051/granular51.F90
 !||    mat87c_tabulated              ../engine/source/materials/mat/mat087/mat87c_tabulated.F90
 !||    mat87c_tabulated_3dir_ortho   ../engine/source/materials/mat/mat087/mat87c_tabulated_3dir_ortho.F90
 !||    no_asso_lplas76c              ../engine/source/materials/mat/mat076/no_asso_lplas76c.F
 !||    no_asso_plas76                ../engine/source/materials/mat/mat076/no_asso_plas76.F
 !||    no_asso_qplas76c              ../engine/source/materials/mat/mat076/no_asso_qplas76c.F
+!||    rate_dependency_parameters    ../engine/source/materials/mat/mat132/rate_dependency_parameters.F90
 !||    s6zforc3                      ../engine/source/elements/solid/solide6z/s6zforc3.F90
+!||    self_heating_tabulated        ../engine/source/materials/mat/mat131/self_heating/self_heating_tabulated.F90
 !||    sigeps106                     ../engine/source/materials/mat/mat106/sigeps106.F90
 !||    sigeps106c                    ../engine/source/materials/mat/mat106/sigeps106c.F90
 !||    sigeps123                     ../engine/source/materials/mat/mat123/sigeps123.F90
@@ -44,6 +48,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sigeps128s                    ../engine/source/materials/mat/mat128/sigeps128s.F90
 !||    sigeps129s                    ../engine/source/materials/mat/mat129/sigeps129s.F90
 !||    sigeps130                     ../engine/source/materials/mat/mat130/sigeps130.F90
+!||    sigeps132c                    ../engine/source/materials/mat/mat132/sigeps132c.F90
 !||    sigeps133                     ../engine/source/materials/mat/mat133/sigeps133.F90
 !||    sigeps163                     ../engine/source/materials/mat/mat163/sigeps163.F90
 !||    sigeps50s                     ../engine/source/materials/mat/mat050/sigeps50s.F90
@@ -51,7 +56,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sigeps70                      ../engine/source/materials/mat/mat070/sigeps70.F
 !||    sigeps88                      ../engine/source/materials/mat/mat088/sigeps88.F90
 !||    sigeps88c                     ../engine/source/materials/mat/mat088/sigeps88c.F90
+!||    srate_dependency_tabulated    ../engine/source/materials/mat/mat131/srate_dependency/srate_dependency_tabulated.F90
 !||    strainrate_dependency         ../engine/source/materials/mat/mat123/strainrate_dependency.F90
+!||    strainrate_dependency_125c    ../engine/source/materials/mat/mat125/strainrate_dependency_125c.F90
+!||    strainrate_dependency_125s    ../engine/source/materials/mat/mat125/strainrate_dependency_125s.F90
+!||    therm_softening_tabulated     ../engine/source/materials/mat/mat131/therm_softening/therm_softening_tabulated.F90
+!||    work_hardening_tabulated      ../engine/source/materials/mat/mat131/work_hardening/work_hardening_tabulated.F90
 !||====================================================================
       MODULE TABLE_MAT_VINTERP_MOD
       CONTAINS
@@ -64,12 +74,16 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    compaction_tab_init           ../common_source/eos/compaction_tab.F90
 !||    condamage                     ../engine/source/materials/mat/mat190/condamage.F
 !||    conversion                    ../engine/source/materials/mat/mat190/conversion.F
+!||    fail_biquad_c                 ../engine/source/materials/fail/biquad/fail_biquad_c.F
+!||    fail_biquad_s                 ../engine/source/materials/fail/biquad/fail_biquad_s.F
 !||    granular51                    ../engine/source/materials/mat/mat051/granular51.F90
 !||    mat87c_tabulated              ../engine/source/materials/mat/mat087/mat87c_tabulated.F90
 !||    mat87c_tabulated_3dir_ortho   ../engine/source/materials/mat/mat087/mat87c_tabulated_3dir_ortho.F90
 !||    no_asso_lplas76c              ../engine/source/materials/mat/mat076/no_asso_lplas76c.F
 !||    no_asso_plas76                ../engine/source/materials/mat/mat076/no_asso_plas76.F
 !||    no_asso_qplas76c              ../engine/source/materials/mat/mat076/no_asso_qplas76c.F
+!||    rate_dependency_parameters    ../engine/source/materials/mat/mat132/rate_dependency_parameters.F90
+!||    self_heating_tabulated        ../engine/source/materials/mat/mat131/self_heating/self_heating_tabulated.F90
 !||    sigeps106                     ../engine/source/materials/mat/mat106/sigeps106.F90
 !||    sigeps106c                    ../engine/source/materials/mat/mat106/sigeps106c.F90
 !||    sigeps123                     ../engine/source/materials/mat/mat123/sigeps123.F90
@@ -78,6 +92,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sigeps128s                    ../engine/source/materials/mat/mat128/sigeps128s.F90
 !||    sigeps129s                    ../engine/source/materials/mat/mat129/sigeps129s.F90
 !||    sigeps130                     ../engine/source/materials/mat/mat130/sigeps130.F90
+!||    sigeps132c                    ../engine/source/materials/mat/mat132/sigeps132c.F90
 !||    sigeps133                     ../engine/source/materials/mat/mat133/sigeps133.F90
 !||    sigeps163                     ../engine/source/materials/mat/mat163/sigeps163.F90
 !||    sigeps50s                     ../engine/source/materials/mat/mat050/sigeps50s.F90
@@ -85,7 +100,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sigeps70                      ../engine/source/materials/mat/mat070/sigeps70.F
 !||    sigeps88                      ../engine/source/materials/mat/mat088/sigeps88.F90
 !||    sigeps88c                     ../engine/source/materials/mat/mat088/sigeps88c.F90
+!||    srate_dependency_tabulated    ../engine/source/materials/mat/mat131/srate_dependency/srate_dependency_tabulated.F90
 !||    strainrate_dependency         ../engine/source/materials/mat/mat123/strainrate_dependency.F90
+!||    strainrate_dependency_125c    ../engine/source/materials/mat/mat125/strainrate_dependency_125c.F90
+!||    strainrate_dependency_125s    ../engine/source/materials/mat/mat125/strainrate_dependency_125s.F90
+!||    therm_softening_tabulated     ../engine/source/materials/mat/mat131/therm_softening/therm_softening_tabulated.F90
+!||    work_hardening_tabulated      ../engine/source/materials/mat/mat131/work_hardening/work_hardening_tabulated.F90
 !||--- calls      -----------------------------------------------------
 !||    ancmsg                        ../engine/source/output/message/message.F
 !||    arret                         ../engine/source/system/arret.F
@@ -215,7 +235,11 @@ C-----------------------------------------------
           DO J=1,NINDX_1
             I = INDX_1(J)
             M = IPOS(I,K)
-            DX = TABLE%X(K)%VALUES(M) - TABLE%X(K)%VALUES(M-1)
+            IF (M > 1) THEN
+              DX = TABLE%X(K)%VALUES(M) - TABLE%X(K)%VALUES(M-1)
+            ELSE
+              DX = TABLE%X(K)%VALUES(2) - TABLE%X(K)%VALUES(1)
+            ENDIF
             IF (DX > ZERO) THEN
               IPOS(I,K) = INT( (XX(I,K) - TABLE%X(K)%VALUES(1)) / DX ) + 1
               IPOS(I,K) = MAX(1,MIN(IPOS(I,K),LDIM(K)-1))
@@ -227,7 +251,11 @@ C-----------------------------------------------
           DO J=1,NINDX_2
             I = INDX_2(J)
             M = IPOS(I,K)
-            DX = TABLE%X(K)%VALUES(M+1) - TABLE%X(K)%VALUES(M)
+            IF (M < LDIM(K)) THEN
+              DX = TABLE%X(K)%VALUES(M+1) - TABLE%X(K)%VALUES(M)
+            ELSE
+              DX = TABLE%X(K)%VALUES(LDIM(K)) - TABLE%X(K)%VALUES(LDIM(K)-1)
+            ENDIF
             IF (DX > ZERO) THEN
               IPOS(I,K) = INT( (XX(I,K) - TABLE%X(K)%VALUES(1)) / DX ) + 1
               IPOS(I,K) = MAX(1,MIN(IPOS(I,K),LDIM(K)-1))
@@ -373,4 +401,4 @@ c-----------
       RETURN
       END SUBROUTINE TABLE_MAT_VINTERP
 c-----------
-      END MODULE TABLE_MAT_VINTERP_MOD     
+      END MODULE TABLE_MAT_VINTERP_MOD

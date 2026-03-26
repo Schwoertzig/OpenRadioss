@@ -154,6 +154,7 @@
             nel = iparg(2,ng)
             nft = iparg(3,ng)
             ity = iparg(5,ng)
+            if(ity /=1 .and. ity /= 2 .and. ity /= 7)cycle
             mid = ix(1,nft+1)
             ishadow = nint(pm(96,mid))
             if(ishadow == 0)cycle
@@ -192,10 +193,10 @@
             nel = iparg(2,ng)
             nft = iparg(3,ng)
             ity = iparg(5,ng)
+            if(ity /=1 .and. ity /= 2 .and. ity /= 7)cycle
             mid = ix(1,nft+1)
             ishadow = nint(pm(96,mid))
             if(ishadow == 0)cycle
-            if(ity /=1 .and. ity /= 2 .and. ity /= 7)cycle
             if(mid /= mat_det .and. mat_det /= 0)cycle
             Dcj = pm(38,mid)
             if(mlw == 51)then
@@ -363,7 +364,7 @@
           do ii=1,neldet
             ng = idx_ng(ii)
             i  = idx_i(ii)
-            tmp = -elbuf_tab(ng)%gbuf%tb(i)
+            tmp = abs(elbuf_tab(ng)%gbuf%tb(i)) ! Tdet was potentially already computed with standard detonator (no fast marching method), see m5in2 subroutine
             tmp = min (tmp, tdet(ii))
             elbuf_tab(ng)%gbuf%tb(i) = -tmp
           end do

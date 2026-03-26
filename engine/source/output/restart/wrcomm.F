@@ -44,6 +44,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    parameters_mod   ../common_source/modules/interfaces/parameters_mod.F
 !||    pblast_mod       ../common_source/modules/loads/pblast_mod.F90
 !||    pinchtype_mod    ../common_source/modules/pinchtype_mod.F
+!||    seatbelt_mod     ../common_source/modules/seatbelt_mod.F
 !||    sensor_mod       ../common_source/modules/sensor_mod.F90
 !||    sfem_mod         ../common_source/modules/elements/sfem_mod.F90
 !||    state_mod        ../common_source/modules/state_mod.F
@@ -75,6 +76,7 @@ C-----------------------------------------------
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
       use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
       use sfem_mod
+      USE SEATBELT_MOD , ONLY : NGUIDED_CABLE,NGUIDED_CABLE_G
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -252,6 +254,7 @@ C   sizes of integer arrays
       TABVINT(95)  = SLBVEL
       TABVINT(96)  = SIACTIV
       TABVINT(97)  = SIBMPC
+      SKINET = 0
       TABVINT(98)  = SKINET
       TABVINT(99)  = SIPARI
       TABVINT(100) = 0 !SINBUF
@@ -1685,9 +1688,13 @@ C-----Seatbelts - slipring / retractors
       LVARINT=LVARINT+1
       TABVINT(LVARINT)=NRETRACTOR
       LVARINT=LVARINT+1
+      TABVINT(LVARINT)=NGUIDED_CABLE
+      LVARINT=LVARINT+1
       TABVINT(LVARINT)=NSLIPRING_G
       LVARINT=LVARINT+1
       TABVINT(LVARINT)=NRETRACTOR_G
+      LVARINT=LVARINT+1
+      TABVINT(LVARINT)=NGUIDED_CABLE_G
       LVARINT=LVARINT+1
       TABVINT(LVARINT)=N_ANCHOR_REMOTE
       LVARINT=LVARINT+1

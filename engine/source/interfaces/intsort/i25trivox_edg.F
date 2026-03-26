@@ -54,7 +54,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      D      GAP_E_L,NEDGE_LOCAL,IFQ,CANDE2E_FX ,CANDE2E_FY,
      E      CANDE2E_FZ,CANDE2S_FX ,CANDE2S_FY,CANDE2S_FZ,IFPEN_E,IFPEN_E2S,
      F      KREMNODE_EDG_SIZ,REMNODE_EDG_SIZ,KREMNODE_E2S_SIZ,REMNODE_E2S_SIZ,
-     G      DGAPLOAD   )
+     G      DGAPLOAD  ,PENE_OLD_E,STIF_OLD_E,SIZ,PENE_OLD_E2S,STIF_OLD_E2S,SIZ_E2S  )
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
@@ -111,6 +111,9 @@ C     REAL
      .   CANDE2S_FX(4,*) ,CANDE2S_FY(4,*),CANDE2S_FZ(4,*)
       REAL*4 EDG_BISECTOR(3,4,*), VTX_BISECTOR(3,2,*)
       INTEGER, INTENT(IN) :: NEDGE_LOCAL
+      INTEGER , INTENT(IN) :: SIZ, SIZ_E2S
+      my_real , INTENT(INOUT) :: PENE_OLD_E(SIZ),STIF_OLD_E(SIZ),PENE_OLD_E2S(SIZ_E2S),
+     .          STIF_OLD_E2S(SIZ_E2S)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -152,6 +155,7 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE ::  TAGREMLINE
 C-----------------------------------------------
 C
+
       DRAD2 =ZERO
 
       IF(FLAGREMNODE==2) THEN
@@ -228,6 +232,7 @@ C         PRINTIF((STFE(I) == 0 .AND.LEDGE(6,I) == D_ES),STFE(I))
             ZZ1=X(3,N1)
             ZZ2=X(3,N2)
             DEBUG_E2E(EID == D_ES,EID)
+            EDGE_TYPE=LEDGE(7,I) 
           ELSE IF(I > NEDGE) THEN
             XX1=XREM_EDGE(E_X1,I-NEDGE)
             XX2=XREM_EDGE(E_X2,I-NEDGE)
@@ -237,6 +242,7 @@ C         PRINTIF((STFE(I) == 0 .AND.LEDGE(6,I) == D_ES),STFE(I))
             ZZ2=XREM_EDGE(E_Z2,I-NEDGE)
             EID = IREM_EDGE(E_GLOBAL_ID,I-NEDGE)
             DEBUG_E2E(EID == D_ES,EID)
+            EDGE_TYPE = IREM_EDGE(E_TYPE,I-NEDGE)
           ELSE
             ! Secondary edge is boundary between domains
             ! ISPMD is not the owner of this edge
@@ -245,7 +251,7 @@ C         PRINTIF((STFE(I) == 0 .AND.LEDGE(6,I) == D_ES),STFE(I))
           ENDIF
           DEBUG_E2E(EID==D_ES,IGAP0)
 
-          IF(IGAP0 == 0)THEN
+          IF(IGAP0 == 0.OR.EDGE_TYPE==3)THEN
             XMAX_EDGS=MAX(XX1,XX2);
             XMIN_EDGS=MIN(XX1,XX2);
             YMAX_EDGS=MAX(YY1,YY2);
@@ -296,8 +302,6 @@ C         PRINTIF((STFE(I) == 0 .AND.LEDGE(6,I) == D_ES),STFE(I))
 
 
           END IF
-
-
 
           !-------------------------------------------!
           !  VOXEL OCCUPIED BY THE EDGE               !
@@ -448,12 +452,21 @@ C=======================================================================
         YY2=X(2,N2)
         ZZ1=X(3,N1)
         ZZ2=X(3,N2)
-        XMAX_EDGM=MAX(XX1,XX2)+GAPE(IEDG) ! +TZINF
-        XMIN_EDGM=MIN(XX1,XX2)-GAPE(IEDG) ! -TZINF
-        YMAX_EDGM=MAX(YY1,YY2)+GAPE(IEDG) ! +TZINF
-        YMIN_EDGM=MIN(YY1,YY2)-GAPE(IEDG) ! -TZINF
-        ZMAX_EDGM=MAX(ZZ1,ZZ2)+GAPE(IEDG) ! +TZINF
-        ZMIN_EDGM=MIN(ZZ1,ZZ2)-GAPE(IEDG) ! -TZINF
+        IF(IABS(LEDGE(7,IEDG))/=3)THEN
+          XMAX_EDGM=MAX(XX1,XX2)+GAPE(IEDG) ! +TZINF
+          XMIN_EDGM=MIN(XX1,XX2)-GAPE(IEDG) ! -TZINF
+          YMAX_EDGM=MAX(YY1,YY2)+GAPE(IEDG) ! +TZINF
+          YMIN_EDGM=MIN(YY1,YY2)-GAPE(IEDG) ! -TZINF
+          ZMAX_EDGM=MAX(ZZ1,ZZ2)+GAPE(IEDG) ! +TZINF
+          ZMIN_EDGM=MIN(ZZ1,ZZ2)-GAPE(IEDG) ! -TZINF
+        ELSE
+          XMAX_EDGM=MAX(XX1,XX2)
+          XMIN_EDGM=MIN(XX1,XX2)
+          YMAX_EDGM=MAX(YY1,YY2)
+          YMIN_EDGM=MIN(YY1,YY2)
+          ZMAX_EDGM=MAX(ZZ1,ZZ2)
+          ZMIN_EDGM=MIN(ZZ1,ZZ2)
+        ENDIF
         !-------------------------------------------!
         !  VOXEL OCCUPIED BY THE BRICK              !
         !-------------------------------------------!
@@ -604,7 +617,7 @@ C-----------------------------------------------------
      4                 NEDGE ,LEDGE  ,ITAB   ,DRAD2  ,IGAP  ,
      5                 GAPE  ,GAP_E_L,ADMSR  ,EDG_BISECTOR,VTX_BISECTOR ,
      6                 CAND_P,IFQ,CANDE2E_FX ,CANDE2E_FY,CANDE2E_FZ,IFPEN_E,
-     7                 DGAPLOAD)
+     7                 DGAPLOAD,PENE_OLD_E,STIF_OLD_E,SIZ)
                   IF(I_MEM(1)/=0) GOTO 300
                   J_STOK = 0
                 ENDIF
@@ -647,7 +660,6 @@ C--- IREMGAP - clean of tagremline
 
       ENDDO       !NEXT IEDG
 
-
 C-------------------------------------------------------------------------
 C     FIN DU TRI vs Main shell edges
 C-------------------------------------------------------------------------
@@ -658,9 +670,10 @@ C-------------------------------------------------------------------------
      4                 NEDGE ,LEDGE  ,ITAB   ,DRAD2  ,IGAP  ,
      5                 GAPE  ,GAP_E_L,ADMSR  ,EDG_BISECTOR,VTX_BISECTOR ,
      6                 CAND_P,IFQ,CANDE2E_FX ,CANDE2E_FY,CANDE2E_FZ,IFPEN_E,
-     7                 DGAPLOAD)
+     7                 DGAPLOAD,PENE_OLD_E,STIF_OLD_E,SIZ)
 
   300 CONTINUE
+
 C=======================================================================
 C     Sorting vs main solid edges
 C=======================================================================
@@ -881,7 +894,7 @@ C-----------------------------------------------------
      5                 GAP_M ,GAP_M_L,GAPE  ,GAP_E_L,ADMSR  ,
      6                 EDG_BISECTOR,VTX_BISECTOR ,CAND_PS,PROV_IDS,
      7                 IFQ,CANDE2S_FX ,CANDE2S_FY,CANDE2S_FZ,IFPEN_E2S,
-     8                 DGAPLOAD)
+     8                 DGAPLOAD,PENE_OLD_E2S,STIF_OLD_E2S,SIZ_E2S)
 
                   IF(I_MEM(2)/=0) GOTO 400
                   J_STOK = 0
@@ -936,7 +949,7 @@ C-------------------------------------------------------------------------
      5                 GAP_M ,GAP_M_L,GAPE  ,GAP_E_L,ADMSR  ,
      6                 EDG_BISECTOR,VTX_BISECTOR ,CAND_PS,PROV_IDS,
      7                 IFQ,CANDE2S_FX ,CANDE2S_FY,CANDE2S_FZ,IFPEN_E2S,
-     8                 DGAPLOAD)
+     8                 DGAPLOAD,PENE_OLD_E2S,STIF_OLD_E2S,SIZ_E2S)
 
 C=======================================================================
 C 4   reset nodes to zero in the boxes
@@ -992,7 +1005,7 @@ C Barrier to avoid reinitialization before end of sorting
         IF(FLAGREMNODE==2) DEALLOCATE(TAGREMLINE)
       ENDIF
 
-      DEALLOCATE(TAGEDG)
+      DEALLOCATE(TAGEDG) 
 
 C=======================================================================
 

@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ancmsg                 ../starter/source/output/message/message.F
 !||    eosfun_usr2sys         ../starter/source/materials/tools/eosfun_usr2sys.F90
 !||    fretitl2               ../starter/source/starter/freform.F
+!||    law02_upd              ../starter/source/materials/mat/mat002/law02_upd.F90
 !||    law100_upd_ab          ../starter/source/materials/mat/mat100/law100_upd.F
 !||    law100_upd_nht         ../starter/source/materials/mat/mat100/law100_upd.F
 !||    law104_upd             ../starter/source/materials/mat/mat104/law104_upd.F
@@ -62,6 +63,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    elbuftag_mod           ../starter/share/modules1/elbuftag_mod.F
 !||    eosfun_usr2sys_mod     ../starter/source/materials/tools/eosfun_usr2sys.F90
+!||    law02_upd_mod          ../starter/source/materials/mat/mat002/law02_upd.F90
 !||    law123_upd_mod         ../starter/source/materials/mat/mat123/law123_upd.F90
 !||    law129_upd_mod         ../starter/source/materials/mat/mat129/law129_upd.F90
 !||    law133_upd_mod         ../starter/source/materials/mat/mat133/law133_upd.F90
@@ -85,6 +87,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD   
       USE MATPARAM_DEF_MOD
       USE SENSOR_MOD
+      USE LAW02_UPD_MOD  , ONLY : LAW02_UPD
       USE LAW19_UPD_MOD  , ONLY : LAW19_UPD
       USE LAW81_UPD_MOD  , ONLY : LAW81_UPD
       USE LAW87_UPD_MOD  , ONLY : LAW87_UPD
@@ -198,7 +201,7 @@ C
         ENDIF
 
 c
-        IF (ILAW < 29.and.ILAW/=19.or.ILAW==32.or.ILAW==43.or.ILAW==49.or.ILAW==52.or.
+        IF (ILAW/=2.and.ILAW < 29.and.ILAW/=19.or.ILAW==32.or.ILAW==43.or.ILAW==49.or.ILAW==52.or.
      .      ILAW==57.or.ILAW==59.or.ILAW==60.or.ILAW==65.or.ILAW==75.or.
      .      ILAW==78 ) CYCLE
 c
@@ -246,6 +249,9 @@ c
 
 c-----------------------------------------------------------------------
         SELECT CASE (ILAW)
+c-------------------------
+          CASE (2) 
+            CALL LAW02_UPD(MAT_PARAM(IMAT))
 c-------------------------
           CASE (19) 
             CALL LAW19_UPD(MAT_PARAM(IMAT),SENSORS)

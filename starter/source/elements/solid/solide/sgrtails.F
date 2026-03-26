@@ -513,7 +513,7 @@ c
             IPARTSPH=IGEO(38,PID)          
 C            
             IF ((ISSN == 10.OR.ISSN == 11).AND.(IGT == 14.OR.IGT == 6)) THEN
-               IF (IKSNOD0/=4 .AND. IKSNOD0/=8.AND. IKSNOD0/=10 ) THEN
+               IF (IKSNOD0/=4 .AND. IKSNOD0/=8.AND. IKSNOD0/=10 .AND. IKSNOD0/=6) THEN
                   CALL ANCMSG(MSGID=1159,
      .                    MSGTYPE=MSGERROR,
      .                    ANMODE=ANINFO_BLIND_2,
@@ -614,7 +614,8 @@ c
      .         MLN /= 28 .AND. MLN /= 50 .AND. MLN /= 68  .AND. 
      .         MLN /= 53 .AND. MLN /= 93 .AND. MLN /= 107 .AND.
      .         MLN /= 112.AND. MLN /= 122 .AND. MTN /= 123 .AND. 
-     .         MLN /= 125 .AND. MLN /= 127 .AND. MLN /= 128) THEN
+     .         MLN /= 125 .AND. MLN /= 127 .AND. MLN /= 128 .AND.
+     .         MLN /= 130 .AND. MLN /= 132) THEN
 
             CALL ANCMSG(MSGID=1225,
      .                  MSGTYPE=MSGWARNING,
@@ -638,16 +639,16 @@ C
           ENDIF
 C
           !< Compatibility of ITET4 = 3 with /MAT/LAW88 is not supported
-          IF ((MLN == 88).AND.(ITET4 == 3)) THEN
-            ITET4 = 0
-            CALL ANCMSG(MSGID=3123,
-     .                  MSGTYPE=MSGWARNING,
-     .                  ANMODE=ANINFO_BLIND_2,
-     .                  I1=ID,
-     .                  C1=TITR,
-     .                  I2=MLN,
-     .                  PRMOD=MSG_CUMU)
-          ENDIF
+    !       IF ((MLN == 88).AND.(ITET4 == 3)) THEN
+    !         ITET4 = 0
+    !         CALL ANCMSG(MSGID=3123,
+    !  .                  MSGTYPE=MSGWARNING,
+    !  .                  ANMODE=ANINFO_BLIND_2,
+    !  .                  I1=ID,
+    !  .                  C1=TITR,
+    !  .                  I2=MLN,
+    !  .                  PRMOD=MSG_CUMU)
+    !       ENDIF
 C
           IFAIL = 0
           NFAIL = 0
@@ -1139,7 +1140,7 @@ C--------elasto-plastic (not large plasticity)
              CASE(21,22,23,24,27,52,79,81,84)                                             
               ICPRE = 2
 C--------orhtotropic,composite (P isn't calculated independently)           
-             CASE(12,14,15,25,28,50,53,68,76,93,107,112,123,125,127)                                             
+             CASE(12,14,15,25,28,50,53,68,76,93,107,112,123,125,127, 132)                                             
               ICPRE = 0
             END SELECT 
            IF (ICP0 ==3) THEN

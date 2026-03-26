@@ -314,6 +314,8 @@ C------- to be cleaned later
         INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_IELEM_M         
         N = N+1
         INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_PROC_MVOISIN  
+        N = N+1
+        INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_MSR_1D 
 
 C=======================================================================
 C real arrays sizes
@@ -595,6 +597,17 @@ C=======================================================================
         N = N+1
         INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_E2S_NOD_NORMAL
 
+        N = N+1
+        INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_PENE_OLD_E
+
+        N = N+1
+        INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_STIF_OLD_E
+
+        N = N+1
+        INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_PENE_OLD_E2S
+
+        N = N+1
+        INTBUF_SIZE(N) = INTBUF_TAB(NI)%S_STIF_OLD_E2S
 C=======================================================================
 C write all INTBUF_TAB arrays sizes on disk
 C=======================================================================
@@ -977,6 +990,9 @@ C we can avoid to write 0
         SIZ = INTBUF_TAB(NI)%S_PROC_MVOISIN
         CALL WRITE_I_C(INTBUF_TAB(NI)%PROC_MVOISIN,SIZ)   
 
+        SIZ = INTBUF_TAB(NI)%S_MSR_1D
+        CALL WRITE_I_C(INTBUF_TAB(NI)%MSR_1D,SIZ)  
+
 C=======================================================================
 C write REAL arrays on disk
 C=======================================================================
@@ -1089,6 +1105,24 @@ C=======================================================================
         IF(SIZ > 0) THEN
           SIZ =INTBUF_TAB(NI)%I_STOK_E(2)*4
           CALL WRITE_DB(INTBUF_TAB(NI)%CAND_PS,SIZ)
+        ENDIF
+
+        SIZ = INTBUF_TAB(NI)%S_PENE_OLD_E
+        CALL WRITE_DB(INTBUF_TAB(NI)%PENE_OLD_E,SIZ)
+
+        SIZ = INTBUF_TAB(NI)%S_STIF_OLD_E
+        CALL WRITE_DB(INTBUF_TAB(NI)%STIF_OLD_E,SIZ)
+
+        SIZ = INTBUF_TAB(NI)%S_PENE_OLD_E2S
+        IF(SIZ > 0) THEN
+          SIZ =INTBUF_TAB(NI)%I_STOK_E(2)*4
+          CALL WRITE_DB(INTBUF_TAB(NI)%PENE_OLD_E2S,SIZ)
+        ENDIF
+
+        SIZ = INTBUF_TAB(NI)%S_STIF_OLD_E2S
+        IF(SIZ > 0) THEN
+          SIZ =INTBUF_TAB(NI)%I_STOK_E(2)*4
+          CALL WRITE_DB(INTBUF_TAB(NI)%STIF_OLD_E2S,SIZ)
         ENDIF
 
         SIZ = INTBUF_TAB(NI)%S_GAPE

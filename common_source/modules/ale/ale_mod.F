@@ -25,7 +25,7 @@ C-----------------------------------------------
 !||    ale_mod                         ../common_source/modules/ale/ale_mod.F
 !||--- called by ------------------------------------------------------
 !||    a4momt3                         ../engine/source/elements/solid/solide4/a4momt3.F
-!||    aconve                          ../engine/source/ale/aconve.F
+!||    aconve                          ../engine/source/ale/aconve.F90
 !||    ale51_antidiff2                 ../engine/source/ale/ale51/ale51_antidiff2.F
 !||    ale51_antidiff3                 ../engine/source/ale/ale51/ale51_antidiff3.F
 !||    ale51_antidiff3_int22           ../engine/source/ale/alefvm/cut_cells/ale51_antidiff3_int22.F
@@ -45,6 +45,7 @@ C-----------------------------------------------
 !||    amomt2                          ../engine/source/ale/ale2d/amomt2.F
 !||    amomt3                          ../engine/source/elements/solid/solide/amomt3.F
 !||    amomtn3                         ../engine/source/elements/solid/solide/amomtn3.F
+!||    arezon                          ../engine/source/ale/arezon.F90
 !||    asspar4                         ../engine/source/assembly/asspar4.F
 !||    c3grtails                       ../starter/source/elements/sh3n/coque3n/c3grtails.F
 !||    contrl                          ../starter/source/starter/contrl.F
@@ -87,6 +88,8 @@ C-----------------------------------------------
 !||    ingrbric_nodes                  ../starter/source/interfaces/interf1/ingrbric_nodes.F
 !||    iniresa                         ../engine/source/output/restart/rdresa.F
 !||    init_ale                        ../engine/source/ale/init_ale.F90
+!||    init_ale_aconve                 ../engine/source/ale/init_ale_aconve.F90
+!||    init_ale_arezon                 ../engine/source/ale/init_ale_arezon.F90
 !||    intti12a                        ../engine/source/interfaces/interf/intti12.F
 !||    lecint                          ../starter/source/interfaces/interf1/lecint.F
 !||    lectur                          ../engine/source/input/lectur.F
@@ -239,15 +242,36 @@ C-----------------------------------------------
           my_real :: DTMSUB
         END TYPE ALE_SUB_
 
+        type phi_data_
+          integer :: nvar_list_nb !< number of convective variables
+          integer, dimension(:), allocatable :: address !< address of the rezoning/convecting variable in the material model
+          integer, dimension(:), allocatable :: nvar_list !< list of convective variables
+        end type phi_data_
         !ALE REZONING (variable to rezone)
         TYPE ALE_REZON_
           INTEGER :: NUM_NUVAR_MAT
           INTEGER :: NUM_NUVAR_EOS
+          integer :: rezone_size !< number of varibles to rezone
+          integer :: rezone_51_size !< number of varibles to rezone for mtn=51
+          integer :: phi_dim1 !< 1rst dimension of phi array
+          integer, dimension(3) :: phi_dim2 !< 2nd dimension of phi array
+          integer, dimension(5) :: nvar_list = (/2,10,11,11,12/) !< list of rezoning variable types
+          integer, dimension(:,:,:), allocatable :: nvar_idx_list !< list of index for each rezoning variable and each material (0 if no rezoning)
+          integer, dimension(:,:,:), allocatable :: nvar_idx_list_51 !< list of index for each rezoning variable and each material (0 if no rezoning)
+          type(phi_data_), dimension(:,:,:), allocatable :: phi_data !< rezoning variable data
+          type(phi_data_), dimension(:,:,:), allocatable :: phi_51_data !< rezoning variable data for mtn=51
         END TYPE ALE_REZON_
 
         TYPE ALE_SOLVER_
           TYPE(multimat_method_struct) :: MULTIMAT
         END TYPE ALE_SOLVER_
+
+        type conv_
+          integer :: phi_dim1 !< 1rst dimension of convective variable array phi
+          integer, dimension(3) :: phi_dim2 !< 2nd dimension of convective variable array phi
+          type(phi_data_), dimension(:), allocatable :: phi_data !< convection variable data
+          type(phi_data_), dimension(:), allocatable :: phi_51_data !< convection variable data for mtn=51
+        end type conv_
 
         ! GENERAL DATA STRUCTURE USED IN SOURCE CODE
         TYPE ALE_
@@ -257,6 +281,7 @@ C-----------------------------------------------
           TYPE(ALE_SUB_)    :: SUB
           TYPE(ALE_REZON_)  :: REZON
           TYPE(ALE_SOLVER_) :: SOLVER
+          type(conv_) :: conv !< convective data structure
         contains
           procedure, pass :: init
         END TYPE ALE_

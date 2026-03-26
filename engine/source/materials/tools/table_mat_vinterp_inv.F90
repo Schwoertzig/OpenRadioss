@@ -21,11 +21,15 @@
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    table_mat_vinterp_inv_mod   ../engine/source/materials/tools/table_mat_vinterp_inv.F90
+!||    table_mat_vinterp_inv_mod    ../engine/source/materials/tools/table_mat_vinterp_inv.F90
 !||--- called by ------------------------------------------------------
-!||    sigeps123                   ../engine/source/materials/mat/mat123/sigeps123.F90
-!||    sigeps123c                  ../engine/source/materials/mat/mat123/sigeps123c.F90
-!||    strainrate_dependency       ../engine/source/materials/mat/mat123/strainrate_dependency.F90
+!||    rate_dependency_parameters   ../engine/source/materials/mat/mat132/rate_dependency_parameters.F90
+!||    sigeps123                    ../engine/source/materials/mat/mat123/sigeps123.F90
+!||    sigeps123c                   ../engine/source/materials/mat/mat123/sigeps123c.F90
+!||    sigeps132c                   ../engine/source/materials/mat/mat132/sigeps132c.F90
+!||    strainrate_dependency        ../engine/source/materials/mat/mat123/strainrate_dependency.F90
+!||    strainrate_dependency_125c   ../engine/source/materials/mat/mat125/strainrate_dependency_125c.F90
+!||    strainrate_dependency_125s   ../engine/source/materials/mat/mat125/strainrate_dependency_125s.F90
 !||====================================================================
       module table_mat_vinterp_inv_mod
       contains
@@ -65,12 +69,12 @@
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
       logical, dimension(nel) :: need_to_compute
-      integer  i,j,k,m,n,i1,i2,j1,j2,k1,k2,l1,l2,ndim
+      integer  i,j,k,m,n,i1,i2,ndim
       integer :: mindx_1,mindx_2
       integer :: nindx_1,nindx_2
       integer, dimension(nel) :: indx_1,indx_2
       integer, dimension(4)   :: ldim
-      real(kind=wp) :: dx,dy,alpha,alphai,beta,betai,gamma,gammai,delta,deltai
+      real(kind=wp) :: dx, alpha, alphai
       real(kind=wp), dimension(nel,4) :: fac
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   

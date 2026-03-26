@@ -65,6 +65,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    trace_in1                         ../starter/source/system/trace_back.F
 !||    trace_out1                        ../starter/source/system/trace_back.F
 !||--- uses       -----------------------------------------------------
+!||    analyse_arret_mod                 ../starter/source/output/analyse/analyse_arret.F
 !||    checksum_check_mod                ../starter/source/output/checksum/checksum_check.F90
 !||    checksum_starter_option_mod       ../starter/source/output/checksum/checksum_option.F90
 !||    defaults_mod                      ../starter/source/modules/defaults_mod.F90
@@ -105,6 +106,7 @@ C-----------------------------------------------
       use checksum_check_mod
       use th_mod , only : TH_HAS_NODA_PEXT
       use hm_rbodies_add_main_node_mod
+      use analyse_arret_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -423,6 +425,7 @@ C       SEARCH RUN NUMBER
         LFNAME = 1
         ISTDI = 5
       ENDIF
+      NAMES_AND_TITLES%rootname = ROOTN(1:LENR)
 C------------------------------------------------
 C Read DYNA model & convert DYNA -> Radioss objects
 C------------------------------------------------
@@ -493,6 +496,9 @@ C
 
       ENDIF
       CALL TITRE1
+      ! Feed Output and Names_and_Titles structures with out filename and chrun (reduce cal stack)
+      OUTPUT%out_filename = TRIM(FILNAM)
+      NAMES_AND_TITLES%CHRUN=CHRUN(1:4)
 C------------------------------------------------
       ERR_MSG='OPEN OUTPUT FILE'
       ERR_CATEGORY='OPEN OUTPUT FILE'
@@ -529,9 +535,9 @@ C new composite shell pid max nbs 200
       NPROPG =1000
       NPROPM =250
       NPARG  = 100
-      NPARI  = 100
+      NPARI  = 104
       NPARIR=52
-      LFXVELR = 9
+      LFXVELR = 9 + 1
       NIBCLD = 9
       LFACCLD = 2
       NIGRV   = 6 
@@ -588,7 +594,7 @@ C     npsav not used by starter
 c 2 new values for ISPHIO, NSEG and IAS for inlet outlet in spmd
       NISPHIO = 16
       NRIVF = 13
-      NXFRAME = 36
+      NXFRAME = 36 
       LSKEW = 12
       LISKN = 6
       NBCSLAG  = 0
@@ -877,6 +883,8 @@ C
       ENDIF
 c     print timers
       CALL PRINTIME(1,GOT_TIMER,STARTDATE,STARTTIME,ENDDATE,ENDTIME)
+      OUTPUT%checksum%date=ENDDATE
+      OUTPUT%checksum%time=ENDTIME
 C
       IF (IPID/=0) THEN
 #if CPP_mach == CPP_w95 || CPP_mach == CPP_win64_spmd || CPP_mach == CPP_p4win64_spmd || CPP_mach == CPP_wnt || CPP_mach == CPP_wmr || CPP_mach == CPP_p4win64 || CPP_mach == CPP_p4win32
@@ -894,8 +902,7 @@ C
 C
       CALL TRACE_OUT1()
 
-      CALL F_ANEND(OUT_FILE_NAME,LEN_TRIM(OUT_FILE_NAME),ROOTNAM,
-     *             ROOTLEN,ENDDATE,ENDTIME,OUTPUT)
+      CALL F_ANEND(OUTPUT,NAMES_AND_TITLES)
 C---  
       print*,'done'
       RETURN

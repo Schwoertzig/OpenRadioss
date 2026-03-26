@@ -34,6 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    dd_bfs                          ../starter/source/spmd/domain_decomposition/grid2mat.F
 !||    find_nodes                      ../starter/source/spmd/domain_decomposition/grid2mat.F
 !||    fvbag_vertex                    ../starter/source/spmd/domain_decomposition/grid2mat.F
+!||    get_metis_arguments             ../starter/source/spmd/domain_decomposition/get_metis_arguments.F90
 !||    iddconnectplus                  ../starter/source/spmd/node/frontplus.F
 !||    ini_iddconnect                  ../starter/source/spmd/node/ddtools.F
 !||    initwg                          ../starter/source/spmd/domain_decomposition/initwg.F
@@ -46,8 +47,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    consider_edge_mod               ../starter/source/spmd/domain_decomposition/consider_edge.F
 !||    format_mod                      ../starter/share/modules1/format_mod.F90
 !||    front_mod                       ../starter/share/modules1/front_mod.F
+!||    get_metis_arguments_mod         ../starter/source/spmd/domain_decomposition/get_metis_arguments.F90
 !||    inter_cand_mod                  ../starter/share/modules1/inter_cand_mod.F
 !||    message_mod                     ../starter/share/message_module/message_mod.F
+!||    metis_mod                       ../starter/source/spmd/domain_decomposition/metis_mod.F90
 !||    mid_pid_mod                     ../starter/share/modules1/mid_pid_mod.F
 !||    monvol_struct_mod               ../starter/share/modules1/monvol_struct_mod.F
 !||    r2r_mod                         ../starter/share/modules1/r2r_mod.F
@@ -68,12 +71,15 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3  NSNT, NMNT,TABMP_L,IQUAOFF,
      4  IGRSURF,FVMAIN,
      5  ITAB  ,IPART  ,IPARTC  ,IPARTG ,IPARTS  ,
+     6  IPARTT, IPARTP  ,IPARTR   ,IPARTX   , IPARTQ,
      6  POIN_PART_SHELL,POIN_PART_TRI,POIN_PART_SOL,
      7  MID_PID_SHELL,MID_PID_TRI,MID_PID_SOL,T_MONVOL,
-     8  EBCS_TAG_CELL_SPMD,NPBY,LPBY,MAT_PARAM)
+     8  EBCS_TAG_CELL_SPMD,NPBY,LPBY,MAT_PARAM,
+     9  iworksh)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE METIS_MOD
       USE CONSIDER_EDGE_MOD , ONLY : CONSIDER_EDGE, MAX_NB_NODES_PER_ELT, SORT_DESCENDING
       USE MESSAGE_MOD
       USE R2R_MOD
@@ -88,6 +94,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE FORMAT_MOD , ONLY : FMW_A_I
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
+      use get_metis_arguments_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -123,10 +130,11 @@ C-----------------------------------------------
      .        IPM(NPROPMI,NUMMAT),IXS10(6,*),KXIG3D(NIXIG3D,NUMELIG3D),
      .        IQUAOFF(*),
      .        IXIG3D(*),NSNT, NMNT,TABMP_L,
-     .        FVMAIN(NVOLU)
+     .        FVMAIN(NVOLU) 
       INTEGER :: ITAB(*)
       INTEGER, DIMENSION(LIPART1,*), INTENT(IN) :: IPART
       INTEGER, DIMENSION(*), INTENT(IN) :: IPARTC,IPARTG,IPARTS
+      INTEGER, DIMENSION(*), INTENT(IN) :: IPARTT,IPARTP,IPARTR,IPARTX,IPARTQ
       TYPE (CLUSTER_) ,DIMENSION(*) :: CLUSTERS
       my_real GEO(NPROPG,NUMGEO),  PM(NPROPM,NUMMAT), X(3,*), COST_R2R,BUFMAT(*)
       REAL    WD(*)
@@ -144,9 +152,10 @@ C-----------------------------------------------
       TYPE(MONVOL_STRUCT_), DIMENSION(NVOLU), INTENT(IN) :: T_MONVOL
       INTEGER,INTENT(IN) :: EBCS_TAG_CELL_SPMD(NUMELQ+NUMELTG+NUMELS)
       INTEGER, DIMENSION(NNPBY,*), INTENT(in) :: NPBY
-      INTEGER, DIMENSION(*), INTENT(in) :: LPBY
+      INTEGER, DIMENSION(*), INTENT(in) :: LPBY      
       TYPE(INTER_CAND_), INTENT(in) :: INTER_CAND
       TYPE(MATPARAM_STRUCT_) ,DIMENSION(NUMMAT), INTENT(IN) :: MAT_PARAM
+      integer, dimension(3,numelc+numeltg), intent(in) :: iworksh !< ply data for shell & shell3n elements
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -190,9 +199,8 @@ C-----------------------------------------------
       DOUBLE PRECISION :: WS, WD_MAX,WD_MAX0
 C metis5 null pointers
 
-      INTEGER METIS_PartGraphKway, METIS_PartGraphRecursive,
-     .        METIS_SetDefaultOptions,Wrap_METIS_PartGraphKway,
-     .        WRAP_METIS_PARTGRAPHRECURSIVE
+      INTEGER 
+     .        METIS_SetDefaultOptions
       INTEGER NNO,NNS,NTG,NNI,NTGT,NTGI
       INTEGER NELMIN
       INTEGER NFVMBAG,NB_FVMBAG_TRIM,DD_FVMBAG_TRY
@@ -213,7 +221,7 @@ C metis5 null pointers
       INTEGER :: CEP_MIN
       INTEGER :: C1,C2
       INTEGER :: OFFSET
-
+      integer, dimension(:), allocatable :: part_id
 
 C ---- statistics for edges added for contact interface
         INTEGER :: number_of_added_edges
@@ -230,15 +238,21 @@ C ---- statistics for edges added for contact interface
         INTEGER :: NUMBER_OF_ELEMENT_RBODY,NUMEL
         INTEGER, DIMENSION(:), ALLOCATABLE :: LIST_ELEMENT_RBODY
         LOGICAL :: BOOL_RBODY
+        REAL, DIMENSION(:,:), allocatable :: elem_coords
+        integer :: METIS_RANDOM_SEED
+        logical :: LEGACY_PARTITIONING
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      EXTERNAL METIS_PartGraphKway, METIS_PartGraphRecursive,
-     .         METIS_SetDefaultOptions,Wrap_METIS_PartGraphKway,
-     .         WRAP_METIS_PARTGRAPHRECURSIVE
+      EXTERNAL
+     .         METIS_SetDefaultOptions
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
+      LEGACY_PARTITIONING = .TRUE.
+      METIS_RANDOM_SEED= 0
+      CALL GET_METIS_ARGUMENTS(LEGACY_PARTITIONING,METIS_RANDOM_SEED)
+
       ALLOCATE(IWKIN(NUMNOD))
       number_of_added_edges = 0
       refused_numg = 0
@@ -603,17 +617,27 @@ C   CNE CALCULATION
 C-----------------------------------------------
 C We have to tag elements for know theirs number of nodes
       ALLOCATE(TAGELEM(NELEM))
+      ALLOCATE(PART_ID(NELEM))
+      ALLOCATE(elem_coords(3,NELEM))
+      PART_ID = -1
+      elem_coords = 0.0 
       DO I = 1,NELEM
         TAGELEM(I)=0
       END DO 
       DO I=1,NUMELS
         TAGELEM(I)=1
+        PART_ID(I)=IPARTS(I)
+        L = 0
         DO K=1,8
           N = IXS(K+1,I)
           IF(N /= 0) THEN
             CNE(ADSKY(N)) = I
             ADSKY(N) = ADSKY(N) + 1
+            L = L + 1
+            ELEM_COORDS(:,I) = ELEM_COORDS(:,I) + X(:,N)
           END IF
+          ! center of the element
+          ELEM_COORDS(:,I) = ELEM_COORDS(:,I) / REAL(L)
         ENDDO 
       ENDDO
 C add Tetra10
@@ -637,11 +661,15 @@ C
 C
       DO I = 1, NUMELQ
         TAGELEM(I+OFF)=3
+        PART_ID(I+OFF)=IPARTQ(I)
         DO K=1,4
           N = IXQ(K+1,I)
           CNE(ADSKY(N)) = I+OFF
           ADSKY(N) = ADSKY(N) + 1
+          ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
+        ! center of the element
+        ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 4.0
       ENDDO
 C
       OFFELEM(2)=NUMELQ
@@ -649,11 +677,15 @@ C
 C
       DO I = 1, NUMELC
         TAGELEM(I+OFF)=4
+        PART_ID(I+OFF) = IPARTC(I)
         DO K=1,4
           N = IXC(K+1,I)
           CNE(ADSKY(N)) = I+OFF
           ADSKY(N) = ADSKY(N) + 1
+          ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
+        ! center of the element
+        ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 4.0
       ENDDO
 C     
 
@@ -662,11 +694,15 @@ C
 C
       DO I = 1, NUMELT
         TAGELEM(I+OFF)=5
+        PART_ID(I+OFF)=IPARTT(I)
         DO K=1,2
           N = IXT(K+1,I)
           CNE(ADSKY(N)) = I+OFF
           ADSKY(N) = ADSKY(N) + 1
+          ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
+        ! center of the element
+        ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 2.0
        ENDDO
 C
        OFFELEM(4)= NUMELT
@@ -674,11 +710,15 @@ C
 C
       DO I = 1, NUMELP
         TAGELEM(I+OFF)=6
+        PART_ID(I+OFF) = IPARTP(I)
         DO K=1,2
           N = IXP(K+1,I)
           CNE(ADSKY(N)) = I+OFF
           ADSKY(N) = ADSKY(N) + 1
+          ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
+        ! center of the element
+        ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 2.0
       ENDDO
 C
       OFFELEM(5) = NUMELP
@@ -686,11 +726,15 @@ C
 C     
       DO I = 1, NUMELR
         TAGELEM(I+OFF)=7
+        PART_ID(I+OFF) = IPARTR(I)
         DO K=1,2
           N = IXR(K+1,I)
           CNE(ADSKY(N)) = I+OFF
           ADSKY(N) = ADSKY(N) + 1
+          ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
+        ! center of the element
+        ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 2.0
         IF(NINT(GEO(12,IXR(1,I)))==12) THEN
           N = IXR(4,I)
           CNE(ADSKY(N)) = I+OFF
@@ -703,11 +747,15 @@ C
 C
       DO I = 1, NUMELTG
         TAGELEM(I+OFF)=8  
+        PART_ID(I+OFF) = IPARTG(I)
         DO K=1,3
           N = IXTG(K+1,I)
           CNE(ADSKY(N)) = I+OFF
           ADSKY(N) = ADSKY(N) + 1
+          ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
+        ! center of the element
+        ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 3.0
       ENDDO
 C
       OFFELEM(7)=NUMELTG
@@ -718,13 +766,17 @@ C     Old obsolete & removed element
 C
       DO I=1, NUMELX
         TAGELEM(I+OFF)=10
+        PART_ID(I+OFF)=IPARTX(I)
         NELX=KXX(3,I)
         DO K=1,NELX
           ADDX = KXX(4,I)+K-1
           N=IXX(ADDX)
           CNE(ADSKY(N)) = I+OFF
           ADSKY(N) = ADSKY(N) + 1
+          ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
+        ! center of the element
+        ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / REAL(NELX)
       ENDDO
 C
       OFFELEM(9)=NUMELX
@@ -966,7 +1018,7 @@ C   default weight optimization
      .             TABMP_L,IPART,IPARTC,IPARTG,
      .             IPARTS,NPART,POIN_PART_SHELL,POIN_PART_TRI,POIN_PART_SOL,
      .             MID_PID_SHELL,MID_PID_TRI,MID_PID_SOL,IDDLEVEL,
-     .             MAT_PARAM)
+     .             MAT_PARAM,iworksh)
 C
       IF(NSUBDOM>0)THEN
         COST_R2R = ZERO
@@ -1922,7 +1974,8 @@ C Determine connectivity components
         ALLOCATE(COLORS(NELEM+1),STAT=IERR1)
         ALLOCATE(ROOTS(NELEM),STAT=IERR1)
         CALL DD_BFS(XADJ,ADJNCY,NELEM,NEDGES,NCONNX,COLORS,ROOTS)
-        IF(NCONNX > 1) THEN
+
+        IF(LEGACY_PARTITIONING .AND. NCONNX > 0) THEN
           WRITE(IOUT,'(A,I8)')
      .  ' NUMBER OF DISCONNECTED COMPONENTS FIXED FOR DOMAIN DECOMP:'
      .  ,NCONNX
@@ -2051,6 +2104,9 @@ C        OPTIONS(17)=1 ! ignore
 C        OPTIONS(METIS NCUTS) = 1 (default) !
 C         OPTIONS(8) = 4              
 C        OPTIONS(8)=1 
+         IF(abs(METIS_RANDOM_SEED) > 0) THEN
+           OPTIONS(9) = abs(METIS_RANDOM_SEED)
+         END IF
 C Domain Decomposition Crash or FSI
         IF(ICFSI==0)THEN
           DO I = 1, NELEM
@@ -2152,10 +2208,15 @@ c        print *,'estimate memory=',i,nelem,XADJ(NELEM+1)
          IF(DECTYP==3.OR.DECTYP==5)THEN
 C KWAY METIS
       
-          IERR1 = Wrap_METIS_PartGraphKway(
+          IF(LEGACY_PARTITIONING) THEN
+            IERR1 = Wrap_METIS_PartGraphKway(nelem, ncond, xadj, adjncy, iwd, nnode, ubvec, options, nec, cep) 
+          ELSE
+            IERR1 = Wrap_METIS_part(
      1      NELEM,NCOND,XADJ,ADJNCY,
      2      IWD,NNODE,
-     3      UBVEC,OPTIONS,NEC,CEP)
+     3      UBVEC,OPTIONS,NEC,CEP, part_id, elem_coords)
+          ENDIF
+
           IDB_METIS = 0
 
           IF(IDB_METIS == 1) THEN
@@ -2175,10 +2236,14 @@ C weight only on vertices
           END IF     
          ELSEIF(DECTYP==4.OR.DECTYP==6)THEN
 C RSB METIS
-          IERR1 = Wrap_METIS_PartGraphRecursive(
+          IF(LEGACY_PARTITIONING) THEN
+            IERR1 = Wrap_METIS_PartGraphRecursive(nelem, ncond, xadj, adjncy, iwd, nnode, ubvec, options, nec, cep) 
+          ELSE
+            IERR1 = Wrap_METIS_PartGraphRecursive_part(
      1      NELEM,NCOND,XADJ,ADJNCY,
      2      IWD,NNODE,
-     3      UBVEC,OPTIONS,NEC,CEP)
+     3      UBVEC,OPTIONS,NEC,CEP, part_id)
+          ENDIF
         END IF
             CALL STAT_DOMDEC(
      1           WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
@@ -2200,7 +2265,7 @@ C RSB METIS
 C     CHECK Quality of Domain Decomp on elements
 C If ( ALE .or. first domdec) .and. (first try)) then check load balance
         IF( ( MAIN_TARGET == 7 .OR. IDDLEVEL==1) .AND. (DECTYP==3 .OR. DECTYP==5) )THEN
-          IF(DMIN(MAIN_TARGET) < AVERAGE(MAIN_TARGET)*0.90  )THEN
+          IF(LEGACY_PARTITIONING .AND. (DMIN(MAIN_TARGET) < AVERAGE(MAIN_TARGET)*0.90  )) THEN
             WRITE(IOUT,'(A)')
      .      '** INFO: DECOMPOSITION UNBALANCING DETECTED'
             WRITE(IOUT,'(A,I5,A,2X,I8,2X,I8,2X,I8)')
@@ -2281,6 +2346,7 @@ C---------------------------------------------------------------------
             WD_MAX = WD_MAX0
           ENDIF
 
+          DD_UNBALANCED = .FALSE. 
           DO WHILE(DD_UNBALANCED .AND.  NCOND2 > 1 )
 C      CHECK Quality of Domain Decomp on elements
             WRITE(IOUT,'(A)')
@@ -2334,10 +2400,10 @@ C      CHECK Quality of Domain Decomp on elements
               ENDDO
             ENDDO 
 C  KWAY METIS
-            IERR1 = WRAP_METIS_PartGraphKway(
+            IERR1 = WRAP_METIS_part(
      1      NELEM,NCOND2,XADJ,ADJNCY,
      2      IWD2,NNODE,
-     3      UBVEC,OPTIONS,NEC,CEP)    
+     3      UBVEC,OPTIONS,NEC,CEP, part_id, elem_coords)    
             CALL STAT_DOMDEC(
      1           WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
      2           WCAND    ,WSOL    ,WR2R      ,WKIN      ,IWD      ,
@@ -2362,12 +2428,14 @@ C  KWAY METIS
      .        ' DOMAINS:',NSPMD,'  MIN/MAX/AVERAGE:',
      .        NINT(DMIN(MAIN_TARGET)),NINT(DMAX(MAIN_TARGET)),NINT(AVERAGE(MAIN_TARGET))
 
+            WRITE(IOUT,'(A,I5)') 'RETRY KWAY WITH RSB =',NCOND2
+
 C  RSB METIS
 
-              IERR1 = WRAP_METIS_PartGraphRecursive(
+              IERR1 = WRAP_METIS_PartGraphRecursive_part(
      1        NELEM,NCOND2,XADJ,ADJNCY,
      2        IWD2,NNODE,
-     3        UBVEC,OPTIONS,NEC,CEP)
+     3        UBVEC,OPTIONS,NEC,CEP, part_id)
               CALL STAT_DOMDEC(
      1             WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
      2             WCAND    ,WSOL    ,WR2R      ,WKIN      ,IWD      ,
@@ -2589,6 +2657,7 @@ C   a single element or unconnected elements or a single processor
         ENDDO
       ENDIF
       DEALLOCATE(IWKIN)
+      IF(ALLOCATED(PART_ID)) DEALLOCATE(PART_ID)
 C
  1000 FORMAT('#PROC    ELEMENT W.    SECND NOD W.   MAST NOD W.    CONT ELT W.',
      .       '        INT2 W.         DOF W.') 
@@ -2619,10 +2688,12 @@ C
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    format_mod   ../starter/share/modules1/format_mod.F90
+!||    metis_mod    ../starter/source/spmd/domain_decomposition/metis_mod.F90
 !||====================================================================
       SUBROUTINE SPDOMETIS(KXSP, IXSP, NOD2SP, CEPSP, RESERVEP,
      .                     SPH2SOL, CEP)
 
+        USE METIS_MOD
         USE FORMAT_MOD , ONLY : FMW_A_I
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -2656,15 +2727,12 @@ C-----------------------------------------------
 C metis5 null pointers
       INTEGER, POINTER :: adjwgt(:)=>null(),vsize(:)=>null()
       REAL, POINTER :: tpwgts(:)=>null()
-      INTEGER METIS_PartGraphKway, METIS_PartGraphRecursive,
-     .        METIS_SetDefaultOptions,Wrap_METIS_PartGraphKway,
-     .        Wrap_METIS_PartGraphRecursive
+      INTEGER METIS_SetDefaultOptions
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      EXTERNAL METIS_PartGraphKway, METIS_PartGraphRecursive,
-     .         METIS_SetDefaultOptions,Wrap_METIS_PartGraphKway,
-     .         Wrap_METIS_PartGraphRecursive
+      EXTERNAL 
+     .         METIS_SetDefaultOptions
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -2673,7 +2741,7 @@ C Connectivitis cells SPH
 C
 c Numsph Active Less Sph2sol/= 0
       NUMSPHA = NUMSPH - NSPHRES - NSPHSOL
-
+      IWD = 1
       NEDGES = 0
       DO N = 1, NUMSPHA
         DO CC = 1, MIN(12,KXSP(4,N))
@@ -2793,6 +2861,11 @@ C
       DO N = 1, NUMSPHA
         IWD(N) = 1
       END DO
+      IF(NUMSPH > NUMSPHA) THEN
+        DO N = NUMSPHA+1, NUMSPH
+          IWD(N) = 0
+        END DO
+      END IF
 C
       IWFLG=2
       NFLAG=1

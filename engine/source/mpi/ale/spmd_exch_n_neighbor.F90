@@ -23,8 +23,10 @@
 !||====================================================================
 !||    spmd_exch_n_neighbor_mod        ../engine/source/mpi/ale/spmd_exch_n_neighbor.F90
 !||--- called by ------------------------------------------------------
+!||    aconve                          ../engine/source/ale/aconve.F90
 !||    afluxt                          ../engine/source/ale/ale51/afluxt.F
 !||    ale51_gradient_reconstruction   ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
+!||    arezon                          ../engine/source/ale/arezon.F90
 !||====================================================================
       module spmd_exch_n_neighbor_mod
         implicit none
@@ -263,7 +265,7 @@
           integer, dimension(nspmd+1) :: r_address
           integer :: s_size,r_size
           integer :: proc_id
-          integer :: msgtyp,IERROR
+          integer :: msgtyp
           integer, parameter :: msgoff = 3006
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   External functions
@@ -313,7 +315,7 @@
                 ! send the data
                 s_proc_nb = s_proc_nb + 1
                 s_index(s_proc_nb) = p   
-                call spmd_isend(s_buffer(p)%my_real_array_3d(1,1,1),dim2*dim1*s_size,p-1,msgtyp,s_req(s_proc_nb))          
+                call spmd_isend(s_buffer(p)%my_real_array_3d(1,1,1),dim2*dim1*s_size,p-1,msgtyp,s_req(s_proc_nb))  
               end if
             end do
           else

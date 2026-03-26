@@ -253,6 +253,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ini_kisc                           ../engine/source/implicit/lin_solv.F
 !||    ini_msg                            ../engine/source/output/message/ini_msg.F
 !||    iniresa                            ../engine/source/output/restart/rdresa.F
+!||    init_h3d_engine                    ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    inivel_start                       ../engine/source/loads/general/inivel/inivel_start.F90
 !||    int18_law151_init                  ../engine/source/interfaces/int18/int18_law151_init.F
 !||    int18_law151_omp_accumulation      ../engine/source/interfaces/int18/int18_law151_omp_accumulation.F
@@ -353,6 +354,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    s4jac_i                            ../engine/source/elements/solid/solide4/s4jac_i.F
 !||    s6cderi3                           ../engine/source/elements/thickshell/solide6c/s6cderi3.F
 !||    s6zderi3                           ../engine/source/elements/solid/solide6z/s6zderi3.F90
+!||    s6zderit3                          ../engine/source/elements/solid/solide6z/s6zderit3.F90
+!||    s6zderito3                         ../engine/source/elements/solid/solide6z/s6zderito3.F90
+!||    s6zjac_i                           ../engine/source/elements/solid/solide6z/s6zjac_i.F90
 !||    s8deri3                            ../engine/source/elements/solid/solide8/s8deri3.F
 !||    s8ederic3                          ../engine/source/elements/solid/solide8e/s8ederic3.F
 !||    s8edericm3                         ../engine/source/elements/solid/solide8e/s8edericm3.F
@@ -517,6 +521,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    usermat_solid                      ../engine/source/materials/mat_share/usermat_solid.F
 !||    userwi_read                        ../engine/source/user_interface/userwindow_interface_routines.F
 !||    userwi_write                       ../engine/source/user_interface/userwindow_interface_routines.F
+!||    ush_force3                         ../engine/source/user_interface/ushforce3.F90
 !||    wciusc2                            ../engine/source/input/wciusc2.F
 !||    wigerest                           ../engine/source/output/restart/rdresb.F
 !||    write_th_restart                   ../engine/source/output/th/write_th_restart.F

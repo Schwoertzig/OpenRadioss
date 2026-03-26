@@ -96,24 +96,12 @@ C----------------------------------------------------------------
       my_real 
      . EY,C1,C2,ET,VMU,VMU0
      . , A,B,C,VAR
-     . 
-     . 
-     . 
-     . 
      . , P0,PHI,GAMA0,FAC,FAC1
      . , S(3,3),SIGPR(3),DIRPR(3,3)
      . ,SIGT_CUTOFF,SIGC_CUTOFF
       my_real  
      .   E(MVSIZ),EDOT(MVSIZ),DAV,E1,E2,E3,E4,E5,E6,EPSP
      . , EPET(MVSIZ),EMET(MVSIZ),EPETS(MVSIZ),EMETS(MVSIZ)
-     . 
-     .  
-     . 
-     . 
-     . 
-     . 
-     . 
-     . 
      . , SIGAIR(MVSIZ),GAMA(MVSIZ),SYIELD(MVSIZ)
      . , SIGSXX(MVSIZ),SIGSYY(MVSIZ),SIGSZZ(MVSIZ)
      . , SIGSXY(MVSIZ),SIGSYZ(MVSIZ),SIGSZX(MVSIZ)
@@ -474,9 +462,6 @@ C--------------------------
            SYIELD(I)=FAC*FINTER(IFUNC(1),GAMA(I),NPF,TF,B*C)
          ELSE
            SYIELD(I) = ABS(A+B*(ONE+C*GAMA(I)))
-         ENDIF
-         IF(GAMA(I) > ZERO) THEN
-           IF (GAMA(I)-UVAR(I,1) < ZERO) SIGC_CUTOFF = ZERO
          ENDIF
          IF(IFUNC(2)/=0)THEN
             DAV = (EPSPXX(I)+EPSPYY(I)+EPSPZZ(I))*THIRD
@@ -1880,25 +1865,26 @@ C Str uses temporary table instead of temporary scalars
 
 
 !||====================================================================
-!||    valpvec_v   ../engine/source/materials/mat/mat033/sigeps33.F
+!||    valpvec_v                 ../engine/source/materials/mat/mat033/sigeps33.F
 !||--- called by ------------------------------------------------------
-!||    sigeps124   ../engine/source/materials/mat/mat124/sigeps124.F
-!||    sigeps130   ../engine/source/materials/mat/mat130/sigeps130.F90
-!||    sigeps163   ../engine/source/materials/mat/mat163/sigeps163.F90
-!||    sigeps190   ../engine/source/materials/mat/mat190/sigeps190.F
-!||    sigeps33    ../engine/source/materials/mat/mat033/sigeps33.F
-!||    sigeps38    ../engine/source/materials/mat/mat038/sigeps38.F
-!||    sigeps42    ../engine/source/materials/mat/mat042/sigeps42.F
-!||    sigeps62    ../engine/source/materials/mat/mat062/sigeps62.F
-!||    sigeps69    ../engine/source/materials/mat/mat069/sigeps69.F
-!||    sigeps71    ../engine/source/materials/mat/mat071/sigeps71.F
-!||    sigeps82    ../engine/source/materials/mat/mat082/sigeps82.F
-!||    sigeps88    ../engine/source/materials/mat/mat088/sigeps88.F90
-!||    sigeps90    ../engine/source/materials/mat/mat090/sigeps90.F
-!||    sigeps92    ../engine/source/materials/mat/mat092/sigeps92.F
-!||    sigeps94    ../engine/source/materials/mat/mat094/sigeps94.F
+!||    sigeps124                 ../engine/source/materials/mat/mat124/sigeps124.F
+!||    sigeps130                 ../engine/source/materials/mat/mat130/sigeps130.F90
+!||    sigeps163                 ../engine/source/materials/mat/mat163/sigeps163.F90
+!||    sigeps190                 ../engine/source/materials/mat/mat190/sigeps190.F
+!||    sigeps33                  ../engine/source/materials/mat/mat033/sigeps33.F
+!||    sigeps38                  ../engine/source/materials/mat/mat038/sigeps38.F
+!||    sigeps42                  ../engine/source/materials/mat/mat042/sigeps42.F
+!||    sigeps62                  ../engine/source/materials/mat/mat062/sigeps62.F
+!||    sigeps69                  ../engine/source/materials/mat/mat069/sigeps69.F
+!||    sigeps71                  ../engine/source/materials/mat/mat071/sigeps71.F
+!||    sigeps82                  ../engine/source/materials/mat/mat082/sigeps82.F
+!||    sigeps88                  ../engine/source/materials/mat/mat088/sigeps88.F90
+!||    sigeps90                  ../engine/source/materials/mat/mat090/sigeps90.F
+!||    sigeps92                  ../engine/source/materials/mat/mat092/sigeps92.F
+!||    sigeps94                  ../engine/source/materials/mat/mat094/sigeps94.F
+!||    yield_criterion_hershey   ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
 !||--- calls      -----------------------------------------------------
-!||    floatmin    ../common_source/tools/math/precision.c
+!||    floatmin                  ../common_source/tools/math/precision.c
 !||====================================================================
       SUBROUTINE VALPVEC_V(SIG,VAL,VEC,NEL)
 C-----------------------------------------------
@@ -2210,26 +2196,27 @@ C
       RETURN
       END
 !||====================================================================
-!||    valpvecdp_v       ../engine/source/materials/mat/mat033/sigeps33.F
+!||    valpvecdp_v               ../engine/source/materials/mat/mat033/sigeps33.F
 !||--- called by ------------------------------------------------------
-!||    fail_spalling_s   ../engine/source/materials/fail/spalling/fail_spalling_s.F90
-!||    sigeps124         ../engine/source/materials/mat/mat124/sigeps124.F
-!||    sigeps130         ../engine/source/materials/mat/mat130/sigeps130.F90
-!||    sigeps163         ../engine/source/materials/mat/mat163/sigeps163.F90
-!||    sigeps190         ../engine/source/materials/mat/mat190/sigeps190.F
-!||    sigeps33          ../engine/source/materials/mat/mat033/sigeps33.F
-!||    sigeps38          ../engine/source/materials/mat/mat038/sigeps38.F
-!||    sigeps42          ../engine/source/materials/mat/mat042/sigeps42.F
-!||    sigeps62          ../engine/source/materials/mat/mat062/sigeps62.F
-!||    sigeps69          ../engine/source/materials/mat/mat069/sigeps69.F
-!||    sigeps71          ../engine/source/materials/mat/mat071/sigeps71.F
-!||    sigeps82          ../engine/source/materials/mat/mat082/sigeps82.F
-!||    sigeps88          ../engine/source/materials/mat/mat088/sigeps88.F90
-!||    sigeps90          ../engine/source/materials/mat/mat090/sigeps90.F
-!||    sigeps92          ../engine/source/materials/mat/mat092/sigeps92.F
-!||    sigeps94          ../engine/source/materials/mat/mat094/sigeps94.F
+!||    fail_spalling_s           ../engine/source/materials/fail/spalling/fail_spalling_s.F90
+!||    sigeps124                 ../engine/source/materials/mat/mat124/sigeps124.F
+!||    sigeps130                 ../engine/source/materials/mat/mat130/sigeps130.F90
+!||    sigeps163                 ../engine/source/materials/mat/mat163/sigeps163.F90
+!||    sigeps190                 ../engine/source/materials/mat/mat190/sigeps190.F
+!||    sigeps33                  ../engine/source/materials/mat/mat033/sigeps33.F
+!||    sigeps38                  ../engine/source/materials/mat/mat038/sigeps38.F
+!||    sigeps42                  ../engine/source/materials/mat/mat042/sigeps42.F
+!||    sigeps62                  ../engine/source/materials/mat/mat062/sigeps62.F
+!||    sigeps69                  ../engine/source/materials/mat/mat069/sigeps69.F
+!||    sigeps71                  ../engine/source/materials/mat/mat071/sigeps71.F
+!||    sigeps82                  ../engine/source/materials/mat/mat082/sigeps82.F
+!||    sigeps88                  ../engine/source/materials/mat/mat088/sigeps88.F90
+!||    sigeps90                  ../engine/source/materials/mat/mat090/sigeps90.F
+!||    sigeps92                  ../engine/source/materials/mat/mat092/sigeps92.F
+!||    sigeps94                  ../engine/source/materials/mat/mat094/sigeps94.F
+!||    yield_criterion_hershey   ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
 !||--- calls      -----------------------------------------------------
-!||    floatmin          ../common_source/tools/math/precision.c
+!||    floatmin                  ../common_source/tools/math/precision.c
 !||====================================================================
       SUBROUTINE VALPVECDP_V(SIG,VAL,VEC,NEL)
 C-----------------------------------------------

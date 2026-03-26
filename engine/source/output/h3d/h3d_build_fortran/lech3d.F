@@ -23,7 +23,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
 !||    lech3d                    ../engine/source/output/h3d/h3d_build_fortran/lech3d.F
 !||--- called by ------------------------------------------------------
-!||    lectur                    ../engine/source/input/lectur.F
+!||    init_h3d_engine           ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||--- calls      -----------------------------------------------------
 !||    ancmsg                    ../engine/source/output/message/message.F
 !||    arret                     ../engine/source/system/arret.F
@@ -178,6 +178,7 @@ C-----------------------------------------------
         INTEGER MLW, NEL, NG, JTURB, NLAY, NUVAR, IMAT, ISUBSTACK, ID_PLY_TMP
         INTEGER CPT_MOD,NMOD,CPT_LAWID,SIZE_INPUT
         INTEGER IERROR  ! Error value from Allocate
+        INTEGER INDEX_MDS_TMP  ! Temporary variable for INDEX_MAT_MDS(MDSVAR_INPUT(K))
  
         INTEGER LENR    ! Size of Remote interface receive values
 
@@ -690,6 +691,34 @@ C--------------------------------------------------
      .                                'MDS_VAR'  ,7           ,IS_MDSVAR ,IMDSVAR  ,
      .                                IS_MDSVAR_ALL,IBID1     ,IBID2     ,IS_DEF   ,
      .                                IS_MDSVAR_DEF,IS_MEMB   ,IBID3     )
+
+          IF (KEY3 =='MDS' .AND. 
+     .        IMDSVAR == 0 .AND. IS_MDSVAR_DEF == 0 .AND. IS_MDSVAR_ALL == 0) THEN
+            CALL ANCMSG(MSGID=322,MSGTYPE=MSGERROR,ANMODE=ANINFO,c1=KEY3_GLOB)
+            CALL ARRET(2)
+          ENDIF
+C--------------------------------------------------
+C Check for duplicate MDS_VAR definition with different settings
+C--------------------------------------------------
+          IF (KEY3 == 'MDS') THEN
+            DO K=1,ID_INPUT-1
+              IF (H3D_DATA%INPUT_LIST(K)%KEY2 == KEY2 .AND.
+     .           H3D_DATA%INPUT_LIST(K)%KEY3 == 'MDS') THEN
+              ! Check if same IMDSVAR value or if both are ALL/DEF
+                IF ((IMDSVAR == 0 .AND. IS_MDSVAR_ALL == 1 .AND.
+     .                     H3D_DATA%INPUT_LIST(K)%KEY4 == 'MDS_VAR=DEF') .OR.
+     .                    (IMDSVAR == 0 .AND. IS_MDSVAR_DEF == 1 .AND.
+     .                     H3D_DATA%INPUT_LIST(K)%KEY4 == 'MDS_VAR=ALL') .OR.
+     .                    (IMDSVAR > 0 .AND.
+     .                     (H3D_DATA%INPUT_LIST(K)%KEY4 == 'MDS_VAR=DEF' .OR.
+     .                      H3D_DATA%INPUT_LIST(K)%KEY4 == 'MDS_VAR=ALL')   ))  THEN
+                  CALL ANCMSG(MSGID=323,MSGTYPE=MSGERROR,ANMODE=ANINFO,
+     .                        c1=KEY3_GLOB,c2=H3D_DATA%INPUT_LIST(K)%KEY2)
+                  CALL ARRET(2)
+                ENDIF
+              ENDIF
+            ENDDO
+          ENDIF
 C--------------------------------------------------
 C Read IR= I/ALL/LOWER/UPPER
 C--------------------------------------------------
@@ -1640,6 +1669,10 @@ C--------------------------------------------------
 C
             ENDIF
 C
+            DO NG=1,NGROUP
+               NLAY_MAX  = MAX(NLAY_MAX,ELBUF_STR(NG)%NLAY)
+            ENDDO
+            
             IF(.NOT.ALLOCATED(IS_LAYER_MAT))ALLOCATE(IS_LAYER_MAT(MAX(1,NUMMAT),MAX(1,NLAY_MAX)))
             IS_LAYER_MAT(1:MAX(1,NUMMAT),MAX(1,NLAY_MAX)) = 0
 C
@@ -2020,12 +2053,19 @@ c
                         H3D_KEYWORD_SHELL_SCALAR(J)%TEXT1 = "Damage:Damage index"
                       ENDIF 
 c
+                      ! Handle MDSVAR_INPUT(K) = 0 to avoid out-of-bounds access
+                      IF (MDSVAR_INPUT(K) > 0) THEN
+                        INDEX_MDS_TMP = INDEX_MAT_MDS(MDSVAR_INPUT(K))
+                      ELSE
+                        INDEX_MDS_TMP = 0
+                      ENDIF
+c
                       CALL CREATE_H3D_SHELL_SCALAR(H3D_DATA,H3D_KEYWORD_SHELL_SCALAR(J)%ID,N1,N2,ID_INPUT,
      .                           TRIM(H3D_KEYWORD_SHELL_SCALAR(J)%TEXT1),LEN_TRIM(H3D_KEYWORD_SHELL_SCALAR(J)%TEXT1),
-     .                                                      H3D_KEYWORD_SHELL_SCALAR(J)%COMMENT,80,IPART,KEY3_GLOB,
-     .                           LAYER_INPUT(K),IPT_INPUT(K),PLY_INPUT(K),GAUSS_INPUT(K),UVAR_INPUT(K),
-     .                                                      MDSVAR_INPUT(K),MDSVAR_INPUT1(K),MDSVAR_INPUT2(K),
-     .                                                      MDS_LABEL_TMP,30,IDS_INPUT(K),MODES_INPUT(K),IGRPART)
+     .                                 H3D_KEYWORD_SHELL_SCALAR(J)%COMMENT,80,IPART,KEY3_GLOB,
+     .                                 LAYER_INPUT(K),IPT_INPUT(K),PLY_INPUT(K),GAUSS_INPUT(K),UVAR_INPUT(K),
+     .                                 INDEX_MDS_TMP,MDSVAR_INPUT1(K),MDSVAR_INPUT2(K),
+     .                                 MDS_LABEL_TMP,30,IDS_INPUT(K),MODES_INPUT(K),IGRPART)
                     END IF
                     IOK_H3DKEY_COMBINATION = 1
                   ELSEIF (IS_AVAILABLE_KEY(K) == 1 .AND. IS_VECTOR == 1) THEN
@@ -2302,11 +2342,18 @@ c
                         H3D_KEYWORD_SOLID_SCALAR(J)%TEXT1 = "Damage:Damage index"
                       ENDIF     
 c
+                      ! Handle MDSVAR_INPUT(K) = 0 to avoid out-of-bounds access
+                      IF (MDSVAR_INPUT(K) > 0) THEN
+                        INDEX_MDS_TMP = INDEX_MAT_MDS(MDSVAR_INPUT(K))
+                      ELSE
+                        INDEX_MDS_TMP = 0
+                      ENDIF
+c
                       CALL CREATE_H3D_SOLID_SCALAR(H3D_DATA,H3D_KEYWORD_SOLID_SCALAR(J)%ID,ID_INPUT,
      .                            TRIM(H3D_KEYWORD_SOLID_SCALAR(J)%TEXT1),LEN_TRIM(H3D_KEYWORD_SOLID_SCALAR(J)%TEXT1),
      .                                                 H3D_KEYWORD_SOLID_SCALAR(J)%COMMENT,80,IPART,KEY3_GLOB,
      .                            LAYER_INPUT(K),IR_INPUT(K),IS_INPUT(K),IT_INPUT(K),
-     .                            UVAR_INPUT(K),MDSVAR_INPUT(K),MDSVAR_INPUT1(K),
+     .                            UVAR_INPUT(K),INDEX_MDS_TMP,MDSVAR_INPUT1(K),
      .                            MDSVAR_INPUT2(K),MDS_LABEL_TMP,30,IDS_INPUT(K),MODES_INPUT(K),IGRPART)
                     END IF
                     IOK_H3DKEY_COMBINATION = 1

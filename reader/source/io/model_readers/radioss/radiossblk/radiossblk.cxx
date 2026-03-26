@@ -68,6 +68,28 @@ public:
 };
 
 
+class SDINodeDataPORadioss : public SDINodeDataPO
+{
+public:
+    SDINodeDataPORadioss(SDIModelViewPrivate* pModel, IMECPreObject* psource,
+                         unsigned int index1 = 0, unsigned int index2 = 0) :
+        SDINodeDataPO(pModel, psource, index1, index2)
+    {}
+
+    inline virtual Status GetValue(const sdiIdentifier& identifier,
+                                   sdiValue&            value) const;
+
+protected:
+    virtual void Init()
+    {
+        myUnitId = UINT_MAX;
+        SDINodeDataPO::Init();
+    }
+
+    mutable unsigned int myUnitId = UINT_MAX;
+};
+
+
 class SDIModelViewRadiossblk: public ModelViewPO
 {
 public:
@@ -85,7 +107,7 @@ public:
         myTypeGrnod = GetEntityType("/GRNOD");
         myTypeUnit = GetEntityType("/UNIT");
         myTypeInclude = GetEntityType("#include");
-        //myTypeSubmodel = GetEntityType("//SUBMODEL");
+        myTypeSubmodel = GetEntityType("//SUBMODEL");
         myTypeParameter = GetEntityType("/PARAMETER");
     }
 
@@ -100,6 +122,22 @@ public:
 
         // we cache the hierarchy of includes
         p_parentIncludes[0] = 0; // main file
+    }
+
+    virtual SDINodeData* Objectify(const HandleNodeRead& handle) const
+    {
+        if(handle.GetIndex1() < p_preobjects[HCDI_OBJ_TYPE_NODES].size())
+        {
+            return new SDINodeDataPORadioss(
+                const_cast<SDIModelViewRadiossblk*>(this),
+                p_preobjects[HCDI_OBJ_TYPE_NODES][handle.GetIndex1()],
+                handle.GetIndex1(),
+                handle.GetIndex2());
+        }
+        else
+        {
+            return new SDINodeDataPORadioss(const_cast<SDIModelViewRadiossblk*>(this), nullptr);
+        }
     }
 
     /// Creation of a new entity
@@ -179,6 +217,48 @@ public:
         return isOk;
     }
 
+    virtual bool SetSingleObjectValueToPreObject(IMECPreObject*              pObj,
+                                                 const sdiString&            skeyword,
+                                                 const sdiValue&             value,
+                                                 int                         i) const
+    {
+        sdiValueEntity value_loc;
+        bool isOk = value.GetValue(value_loc);
+        EntityType type = ENTITY_TYPE_NONE;
+        if(value_loc.GetEntityFullType().IsTypeNumeric())
+        {
+            type = value_loc.GetEntityFullType().GetTypeNumeric();
+        }
+        else
+        {
+            type = GetEntityType(value_loc.GetEntityFullType().GetTypeNamed());
+        }
+        unsigned int CFGType = GetCFGType(type);
+        if(type == myTypeSubmodel) CFGType = HCDI_OBJ_TYPE_SOLVERSUBMODELS; // specific for Radioss
+        const char *otype = HCDI_get_entitystringtype((int) CFGType).c_str();
+        if(i == -1)
+        {
+            pObj->AddObjectValue(skeyword.c_str(), otype, value_loc.GetId());
+        }
+        else
+        {
+            int keywordIndex = pObj->GetIndex(IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_OBJECT, skeyword);
+            if (keywordIndex == -1)
+            {
+                pObj->AddObjectArray(skeyword.c_str(), i + 1);
+                keywordIndex = pObj->GetIndex(IMECPreObject::ATY_ARRAY, IMECPreObject::VTY_OBJECT, skeyword);
+            }
+            else
+            {
+                int arraySize = pObj->GetNbValues(IMECPreObject::VTY_OBJECT, keywordIndex);
+                if (arraySize <= i)
+                    pObj->resizeArray(IMECPreObject::VTY_OBJECT, keywordIndex, i + 1);
+            }
+            pObj->SetObjectValue(keywordIndex, i,otype, value_loc.GetId());
+        }
+        return isOk;
+    }
+
     virtual HandleRead SetCurrentCollector(const HandleRead handle) const
     {
         HandleRead oldCollector;
@@ -186,6 +266,11 @@ public:
         if(handle.GetType() == myTypeInclude)
         {
             p_currentIncludeId = handle.GetId(this);
+        }
+        else if(handle.GetType() == myTypeSubmodel)
+        {
+            // submodel and include are the same preobject, but different sdi types
+            p_currentIncludeId = P_GetId(HandleRead(myTypeInclude, handle.GetPointer()));
         }
         else
         {
@@ -268,6 +353,8 @@ public:
 
 public: // for EntityData, should rather be friend
     EntityType myTypeSkew, myTypeGrnod;
+private :
+    EntityType myTypeSubmodel;
 };
 
 
@@ -282,6 +369,32 @@ void SDIIdManagerRadiossblk::GetOffsets(unsigned int includeId, std::vector<int>
 
 }
 
+
+Status SDINodeDataPORadioss::GetValue(const sdiIdentifier& identifier,
+                                      sdiValue&            value) const
+{
+    const SDIModelViewRadiossblk* mv = static_cast<const SDIModelViewRadiossblk*>(this->GetModelView());
+    assert(mv);
+    const sdiString& nameKey = identifier.GetNameKey();
+    if(nameKey.compare(0, 1, "u") == 0) // unitid or unit_ID
+    {
+        if(myUnitId == UINT_MAX)
+        { // not yet cached, so cache it
+            myUnitId = 0;
+            if(p_ptr)
+            {
+                int index = p_ptr->GetIndex(IMECPreObject::ATY_SINGLE, IMECPreObject::VTY_OBJECT, "unitid");
+                if(0 <= index) myUnitId = p_ptr->GetObjectId(index);
+            }
+        }
+        value.SetValue(sdiValueEntity(sdiValueEntityType(mv->myTypeUnit), myUnitId));
+        return true;
+    }
+    else
+    {
+        return SDINodeDataPO::GetValue(identifier, value);
+    }
+}
 
 } // namespace sdi
 

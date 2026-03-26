@@ -39,7 +39,7 @@
 !||    coqini_wm                 ../engine/source/elements/shell/coqini.F
 !||    damping_range_shell       ../engine/source/general_controls/damping/damping_range_shell.F90
 !||    fail_biquad_c             ../engine/source/materials/fail/biquad/fail_biquad_c.F
-!||    fail_changchang_c         ../engine/source/materials/fail/changchang/fail_changchang_c.F
+!||    fail_changchang_c         ../engine/source/materials/fail/changchang/fail_changchang_c.F90
 !||    fail_cockroft_c           ../engine/source/materials/fail/cockroft_latham/fail_cockroft_c.F
 !||    fail_composite_c          ../engine/source/materials/fail/composite/fail_composite_c.F90
 !||    fail_energy_c             ../engine/source/materials/fail/energy/fail_energy_c.F
@@ -47,7 +47,7 @@
 !||    fail_fld_c                ../engine/source/materials/fail/fld/fail_fld_c.F
 !||    fail_fld_xfem             ../engine/source/materials/fail/fld/fail_fld_xfem.F
 !||    fail_gene1_c              ../engine/source/materials/fail/gene1/fail_gene1_c.F
-!||    fail_hashin_c             ../engine/source/materials/fail/hashin/fail_hashin_c.F
+!||    fail_hashin_c             ../engine/source/materials/fail/hashin/fail_hashin_c.F90
 !||    fail_hc_dsse_c            ../engine/source/materials/fail/hc_dsse/fail_hc_dsse_c.F
 !||    fail_hoffman_c            ../engine/source/materials/fail/hoffman/fail_hoffman_c.F
 !||    fail_inievo_c             ../engine/source/materials/fail/inievo/fail_inievo_c.F
@@ -59,7 +59,7 @@
 !||    fail_orthbiquad_c         ../engine/source/materials/fail/orthbiquad/fail_orthbiquad_c.F
 !||    fail_orthenerg_c          ../engine/source/materials/fail/orthenerg/fail_orthenerg_c.F
 !||    fail_orthstrain_c         ../engine/source/materials/fail/orthstrain/fail_orthstrain_c.F
-!||    fail_puck_c               ../engine/source/materials/fail/puck/fail_puck_c.F
+!||    fail_puck_c               ../engine/source/materials/fail/puck/fail_puck_c.F90
 !||    fail_rtcl_c               ../engine/source/materials/fail/rtcl/fail_rtcl_c.F
 !||    fail_setoff_c             ../engine/source/materials/fail/fail_setoff_c.F
 !||    fail_setoff_npg_c         ../engine/source/materials/fail/fail_setoff_npg_c.F
@@ -100,6 +100,8 @@
 !||    sigeps125c                ../engine/source/materials/mat/mat125/sigeps125c.F90
 !||    sigeps127c                ../engine/source/materials/mat/mat127/sigeps127c.F90
 !||    sigeps128c                ../engine/source/materials/mat/mat128/sigeps128c.F90
+!||    sigeps131c                ../engine/source/materials/mat/mat131/sigeps131c.F90
+!||    sigeps132c                ../engine/source/materials/mat/mat132/sigeps132c.F90
 !||    sigeps158c                ../engine/source/materials/mat/mat158/sigeps158c.F
 !||    sigeps15c                 ../engine/source/materials/mat/mat015/sigeps15c.F
 !||    sigeps19c                 ../engine/source/materials/mat/mat019/sigeps19c.F
@@ -149,9 +151,12 @@
 !||    damping_range_shell_mod   ../engine/source/general_controls/damping/damping_range_shell.F90
 !||    dt_mod                    ../engine/source/modules/dt_mod.F
 !||    elbufdef_mod              ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    fail_changchang_c_mod     ../engine/source/materials/fail/changchang/fail_changchang_c.F90
 !||    fail_composite_c_mod      ../engine/source/materials/fail/composite/fail_composite_c.F90
+!||    fail_hashin_c_mod         ../engine/source/materials/fail/hashin/fail_hashin_c.F90
 !||    fail_lemaitre_c_mod       ../engine/source/materials/fail/lemaitre/fail_lemaitre_c.F90
 !||    fail_param_mod            ../common_source/modules/mat_elem/fail_param_mod.F90
+!||    fail_puck_c_mod           ../engine/source/materials/fail/puck/fail_puck_c.F90
 !||    failwave_mod              ../common_source/modules/failwave_mod.F
 !||    file_descriptor_mod       ../engine/source/modules/file_descriptor_mod.F90
 !||    mat_elem_mod              ../common_source/modules/mat_elem/mat_elem_mod.F90
@@ -166,6 +171,8 @@
 !||    sigeps125c_mod            ../engine/source/materials/mat/mat125/sigeps125c.F90
 !||    sigeps127c_mod            ../engine/source/materials/mat/mat127/sigeps127c.F90
 !||    sigeps128c_mod            ../engine/source/materials/mat/mat128/sigeps128c.F90
+!||    sigeps131c_mod            ../engine/source/materials/mat/mat131/sigeps131c.F90
+!||    sigeps132c_mod            ../engine/source/materials/mat/mat132/sigeps132c.F90
 !||    sigeps57c_mod             ../engine/source/materials/mat/mat057/sigeps57c.F90
 !||    sigeps87c_mod             ../engine/source/materials/mat/mat087/sigeps87c.F90
 !||    sigeps88c_mod             ../engine/source/materials/mat/mat088/sigeps88c.F90
@@ -174,7 +181,7 @@
 !||    timer_mod                 ../engine/source/system/timer_mod.F90
 !||====================================================================
         subroutine mulawc(timers,elbuf_str ,&
-        & jft      ,jlt      ,nel      ,pm        ,for      ,mom      , &
+        & jlt      ,nel      ,pm        ,for      ,mom      , &
         & gstr     ,thk      ,eint     ,off       ,dir_a    ,dir_b    , &
         & mat      ,area     ,exx      ,eyy       ,exy      ,exz      , &
         & eyz      ,kxx      ,kyy      ,kxy       ,geo      ,thk_ly   , &
@@ -216,6 +223,8 @@
           use sigeps125c_mod
           use sigeps127c_mod
           use sigeps128c_mod
+          use sigeps131c_mod
+          use sigeps132c_mod
           use elbufdef_mod
           use dt_mod
           use file_descriptor_mod
@@ -225,6 +234,9 @@
           use fail_param_mod
           use fail_lemaitre_c_mod
           use fail_composite_c_mod
+          use fail_puck_c_mod
+          use fail_hashin_c_mod
+          use fail_changchang_c_mod
           use precision_mod, only : WP
           use shell_offset_wm_ini_mod
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -239,7 +251,6 @@
           type(timer_) :: timers
           integer, intent(in) :: ir
           integer, intent(in) :: is
-          integer, intent(in) :: jft
           integer, intent(in) :: jlt
           integer, intent(in) :: nel
           integer, intent(in) :: npt
@@ -403,17 +414,18 @@
             signzx,sigvxx,sigvyy,sigvxy,sigvyz,sigvzx,&
             wmc, epsd, yld,dpla,vol0,hardm,g_imp,visc,wplar,&
             tstar,  vm, vm0, seq0, vol_ipt,&
-            areamin,dareamin,dmg_glob_scale,dmg_loc_scale,et_imp, epsthtot
+            dmg_glob_scale,dmg_loc_scale,et_imp, epsthtot
           real(kind=WP), dimension(nel,5) :: dmg_orth_scale
 !
           real(kind=WP) :: zt,dtinv, vol2,asrate,coef, &
             r1,r2,s1,s2,r12a,r22a,s12b,s22b,rs1,rs2,rs3,&
             t1,t2,t3,fact,r3r3,s3s3,&
+            areamin,dareamin,&
             bidon1,bidon2,bidon3,bidon4,bidon5,vv,aa,trelax
           real(kind=WP)  :: scale1(nel)
           real(kind=WP) ,dimension(nel), target :: le_max
           real(kind=WP) :: tt_local
-          real(kind=WP), dimension(:) ,pointer  :: el_temp,yldfac,crklen,crkdir,dadv,tfail,el_len,&
+          real(kind=WP), dimension(:) ,pointer, contiguous  :: el_temp,yldfac,crklen,crkdir,dadv,tfail,el_len,&
           &el_pla
           real(kind=WP), dimension(nel), target :: el_pla_dum
           target :: tempel,bufmat,scale1
@@ -424,9 +436,9 @@
           type(g_bufel_) ,pointer :: gbuf
           type(buf_fail_),pointer :: fbuf
 !----
-          integer, dimension(:) ,pointer  :: fld_idx,foff,offly,itable,ifunc_fail,&
+          integer, dimension(:) ,pointer, contiguous  :: fld_idx,foff,offly,itable,ifunc_fail,&
           &itabl_fail,vartmp,iparam,iparamf
-          real(kind=WP), dimension(:) ,pointer  :: uvar,uvarf,uelr,uelr1,dam,&
+          real(kind=WP), dimension(:) ,pointer, contiguous  :: uvar,uvarf,uelr,uelr1,dam,&
           &dfmax,tdel ,offl,uvarv,uparam,uparam0,uparamf,&
           &dirdmg,dir_orth,damini
           type(matparam_struct_) , pointer :: matparam
@@ -443,7 +455,7 @@
           real(kind=WP) :: fisokin,kv,zshift,wm_zshift,tref,tmelt
           real(kind=WP), dimension(nel) :: eps1,eps2
           real(kind=WP), dimension(nel), target :: vecnul
-          real(kind=WP), dimension(:), pointer  :: sigbxx,sigbyy,sigbxy
+          real(kind=WP), dimension(:), pointer, contiguous  :: sigbxx,sigbyy,sigbxy
           real(kind=WP), dimension(:), allocatable :: gv,beta
           real(kind=WP) :: wm(11,11)
 !
@@ -461,6 +473,7 @@
           !jlag = iparg(14) ! Not used for shell elements (always Lagrangian).
           ! Initialized to 0, but may be interpreted as 1 if needed.
           nsensor = sensors%nsensor
+
 !
           idrape = elbuf_str%idrape
           logical_userl_avail=.false.
@@ -521,64 +534,64 @@
           dmg_flag = 0
           trelax = zero
 !
-          degmb(jft:jlt) = for(jft:jlt,1)*exx(jft:jlt)+for(jft:jlt,2)*eyy(jft:jlt)  &
-          &              + for(jft:jlt,3)*exy(jft:jlt)+for(jft:jlt,4)*eyz(jft:jlt)  &
-          &              + for(jft:jlt,5)*exz(jft:jlt)
-          degfx(jft:jlt) = mom(jft:jlt,1)*kxx(jft:jlt)+mom(jft:jlt,2)*kyy(jft:jlt)  &
-          &              + mom(jft:jlt,3)*kxy(jft:jlt)
+          degmb(1:jlt) = for(1:jlt,1)*exx(1:jlt)+for(1:jlt,2)*eyy(1:jlt)  &
+          &              + for(1:jlt,3)*exy(1:jlt)+for(1:jlt,4)*eyz(1:jlt)  &
+          &              + for(1:jlt,5)*exz(1:jlt)
+          degfx(1:jlt) = mom(1:jlt,1)*kxx(1:jlt)+mom(1:jlt,2)*kyy(1:jlt)  &
+          &              + mom(1:jlt,3)*kxy(1:jlt)
 !
           if (flag_law1 .or. flag_law25) then
             if (npt == 1) then
-              degmb(jft:jlt) = for(jft:jlt,1)*exx(jft:jlt) + for(jft:jlt,2)*eyy(jft:jlt)  &
-              &              + for(jft:jlt,3)*exy(jft:jlt) + for(jft:jlt,4)*eyz(jft:jlt)  &
-              &              + for(jft:jlt,5)*exz(jft:jlt)
-              degfx(jft:jlt) = zero
+              degmb(1:jlt) = for(1:jlt,1)*exx(1:jlt) + for(1:jlt,2)*eyy(1:jlt)  &
+              &              + for(1:jlt,3)*exy(1:jlt) + for(1:jlt,4)*eyz(1:jlt)  &
+              &              + for(1:jlt,5)*exz(1:jlt)
+              degfx(1:jlt) = zero
             endif
           endif
 !
           if (flag_law25 .and. igtyp == 9 .and. npt == 1) then
-            degmb(jft:jlt) = zero
-            degfx(jft:jlt) = zero
+            degmb(1:jlt) = zero
+            degfx(1:jlt) = zero
           elseif (npg>1) then
-            degmb(jft:jlt) = degmb(jft:jlt)*off(jft:jlt)
-            degfx(jft:jlt) = degfx(jft:jlt)*off(jft:jlt)
+            degmb(1:jlt) = degmb(1:jlt)*off(1:jlt)
+            degfx(1:jlt) = degfx(1:jlt)*off(1:jlt)
           endif
 !
-          vol0(jft:jlt)   = area(jft:jlt)*thk0(jft:jlt)
-          thkn(jft:jlt)   = thk(jft:jlt)
-          for(jft:jlt,1)  = zero
-          for(jft:jlt,2)  = zero
-          for(jft:jlt,3)  = zero
-          for(jft:jlt,4)  = zero
-          for(jft:jlt,5)  = zero
-          mom(jft:jlt,1)  = zero
-          mom(jft:jlt,2)  = zero
-          mom(jft:jlt,3)  = zero
-          yld(jft:jlt)    = zero
-          seq0(jft:jlt)   = zero
-          if (flag_law2 .or. flag_law25 .or. (.not.flag_zcfac)) sigy(jft:jlt)   = zero
-          if(flag_zcfac .and. mtn /= 22) zcfac(jft:jlt,1)= zero
-          zcfac(jft:jlt,2)= zero
-          if(flag_zcfac) zcfac(jft:jlt,2)= one
-          etse(jft:jlt)   = one
-          if(flag_etimp) etimp(jft:jlt)= zero
+          vol0(1:jlt)   = area(1:jlt)*thk0(1:jlt)
+          thkn(1:jlt)   = thk(1:jlt)
+          for(1:jlt,1)  = zero
+          for(1:jlt,2)  = zero
+          for(1:jlt,3)  = zero
+          for(1:jlt,4)  = zero
+          for(1:jlt,5)  = zero
+          mom(1:jlt,1)  = zero
+          mom(1:jlt,2)  = zero
+          mom(1:jlt,3)  = zero
+          yld(1:jlt)    = zero
+          seq0(1:jlt)   = zero
+          if (flag_law2 .or. flag_law25 .or. (.not.flag_zcfac)) sigy(1:jlt)   = zero
+          if(flag_zcfac .and. mtn /= 22) zcfac(1:jlt,1)= zero
+          zcfac(1:jlt,2)= zero
+          if(flag_zcfac) zcfac(1:jlt,2)= one
+          etse(1:jlt)   = one
+          if(flag_etimp) etimp(1:jlt)= zero
           if(flag_law25)then
-            wplar(jft:jlt)=zero
-            nfis1(jft:jlt)=0
-            nfis2(jft:jlt)=0
-            nfis3(jft:jlt)=0
+            wplar(1:jlt)=zero
+            nfis1(1:jlt)=0
+            nfis2(1:jlt)=0
+            nfis3(1:jlt)=0
           endif
-          off_old(jft:jlt) = off(jft:jlt)
-          ioff_duct(jft:jlt) = 0
-          dmg_glob_scale(jft:jlt) = one
+          off_old(1:jlt) = off(1:jlt)
+          ioff_duct(1:jlt) = 0
+          dmg_glob_scale(1:jlt) = one
           sigoff(1:nel) = one
-          epchk(1:mvsiz)  = zero
-          viscmx(1:mvsiz) = zero
+          epchk(1:jlt)  = zero
+          viscmx(1:jlt) = zero
           zshift = geo(199, pid(1))
 !
           if ( flag_law22 ) then
 #include "vectorize.inc"
-            do i=jft,jlt
+            do i=1,jlt
               alpe(i) = em30
             enddo
           endif ! if ( flag_law22 )
@@ -633,6 +646,7 @@
             &            igtyp == 51 .or. igtyp == 52) then
               if (ilaw == 58 .or. ilaw == 158 .or. ilaw == 88) nfunc = ipm(10,imat)+ipm(6,imat)
             endif
+            ifunc(1) = 0 ! ifunc(1) may be used even when nfunc=0 (see sigeps78c)
             do i=1,nfunc
               ifunc(i)=ipm(10+i,imat)
             enddo
@@ -651,24 +665,24 @@
                 do ifl = 1, nfail      ! loop over fail models in current layer
                   irupt  =  fbuf%floc(ifl)%ilawf
                   if(irupt== 4.or.irupt== 5.or.irupt== 6.or.irupt==7.or.   &
-                  &                 irupt==10.or.irupt==24.or.irupt==34.or.irupt==39.or.  &
-                  &                 irupt==43.or.irupt==47 ) flag_eps=.true.
+                  &  irupt==10.or.irupt==24.or.irupt==34.or.irupt==36.or.  &
+                  &  irupt==39.or.irupt==43.or.irupt==47 ) flag_eps=.true.
                 enddo
               enddo
             endif
 
 !           depsyz/zx and epsyz/zx are it independent
 !           epsxy is it independent for igtyp/=1
-            depsyz(jft:jlt)=eyz(jft:jlt)
-            depszx(jft:jlt)=exz(jft:jlt)
+            depsyz(1:jlt)=eyz(1:jlt)
+            depszx(1:jlt)=exz(1:jlt)
             if (flag_eps) then
               if (igtyp == 1) then
-                epsyz(jft:jlt)= gstr(jft:jlt,4)
-                epszx(jft:jlt)= gstr(jft:jlt,5)
+                epsyz(1:jlt)= gstr(1:jlt,4)
+                epszx(1:jlt)= gstr(1:jlt,5)
               else
-                epsxy(jft:jlt)  = zero
-                epsyz(jft:jlt)  = zero
-                epszx(jft:jlt)  = zero
+                epsxy(1:jlt)  = zero
+                epsyz(1:jlt)  = zero
+                epszx(1:jlt)  = zero
               endif
             endif
 !----------------------------------------------------------------------
@@ -682,6 +696,18 @@
 !----------------------------------------------------------------------
 !---
             l_dmg = bufly%l_dmg
+!---
+!         hoist prony model allocation outside the integration point loop
+!         since nprony, kv, gv, beta are constant across it iterations
+            if (matparam%ivisc == 1 .and. ilaw /= 25) then
+              nprony = matparam%visc%iparam(1)
+              kv     = matparam%visc%uparam(1)
+              allocate(gv(nprony),beta(nprony))
+              do i=1,nprony
+                gv(i)   = matparam%visc%uparam(1 + i)
+                beta(i) = matparam%visc%uparam(1 + nprony + i)
+              enddo
+            endif
 !---
             do it=1,nptt
               ipt = ipt_all + it        ! count all nptt through all layers
@@ -697,7 +723,7 @@
 !
               ! -> make sure the non-local increment is positive
               if (inloc > 0) then
-                do i = jft,jlt
+                do i = 1,jlt
                   varnl(i,it)    = max(varnl(i,it),zero)
                   lbuf%planl(i)  = lbuf%planl(i) + varnl(i,it)
                   lbuf%epsdnl(i) = varnl(i,it)/max(dt1,em20)
@@ -721,6 +747,8 @@
                 if (bufly%l_fac_yld > 0) then
                   yldfac => lbuf%fac_yld(1:nel)
                 endif
+              else
+                yldfac => vecnul(1:nel)
               endif
 !-----------------------------------------
 !         coordinates of integration point ipt
@@ -745,18 +773,18 @@
 !         increment de deformations
 !-------------------------------
               if (ilaw == 58 .or. ilaw == 158 .or. ilaw==127) then
-                signxx(1:mvsiz) = zero
-                signyy(1:mvsiz) = zero
-                signxy(1:mvsiz) = zero
-                signyz(1:mvsiz) = zero
-                signzx(1:mvsiz) = zero
+                signxx(1:jlt) = zero
+                signyy(1:jlt) = zero
+                signxy(1:jlt) = zero
+                signyz(1:jlt) = zero
+                signzx(1:jlt) = zero
               endif
               if (ilaw == 58 .or. ilaw == 158 .or. ilaw==127 .or. idamp_freq_range > 0) then
-                sigvxx(1:mvsiz) = zero
-                sigvyy(1:mvsiz) = zero
-                sigvxy(1:mvsiz) = zero
-                sigvyz(1:mvsiz) = zero
-                sigvzx(1:mvsiz) = zero
+                sigvxx(1:jlt) = zero
+                sigvyy(1:jlt) = zero
+                sigvxy(1:jlt) = zero
+                sigvyz(1:jlt) = zero
+                sigvzx(1:jlt) = zero
               endif
 !       -------------------------------
 !       igtyp = 1
@@ -767,7 +795,7 @@
                 !       -----------
                 if (ismstr==10 .and. (mtn == 1 .or. mtn == 42 .or.&
                   mtn == 69.or. mtn == 71 .or. mtn == 88)) then
-                  do i=jft,jlt
+                  do i=1,jlt
                     zt=posly(i,ipt) *thk0(i)
                     depsxx(i)=exx(i)+zt*kxx(i)
                     depsyy(i)=eyy(i)+zt*kyy(i)
@@ -779,7 +807,7 @@
                     tens(i,4)= f_def(i,4)+zt*f_def(i,5)
                   enddo
 !---------        [f]=[f_def]+[1]; [b]=[f][f]^t strain-----
-                  do i=jft,jlt
+                  do i=1,jlt
                     epsxx(i)=tens(i,1)*(two+tens(i,1))+&
                     &tens(i,3)*tens(i,3)
                     epsyy(i)=tens(i,2)*(two+tens(i,2))+&
@@ -788,7 +816,7 @@
                     &tens(i,3)*tens(i,2))
                   enddo
                 else if (ilaw == 27) then
-                  do i=jft,jlt
+                  do i=1,jlt
                     zt       = posly(i,ipt) *thk0(i)
                     tens(i,1)=exx(i)+zt*kxx(i)
                     tens(i,2)=eyy(i)+zt*kyy(i)
@@ -797,9 +825,9 @@
                     tens(i,5)=half*exz(i)
                   enddo
 !
-                  call rotov(jft,jlt,tens,dirdmg,nel)
+                  call rotov(1,jlt,tens,dirdmg,nel)
 !
-                  do i=jft,jlt
+                  do i=1,jlt
                     depsxx(i)=tens(i,1)
                     depsyy(i)=tens(i,2)
                     depsxy(i)=two*tens(i,3)
@@ -810,14 +838,14 @@
                   !       -----------
                   !       /= ismstr=10 + foam laws
                   !       -----------
-                  do i=jft,jlt
+                  do i=1,jlt
                     zt=posly(i,ipt) *thk0(i)
                     depsxx(i)=exx(i)+zt*kxx(i)
                     depsyy(i)=eyy(i)+zt*kyy(i)
                     depsxy(i)=exy(i)+zt*kxy(i)
                   enddo
                   if (flag_eps) then
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt=posly(i,ipt) *thk0(i)
                       epsxx(i)= gstr(i,1)+zt*gstr(i,6)
                       epsyy(i)= gstr(i,2)+zt*gstr(i,7)
@@ -834,7 +862,7 @@
                 !       ------------
                 if (ismstr == 11) then
 !             total strain in fiber coord sys
-                  do i=jft,jlt
+                  do i=1,jlt
                     ii = jdir + i-1
                     r1 = dir_a(ii)
                     s1 = dir_a(ii+nel)
@@ -858,7 +886,7 @@
                   !       ismstr/=11
                   !       ------------
 !             strain rate in fiber coord sys
-                  do i=jft,jlt
+                  do i=1,jlt
                     ii = jdir + i-1
                     r1 = dir_a(ii)
                     s1 = dir_a(ii+nel)
@@ -875,7 +903,7 @@
                   enddo
                 endif
                 if (flag_eps) then
-                  do i=jft,jlt
+                  do i=1,jlt
 !             total true strain in global coord sys
                     zt = posly(i,ipt) *thk0(i)
                     epsxx(i) = gstr(i,1) + zt*gstr(i,6)
@@ -898,7 +926,7 @@
                   !       ------------
                   if (ismstr == 11) then
 !             total strain in fiber coord sys
-                    do i=jft,jlt
+                    do i=1,jlt
                       ii = jdir + i-1
                       r1 = dir_a(ii)
                       s1 = dir_a(ii+nel)
@@ -919,7 +947,7 @@
                     !       ismstr/=11
                     !       ------------
 !             strain rate in fiber coord sys
-                    do i=jft,jlt
+                    do i=1,jlt
                       ii = jdir + i-1
                       r1 = dir_a(ii)
                       s1 = dir_a(ii+nel)
@@ -936,7 +964,7 @@
                     enddo
                   endif ! if (ismstr == 11) then
                   if (flag_eps) then
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt = posly(i,ipt) *thk0(i)
                       t1 = gstr(i,1) + zt*gstr(i,6)
                       t2 = gstr(i,2) + zt*gstr(i,7)
@@ -951,7 +979,7 @@
 !               igtyp /= 51 and 52 or ilaw/=58
 !               -------------------------------
                   if (ilaw /= 1 .and. ilaw /= 2 .and. ilaw /= 32 ) then
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt       = posly(i,ipt) *thk0(i)
                       tens(i,1)=exx(i)+zt*kxx(i)
                       tens(i,2)=eyy(i)+zt*kyy(i)
@@ -961,12 +989,12 @@
                     enddo
 !
                     if (ilaw /= 27) then
-                      call rotov(jft,jlt,tens,dir_a(jdir),nel)
+                      call rotov(1,jlt,tens,dir_a(jdir),nel)
                     else
-                      call rotov(jft,jlt,tens,dirdmg,nel)
+                      call rotov(1,jlt,tens,dirdmg,nel)
                     endif
 !
-                    do i=jft,jlt
+                    do i=1,jlt
                       depsxx(i)=tens(i,1)
                       depsyy(i)=tens(i,2)
                       depsxy(i)=two*tens(i,3)
@@ -974,7 +1002,7 @@
                       depszx(i)=two*tens(i,5)
                     enddo
                   elseif (ilaw == 1 .or. ilaw == 2 .or. ilaw == 32) then
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt       = posly(i,ipt) *thk0(i)
                       depsxx(i)=exx(i)+zt*kxx(i)
                       depsyy(i)=eyy(i)+zt*kyy(i)
@@ -984,7 +1012,7 @@
 !
                   if (ismstr==10 .and. (mtn == 1 .or. mtn == 42 .or.&
                   &mtn == 69.or. mtn == 71 .or. mtn == 88)) then
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt=posly(i,ipt) *gbuf%thk_i(i)
 !
                       tens(i,1)= f_def(i,1)+zt*f_def(i,6)
@@ -993,10 +1021,10 @@
                       tens(i,4)= f_def(i,4)+zt*f_def(i,5)
                     enddo
 !--------   - [f]=[f_def]+[1]; [b]=[f][f]^t strain-----
-                    epsxx(jft:jlt)=tens(jft:jlt,1)*(two+tens(jft:jlt,1))+tens(jft:jlt,3)*tens(jft:jlt,3)
-                    epsyy(jft:jlt)=tens(jft:jlt,2)*(two+tens(jft:jlt,2))+tens(jft:jlt,4)*tens(jft:jlt,4)
-                    epsxy(jft:jlt)=tens(jft:jlt,3)+tens(jft:jlt,4)+tens(jft:jlt,1)*tens(jft:jlt,4)+tens(jft:jlt,3)*tens(jft:jlt,2)
-                    do i=jft,jlt
+                    epsxx(1:jlt)=tens(1:jlt,1)*(two+tens(1:jlt,1))+tens(1:jlt,3)*tens(1:jlt,3)
+                    epsyy(1:jlt)=tens(1:jlt,2)*(two+tens(1:jlt,2))+tens(1:jlt,4)*tens(1:jlt,4)
+                    epsxy(1:jlt)=tens(1:jlt,3)+tens(1:jlt,4)+tens(1:jlt,1)*tens(1:jlt,4)+tens(1:jlt,3)*tens(1:jlt,2)
+                    do i=1,jlt
                       tens(i,1)= epsxx(i)
                       tens(i,2)= epsyy(i)
                       tens(i,3)= epsxy(i)
@@ -1004,14 +1032,14 @@
                       tens(i,5)= half*gstr(i,5)
                     enddo
                   elseif (ilaw == 32) then
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt=posly(i,ipt) *thk0(i)
                       epsxx(i)= gstr(i,1)+zt*gstr(i,6)
                       epsyy(i)= gstr(i,2)+zt*gstr(i,7)
                       epsxy(i)= gstr(i,3)+zt*gstr(i,8)
                     enddo
                   else
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt=posly(i,ipt) *thk0(i)
                       tens(i,1)= gstr(i,1)+zt*gstr(i,6)
                       tens(i,2)= gstr(i,2)+zt*gstr(i,7)
@@ -1022,13 +1050,13 @@
                   end if!(ismstr==10)
 !
                   if (ilaw /= 27 .and. ilaw /= 32) then
-                    call rotov(jft,jlt,tens,dir_a(jdir),nel)
+                    call rotov(1,jlt,tens,dir_a(jdir),nel)
                   else if (ilaw == 27) then
-                    call rotov(jft,jlt,tens,dirdmg,nel)
+                    call rotov(1,jlt,tens,dirdmg,nel)
                   endif
 !
                   if (flag_eps) then !
-                    do i=jft,jlt
+                    do i=1,jlt
                       epsxx(i) = tens(i,1)
                       epsyy(i) = tens(i,2)
                       epsxy(i) = two*tens(i,3)
@@ -1042,18 +1070,18 @@
 !       end of igtyp condition
 !       -------------------------------
 !---
-              do i=jft,jlt
+              do i=1,jlt
                 epspxx(i)=depsxx(i)*dtinv
                 epspyy(i)=depsyy(i)*dtinv
                 epspxy(i)=depsxy(i)*dtinv
                 epspyz(i)=depsyz(i)*dtinv
                 epspzx(i)=depszx(i)*dtinv
               enddo
-              dpla(1:mvsiz) = zero
-              if (elbuf_str%bufly(ilayer)%l_pla > 0) then
+              dpla(1:jlt) = zero
+              ! pla0 is only read for plastic work (g_wpla>0) or local failure (ifailure==1, inloc==0)
+              if (elbuf_str%bufly(ilayer)%l_pla > 0 .and.          &
+                (gbuf%g_wpla > 0 .or. (ifailure == 1 .and. inloc == 0))) then
                 pla0(1:jlt) = lbuf%pla(1:jlt)
-              else
-                pla0(1:jlt) = zero
               endif
               !< Old stress tensor
               sigoxx(1:nel) = lbuf%sig(ij1:ij1+nel-1)
@@ -1081,7 +1109,7 @@
 !------------------------------------------
               if (ilaw == 1) then
                 call sigeps01c(                                         &
-                  jft       ,jlt      ,nel      ,imat     ,gs       ,&
+                  1       ,jlt      ,nel      ,imat     ,gs       ,&
                   sigoxx    ,sigoyy   ,sigoxy   ,sigoyz   ,sigozx   ,&
                   signxx    ,signyy   ,signxy   ,signyz   ,signzx   ,&
                   depsxx    ,depsyy   ,depsxy   ,depsyz   ,depszx   ,&
@@ -1104,7 +1132,7 @@
 !
               elseif (ilaw == 15) then
                 call sigeps15c(                                           &
-                  jft      ,jlt     ,pm       ,lbuf%dam   ,            &
+                  1      ,jlt     ,pm       ,lbuf%dam   ,            &
                   imat     ,shf     ,ngl      ,dmg_flag   ,            &
                   ilayer   ,nel     ,lbuf%pla ,sigdmg     ,            &
                   israte   ,asrate  ,epsd_pg  ,lbuf%epsd  ,            &
@@ -1124,7 +1152,7 @@
 
               elseif (ilaw == 22) then
                 call sigeps22c(&
-                &jft      ,jlt    ,pm       ,thkn   ,off     ,&
+                &1      ,jlt    ,pm       ,thkn   ,off     ,&
                 &sigy     ,dt1c   ,ipla     ,nel    ,off_old ,&
                 &gs       ,dpla   ,ioff_duct,nptt   ,ipt     ,&
                 &epchk    ,alpe   ,thklyl   ,imat   ,lbuf%pla,&
@@ -1135,7 +1163,7 @@
 !
               elseif (ilaw == 27) then
                 call sigeps27c(&
-                  jft      ,jlt     ,pm       ,thkn    ,off   ,&
+                  1      ,jlt     ,pm       ,thkn    ,off   ,&
                   gstr     ,imat    ,dt1      ,ipla    ,shf   ,&
                   ngl      ,thk0    ,thklyl   ,lbuf%crak,lbuf%dam,&
                   sigy     ,zcfac   ,dpla     ,ilayer  ,ipt   ,&
@@ -1148,7 +1176,7 @@
 !
               elseif (ilaw == 32) then
                 call sigeps32c(&
-                &jft        ,jlt    ,pm      ,thkn   ,off    ,&
+                &1        ,jlt    ,pm      ,thkn   ,off    ,&
                 &dir_a(jdir),ipt    ,imat    ,nel    ,dt1c   ,&
                 &gs         ,lbuf%epsd,thklyl,ipla   ,dpla   ,&
                 &depsxx     ,depsyy ,depsxy  ,depsyz ,depszx ,&
@@ -1183,7 +1211,7 @@
                 elseif (igtyp == 9) then
 !           integration by points (through thickness)
                   call sigeps25cp(matparam ,&
-                    jft     ,jlt    ,off      ,dir_a(jdir) ,&
+                    1     ,jlt    ,off      ,dir_a(jdir) ,&
                     shf     ,npt    ,ngl      ,ipt     ,off_old     ,&
                     thk0    ,lbuf%epsd,sigy     ,zcfac   ,nel    ,&
                     depsxx  ,depsyy ,depsxy   ,depsyz  ,depszx ,&
@@ -1822,35 +1850,34 @@
                   epsd_pg  ,nfunc    ,ifunc    ,npf      ,tf       ,   &
                   nvartmp  ,vartmp   ,ioff_duct)
                 lbuf%epsd(1:nel) = epsd_pg(1:nel)
-              elseif (ilaw == 123) then 
-               call sigeps123c( &                     
-              &jlt      ,matparam   ,nuvar    ,nvartmp ,  uvar   , &
-              &vartmp   ,rho        ,thkn     ,thklyl   , shf    , &
-              & area    ,epsd_pg    ,npg      ,tt       ,npttot  , &
-              &epsxx    ,epsyy      ,epsxy    ,epsyz    ,epszx   , &
-              &depsxx   ,depsyy     ,depsxy   ,sigoxx   ,sigoyy  , &
-              &sigoxy   , &
-              &signxx   ,signyy     ,signxy   ,signzx   ,signyz  , &
-              &off      ,offl       ,sigy       ,etse     ,ssp   , &
-              &lbuf%dmg ,gbuf%dmg   ,ioff_duct)
-               lbuf%epsd(1:nel) = epsd_pg(1:nel)
+              elseif (ilaw == 123) then
+                call sigeps123c( &
+                &jlt      ,matparam   ,nuvar    ,nvartmp ,  uvar   , &
+                &vartmp   ,rho        ,thkn     ,thklyl   , shf    , &
+                & area    ,epsd_pg    ,npg      ,tt       ,npttot  , &
+                &epsxx    ,epsyy      ,epsxy    ,epsyz    ,epszx   , &
+                &depsxx   ,depsyy     ,depsxy   ,sigoxx   ,sigoyy  , &
+                &sigoxy   , &
+                &signxx   ,signyy     ,signxy   ,signzx   ,signyz  , &
+                &off      ,offl       ,sigy       ,etse     ,ssp   , &
+                &lbuf%dmg ,gbuf%dmg   ,ioff_duct)
+                lbuf%epsd(1:nel) = epsd_pg(1:nel)
               elseif (ilaw == 125) then
                 call sigeps125c(&
-                  jlt      ,matparam   ,nuvar    ,uvar      ,&
-                  rho      ,thkn       ,thklyl   , shf      ,&
-                  nfunc    ,ifunc      ,npf      ,tf        ,snpc    ,&
-                  stf      ,epsd_pg                                  ,&
+                  jlt      ,matparam   ,nuvar    ,uvar     ,nvartmp ,&
+                  vartmp   ,rho        ,thkn     ,thklyl   , shf     ,&
+                  epsd_pg                                            ,&
                   depsxx   ,depsyy     ,depsxy                       ,&
                   epsxx    ,epsyy      ,epsxy    ,epsyz    ,epszx    ,&
                   sigoxx   ,sigoyy     ,sigoxy                       ,&
                   signxx   ,signyy     ,signxy   ,signzx   ,signyz   ,&
                   off      ,sigy       ,etse     ,ssp      ,lbuf%dmg ,&
-                  lbuf%off  )
+                  gbuf%dmg,lbuf%off  )
                 lbuf%epsd(1:nel) = epsd_pg(1:nel)
 !
               elseif (ilaw == 127) then
                 ! ---
-                do i=jft,jlt
+                do i=1,jlt
                   ! ij(k) = nel*(k-1)
                   sigoxx(i) =  lbuf%sig(nel*(1-1)+i)
                   sigoyy(i) =  lbuf%sig(nel*(2-1)+i)
@@ -1888,6 +1915,32 @@
                   off      ,etse     ,thklyl   ,shf      ,sigy     ,       &
                   hardm    ,lbuf%seq ,l_sigb   ,lbuf%sigb)
 !
+              elseif (ilaw == 131) then
+                call sigeps131c(                                           &
+                  nel      ,matparam ,rho      ,nvartmp  ,vartmp   ,       &
+                  depsxx   ,depsyy   ,depsxy   ,depsyz   ,depszx   ,       &
+                  sigoxx   ,sigoyy   ,sigoxy   ,sigoyz   ,sigozx   ,       &
+                  signxx   ,signyy   ,signxy   ,signyz   ,signzx   ,       &
+                  ssp      ,lbuf%off ,lbuf%pla ,dpla     ,lbuf%seq ,       &
+                  etse     ,sigy     ,dt1      ,lbuf%epsd,el_temp  ,       &
+                  shf      ,thkn     ,thklyl   ,asrate   ,l_sigb   ,       &
+                  lbuf%sigb,epsd_pg  ,nuvar    ,uvar     ,inloc    ,       &
+                  varnl(1,it),ioff_duct,jthe   ,fheat    ,vol_ipt  ,       &
+                  off      )
+!       
+              elseif (ilaw == 132) then 
+                call sigeps132c( &                     
+                  jlt      ,matparam   ,nuvar    ,nvartmp ,  uvar   ,      &
+                  vartmp   ,rho        ,thkn     ,thklyl   , shf    ,      &
+                  area    ,epsd_pg    ,npg      ,tt       ,npttot  ,      &
+                  epsxx    ,epsyy      ,epsxy    ,epsyz    ,epszx   ,       &
+                  depsxx   ,depsyy     ,depsxy   ,sigoxx   ,sigoyy  ,       &
+                  sigoxy   ,                                                &
+                  signxx   ,signyy     ,signxy   ,signzx   ,signyz  ,       &
+                  off      ,offl       ,sigy       ,etse     ,ssp   ,       &
+                  lbuf%dmg ,gbuf%dmg   ,ioff_duct)
+                lbuf%epsd(1:nel) = epsd_pg(1:nel)
+!
               elseif (ilaw == 158) then
                 call sigeps158c(&
                 &jlt       ,nuparam   ,nuvar     ,nfunc     ,ifunc     ,&
@@ -1909,22 +1962,12 @@
               if (idamp_freq_range > 0) nvar_damp = 21
 !
               if (matparam%ivisc == 1 .and. ilaw /= 25) then
-                nprony = matparam%visc%iparam(1)
-                kv     = matparam%visc%uparam(1)
-!
-                allocate(gv(nprony),beta(nprony))
-                do i=1,nprony
-                  gv(i)   = matparam%visc%uparam(1 + i)
-                  beta(i) = matparam%visc%uparam(1 + nprony + i)
-                enddo
-!
                 call prony_modelc(&
                 &nel    ,nuvarv  ,dt1 ,&
                 &nprony , kv   , gv   ,beta    ,rho   ,&
                 &epspxx ,epspyy ,epspxy  ,epspyz  ,epspzx ,&
                 &sigvxx ,sigvyy ,sigvxy  ,sigvyz  ,sigvzx ,&
                 &ssp,uvarv   ,off,nvar_damp)
-                deallocate(gv,beta)
               endif
 !
               if ((idamp_freq_range > 0) .and. ilaw /= 25) then
@@ -1936,7 +1979,7 @@
                   uvarv   ,off     ,etse     ,flag_incr)
               endif
 !-------------------------------------------
-              do i=jft,jlt
+              do i=1,jlt
                 viscmx(i) = max(dm,viscmx(i))
               enddo
 !-------------------------------------------
@@ -1948,14 +1991,14 @@
               if ((gbuf%g_wpla > 0).and.(bufly%l_pla > 0)) then
                 !< Case where equivalent stress is computed in the material law
                 if (bufly%l_seq > 0) then
-                  do i = jft,jlt
+                  do i = 1,jlt
                     dpla(i) = lbuf%pla(i) - pla0(i)
                     gbuf%wpla(i) = gbuf%wpla(i) +                               &
                       half*(seq0(i) + lbuf%seq(i))*dpla(i)*thklyl(i)*area(i)
                   enddo
                   !< Default case using Von Mises stress
                 else
-                  do i = jft,jlt
+                  do i = 1,jlt
                     dpla(i) = lbuf%pla(i) - pla0(i)
                     vm0(i) = sqrt(sigoxx(i)*sigoxx(i) + sigoyy(i)*sigoyy(i) -   &
                       sigoxx(i)*sigoyy(i) + three*sigoxy(i)*sigoxy(i))
@@ -1973,7 +2016,7 @@
                 if ((itask==0).and.(imon_mat==1))call startime(TIMERS,121)
 !
                 if (ixfem > 0) then
-                  do i=jft,jlt
+                  do i=1,jlt
                     tensx(i,1) = zero
                     tensx(i,2) = zero
                     tensx(i,3) = zero
@@ -2005,14 +2048,14 @@
                 if (bufly%l_pla > 0) then
                   ! non-local material
                   if (inloc > 0) then
-                    do i=jft,jlt
+                    do i=1,jlt
                       dpla(i) = max(varnl(i,it),zero)
                       epsd(i) = lbuf%epsdnl(i)
                     enddo
                     el_pla => lbuf%planl(1:nel)
                     ! classical local material
                   else
-                    do i=jft,jlt
+                    do i=1,jlt
                       dpla(i) = lbuf%pla(i) - pla0(i)
                       epsd(i) = lbuf%epsd(i)
                     enddo
@@ -2030,7 +2073,7 @@
                 endif
                 if (ixlay == 0) then  ! standard element
                   uelr  => gbuf%uelr
-                elseif (ixlay > 0) then ! xfem phantom element
+                else !if (ixlay > 0) then ! xfem phantom element
                   uelr  => elbuf_str%bufly(ixlay)%uelr
                 endif
                 dadv => gbuf%dmg(1:nel)  ! used outside this routine for frontwave propagation
@@ -2106,7 +2149,7 @@
                     &dpla      ,foff      ,dfmax     ,tdel      )
 !
                    case (4)     !    user1
-                    do i=jft,jlt
+                    do i=1,jlt
                       copy_pla(i) = lbuf%pla(i)
                     enddo
                     if (logical_userl_avail)then
@@ -2129,13 +2172,13 @@
                       ! ----------------
 !!!
                     endif
-                    do i=jft,jlt
+                    do i=1,jlt
                       lbuf%pla(i) = copy_pla(i)
                     enddo
 
 !
                    case (5)     !    user2
-                    do i=jft,jlt
+                    do i=1,jlt
                       copy_pla(i) = lbuf%pla(i)
                     enddo
                     if (logical_userl_avail)then
@@ -2158,13 +2201,13 @@
                       ! ----------------
 !!!
                     endif
-                    do i=jft,jlt
+                    do i=1,jlt
                       lbuf%pla(i) = copy_pla(i)
                     enddo
 
 !
                    case (6)     !    user3
-                    do i=jft,jlt
+                    do i=1,jlt
                       copy_pla(i) = lbuf%pla(i)
                     enddo
                     if (logical_userl_avail)then
@@ -2187,12 +2230,12 @@
                       ! ----------------
 !!!
                     endif
-                    do i=jft,jlt
+                    do i=1,jlt
                       lbuf%pla(i) = copy_pla(i)
                     enddo
 !
                    case (7)     !    fld
-                    do i=jft,jlt
+                    do i=1,jlt
                       zt=posly(i,ipt) *thk0(i)
                       epsxx(i)= gstr(i,1)+zt*gstr(i,6)
                       epsyy(i)= gstr(i,2)+zt*gstr(i,7)
@@ -2254,31 +2297,27 @@
                    case (13)     !    chang-chang failure model
                     call fail_changchang_c(&
                     &nel       ,nupar     ,nvarf     ,uparamf   ,uvarf     ,&
-                    &tt        ,dt1c      ,ipg       ,ilayer    ,it        ,&
-                    &ngl       ,dmg_flag  ,dmg_loc_scale ,dfmax ,tdel      ,&
-                    &signxx    ,signyy    ,signxy    ,signyz    ,signzx    ,&
-                    &off       ,foff      ,lf_dammx  )
+                    &tt        ,ngl       ,ipg       ,ilayer    ,it        ,&
+                    &signxx    ,signyy    ,signxy    ,foff      ,dmg_flag  ,&
+                    &dmg_loc_scale,lf_dammx,dfmax    ,tdel      ,dt1       ,&
+                    &igtyp     ,ply_id    ,nipar     ,iparamf   )
 !
                    case (14)     !    hashin failure model
-!                    do i=jft,jlt
-!                      epsp(i) = max(abs(epspxx(i)),abs(epspyy(i)),&
-!                      &                                   abs(epspxy(i)),em20)
-!                    enddo
                     call fail_hashin_c(&
-                    &nel       ,nupar     ,nvarf     ,uparamf   ,uvarf      ,&
-                    &tt        ,dt1c      ,ipg       ,ilayer    ,it         ,&
-                    &ngl       ,dmg_flag  ,dmg_loc_scale,dfmax  ,tdel       ,&
-                    &signxx    ,signyy    ,signxy    ,signyz    ,signzx     ,&
-                    &off       ,foff      ,ply_id    ,&
-                    &epsd      ,fwave_el  ,gbuf%dmg  ,lf_dammx  )
+                    &nel       ,nupar     ,nvarf     ,uparamf   ,uvarf     ,&
+                    &tt        ,ngl       ,ipg       ,ilayer    ,it        ,&
+                    &signxx    ,signyy    ,signxy    ,signyz    ,signzx    ,&
+                    &foff      ,dmg_flag  ,dmg_loc_scale,lf_dammx,dfmax    ,&
+                    &tdel      ,dt1       ,igtyp     ,ply_id    ,nipar     ,&
+                    &iparamf   )
 !
                    case (16)     !    modified puck failure model
                     call fail_puck_c(&
                     &nel       ,nupar     ,nvarf     ,uparamf   ,uvarf     ,&
                     &tt        ,ngl       ,ipg       ,ilayer    ,it        ,&
-                    &signxx    ,signyy    ,signxy    ,signyz    ,signzx    ,&
-                    &off       ,foff      ,dmg_flag  ,dmg_loc_scale ,&
-                    &dfmax     ,lf_dammx  ,tdel      ,dt1c      )
+                    &signxx    ,signyy    ,signxy    ,foff      ,dmg_flag  ,&
+                    &dmg_loc_scale,lf_dammx,dfmax    ,tdel      ,dt1       ,&
+                    &igtyp     ,ply_id    ,nipar     ,iparamf   )
 !
                    case (23)     !    tabulated failure model
                     if (ixfem == 0) then
@@ -2353,9 +2392,9 @@
                     endif
 !
                    case (30)     !    biquadratic failure model
-                    call fail_biquad_c(&
+                    call fail_biquad_c(mat_elem%mat_param(imat)%fail(ifl),&
                     &jlt      ,nvarf   ,&
-                    &tt       ,uparamf ,ngl      ,ipt      ,mpt      ,&
+                    &tt       ,ngl      ,ipt      ,mpt      ,&
                     &signxx   ,signyy  ,signxy   ,signyz   ,signzx   ,&
                     &dpla     ,uvarf   ,uelr1    ,&
                     &off      ,offl    ,dfmax    ,tdel     ,nfunc_fail   ,&
@@ -2401,7 +2440,7 @@
 !
                    case (36)     !    visual failure model
                     if (ilaw == 2) then
-                      do i=jft,jlt
+                      do i=1,jlt
                         zt=posly(i,ipt) *thk0(i)
                         epsxx(i)= gstr(i,1)+zt*gstr(i,6)
                         epsyy(i)= gstr(i,2)+zt*gstr(i,7)
@@ -2565,7 +2604,6 @@
                     do i=1,nel
                       if (foff(i) == 0)  then
                         offl(i) = zero
-!                    sigoff(i) = offl(i)
                         sigoff(i) = zero
                       endif
                     enddo
@@ -2584,7 +2622,7 @@
 !         end of failure models
 !-----------------------------------
 #include "vectorize.inc"
-              do i=jft,jlt
+              do i=1,jlt
                 ! ij(k) = nel*(k-1)
                 lbuf%sig(nel*(1-1)+i) = signxx(i) * sigoff(i)
                 lbuf%sig(nel*(2-1)+i) = signyy(i) * sigoff(i)
@@ -2672,56 +2710,56 @@
                 select case (dmg_flag)
                  case (0)
                   if (ilaw == 58 .or. ilaw == 158 .or. iprony == 1) then
-                    tens(jft:jlt,1) = signxx(jft:jlt)+sigvxx(jft:jlt)
-                    tens(jft:jlt,2) = signyy(jft:jlt)+sigvyy(jft:jlt)
-                    tens(jft:jlt,3) = signxy(jft:jlt)+sigvxy(jft:jlt)
-                    tens(jft:jlt,4) = signyz(jft:jlt)+sigvyz(jft:jlt)
-                    tens(jft:jlt,5) = signzx(jft:jlt)+sigvzx(jft:jlt)
+                    tens(1:jlt,1) = signxx(1:jlt)+sigvxx(1:jlt)
+                    tens(1:jlt,2) = signyy(1:jlt)+sigvyy(1:jlt)
+                    tens(1:jlt,3) = signxy(1:jlt)+sigvxy(1:jlt)
+                    tens(1:jlt,4) = signyz(1:jlt)+sigvyz(1:jlt)
+                    tens(1:jlt,5) = signzx(1:jlt)+sigvzx(1:jlt)
                   else
-                    tens(jft:jlt,1) = signxx(jft:jlt)
-                    tens(jft:jlt,2) = signyy(jft:jlt)
-                    tens(jft:jlt,3) = signxy(jft:jlt)
-                    tens(jft:jlt,4) = signyz(jft:jlt)
-                    tens(jft:jlt,5) = signzx(jft:jlt)
+                    tens(1:jlt,1) = signxx(1:jlt)
+                    tens(1:jlt,2) = signyy(1:jlt)
+                    tens(1:jlt,3) = signxy(1:jlt)
+                    tens(1:jlt,4) = signyz(1:jlt)
+                    tens(1:jlt,5) = signzx(1:jlt)
                   endif
                  case (1)
                   if (ilaw == 58 .or. ilaw == 158 .or. iprony == 1) then
-                    tens(jft:jlt,1) = (signxx(jft:jlt)+sigvxx(jft:jlt))*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,2) = (signyy(jft:jlt)+sigvyy(jft:jlt))*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,3) = (signxy(jft:jlt)+sigvxy(jft:jlt))*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,4) = (signyz(jft:jlt)+sigvyz(jft:jlt))*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,5) = (signzx(jft:jlt)+sigvzx(jft:jlt))*dmg_loc_scale(jft:jlt)
+                    tens(1:jlt,1) = (signxx(1:jlt)+sigvxx(1:jlt))*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,2) = (signyy(1:jlt)+sigvyy(1:jlt))*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,3) = (signxy(1:jlt)+sigvxy(1:jlt))*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,4) = (signyz(1:jlt)+sigvyz(1:jlt))*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,5) = (signzx(1:jlt)+sigvzx(1:jlt))*dmg_loc_scale(1:jlt)
                   else
-                    tens(jft:jlt,1) = signxx(jft:jlt)*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,2) = signyy(jft:jlt)*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,3) = signxy(jft:jlt)*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,4) = signyz(jft:jlt)*dmg_loc_scale(jft:jlt)
-                    tens(jft:jlt,5) = signzx(jft:jlt)*dmg_loc_scale(jft:jlt)
+                    tens(1:jlt,1) = signxx(1:jlt)*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,2) = signyy(1:jlt)*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,3) = signxy(1:jlt)*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,4) = signyz(1:jlt)*dmg_loc_scale(1:jlt)
+                    tens(1:jlt,5) = signzx(1:jlt)*dmg_loc_scale(1:jlt)
                   endif
                  case (2)  ! internal damage model within law15
-                  tens(jft:jlt,1) = sigdmg(jft:jlt,1)
-                  tens(jft:jlt,2) = sigdmg(jft:jlt,2)
-                  tens(jft:jlt,3) = sigdmg(jft:jlt,3)
-                  tens(jft:jlt,4) = sigdmg(jft:jlt,4)
-                  tens(jft:jlt,5) = sigdmg(jft:jlt,5)
+                  tens(1:jlt,1) = sigdmg(1:jlt,1)
+                  tens(1:jlt,2) = sigdmg(1:jlt,2)
+                  tens(1:jlt,3) = sigdmg(1:jlt,3)
+                  tens(1:jlt,4) = sigdmg(1:jlt,4)
+                  tens(1:jlt,5) = sigdmg(1:jlt,5)
                  case (3)  ! orthotropic softening with dmg_orth_scale from failure model
                   if (ilaw == 58 .or. ilaw == 158 .or. iprony == 1) then
-                    tens(jft:jlt,1) = (signxx(jft:jlt)+sigvxx(jft:jlt))*dmg_orth_scale(jft:jlt,1)
-                    tens(jft:jlt,2) = (signyy(jft:jlt)+sigvyy(jft:jlt))*dmg_orth_scale(jft:jlt,2)
-                    tens(jft:jlt,3) = (signxy(jft:jlt)+sigvxy(jft:jlt))*dmg_orth_scale(jft:jlt,3)
-                    tens(jft:jlt,4) = (signyz(jft:jlt)+sigvyz(jft:jlt))*dmg_orth_scale(jft:jlt,4)
-                    tens(jft:jlt,5) = (signzx(jft:jlt)+sigvzx(jft:jlt))*dmg_orth_scale(jft:jlt,5)
+                    tens(1:jlt,1) = (signxx(1:jlt)+sigvxx(1:jlt))*dmg_orth_scale(1:jlt,1)
+                    tens(1:jlt,2) = (signyy(1:jlt)+sigvyy(1:jlt))*dmg_orth_scale(1:jlt,2)
+                    tens(1:jlt,3) = (signxy(1:jlt)+sigvxy(1:jlt))*dmg_orth_scale(1:jlt,3)
+                    tens(1:jlt,4) = (signyz(1:jlt)+sigvyz(1:jlt))*dmg_orth_scale(1:jlt,4)
+                    tens(1:jlt,5) = (signzx(1:jlt)+sigvzx(1:jlt))*dmg_orth_scale(1:jlt,5)
                   else
-                    tens(jft:jlt,1) = signxx(jft:jlt)*dmg_orth_scale(jft:jlt,1)
-                    tens(jft:jlt,2) = signyy(jft:jlt)*dmg_orth_scale(jft:jlt,2)
-                    tens(jft:jlt,3) = signxy(jft:jlt)*dmg_orth_scale(jft:jlt,3)
-                    tens(jft:jlt,4) = signyz(jft:jlt)*dmg_orth_scale(jft:jlt,4)
-                    tens(jft:jlt,5) = signzx(jft:jlt)*dmg_orth_scale(jft:jlt,5)
+                    tens(1:jlt,1) = signxx(1:jlt)*dmg_orth_scale(1:jlt,1)
+                    tens(1:jlt,2) = signyy(1:jlt)*dmg_orth_scale(1:jlt,2)
+                    tens(1:jlt,3) = signxy(1:jlt)*dmg_orth_scale(1:jlt,3)
+                    tens(1:jlt,4) = signyz(1:jlt)*dmg_orth_scale(1:jlt,4)
+                    tens(1:jlt,5) = signzx(1:jlt)*dmg_orth_scale(1:jlt,5)
                   endif
                 end select
 !
                 if (ilaw == 58 .or. ilaw == 158) then
-                  do i=jft,jlt
+                  do i=1,jlt
                     ii = jdir + i-1
                     r1 = dir_a(ii)
                     s1 = dir_a(ii+nel)
@@ -2750,13 +2788,13 @@
 !
                 else     ! igtyp = 9,10,11,51,52
                   if (ilaw /= 1 .and. ilaw /= 2 .and. ilaw /= 27 .and. ilaw /= 32)&
-                  &call urotov(jft,jlt,tens,dir_a(jdir),nel)
+                  &call urotov(1,jlt,tens,dir_a(jdir),nel)
                 endif
 !----------------------
 !           forces and moments when igtyp /= 1
 !----------------------
 #include "vectorize.inc"
-                do i=jft,jlt
+                do i=1,jlt
                   for(i,1) = for(i,1) + thkly(jpos-1+i)*tens(i,1)
                   for(i,2) = for(i,2) + thkly(jpos-1+i)*tens(i,2)
                   for(i,3) = for(i,3) + thkly(jpos-1+i)*tens(i,3)
@@ -2775,33 +2813,33 @@
                 ilaw /= 25 .and. ilaw /= 27 .and. ilaw /= 32 &
                 .and. ilaw /= 19 .and. ilaw /= 119) then  ! for law25,27 it is done inside sigeps25c.f...
                 if(flag_zcfac) then
-                  zcfac(jft:jlt,1) = zcfac(jft:jlt,1) + etse(jft:jlt) * thkly(jpos:jpos+jlt-1)
-                  zcfac(jft:jlt,2) = min(etse(jft:jlt),zcfac(jft:jlt,2))
+                  zcfac(1:jlt,1) = zcfac(1:jlt,1) + etse(1:jlt) * thkly(jpos:jpos+jlt-1)
+                  zcfac(1:jlt,2) = min(etse(1:jlt),zcfac(1:jlt,2))
                 endif
-                yld(jft:jlt) = yld(jft:jlt) + sigy(jft:jlt)*thkly(jpos:jpos+jlt-1)
-                if(flag_etimp) etimp(jft:jlt) = etimp(jft:jlt) + et_imp(jft:jlt)*thkly(jpos:jpos+jlt-1)
+                yld(1:jlt) = yld(1:jlt) + sigy(1:jlt)*thkly(jpos:jpos+jlt-1)
+                if(flag_etimp) etimp(1:jlt) = etimp(1:jlt) + et_imp(1:jlt)*thkly(jpos:jpos+jlt-1)
               elseif ( ilaw == 2 ) then
 !------------------------------------
                 select case (igtyp)
 !------------------------------------
                  case (1,9)
                   if (flag_zcfac) then
-                    zcfac(jft:jlt,1) = zcfac(jft:jlt,1) + etse(jft:jlt) / npt
-                    zcfac(jft:jlt,2) = min(etse(jft:jlt),zcfac(jft:jlt,2))
+                    zcfac(1:jlt,1) = zcfac(1:jlt,1) + etse(1:jlt) / npt
+                    zcfac(1:jlt,2) = min(etse(1:jlt),zcfac(1:jlt,2))
                   endif
-                  yld(jft:jlt)     = yld(jft:jlt) + sigy(jft:jlt) / npt
+                  yld(1:jlt)     = yld(1:jlt) + sigy(1:jlt) / npt
                  case default
                   if (flag_zcfac) then
-                    zcfac(jft:jlt,1) = zcfac(jft:jlt,1) + etse(jft:jlt) * thkly(jpos:jpos+jlt-1)
-                    zcfac(jft:jlt,2) = min(etse(jft:jlt),zcfac(jft:jlt,2))
+                    zcfac(1:jlt,1) = zcfac(1:jlt,1) + etse(1:jlt) * thkly(jpos:jpos+jlt-1)
+                    zcfac(1:jlt,2) = min(etse(1:jlt),zcfac(1:jlt,2))
                   endif
-                  yld(jft:jlt)     = yld(jft:jlt) + sigy(jft:jlt) * thkly(jpos:jpos+jlt-1)
+                  yld(1:jlt)     = yld(1:jlt) + sigy(1:jlt) * thkly(jpos:jpos+jlt-1)
                 end select
               endif
-              ssp_eq(jft:jlt)     = ssp_eq(jft:jlt) + ssp(jft:jlt) * thkly(jpos:jpos+jlt-1)
+              ssp_eq(1:jlt)     = ssp_eq(1:jlt) + ssp(1:jlt) * thkly(jpos:jpos+jlt-1)
 !-----------------------------------------------
               if (impl_s > 0) then
-                call putsignorc3(jft ,jlt ,iun,ng,ipt,g_imp ,sigksi)
+                call putsignorc3(1 ,jlt ,iun,ng,ipt,g_imp ,sigksi)
               end if
 !-----------------------------------------------
               if (ixel == 0 .and. progressive_crack == 0) then   ! original element
@@ -2829,7 +2867,7 @@
               if (bufly%l_pla > 0) then
                 ! non-local material
                 if (inloc > 0) then
-                  do i=jft,jlt
+                  do i=1,jlt
                     if (off(i) == one) then
                       varnl(i,it) = lbuf%pla(i)
                     else
@@ -2840,6 +2878,11 @@
               endif
 !-------------------------------------
             enddo  !  it=1,nptt
+!         deallocate prony model arrays hoisted from the it loop
+            if (matparam%ivisc == 1 .and. ilaw /= 25) then
+              if(allocated(gv)) deallocate(gv)
+              if(allocated(beta)) deallocate(beta)
+            endif
             ipt_all = ipt_all + nptt
           enddo  !  do ilay =1,nlay
 !--------------------------------------------------
@@ -2884,7 +2927,7 @@
           ! checking element deletion and printing element deletion messages (if needed)
           nindx = 0
           if (ixfem == 0) then
-            do i=jft,jlt
+            do i=1,jlt
               if (off(i) == four_over_5 .and. ioff_duct(i) == 0 .or.&   ! rupture /fail
               &off(i) > zero   .and. off_old(i) < em01 .or.&   ! rupture progressive law 2,22,25
               &off(i) > zero   .and. off(i) < one .and. dmg_flag == 1 .and.&
@@ -2911,18 +2954,18 @@
 !---------------------------
           if (igtyp == 11 .and. igmat > 0) then
             ipgmat = 700
-            do i=jft,jlt
+            do i=1,jlt
               rho(i) = geo(ipgmat+1,pid(1))
               ssp(i) = geo(ipgmat+9,pid(1))
             enddo
-            ssp_eq(jft:jlt)     = ssp(jft:jlt)
+            ssp_eq(1:jlt)     = ssp(1:jlt)
           elseif (igtyp == 52 .or.&
           &((igtyp == 17 .or. igtyp == 51) .and. igmat > 0)) then
-            do i=jft,jlt
+            do i=1,jlt
               ssp(i) = stack%pm(9,isubstack)
               rho(i) = stack%pm(1,isubstack)
             enddo
-            ssp_eq(jft:jlt)     = ssp(jft:jlt)
+            ssp_eq(1:jlt)     = ssp(1:jlt)
           endif
 !---
 ! special treatment for law 19
@@ -2932,15 +2975,13 @@
 !     desactivation si surface < surface min
 !-----------------------------------------------------------
           if (mtn == 19) then
-            mx = mat(jft)
-            do i=jft,jlt
-              areamin(i)  = pm(53,mx)
-              dareamin(i) = pm(54,mx)
-            enddo
+            mx = mat(1)
+            areamin  = pm(53,mx)
+            dareamin = pm(54,mx)
             if (ismstr == 3) then
-              do i=jft,jlt
-                if (areamin(i) > zero) then
-                  aa = (one+gstr(i,1)+gstr(i,2) - areamin(i)) * dareamin(i)
+              do i=1,jlt
+                if (areamin > zero) then
+                  aa = (one+gstr(i,1)+gstr(i,2) - areamin) * dareamin
                   aa = min(max(aa,zero),one)
                   for(i,1)=for(i,1)*aa
                   for(i,2)=for(i,2)*aa
@@ -2948,11 +2989,11 @@
                 endif
               enddo
             else
-              do i=jft,jlt
-                if(areamin(i) > zero)then
+              do i=1,jlt
+                if(areamin > zero)then
                   vv = gstr(i,1)+gstr(i,2)
                   vv = one + (one + (half + one_over_6*vv)*vv)*vv
-                  aa = (vv - areamin(i)) * dareamin(i)
+                  aa = (vv - areamin) * dareamin
                   aa = min(max(aa,zero),one)
                   for(i,1)=for(i,1)*aa
                   for(i,2)=for(i,2)*aa
@@ -2963,39 +3004,39 @@
           endif  ! if (mtn == 19)
 !  --- end treatment law 19---
 !-----------------------------------------------------------------------
-          thk(jft:jlt) = max(thkn(jft:jlt),em30)
+          thk(1:jlt) = max(thkn(1:jlt),em30)
 !
           fact = onep414*dm
-          visc(jft:jlt) = fact*ssp(jft:jlt)*sqrt(area(jft:jlt))*dtinv*rho(jft:jlt)
+          visc(1:jlt) = fact*ssp(1:jlt)*sqrt(area(1:jlt))*dtinv*rho(1:jlt)
 !
-          for(jft:jlt,1)=for(jft:jlt,1)+visc(jft:jlt)*(exx(jft:jlt)+half*eyy(jft:jlt))
-          for(jft:jlt,2)=for(jft:jlt,2)+visc(jft:jlt)*(eyy(jft:jlt)+half*exx(jft:jlt))
-          for(jft:jlt,3)=for(jft:jlt,3)+visc(jft:jlt)* exy(jft:jlt) *third
+          for(1:jlt,1)=for(1:jlt,1)+visc(1:jlt)*(exx(1:jlt)+half*eyy(1:jlt))
+          for(1:jlt,2)=for(1:jlt,2)+visc(1:jlt)*(eyy(1:jlt)+half*exx(1:jlt))
+          for(1:jlt,3)=for(1:jlt,3)+visc(1:jlt)* exy(1:jlt) *third
 !
-          for(jft:jlt,1)=for(jft:jlt,1)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
-          for(jft:jlt,2)=for(jft:jlt,2)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
-          for(jft:jlt,3)=for(jft:jlt,3)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
-          for(jft:jlt,4)=for(jft:jlt,4)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
-          for(jft:jlt,5)=for(jft:jlt,5)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
-          mom(jft:jlt,1)=mom(jft:jlt,1)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
-          mom(jft:jlt,2)=mom(jft:jlt,2)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
-          mom(jft:jlt,3)=mom(jft:jlt,3)*off(jft:jlt)*dmg_glob_scale(jft:jlt)
+          for(1:jlt,1)=for(1:jlt,1)*off(1:jlt)*dmg_glob_scale(1:jlt)
+          for(1:jlt,2)=for(1:jlt,2)*off(1:jlt)*dmg_glob_scale(1:jlt)
+          for(1:jlt,3)=for(1:jlt,3)*off(1:jlt)*dmg_glob_scale(1:jlt)
+          for(1:jlt,4)=for(1:jlt,4)*off(1:jlt)*dmg_glob_scale(1:jlt)
+          for(1:jlt,5)=for(1:jlt,5)*off(1:jlt)*dmg_glob_scale(1:jlt)
+          mom(1:jlt,1)=mom(1:jlt,1)*off(1:jlt)*dmg_glob_scale(1:jlt)
+          mom(1:jlt,2)=mom(1:jlt,2)*off(1:jlt)*dmg_glob_scale(1:jlt)
+          mom(1:jlt,3)=mom(1:jlt,3)*off(1:jlt)*dmg_glob_scale(1:jlt)
 !
 !!  --- specific treatment for law 119 - scale factor applied on internal forces---
           if (ilaw == 119) then
-            for(jft:jlt,1)=for(jft:jlt,1)*gbuf%intvar(jft:jlt)
-            for(jft:jlt,2)=for(jft:jlt,2)*gbuf%intvar(jft:jlt)
-            for(jft:jlt,3)=for(jft:jlt,3)*gbuf%intvar(jft:jlt)
-            for(jft:jlt,4)=for(jft:jlt,4)*gbuf%intvar(jft:jlt)
-            for(jft:jlt,5)=for(jft:jlt,5)*gbuf%intvar(jft:jlt)
-            mom(jft:jlt,1)=mom(jft:jlt,1)*gbuf%intvar(jft:jlt)
-            mom(jft:jlt,2)=mom(jft:jlt,2)*gbuf%intvar(jft:jlt)
-            mom(jft:jlt,3)=mom(jft:jlt,3)*gbuf%intvar(jft:jlt)
+            for(1:jlt,1)=for(1:jlt,1)*gbuf%intvar(1:jlt)
+            for(1:jlt,2)=for(1:jlt,2)*gbuf%intvar(1:jlt)
+            for(1:jlt,3)=for(1:jlt,3)*gbuf%intvar(1:jlt)
+            for(1:jlt,4)=for(1:jlt,4)*gbuf%intvar(1:jlt)
+            for(1:jlt,5)=for(1:jlt,5)*gbuf%intvar(1:jlt)
+            mom(1:jlt,1)=mom(1:jlt,1)*gbuf%intvar(1:jlt)
+            mom(1:jlt,2)=mom(1:jlt,2)*gbuf%intvar(1:jlt)
+            mom(1:jlt,3)=mom(1:jlt,3)*gbuf%intvar(1:jlt)
           endif
 !
-          degmb(jft:jlt) = degmb(jft:jlt)+ for(jft:jlt,1)*exx(jft:jlt)+for(jft:jlt,2)*eyy(jft:jlt)&
-          &+ for(jft:jlt,3)*exy(jft:jlt)+for(jft:jlt,4)*eyz(jft:jlt)+ for(jft:jlt,5)*exz(jft:jlt)
-          degfx(jft:jlt) = degfx(jft:jlt)+ mom(jft:jlt,1)*kxx(jft:jlt)+mom(jft:jlt,2)*kyy(jft:jlt)+mom(jft:jlt,3)*kxy(jft:jlt)
+          degmb(1:jlt) = degmb(1:jlt)+ for(1:jlt,1)*exx(1:jlt)+for(1:jlt,2)*eyy(1:jlt)&
+          &+ for(1:jlt,3)*exy(1:jlt)+for(1:jlt,4)*eyz(1:jlt)+ for(1:jlt,5)*exz(1:jlt)
+          degfx(1:jlt) = degfx(1:jlt)+ mom(1:jlt,1)*kxx(1:jlt)+mom(1:jlt,2)*kyy(1:jlt)+mom(1:jlt,3)*kxy(1:jlt)
 !-----------------------------------------------------------------------
 !---
           if (mtn == 25) then
@@ -3004,10 +3045,10 @@
 !----------------------------
 ! is an obsolete option (still present for backward compatibility)
             if (igmat == 0)&
-            &call m25delam(jft,jlt,pm,gstr,gbuf%damdl,mat,ngl,nel)
+            &call m25delam(1,jlt,pm,gstr,gbuf%damdl,mat,ngl,nel)
 !
             if (ishplyxfem > 0) then
-              mx = mat(jft)
+              mx = mat(1)
               ipt_all = 0
               do ilay=1,nlay
                 ilayer = ilay
@@ -3016,14 +3057,14 @@
                 nptt = elbuf_str%bufly(ilayer)%nptt
                 do it=1,nptt
                   ipt = ipt_all + it        ! count all nptt through all layers
-                  do i=jft,jlt
+                  do i=1,jlt
 !
                     ply_f(i,1,ipt) = ply_f(i,1,ipt) + visc(i)*(ply_exx(i,ipt)+half*ply_eyy(i,ipt))
                     ply_f(i,2,ipt) = ply_f(i,2,ipt) + visc(i)*(ply_eyy(i,ipt)+half*ply_exx(i,ipt))
                     ply_f(i,3,ipt) = ply_f(i,3,ipt) + visc(i)* ply_exy(i,ipt)*third
                   enddo
 !
-                  do i=jft,jlt
+                  do i=1,jlt
                     ply_f(i,1,ipt) = ply_f(i,1,ipt)*off(i)
                     ply_f(i,2,ipt) = ply_f(i,2,ipt)*off(i)
                     ply_f(i,3,ipt) = ply_f(i,3,ipt)*off(i)
@@ -3036,7 +3077,7 @@
             endif ! if (ishplyxfem /= 0)
           endif ! if (mtn == 25)
 !---
-          do i=jft,jlt
+          do i=1,jlt
             vol2 = half*vol0(i)
             if (mtn == 22) vol2 = vol2*off(i)
             eint(i,1) = eint(i,1) + degmb(i)*vol2
@@ -3044,14 +3085,14 @@
           enddo
 !
           if (jthe > 0 .and. mtn /= 2) then
-            die(jft:jlt) = die(jft:jlt)                                         &
-              + coef*(degmb(jft:jlt)*half*vol0(jft:jlt)     &
-              + degfx(jft:jlt)*thk0(jft:jlt) *half*vol0(jft:jlt) )
+            die(1:jlt) = die(1:jlt)                                         &
+              + coef*(degmb(1:jlt)*half*vol0(1:jlt)     &
+              + degfx(1:jlt)*thk0(1:jlt) *half*vol0(1:jlt) )
           endif
 !---------------------------------------------------
 !      check element failure with xfem
           if (ixfem > 0) then
-            do i=jft,jlt
+            do i=1,jlt
               if (off(i) == four_over_5) then
                 off(i) = zero
                 nindx  = nindx + 1

@@ -31,7 +31,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    build_msg                    ../common_source/tools/memory/my_alloc.F90
 !||    cdk6bc3                      ../engine/source/elements/sh3n/coquedk6/cdk6bc3.F
 !||    check_message_definition     ../common_source/modules/check_mod.F
-!||    checksum_option_outfile      ../common_source/modules/output/checksum_mod.F90
 !||    close_c                      ../common_source/tools/input_output/write_routines.c
 !||    condrmat                     ../engine/source/materials/mat/mat013/condrmat.F
 !||    coqini                       ../engine/source/elements/shell/coqini.F
@@ -46,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inipar                       ../engine/source/mpi/init/inipar.F
 !||    iniresa                      ../engine/source/output/restart/rdresa.F
 !||    init_dyn_lib_struc           ../engine/share/modules/dynlib_mod.F
+!||    init_h3d_engine              ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    init_th0                     ../engine/source/output/th/init_th0.F
 !||    initime                      ../engine/source/system/timer_mod.F90
 !||    lecinp                       ../engine/source/input/lecinp.F
@@ -105,6 +105,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    group_mod                    ../engine/share/modules/group_mod.F
 !||    groupdef_mod                 ../common_source/modules/groupdef_mod.F
 !||    h3d_mod                      ../engine/share/modules/h3d_mod.F
+!||    init_h3d_engine_mod          ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    inoutfile_mod                ../common_source/modules/inoutfile_mod.F
 !||    interfaces_mod               ../common_source/modules/interfaces/interfaces_mod.F90
 !||    intstamp_glob_mod            ../engine/share/modules/intstamp_glob_mod.F
@@ -202,6 +203,7 @@ C-----------------------------------------------
       USE ANIM_MOD
       use rwall_mod
       use sfem_mod
+      use init_h3d_engine_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -238,6 +240,7 @@ C-----------------------------------------------
 #include      "scr_fac_c.inc"
 #include      "chara_c.inc"
 #include      "task_c.inc"
+#include      "spmd_c.inc"
 #include      "warn_c.inc"
 #include      "parit_c.inc"
 #include      "titr_c.inc"
@@ -270,7 +273,7 @@ C-----------------------------------------------
      .        RADIOSSV,RADFLEXV,RDFLEXCOMP,ABFV,ABFCOMP,IFILABF,
      .        NB_OF_FILES,N_FAIL,IP,IRUNN_BIS,IFILTITL
       INTEGER OMP_GET_THREAD_NUM,LONG,LONG_TMP,
-     .        LENV,FVERS,LFNAME,NB_INDEX_ABF
+     .        LENV,FVERS,LFNAME,NB_INDEX_ABF,NINTERSKID
       CHARACTER FILNAM*100, CHRUNM1*2, INPUTNAM*100,
      .          CHR_OLD*2,FNAME*2048,IOFF1*3,IOFF2*3,IOFF3*3
       CHARACTER*2048 INAME
@@ -372,6 +375,7 @@ C------------------------------------------------
 C     Init Timer (from beginning of radioss2 (reading timer)
 C------------------------------------------------    
       ISTDO=6
+      coupling%active = .false.
       CALL INI_MSG()
       CALL BUILD_MSG()
     
@@ -599,7 +603,7 @@ c
         IF(OUTFILE_BOOL) BOOL_C = 1
 
         CALL LF_CONVERT_C_FLAT(GOT_INPUT,ROOTN,LENROOTN,FNAME,LFNAME,
-     .                         INAME, IERR,1024,LEN_TMP_NAME,TMP_NAME,
+     .                         INAME, IERR,65536,LEN_TMP_NAME,TMP_NAME,
      .                         LEN_TMP_NAME2,TMP_NAME2)
 
         IF (IERR == 0) THEN
@@ -1482,11 +1486,11 @@ C------------------------------------------------
      C              MONVOL ,VOLMON, IPART_STATE,GEO,TABLE,
      D              IFRAME,XFRAME,MAT_ELEM%ELBUF,IGEO,INTERFACES%INTBUF_TAB,
      E              IPM   ,H3D_DATA, MULTI_FVM,
-     F              IGRPART,TAG_SKINS6,ICFIELD,LCFIELD,NODES%TAG_S_RBY,
-     G              MDS_LABEL,MDS_OUTPUT_TABLE,MDS_NMAT,MAX_DEPVAR,
-     H              MDS_NDEPSVAR,STACK,IBCL,ILOADP,LLOADP,SENSORS,
-     I              DYNAIN_DATA,DT ,LOADS ,OUTPUT,NAMES_AND_TITLES,
-     J              MAT_ELEM%MAT_PARAM,GLOB_THERM,PBLAST)
+     F              IGRPART,ICFIELD,LCFIELD,NODES%TAG_S_RBY,
+     G              MDS_NMAT,
+     H              SENSORS,MAT_ELEM,
+     I              DYNAIN_DATA,DT ,OUTPUT,NAMES_AND_TITLES,
+     J              GLOB_THERM)
 C------------------------------------------------
 C Close & Delete scratch file
       CLOSE (UNIT=IIN)
@@ -1504,6 +1508,19 @@ C------------------------------------------------
      *       MDS_NMAT,MDS_MATID,MDS_FILES,MDS_LABEL,MDS_NDEPSVAR,MAX_DEPVAR,MDS_OUTPUT_TABLE)
       ENDIF
 #endif
+C------------------------------------------------
+C     H3D initialization
+C------------------------------------------------
+      CALL INIT_H3D_ENGINE(OUTPUT,GEO,IGEO,IPM,IPART,H3D_DATA,MULTI_FVM,IPARI,IPARG,TAG_SKINS6,
+     .                     MDS_LABEL,MDS_OUTPUT_TABLE,MDS_NMAT,MAX_DEPVAR,MDS_NDEPSVAR,
+     .                     MAT_ELEM%ELBUF,STACK,IBCL,ILOADP,LLOADP,LOADS,MAT_ELEM%MAT_PARAM,PBLAST,
+     .                     IGRPART,NPC,TF,SNPC,STF,SENSORS,SENSORS%SENSOR_TAB,PSKIDS,
+     .                     NINTSKIDOLD,NINTERSKID,NINTSTAMP,NUMNOD,NUMNODG,NINTER,NUMSPHG,
+     .                     NPROPG,NPROPGI,NPROPMI,LIPART1,NPARI,NPARG,
+     .                     NGROUP,NUMELS,SIBCL,NLOADP,SIZLOADP,SLLOADP,NGRPART,SENSORS%NSENSOR,
+     .                     ISPMD,IOUT,MCHECK,
+     .                     NUMELCG,NUMELTGG,NUMELSG,NUMELTRG,NUMELPG,NUMELRG,
+     .                     NUMELQG,NUMSKING,NUMGEO,NUMMAT,NUMPLY)
 
 C------------------------------------------------
       CALL TRACE_IN(19,0,ZERO)
@@ -2195,10 +2212,6 @@ C Send Data / Fem Structures
 C---------------------------------------------------------------------
          ITASK=0
          IRUNN_BIS = IRUNN
-
-         IF (ISPMD==0)THEN
-            CALL checksum_option_outfile(OUTPUT%checksum)
-         ENDIF
 
          CALL RESOL_HEAD(ELEMENT, NODES, ITASK        ,AF              ,IAF             ,IDATA      ,RDATA,
      .                   GRAPHE       ,IFLOW           ,RFLOW           ,

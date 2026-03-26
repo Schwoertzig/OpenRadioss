@@ -23,7 +23,7 @@
 !||====================================================================
 !||    timer_mod                        ../engine/source/system/timer_mod.F90
 !||--- called by ------------------------------------------------------
-!||    aconve                           ../engine/source/ale/aconve.F
+!||    aconve                           ../engine/source/ale/aconve.F90
 !||    add_elapsed_time_mon_off         ../engine/source/system/timer.F
 !||    afluxt                           ../engine/source/ale/ale51/afluxt.F
 !||    ale51_gradient_reconstruction    ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
@@ -31,7 +31,7 @@
 !||    alemain                          ../engine/source/ale/alemain.F
 !||    alethe                           ../engine/source/ale/alethe.F
 !||    alewdx                           ../engine/source/ale/grid/alewdx.F
-!||    arezon                           ../engine/source/ale/arezon.F
+!||    arezon                           ../engine/source/ale/arezon.F90
 !||    bforc2                           ../engine/source/ale/bimat/bforc2.F
 !||    c3forc3                          ../engine/source/elements/sh3n/coque3n/c3forc3.F
 !||    c3forc3_crk                      ../engine/source/elements/xfem/c3forc3_crk.F
@@ -88,7 +88,7 @@
 !||    multi_muscl_gradients            ../engine/source/multifluid/multi_muscl_gradients.F
 !||    multi_timeevolution              ../engine/source/multifluid/multi_timeevolution.F
 !||    print_summary                    ../engine/source/system/timer.F
-!||    printime                         ../engine/source/system/timer.F
+!||    printime                         ../engine/source/system/printime.F
 !||    q4forc2                          ../engine/source/elements/solid_2d/quad4/q4forc2.F
 !||    qforc2                           ../engine/source/elements/solid_2d/quad/qforc2.F
 !||    radioss2                         ../engine/source/engine/radioss2.F
@@ -146,7 +146,15 @@
         integer, parameter :: TIMER_EXRBYV    =     12
         integer, parameter :: TIMER_EXSPMDV   =     13
         integer, parameter :: TIMER_MADYMO    =     14
+        integer, parameter :: TIMER_CONT_CRIT =     15  
+        integer, parameter :: TIMER_COMM_CRIT =     16
+        integer, parameter :: TIMER_CONT_BUK  =     17
+        integer, parameter :: TIMER_CONT_GFRONT=    18
+        integer, parameter :: TIMER_CONT_OPT  =     19
         integer, parameter :: TIMER_AMS       =     39
+        integer, parameter :: TIMER_BEG_CRIT  =     56        
+        integer, parameter :: TIMER_EOF_CRIT  =     57
+        integer, parameter :: TIMER_EOF_SORT  =     58
         integer, parameter :: TIMER_TMP1      =    150
         integer, parameter :: TIMER_TMP2      =    149
         integer, parameter :: TIMER_ALEMAIN   =     110
@@ -345,14 +353,14 @@
 !||====================================================================
 !||    startime                         ../engine/source/system/timer_mod.F90
 !||--- called by ------------------------------------------------------
-!||    aconve                           ../engine/source/ale/aconve.F
+!||    aconve                           ../engine/source/ale/aconve.F90
 !||    afluxt                           ../engine/source/ale/ale51/afluxt.F
 !||    ale51_gradient_reconstruction    ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
 !||    ale51_gradient_reconstruction2   ../engine/source/ale/alemuscl/ale51_gradient_reconstruction2.F
 !||    alemain                          ../engine/source/ale/alemain.F
 !||    alethe                           ../engine/source/ale/alethe.F
 !||    alewdx                           ../engine/source/ale/grid/alewdx.F
-!||    arezon                           ../engine/source/ale/arezon.F
+!||    arezon                           ../engine/source/ale/arezon.F90
 !||    c3forc3                          ../engine/source/elements/sh3n/coque3n/c3forc3.F
 !||    c3forc3_crk                      ../engine/source/elements/xfem/c3forc3_crk.F
 !||    cbaforc3                         ../engine/source/elements/shell/coqueba/cbaforc3.F
@@ -453,14 +461,14 @@
 !||====================================================================
 !||    stoptime                         ../engine/source/system/timer_mod.F90
 !||--- called by ------------------------------------------------------
-!||    aconve                           ../engine/source/ale/aconve.F
+!||    aconve                           ../engine/source/ale/aconve.F90
 !||    afluxt                           ../engine/source/ale/ale51/afluxt.F
 !||    ale51_gradient_reconstruction    ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
 !||    ale51_gradient_reconstruction2   ../engine/source/ale/alemuscl/ale51_gradient_reconstruction2.F
 !||    alemain                          ../engine/source/ale/alemain.F
 !||    alethe                           ../engine/source/ale/alethe.F
 !||    alewdx                           ../engine/source/ale/grid/alewdx.F
-!||    arezon                           ../engine/source/ale/arezon.F
+!||    arezon                           ../engine/source/ale/arezon.F90
 !||    c3forc3                          ../engine/source/elements/sh3n/coque3n/c3forc3.F
 !||    c3forc3_crk                      ../engine/source/elements/xfem/c3forc3_crk.F
 !||    cbaforc3                         ../engine/source/elements/shell/coqueba/cbaforc3.F

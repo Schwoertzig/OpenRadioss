@@ -188,18 +188,23 @@
           end do
         end subroutine checksum_restart_write
 
+
         !! \brief writes checksum in .out file
 !||====================================================================
-!||    checksum_option_outfile   ../common_source/modules/output/checksum_mod.F90
+!||    checksum_option_out_file   ../common_source/modules/output/checksum_mod.F90
 !||--- called by ------------------------------------------------------
-!||    radioss2                  ../engine/source/engine/radioss2.F
+!||    arret                      ../engine/source/system/arret.F
+!||--- calls      -----------------------------------------------------
+!||    print_checksum_list        ../common_source/output/checksum/checksum.cpp
 !||--- uses       -----------------------------------------------------
-!||    file_descriptor_mod       ../engine/source/modules/file_descriptor_mod.F90
+!||    file_descriptor_mod        ../engine/source/modules/file_descriptor_mod.F90
+!||    names_and_titles_mod       ../common_source/modules/names_and_titles_mod.F
 !||====================================================================
-        subroutine checksum_option_outfile(checksum)
+        subroutine checksum_option_out_file(checksum)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
+          use names_and_titles_mod
           use file_descriptor_mod
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
@@ -213,21 +218,31 @@
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: i
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Body
+! ----------------------------------------------------------------------------------------------------------------------
           write(iout,"(a)") " "
-          write(iout,"(a)") " CHECKSUM DIGESTS"
-          write(iout,"(a)") " ----------------"
           write(iout,"(a)") " "
-          do i=1,checksum%checksum_count
-            write(iout,"(a,a)") "    CHECKSUM : ",trim( checksum%checksums(i))
-          end do
-          write(iout,"(a)") " "
-        end subroutine checksum_option_outfile
+          write(iout,"(a)") " CHECKSUM OPTION: DECK FINGERPRINTS"
+          write(iout,"(a)") " ----------------------------------"
 
-        !! \brief writes checksum in .out file
+          do i=1,checksum%checksum_count
+            write(iout,"(a,a)") "    CHECKSUM: ",trim( checksum%checksums(i))
+          end do
+
+          write(iout,"(a)") " "
+          write(iout,"(a)") " OUTPUT FILES: CHECKSUM DIGESTS"
+          write(iout,"(a)") " ------------------------------"
+          call print_checksum_list(checksum%files_checksum,iout )
+          write(iout,"(a)") " "
+
+        end subroutine checksum_option_out_file
+
 !||====================================================================
 !||    checksum_option_checksum_file   ../common_source/modules/output/checksum_mod.F90
 !||--- called by ------------------------------------------------------
 !||    arret                           ../engine/source/system/arret.F
+!||    f_anend                         ../starter/source/output/analyse/analyse_arret.F
 !||--- calls      -----------------------------------------------------
 !||    print_checksum_list             ../common_source/output/checksum/checksum.cpp
 !||--- uses       -----------------------------------------------------
@@ -272,23 +287,23 @@
           write(fchecksum,"(a)") " **                                                                    **"
           write(fchecksum,"(a)") " ************************************************************************"
           write(fchecksum,"(a)") " ** OpenRadioss Software                                               **"
-          write(fchecksum,"(a)") " ** COPYRIGHT (C) 1986-2025 Altair Engineering, Inc.                   **"
+          write(fchecksum,"(a)") " ** COPYRIGHT (C) 1986-2026 Altair Engineering, Inc.                   **"
           write(fchecksum,"(a)") " ** Licensed under GNU Affero General Public License.                  **"
           write(fchecksum,"(a)") " ** See License file.                                                  **"
           write(fchecksum,"(a)") " ************************************************************************"
           write(fchecksum,"(a,a)") " DECK ROOTNAME .............................:      ",rootname(1:rootlen)
           write(fchecksum,"(a,a)") " EXECUTION COMPLETED .......................:      ",trim(formated_date_time)
           write(fchecksum,"(a)") " "
-          write(fchecksum,"(a)") " DECK FINGERPRINTS"
-          write(fchecksum,"(a)") " -----------------"
+          write(fchecksum,"(a)") " CHECKSUM OPTION: DECK FINGERPRINTS"
+          write(fchecksum,"(a)") " ----------------------------------"
 
           do i=1,checksum%checksum_count
-            write(fchecksum,"(a,a)") "    CHECKSUM : ",trim( checksum%checksums(i))
+            write(fchecksum,"(a,a)") "    CHECKSUM: ",trim( checksum%checksums(i))
           end do
 
           write(fchecksum,"(a)") " "
-          write(fchecksum,"(a)") " OUTPUT FILES CHECKSUM DIGESTS"
-          write(fchecksum,"(a)") " -----------------------------"
+          write(fchecksum,"(a)") " OUTPUT FILES: CHECKSUM DIGESTS"
+          write(fchecksum,"(a)") " ------------------------------"
           call print_checksum_list(checksum%files_checksum,fchecksum )
           write(fchecksum,"(a)") " "
 
@@ -296,6 +311,7 @@
           close(unit=fchecksum)
 
         end subroutine checksum_option_checksum_file
+
 
       end module checksum_output_option_mod
 

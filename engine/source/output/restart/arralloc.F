@@ -166,6 +166,7 @@ C   -----------------------------------------------
 C             Entirere Allowances 
 C   -----------------------------------------------
 
+        NODES%N2D = N2D
         CALL ALLOCATE_NODAL_ARRAYS(NODES, NUMNOD, NTHREAD, IRODDL, IPARIT, 
      .      ISECUT, IISROTS, IMPOSE_DR, IDROT, NRCVVOIS, SICODT, GLOB_THERM%ITHERM_FE)
 
@@ -2259,6 +2260,9 @@ C-------Seatbelt structures -----
         IF (IERR/=0) GOTO 1000
 C
         ALLOCATE (RETRACTOR(NRETRACTOR),STAT=IERR)
+        IF (IERR/=0) GOTO 1000
+C
+        ALLOCATE (GUIDE(NGUIDED_CABLE),STAT=IERR)
         IF (IERR/=0) GOTO 1000
 C
         IF (N_ANCHOR_REMOTE > 0) THEN
