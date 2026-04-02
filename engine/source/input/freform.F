@@ -1957,6 +1957,29 @@ C-----------------------
        ENDIF
        K = K + 1 + NBC
       ENDDO
+      
+C-----------------------
+C      /ALE/VOF
+C-----------------------
+      ALE%VOF%IS_DEFINED = 0
+      IKEY = KALE
+      K = 0
+      DO WHILE (IKAD(IKEY) + K /= IKAD(IKEY + 1))
+       READ(IUSC1,REC=IKAD(IKEY)+K,FMT='(7X,A,1X,A,31X,I10)',ERR=9990)KEY2,KEY3,NBC
+       !---------------------------------------!
+       !    '/ALE/VOF/OFF'                     !
+       !---------------------------------------!
+       IF (KEY2(1:3) == 'VOF') THEN
+         IF(KEY3(1:3)=='OFF')THEN    
+           ALE%VOF%IS_DEFINED = 0
+         ELSEIF(KEY3(1:2)=='ON')THEN 
+           ALE%VOF%IS_DEFINED = 1
+         ELSE                        
+           GOTO 9990                 
+         ENDIF                       
+       ENDIF
+       K = K + 1 + NBC
+      ENDDO      
 
 C--------------------
 C   /ALE/ON  /ALE/OFF

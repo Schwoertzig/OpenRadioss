@@ -340,6 +340,10 @@ C MUSCL Activation
       ALEMUSCL_Param%IALEMUSCL = 1
 C Muscl Compression Coefficient, Default Value Set to 1.
       ALEMUSCL_Param%BETA = TWO
+C VOF
+      ALE%VOF%IS_DEFINED = 0
+      ALE%VOF%NMAT = 0
+      
       RATIO22 = ONE + TEN/HUNDRED
       RADIOSSV = 100090402
       IFLEXPIPE = 1

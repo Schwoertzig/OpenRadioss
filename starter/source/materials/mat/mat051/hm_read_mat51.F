@@ -609,6 +609,7 @@ C-----------------------------------------------
           CALL HM_GET_INT_ARRAY_INDEX  ('materialIds'               ,tMID(I)   ,I,IS_AVAILABLE, LSUBMODEL)
           CALL HM_GET_FLOAT_ARRAY_INDEX('MAT_ALPHA_Iflg12_phas'     ,tAV(I)    ,I,IS_AVAILABLE, LSUBMODEL, UNITAB)
         ENDDO
+        ALE%VOF%NMAT = MIP
         UPARAM(09:12) = tMID(1:4)
         UPARAM(13:16) = tAV(1:4)
         AV(1:4) = tAV(1:4)

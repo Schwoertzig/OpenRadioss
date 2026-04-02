@@ -266,6 +266,22 @@ C-----------------------------------------------
           type(phi_data_), dimension(:), allocatable :: phi_51_data !< convection variable data for mtn=51
         end type conv_
 
+        type vof_cell_data
+          integer :: elem_id
+          my_real :: alpha
+          my_real :: alpha_f(6)
+          my_real :: n(3)
+          my_real :: d
+          my_real :: Swet(6)
+        end type vof_cell_data
+
+        type ale_vof_
+          integer :: is_defined = 0
+          integer :: nmat = 0
+          integer :: elem_id
+          type(vof_cell_data) :: cell_data
+        end type ale_vof_
+
         ! GENERAL DATA STRUCTURE USED IN SOURCE CODE
         TYPE ALE_
           TYPE(ALE_GRID_)   :: GRID
@@ -273,6 +289,7 @@ C-----------------------------------------------
           TYPE(ALE_GLOBAL_) :: GLOBAL
           TYPE(ALE_SUB_)    :: SUB
           TYPE(ALE_REZON_)  :: REZON
+          TYPE(ALE_VOF_)    :: VOF
           type(conv_) :: conv !< convective data structure
         contains
           procedure, pass :: init
@@ -350,6 +367,9 @@ C-----------------------------------------------
           !---ALE%REZON
           this%REZON%NUM_NUVAR_MAT = 0
           this%REZON%NUM_NUVAR_EOS = 0
+          !---ALE%VOF
+          this%VOF%IS_DEFINED = 0
+          this%VOF%NMAT = 0
         end subroutine
 
       END MODULE ALE_MOD

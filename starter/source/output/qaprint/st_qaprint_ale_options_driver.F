@@ -33,7 +33,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE QA_OUT_MOD
       USE ALEMUSCL_MOD , only : ALEMUSCL_Param
-      USE ALE_MOD
+      USE ALE_MOD , only : ALE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -287,6 +287,14 @@ C-----------------------------------------------
 
         WRITE(VARNAME,'(A)') 'ALE%REZON%NUM_NUVAR_EOS'
         TEMP_INT = ALE%REZON%NUM_NUVAR_EOS
+        IF(TEMP_INT/=0)CALL QAPRINT(VARNAME(1:LEN_TRIM(VARNAME)),TEMP_INT,0.0_8)  
+        
+       !------------------------------------------------------------------------
+       ! ---ALE VOF
+       !   INTEGER IS_DEFINED
+
+        WRITE(VARNAME,'(A)') 'ALE%VOF%IS_DEFINED'
+        TEMP_INT = ALE%VOF%IS_DEFINED
         IF(TEMP_INT/=0)CALL QAPRINT(VARNAME(1:LEN_TRIM(VARNAME)),TEMP_INT,0.0_8)  
 
       ENDIF        
