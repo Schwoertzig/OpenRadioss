@@ -95,8 +95,7 @@ C-----------------------------------------------
       use arezon_mod , only : arezon
       use aconve_mod , only : aconve
       use i22bufbric_mod
-
-
+      use ALE51_VOF_RECONSTRUCTION2_MOD , ONLY : ALE51_VOF_RECONSTRUCTION2
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -108,7 +107,7 @@ C-----------------------------------------------
 #include      "com01_c.inc"
 #include      "com04_c.inc"
 #include      "param_c.inc"
-#include "spmd_c.inc"
+#include      "spmd_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -313,6 +312,14 @@ C----------------------
             CALL ALE51_GRADIENT_RECONSTRUCTION2(IPARG, ELBUF_TAB, IXQ, X, ALE_CONNECT,
      .            NV46,NERCVOIS,NESDVOIS,  LERCVOIS,LESDVOIS,LENCOM, ITASK, 
      .            IAD_ELEM, FR_ELEM, SEGVAR,timers)
+          ENDIF
+        ENDIF
+        IF (TRIMAT   >  0 .AND. ALE%VOF%IS_DEFINED == 1) THEN
+          IF (N2D  /=  0) THEN
+            CALL ALE51_VOF_RECONSTRUCTION2(IPARG, ELBUF_TAB, ALE_CONNECT,
+     .            NERCVOIS,NESDVOIS,  LERCVOIS,LESDVOIS,LENCOM, ITASK,
+     .            SEGVAR,timers,
+     .            NPARG,NGROUP,NUMELQ,NUMELS,TRIMAT,NQVOIS,NSVOIS,NSPMD)
           ENDIF
         ENDIF
 

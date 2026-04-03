@@ -61,19 +61,21 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-      USE INITBUF_MOD
-      USE TRIMAT_MOD
-      USE ELBUFDEF_MOD            
-      USE SEGVAR_MOD   
-      USE ALE_CONNECTIVITY_MOD
-      USE ALEMUSCL_MOD , only:ALEMUSCL_Param
-      USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
+      use initbuf_mod
+      use trimat_mod
+      use elbufdef_mod
+      use segvar_mod
+      use ale_connectivity_mod
+      use alemuscl_mod , only:alemuscl_param
+      use multimat_param_mod , only : m51_n0phas, m51_nvphas
       use element_mod , only : nixs
       use timer_mod
       use ale51_apply_remote_flux_mod , only : ale51_apply_remote_flux
-      use precision_mod , only : WP
+      use precision_mod , only : wp
       use array_mod
       use spmd_exch_n_neighbor_mod , only : spmd_exch_n_neighbor
+      use ale_mod , only : ale
+      use alevof_upwind2_mod , only : alevof_upwind2
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -284,7 +286,11 @@ C     ALE ON / OFF
      .                             flux_vois_mat,nv46,trimat, SEGVAR,s_flux,s_flux_vois)
            ENDIF
         ELSE
-           IF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN
+           IF (ALE%VOF%IS_DEFINED  == 1) THEN
+              CALL ALEVOF_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X    , IXQ, flux_vois_mat,
+     .                              NV46,trimat,SEGVAR,s_flux,s_flux_vois,
+     .                              NUMELQ, NUMNOD, NSEGFLU, LLT, NFT)
+           ELSEIF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN
               CALL ALEMUSCL_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X    , IXQ, flux_vois_mat, 
      .                              NV46,trimat,SEGVAR,s_flux,s_flux_vois)
            ELSE

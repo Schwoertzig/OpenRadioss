@@ -2077,6 +2077,40 @@ C
              ALEMUSCL_Buffer%ELCENTER(:, :) = ZERO
            ENDIF
         ENDIF
+
+        ! VOLUME OF FLUID (VOF)
+          ! integer, allocatable, dimension(:)    :: elem_id  !(nel)
+          ! my_real, allocatable, dimension(:)    :: alpha    !(nel)
+          ! my_real, allocatable, dimension(:,:)  :: alpha_f  !(6,nel)
+          ! my_real, allocatable, dimension(:,:)  :: n        !(3,nel)
+          ! my_real, allocatable, dimension(:)    :: d        !(nel)
+          ! my_real, allocatable, dimension(:)    :: Swet     !(6,nel)
+        IF(ALE%VOF%IS_DEFINED == 1)THEN
+          ! ELEM_ID
+          ALLOCATE(ALE%VOF%cell_data%elem_id(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%elem_id(:) = ZERO
+          ! ALPHA
+          ALLOCATE(ALE%VOF%cell_data%alpha(NUMELS + NSVOIS + NUMELQ + NQVOIS),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%ALPHA(:) = ZERO
+          ! alpha_f
+          ALLOCATE(ALE%VOF%cell_data%alpha_f(NSVOIS+NQVOIS, NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%alpha_f(:,:) = ZERO
+          ! n
+          ALLOCATE(ALE%VOF%cell_data%n(3, NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%n(:,:) = ZERO
+          ! d
+          ALLOCATE(ALE%VOF%cell_data%d(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%d(:) = ZERO
+          ! Swet
+          ALLOCATE(ALE%VOF%cell_data%Swet(NSVOIS+NQVOIS, NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%Swet(:,:) = ZERO
+        ENDIF
         
         !/EBCS/NRF VOLUME FRACTION ALLOCATION
         IF(MULTI_FVM%IS_USED)THEN

@@ -267,12 +267,12 @@ C-----------------------------------------------
         end type conv_
 
         type vof_cell_data
-          integer :: elem_id
-          my_real :: alpha
-          my_real :: alpha_f(6)
-          my_real :: n(3)
-          my_real :: d
-          my_real :: Swet(6)
+          integer, allocatable, dimension(:)    :: elem_id  !(nel)
+          my_real, allocatable, dimension(:)    :: alpha    !(nel)
+          my_real, allocatable, dimension(:,:)  :: alpha_f  !(6,nel)
+          my_real, allocatable, dimension(:,:)  :: n        !(3,nel)
+          my_real, allocatable, dimension(:)    :: d        !(nel)
+          my_real, allocatable, dimension(:,:)  :: Swet     !(6,nel)
         end type vof_cell_data
 
         type ale_vof_
@@ -296,7 +296,7 @@ C-----------------------------------------------
         END TYPE ALE_
 
 C-----------------------------------------------
-        TYPE(ALE_) :: ALE
+        TYPE(ALE_),TARGET :: ALE
 C-----------------------------------------------
 
       CONTAINS

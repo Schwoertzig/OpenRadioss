@@ -34,6 +34,7 @@
       USE SUBMODEL_MOD
       USE MESSAGE_MOD
       USE ALE_MOD , ONLY : ALE
+       USE ALEMUSCL_MOD , only : ALEMUSCL_Param
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -46,7 +47,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      INTEGER :: NALEVOF
+      INTEGER :: NALEVOF, NALEMUSCL
       INTEGER :: IFORM
       LOGICAL :: IS_AVAILABLE
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -70,6 +71,15 @@
                IFORM = 0
            END IF
            ALE%VOF%IS_DEFINED = IFORM
+           IF (IFORM == 1 .AND. ALEMUSCL_Param%IALEMUSCL /= 0)THEN
+               ALEMUSCL_Param%IALEMUSCL = 0  ! LAW51 interface reconstruction :either UPWIND, or MUSCL or VOF. No possible combination
+               CALL HM_OPTION_COUNT('/ALE/MUSCL', NALEMUSCL)
+               IF (NALEMUSCL > 0) THEN
+                  CALL ANCMSG(MSGID   = 1140, MSGTYPE = MSGWARNING, ANMODE = ANINFO,  &
+                  C1 = 'MUSCL REPLACED WITH VOF (LAW51 INTERFACE RECONSTRUCTION)', I1 = IFORM )
+               ENDIF
+               IFORM = 0
+           END IF
          END IF
       ENDIF
 
