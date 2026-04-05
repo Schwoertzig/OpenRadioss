@@ -2079,23 +2079,32 @@ C
         ENDIF
 
         ! VOLUME OF FLUID (VOF)
-          ! integer, allocatable, dimension(:)    :: elem_id  !(nel)
+          ! my_real, allocatable, dimension(:)    :: vol      !(nel)
           ! my_real, allocatable, dimension(:)    :: alpha    !(nel)
           ! my_real, allocatable, dimension(:,:)  :: alpha_f  !(6,nel)
           ! my_real, allocatable, dimension(:,:)  :: n        !(3,nel)
           ! my_real, allocatable, dimension(:)    :: d        !(nel)
           ! my_real, allocatable, dimension(:)    :: Swet     !(6,nel)
         IF(ALE%VOF%IS_DEFINED == 1)THEN
-          ! ELEM_ID
+          ALE%VOF%cell_data%num_mixed = 0
+          ! ELEM_IID
           ALLOCATE(ALE%VOF%cell_data%elem_id(NUMELS + NUMELQ),STAT=IERR)
           IF (IERR /= 0) GOTO 1000
-          ALE%VOF%cell_data%elem_id(:) = ZERO
+          ALE%VOF%cell_data%elem_id(:) = 0
+          ! MIXED_CELL_ID (reverse index : elem -> position in mixed list)
+          ALLOCATE(ALE%VOF%cell_data%mixed_cell_id(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%mixed_cell_id(:) = 0
+          ! VOL
+          ALLOCATE(ALE%VOF%cell_data%vol(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%vol(:) = ZERO
           ! ALPHA
           ALLOCATE(ALE%VOF%cell_data%alpha(NUMELS + NSVOIS + NUMELQ + NQVOIS),STAT=IERR)
           IF (IERR /= 0) GOTO 1000
           ALE%VOF%cell_data%ALPHA(:) = ZERO
           ! alpha_f
-          ALLOCATE(ALE%VOF%cell_data%alpha_f(NSVOIS+NQVOIS, NUMELS + NUMELQ),STAT=IERR)
+          ALLOCATE(ALE%VOF%cell_data%alpha_f(6, NUMELS + NUMELQ),STAT=IERR)
           IF (IERR /= 0) GOTO 1000
           ALE%VOF%cell_data%alpha_f(:,:) = ZERO
           ! n
@@ -2107,7 +2116,7 @@ C
           IF (IERR /= 0) GOTO 1000
           ALE%VOF%cell_data%d(:) = ZERO
           ! Swet
-          ALLOCATE(ALE%VOF%cell_data%Swet(NSVOIS+NQVOIS, NUMELS + NUMELQ),STAT=IERR)
+          ALLOCATE(ALE%VOF%cell_data%Swet(6, NUMELS + NUMELQ),STAT=IERR) !6 in 3d 4 in éd
           IF (IERR /= 0) GOTO 1000
           ALE%VOF%cell_data%Swet(:,:) = ZERO
         ENDIF

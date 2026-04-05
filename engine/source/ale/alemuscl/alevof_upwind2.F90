@@ -23,10 +23,27 @@
 ! ======================================================================================================================
 !                                                   procedures
 ! ======================================================================================================================
-!! \brief VOF method for 2D quads
-!! \details      1 - build volume fraction at cell edge using the VOF method.
-!! \details      2 - upwind this value on the edge and store it in the volumetric flux
-!! \details if needed, more details can be added here
+!||====================================================================
+!||    alevof_upwind2               ../engine/source/ale/alemuscl/alevof_upwind2.F90
+!||--- called by ------------------------------------------------------
+!||    afluxt                       ../engine/source/ale/ale51/afluxt.F
+!||--- uses       -----------------------------------------------------
+!||    ale_connectivity_mod         ../common_source/modules/ale/ale_connectivity_mod.F
+!||    ale_mod                      ../common_source/modules/ale/ale_mod.F
+!||    constant_mod                 ../common_source/modules/constant_mod.F
+!||    element_mod                  ../common_source/modules/elements/element_mod.F90
+!||    precision_mod                ../common_source/modules/precision_mod.F90
+!||    segvar_mod                   ../engine/share/modules/segvar_mod.F
+!||====================================================================
+!! \brief VOF-PLIC upwind for 2D quads — 2 phases only
+!! \details Computes sub-material volume fluxes using the PLIC reconstruction:
+!!          - For PURE cells (alpha=0 or 1): flux_mat(:,:,1) = alpha * flux_total,
+!!            flux_mat(:,:,2) = (1-alpha) * flux_total  (already set by caller)
+!!          - For MIXED cells: the wet fraction Swet(KK)/edge_length determines
+!!            the phase-1 share of the outgoing flux through each face KK.
+!!            Phase 2 gets the complement.
+!!          - For INCOMING fluxes: the upwind cell's alpha determines the phase split.
+!!          - Phases 3..trimat get zero flux.
        MODULE ALEVOF_UPWIND2_MOD
          IMPLICIT NONE
        CONTAINS
@@ -36,36 +53,28 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-      USE I22BUFBRIC_MOD
-      USE I22TRI_MOD
-      USE ALEMUSCL_MOD , only:ALEMUSCL_Buffer
       USE SEGVAR_MOD
       USE ALE_CONNECTIVITY_MOD
-      use element_mod , only :nixq
+      use element_mod , only : nixq
       use precision_mod , only : WP
-      use constant_mod , only : half,  zero
+      use constant_mod , only : HALF, ZERO, ONE, EM20
+      use ale_mod , only : ale
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
-      implicit none 
+      implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Include Files
+!                                                   Dummy Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-#include "spmd.inc"
-!#include "vect01_c.inc"
-!#include "com04_c.inc"
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Modules
-! ----------------------------------------------------------------------------------------------------------------------
-      integer, intent(in) :: s_flux !< first dimension of FLUX array
-      integer, intent(in) :: s_flux_vois !< first dimension of flux_vois_mat
-      integer, intent(in) :: trimat !< number of material      
+      integer, intent(in) :: s_flux       !< first dimension of FLUX array
+      integer, intent(in) :: s_flux_vois  !< first dimension of flux_vois_mat
+      integer, intent(in) :: trimat       !< number of materials (must be >= 2)
       INTEGER, INTENT(IN) :: NV46
       real(kind=WP), dimension(s_flux,nv46), intent(in) :: flux_save
-      real(kind=WP), dimension(s_flux,NV46,trimat), INTENT(OUT) :: flux_mat
+      real(kind=WP), dimension(s_flux,NV46,trimat), INTENT(INOUT) :: flux_mat
       real(kind=WP), INTENT(IN) :: X(3, NUMNOD)
       INTEGER, INTENT(IN) :: IXQ(NIXQ, NUMELQ)
-      real(kind=WP), INTENT(OUT) :: flux_vois_mat(s_flux_vois, NV46,trimat)
+      real(kind=WP), INTENT(INOUT) :: flux_vois_mat(s_flux_vois, NV46,trimat)
       TYPE(t_segvar),INTENT(IN) :: SEGVAR
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
       INTEGER,INTENT(IN) :: NUMELQ
@@ -76,94 +85,121 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      INTEGER :: I, II, KK, JJ, IAD2, IAD3
-      integer :: itrimat
-      INTEGER :: NEIGHBOOR_LIST(NV46), FACE_NEIGHBOOR(NV46)
-      real(kind=WP) :: ALPHAK
-      real(kind=WP) :: YK, ZK
-      real(kind=WP) :: YF, ZF
+      INTEGER :: I, II, KK, JJ, IAD2
+      INTEGER :: NEIGH, FACE_NEIGH
+      INTEGER :: ICELL
       INTEGER :: FACE_TO_NODE_LOCAL_ID(4, 2), NODEID1, NODEID2
+      real(kind=WP) :: ALPHA_I, ALPHA_FACE
+      real(kind=WP) :: EDGE_LEN, WET_FRAC
+      real(kind=WP) :: FLUX_TOTAL
+      real(kind=WP) :: Y1, Z1, Y2, Z2
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-!!! Once for all, associate node local id to a face number
-      FACE_TO_NODE_LOCAL_ID(1, 1) = 1 ; FACE_TO_NODE_LOCAL_ID(1, 2) = 2  !!! Face 1
-      FACE_TO_NODE_LOCAL_ID(2, 1) = 2 ; FACE_TO_NODE_LOCAL_ID(2, 2) = 3  !!! Face 2
-      FACE_TO_NODE_LOCAL_ID(3, 1) = 3 ; FACE_TO_NODE_LOCAL_ID(3, 2) = 4  !!! Face 3
-      FACE_TO_NODE_LOCAL_ID(4, 1) = 4 ; FACE_TO_NODE_LOCAL_ID(4, 2) = 1  !!! Face 4
-!!! First of all, compute gradient for alpha
+
+      ! Face-to-node connectivity for QUAD4
+      FACE_TO_NODE_LOCAL_ID(1, 1) = 1 ; FACE_TO_NODE_LOCAL_ID(1, 2) = 2
+      FACE_TO_NODE_LOCAL_ID(2, 1) = 2 ; FACE_TO_NODE_LOCAL_ID(2, 2) = 3
+      FACE_TO_NODE_LOCAL_ID(3, 1) = 3 ; FACE_TO_NODE_LOCAL_ID(3, 2) = 4
+      FACE_TO_NODE_LOCAL_ID(4, 1) = 4 ; FACE_TO_NODE_LOCAL_ID(4, 2) = 1
+
+      ! -----------------------------------------------
+      ! NOTE: The default initialization (phases 1/2 = alpha-weighted, phases 3..trimat = 0)
+      ! is done by the caller (afluxt.F) BEFORE the group loop.
+      ! It CANNOT be done here because this routine is called per-group,
+      ! and the init pass would overwrite neighbor flux values written by previous groups.
+      ! -----------------------------------------------
+
+      ! -----------------------------------------------
+      ! OUTGOING FLUXES (flux_save > 0) : VOF phase split for phases 1 and 2
+      ! -----------------------------------------------
       DO I = 1, NEL
         II = I + NFT
         IAD2 = ALE_CONNECT%ee_connect%iad_connect(II)
-        !!!centroid element
-        YK = ALEMUSCL_Buffer%ELCENTER(II,2) ; 
-        ZK = ALEMUSCL_Buffer%ELCENTER(II,3)
-        !!! Neighbors
+        ICELL = ALE%VOF%cell_data%mixed_cell_id(II)  ! 0 if pure, >0 if mixed
+
         DO KK = 1, NV46
-          !!! Only for outgoing fluxes
-          IF (flux_save(II,KK) > ZERO) THEN
-            !!! Storing neighbor indexes
-            NEIGHBOOR_LIST(KK) = ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1)
-            FACE_NEIGHBOOR(KK) = KK
-            IF (NEIGHBOOR_LIST(KK) <= 0) THEN
-              IF(NEIGHBOOR_LIST(KK)==0)NEIGHBOOR_LIST(KK) = II
-              !case <0 is for eBCS. -NEIGHBOR_LIST is then the segment number
-            ELSEIF (NEIGHBOOR_LIST(KK) <= NUMELQ) THEN
-              IAD3 = ALE_CONNECT%ee_connect%iad_connect(NEIGHBOOR_LIST(KK))
-              !!! Store the face number to which II and NEIGHBOR_LIST(KK) are adjacent
-              DO JJ = 1, NV46
-                IF (ALE_CONNECT%ee_connect%connected(IAD3 + JJ - 1) == II) THEN
-                  FACE_NEIGHBOOR(KK) = JJ
-                ENDIF
-              ENDDO  ! JJ = 1, NV46
+          FLUX_TOTAL = flux_save(II, KK)
+
+          IF(FLUX_TOTAL > ZERO) THEN
+
+            IF( ICELL > 0) THEN
+              ! --- MIXED cell: use Swet for phase split ---
+              NODEID1 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 1), II)
+              NODEID2 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 2), II)
+              Y1 = X(2, NODEID1) ; Z1 = X(3, NODEID1)
+              Y2 = X(2, NODEID2) ; Z2 = X(3, NODEID2)
+              EDGE_LEN = SQRT((Y2 - Y1)**2 + (Z2 - Z1)**2)
+              WET_FRAC = ALE%VOF%cell_data%Swet(KK, II) / (EDGE_LEN + EM20)
+              WET_FRAC = MAX(ZERO, MIN(ONE, WET_FRAC))
+              ! Phase 1 flux
+              flux_mat(II, KK, 1) = WET_FRAC * FLUX_TOTAL
+              ! Phase 2 flux (complement)
+              flux_mat(II, KK, 2) = (ONE - WET_FRAC) * FLUX_TOTAL
+            ELSE
+              ! --- PURE cell: use cell alpha for phase split ---
+              ! (caller already initialized flux_mat with alpha-weighted values,
+              !  but we redo it here to be consistent before neighbor propagation)
+              ALPHA_I = ALE%VOF%cell_data%ALPHA(II)
+              flux_mat(II, KK, 1) = ALPHA_I * FLUX_TOTAL
+              flux_mat(II, KK, 2) = (ONE - ALPHA_I) * FLUX_TOTAL
             ENDIF
+            ! Zero out phases 3..trimat
+            DO JJ = 3, trimat
+              flux_mat(II, KK, JJ) = ZERO
+            ENDDO
 
-            NODEID1 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 1), II)
-            NODEID2 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 2), II)
+            ! --- Apply to neighbor (incoming flux = -outgoing flux) ---
+            NEIGH = ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1)
 
-            YF = HALF * (X(2, NODEID1) + X(2, NODEID2))
-            ZF = HALF * (X(3, NODEID1) + X(3, NODEID2))
-
-            !!! Reconstruct second order value for ALPHA(II) on the face
-            do itrimat=1,trimat
-              ALPHAK = ALEMUSCL_Buffer%VOLUME_FRACTION(II,ITRIMAT) &
-                      + ALEMUSCL_Buffer%GRAD(II,2,ITRIMAT) * (YF - YK) &
-                      + ALEMUSCL_Buffer%GRAD(II,3,ITRIMAT) * (ZF - ZK)
-
-              !!! Partial volume flux is then computed as:
-              flux_mat(II,KK,itrimat) = ALPHAK * flux_save(II,KK)
-            enddo
-
-            IF (NEIGHBOOR_LIST(KK) > 0)THEN
-              IF (NEIGHBOOR_LIST(KK) <= NUMELQ) THEN
-                do itrimat=1,trimat                
-                  !!! The opposite of the flux goes to the neighbor
-                  flux_mat(NEIGHBOOR_LIST(KK),FACE_NEIGHBOOR(KK),itrimat) = -flux_mat(II,KK,itrimat)
-                enddo
+            IF(NEIGH > 0) THEN
+              IF(NEIGH <= NUMELQ) THEN
+                ! Local neighbor: find the face number on the neighbor side
+                FACE_NEIGH = ALE_CONNECT%ee_connect%IFACE2(IAD2 + KK - 1)
+                IF(FACE_NEIGH > 0) THEN
+                  ! The opposite flux goes to the neighbor
+                  flux_mat(NEIGH, FACE_NEIGH, 1) = -flux_mat(II, KK, 1)
+                  flux_mat(NEIGH, FACE_NEIGH, 2) = -flux_mat(II, KK, 2)
+                  DO JJ = 3, trimat
+                    flux_mat(NEIGH, FACE_NEIGH, JJ) = ZERO
+                  ENDDO
+                ENDIF
               ELSE
-                do itrimat=1,trimat
-                  flux_vois_mat(II, KK,itrimat) = flux_mat(II,KK,itrimat)
-                enddo
+                ! Remote neighbor (SPMD): store in vois buffer
+                flux_vois_mat(II, KK, 1) = flux_mat(II, KK, 1)
+                flux_vois_mat(II, KK, 2) = flux_mat(II, KK, 2)
+                DO JJ = 3, trimat
+                  flux_vois_mat(II, KK, JJ) = ZERO
+                ENDDO
               ENDIF
             ENDIF
-          ENDIF  ! (FLUX(II,KK) > ZERO)
-        ENDDO  ! KK = 1, NV46
-      ENDDO  ! I = 1, NEL
+            ! NEIGH==0 : free boundary, nothing to do
+            ! NEIGH<0  : eBCS segment, handled in incoming flux section below
 
-!-----------------------------------------------
-!         incoming flux by EBCS
-!-----------------------------------------------
-      IF(NSEGFLU > 0)THEN
+          ENDIF  ! FLUX_TOTAL > ZERO
+
+        ENDDO  ! KK
+      ENDDO  ! I
+
+      ! -----------------------------------------------
+      ! INCOMING FLUXES BY EBCS (boundary conditions)
+      ! -----------------------------------------------
+      IF(NSEGFLU > 0) THEN
         DO I = 1, NEL
           II = I + NFT
           IAD2 = ALE_CONNECT%ee_connect%iad_connect(II)
-          DO KK=1,4            
-            IF(flux_save(II,KK) < ZERO .AND. ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1) < 0)THEN
-              do itrimat=1,trimat
-                flux_mat(II,KK,itrimat) = SEGVAR%PHASE_ALPHA(ITRIMAT,-ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1))* &
-                                         flux_save(II,KK)
-              enddo
-            ENDIF            
+          DO KK = 1, 4
+            IF(flux_save(II, KK) < ZERO .AND. &
+               ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1) < 0) THEN
+              FLUX_TOTAL = flux_save(II, KK)
+              ! Use boundary phase fraction from SEGVAR
+              ALPHA_FACE = SEGVAR%PHASE_ALPHA(1, -ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1))
+              flux_mat(II, KK, 1) = ALPHA_FACE * FLUX_TOTAL
+              flux_mat(II, KK, 2) = (ONE - ALPHA_FACE) * FLUX_TOTAL
+              DO JJ = 3, trimat
+                flux_mat(II, KK, JJ) = ZERO
+              ENDDO
+            ENDIF
           ENDDO
         ENDDO
       ENDIF

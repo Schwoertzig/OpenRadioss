@@ -316,7 +316,7 @@ C----------------------
         ENDIF
         IF (TRIMAT   >  0 .AND. ALE%VOF%IS_DEFINED == 1) THEN
           IF (N2D  /=  0) THEN
-            CALL ALE51_VOF_RECONSTRUCTION2(IPARG, ELBUF_TAB, ALE_CONNECT,
+            CALL ALE51_VOF_RECONSTRUCTION2(IPARG, ELBUF_TAB, ALE_CONNECT,  NIXQ,IXQ, NUMNOD, X,
      .            NERCVOIS,NESDVOIS,  LERCVOIS,LESDVOIS,LENCOM, ITASK,
      .            SEGVAR,timers,
      .            NPARG,NGROUP,NUMELQ,NUMELS,TRIMAT,NQVOIS,NSVOIS,NSPMD)
@@ -384,6 +384,10 @@ C----------------------
           endif
          endif
 C----------------------
+
+
+
+
       ENDIF
 
       call my_barrier

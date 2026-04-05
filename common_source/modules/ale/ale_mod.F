@@ -267,12 +267,16 @@ C-----------------------------------------------
         end type conv_
 
         type vof_cell_data
-          integer, allocatable, dimension(:)    :: elem_id  !(nel)
-          my_real, allocatable, dimension(:)    :: alpha    !(nel)
-          my_real, allocatable, dimension(:,:)  :: alpha_f  !(6,nel)
-          my_real, allocatable, dimension(:,:)  :: n        !(3,nel)
-          my_real, allocatable, dimension(:)    :: d        !(nel)
-          my_real, allocatable, dimension(:,:)  :: Swet     !(6,nel)
+         integer :: nel
+         integer :: num_mixed               !  number of mixed cells (alpha in ]0,1[)
+          my_real, allocatable, dimension(:)    :: vol      !(nel)    working array
+          my_real, allocatable, dimension(:)    :: alpha    !(nel)    working array
+          my_real, allocatable, dimension(:,:)  :: alpha_f  !(6,nel)  working array
+          integer, allocatable, dimension(:)    :: elem_id  !(nel)    -> loop only if alpha in ]0,1[
+          integer, allocatable, dimension(:)    :: mixed_cell_id !(nel) reverse index: elem IE -> position in mixed list (0 if not mixed)
+          my_real, allocatable, dimension(:,:)  :: n        !(3,nel)  -> loop only if alpha in ]0,1[
+          my_real, allocatable, dimension(:)    :: d        !(nel)    -> loop only if alpha in ]0,1[
+          my_real, allocatable, dimension(:,:)  :: Swet     !(6,nel)  -> loop only if alpha in ]0,1[
         end type vof_cell_data
 
         type ale_vof_

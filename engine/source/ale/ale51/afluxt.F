@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale51_upwind3                 ../engine/source/ale/ale51/ale51_upwind3.F
 !||    alemuscl_upwind               ../engine/source/ale/alemuscl/alemuscl_upwind.F
 !||    alemuscl_upwind2              ../engine/source/ale/alemuscl/alemuscl_upwind2.F
+!||    alevof_upwind2                ../engine/source/ale/alemuscl/alevof_upwind2.F90
 !||    initbuf                       ../engine/share/resol/initbuf.F
 !||    my_barrier                    ../engine/source/system/machine.F
 !||    startime                      ../engine/source/system/timer_mod.F90
@@ -188,6 +189,18 @@ C     ALE ON / OFF
             ENDDO
           ENDDO
         enddo
+        IF(ALE%VOF%IS_DEFINED == 1)THEN
+          DO K=1,NV46
+            DO I=LFT,LLT
+              II = I+NFT
+              flux_mat(II,K,1) = alpha_mat(II,1) * FLUX_SAV(II,K)
+              flux_mat(II,K,2) = FLUX_SAV(II,K) - flux_mat(II,K,1)
+              DO ITRIMAT=3,TRIMAT
+                flux_mat(II,K,ITRIMAT) = ZERO
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDIF
         do itrimat=1,trimat
           DO K=1,NV46
             DO II=NFT+LFT,NFT+LLT
