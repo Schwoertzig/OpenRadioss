@@ -193,7 +193,13 @@ C     ALE ON / OFF
           DO K=1,NV46
             DO I=LFT,LLT
               II = I+NFT
-              flux_mat(II,K,1) = alpha_mat(II,1) * FLUX_SAV(II,K)
+              VFRAC = alpha_mat(II,1)
+              IF(VFRAC < 1.0E-4)THEN
+                VFRAC = ZERO
+              ELSEIF(VFRAC > ONE - 1.0E-4)THEN
+                VFRAC = ONE
+              ENDIF
+              flux_mat(II,K,1) = VFRAC * FLUX_SAV(II,K)
               flux_mat(II,K,2) = FLUX_SAV(II,K) - flux_mat(II,K,1)
               DO ITRIMAT=3,TRIMAT
                 flux_mat(II,K,ITRIMAT) = ZERO

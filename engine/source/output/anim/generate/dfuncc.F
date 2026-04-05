@@ -376,7 +376,15 @@ c----         USER VARIABLES from 1 to 5
                                     exit
                                   endif
                                 ENDDO
-
+                    elseif(ius==2)then
+                               FUNC(EL2FA(NN3+N))= 0
+                                DO N=1,ALE%VOF%cell_data%num_mixed
+                                  if(i+nft == ALE%VOF%cell_data%elem_id(N) )then
+                                    FUNC(EL2FA(NN3+i+nft)) = ALE%VOF%cell_data%alpha(N)
+                                    !print *, "ok"
+                                    exit
+                                  endif
+                                ENDDO
                     endif
 
               ENDDO

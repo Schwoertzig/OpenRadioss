@@ -185,8 +185,8 @@
      !       producing a random PLIC interface → spurious Swet → cell detachment.
      ITRIMAT = 1
      num_mixed_cells = 0
-     tol1=1.0e-6_WP
-     tol2=ONE - 1.0e-6_WP
+     tol1=1.0e-3_WP
+     tol2=ONE - 1.0e-3_WP
      ALE%VOF%cell_data%mixed_cell_id(1:NUMELQ+NUMELS) = 0
       DO IE=1,NUMELQ+NUMELS
          ALPHAII = ALE%VOF%cell_data%ALPHA(IE)

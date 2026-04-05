@@ -93,6 +93,7 @@
       real(kind=WP) :: EDGE_LEN, WET_FRAC
       real(kind=WP) :: FLUX_TOTAL
       real(kind=WP) :: Y1, Z1, Y2, Z2
+      real(kind=WP), parameter :: TOL_PURE = 1.0e-3_WP  ! must match tol1 in ale51_vof_reconstruction2
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -138,9 +139,14 @@
               flux_mat(II, KK, 2) = (ONE - WET_FRAC) * FLUX_TOTAL
             ELSE
               ! --- PURE cell: use cell alpha for phase split ---
-              ! (caller already initialized flux_mat with alpha-weighted values,
-              !  but we redo it here to be consistent before neighbor propagation)
               ALPHA_I = ALE%VOF%cell_data%ALPHA(II)
+              ! Clip near-zero / near-one alpha to prevent micro-flux leakage
+              ! that would spuriously create mixed cells in neighbors.
+              IF(ALPHA_I < TOL_PURE) THEN
+                ALPHA_I = ZERO
+              ELSEIF(ALPHA_I > ONE - TOL_PURE) THEN
+                ALPHA_I = ONE
+              ENDIF
               flux_mat(II, KK, 1) = ALPHA_I * FLUX_TOTAL
               flux_mat(II, KK, 2) = (ONE - ALPHA_I) * FLUX_TOTAL
             ENDIF
