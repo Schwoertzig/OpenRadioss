@@ -28,9 +28,9 @@
       module mulaw_mod
         implicit none
       contains
-! ======================================================================================================================
+! =================================================================================================
 !                                                   mmain
-! ======================================================================================================================
+! =================================================================================================
 !! \brief main routine for advanced Material Computation for brick/quad/thickshell/sph elements
 !||====================================================================
 !||    mulaw                   ../engine/source/materials/mat_share/mulaw.F90
@@ -500,10 +500,12 @@
           integer :: nuvarr
 
           integer :: nv46, numel, inloc
-          integer :: i,npar,nuparam,niparam,nparf,iadbuf,nfunc,numtabl,israte,ipg,nptr,npts,&
-          &ibid,ibidon1,ibidon2,ibidon3,ibidon4 ,n48,nix,ilaw_user,igtyp,&
-          &nvarf,ir,irupt,imat,isvis,nuvarv,iseq,idev,ntabl_fail,&
-          &l_planl,l_epsdnl,l_dmg,l_sigb
+          integer :: i,npar,nuparam,niparam,nparf,nvarftmp,iadbuf,nfunc,numtabl,   &
+          israte,ipg,nptr,npts,&
+          ibid,ibidon1,ibidon2,ibidon3,ibidon4 ,n48,nix,ilaw_user,igtyp,&
+          nvarf,ir,irupt,imat,isvis,nuvarv,iseq,idev,ntabl_fail,&
+          l_planl,l_epsdnl,l_dmg,l_sigb
+          integer, dimension(:) ,pointer :: varftmp
 
           real(kind=WP) :: e1,e2,e3,e4,e5,e6,bid1,bid3,q1,q2,q3,ss1,ss2,ss3,ss4,ss5,&
           &ss6,wxxf,wyyf,wzzf,p2,epsp,dav,asrate,     &
@@ -534,8 +536,7 @@
           real(kind=WP) :: wfextt !< external force work accumulation
 !----
           real(kind=WP), dimension(:), pointer, contiguous   :: uparam,uparam0,uparf,uvarf,dfmax,&
-          &tdel,yldfac,dam,el_len,&
-          &el_pla,damini
+          &tdel,yldfac,dam,el_len,el_pla,damini
           real(kind=WP), dimension(nel), target :: el_pla_dum
           real(kind=WP), dimension(:), allocatable ,target  :: bufzero
           type(l_bufel_)  ,pointer         :: lbuf
@@ -1544,14 +1545,14 @@
             &ebuf%var,nvareos,mat_elem%mat_param, nvartmp_eos, ebuf%var)
 !
           else if (mtn == 76) then
-            call sigeps76(nel      ,npar     ,nuvar    ,nfunc    ,ifunc    ,ngl       ,&
-            &npf      ,tf       ,tt       ,dt1      ,uparam0   ,matparam  ,&
-            &rho0     ,dpla     ,et       ,ssp      ,sigy     ,uvar      ,&
-            &de1      ,de2      ,de3      ,de4      ,de5      ,de6       ,&
-            &so1      ,so2      ,so3      ,so4      ,so5      ,so6       ,&
-            &s1       ,s2       ,s3       ,s4       ,s5       ,s6        ,&
-            &off      ,epsd     ,defp     ,inloc    ,l_planl  ,lbuf%planl,&
-            &lbuf%dmg ,nvartmp  ,vartmp   )
+            call sigeps76(nel   ,npar     ,nuvar    ,ngl      ,           &
+             tt       ,dt1      ,uparam0   ,matparam,                     &
+             rho0     ,dpla     ,et       ,ssp      ,sigy     ,uvar      ,&
+             de1      ,de2      ,de3      ,de4      ,de5      ,de6       ,&
+             so1      ,so2      ,so3      ,so4      ,so5      ,so6       ,&
+             s1       ,s2       ,s3       ,s4       ,s5       ,s6        ,&
+             off      ,epsd     ,defp     ,inloc    ,l_planl  ,lbuf%planl,&
+             lbuf%dmg ,nvartmp  ,vartmp   )
 !
           else if (mtn == 78) then
             call sigeps78(nel ,npar,nuvar,nfunc,ifunc,npf ,&
@@ -2293,7 +2294,9 @@
               end if
 !----
               uvarf  => fbuf%floc(ir)%var
+              varftmp=> fbuf%floc(ir)%vartmp
               irupt  =  fbuf%floc(ir)%ilawf
+              nvarf  =  fbuf%floc(ir)%nvar
               nvarf  =  fbuf%floc(ir)%nvar
               dfmax  => fbuf%floc(ir)%dammx
               damini => fbuf%floc(ir)%damini
@@ -2305,8 +2308,9 @@
               failparam => matparam%fail(ir)
               nparf  =  matparam%fail(ir)%nuparam
               niparf =  matparam%fail(ir)%niparam
-              uparf=> matparam%fail(ir)%uparam(1:nparf)
-              iparf=> matparam%fail(ir)%iparam(1:niparf)
+              nvarftmp= matparam%fail(ir)%nvartmp
+              uparf  => matparam%fail(ir)%uparam(1:nparf)
+              iparf => matparam%fail(ir)%iparam(1:niparf)
               nfunc  =  matparam%fail(ir)%nfunc
               fld_idx=> fbuf%floc(ir)%indx
               ifunc  => matparam%fail(ir)%ifunc(1:nfunc)
@@ -2431,12 +2435,12 @@
                 &mfzx     ,mfzy     ,mfzz     ,lbuf%dmgscl)
               else if (irupt == 11) then
 !---- energy failure
-                call fail_energy_s(&
-                &nel      ,nparf    ,nvarf    ,nfunc    ,ifunc    ,npf      ,&
-                &tf       ,tt       ,dt1      ,uparf    ,ngl      ,epsp1    ,&
-                &uvarf    ,off      ,dfmax    ,tdel     ,lbuf%dmgscl,&
-                &s1       ,s2       ,s3       ,s4       ,s5       ,s6       ,&
-                &de1      ,de2      ,de3      ,de4      ,de5      ,de6      )
+                call fail_energy_s(mat_elem%mat_param(imat)%fail(ir)  , &
+                 nel      ,nvarf    ,nvarftmp ,uvarf    ,varftmp   ,          &
+                 tt       ,dt1      ,ngl      ,epsp1    ,&
+                 off      ,dfmax    ,tdel     ,lbuf%dmgscl,&
+                 s1       ,s2       ,s3       ,s4       ,s5       ,s6       ,&
+                 de1      ,de2      ,de3      ,de4      ,de5      ,de6      )
               else if (irupt == 13) then
 !---- chang - chang
                 call fail_changchang_s(&
@@ -2566,13 +2570,13 @@
               else if (irupt == 41) then
 !---- tabulated failure model version 2
                 call fail_tab2_s(&
-                &nel      ,nparf    ,nvarf    ,nfunc    ,ifunc    ,&
-                &npf      ,table    ,tf       ,tt       ,uparf  ,&
-                &ngl      ,el_len   ,dpla     ,epsp1    ,uvarf    ,&
-                &s1       ,s2       ,s3       ,s4       ,s5       ,s6       ,&
-                &el_temp  ,off      ,dfmax    ,tdel     ,lbuf%dmgscl,&
-                &gbuf%uelr,ipg      ,npg      ,lbuf%off ,ntabl_fail,itabl_fail,&
-                &gbuf%noff,voln     )
+                 nel      ,nparf    ,nvarf    ,nfunc    ,ifunc    ,&
+                 npf      ,table    ,tf       ,tt       ,uparf  ,&
+                 ngl      ,el_len   ,dpla     ,epsp1    ,uvarf    ,&
+                 s1       ,s2       ,s3       ,s4       ,s5       ,s6       ,&
+                 el_temp  ,off      ,dfmax    ,tdel     ,lbuf%dmgscl,&
+                 gbuf%uelr,ipg      ,npg      ,lbuf%off ,ntabl_fail,itabl_fail,&
+                 gbuf%noff,voln     ,nvarftmp ,varftmp   )
 !
               else if (irupt == 42) then
 !---- inievo failure model

@@ -45,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    cluster_mod                     ../starter/share/modules1/cluster_mod.F
 !||    consider_edge_mod               ../starter/source/spmd/domain_decomposition/consider_edge.F
+!||    elm_group_mod                   ../starter/source/modules/elm_group_mod.F90
 !||    format_mod                      ../starter/share/modules1/format_mod.F90
 !||    front_mod                       ../starter/share/modules1/front_mod.F
 !||    get_metis_arguments_mod         ../starter/source/spmd/domain_decomposition/get_metis_arguments.F90
@@ -75,7 +76,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      6  POIN_PART_SHELL,POIN_PART_TRI,POIN_PART_SOL,
      7  MID_PID_SHELL,MID_PID_TRI,MID_PID_SOL,T_MONVOL,
      8  EBCS_TAG_CELL_SPMD,NPBY,LPBY,MAT_PARAM,
-     9  iworksh)
+     9  iworksh,elm_group)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -95,6 +96,7 @@ C-----------------------------------------------
       USE FORMAT_MOD , ONLY : FMW_A_I
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
       use get_metis_arguments_mod
+      use elm_group_mod , only : elm_group_      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -156,6 +158,7 @@ C-----------------------------------------------
       TYPE(INTER_CAND_), INTENT(in) :: INTER_CAND
       TYPE(MATPARAM_STRUCT_) ,DIMENSION(NUMMAT), INTENT(IN) :: MAT_PARAM
       integer, dimension(3,numelc+numeltg), intent(in) :: iworksh !< ply data for shell & shell3n elements
+      type(elm_group_), intent(in) :: elm_group !< element group data structure to store the group id and the number of element in the group for each element  
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -1018,7 +1021,7 @@ C   default weight optimization
      .             TABMP_L,IPART,IPARTC,IPARTG,
      .             IPARTS,NPART,POIN_PART_SHELL,POIN_PART_TRI,POIN_PART_SOL,
      .             MID_PID_SHELL,MID_PID_TRI,MID_PID_SOL,IDDLEVEL,
-     .             MAT_PARAM,iworksh)
+     .             MAT_PARAM,iworksh,elm_group)
 C
       IF(NSUBDOM>0)THEN
         COST_R2R = ZERO

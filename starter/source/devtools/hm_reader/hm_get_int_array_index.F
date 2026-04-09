@@ -63,6 +63,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_bem                              ../starter/source/loads/bem/hm_read_bem.F
 !||    hm_read_drape                            ../starter/source/properties/composite_options/drape/hm_read_drape.F
 !||    hm_read_ebcs_inlet                       ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_inlet.F
+!||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_eref                             ../starter/source/loads/reference_state/eref/hm_read_eref.F
 !||    hm_read_fail_inievo                      ../starter/source/materials/fail/inievo/hm_read_fail_inievo.F
 !||    hm_read_fail_tab_old                     ../starter/source/materials/fail/tabulated/hm_read_fail_tab_old.F
@@ -139,7 +140,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_thgrsurf                         ../starter/source/output/th/hm_read_thgrsurf.F
 !||    hm_read_work_hardening_tabulated         ../starter/source/materials/mat/mat131/work_hardening/hm_read_work_hardening_tabulated.F90
 !||    hm_read_xref                             ../starter/source/loads/reference_state/xref/hm_read_xref.F
-!||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_set                                   ../starter/source/model/sets/hm_set.F
 !||    hm_surfnod                               ../starter/source/groups/hm_surfnod.F

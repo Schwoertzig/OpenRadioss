@@ -179,6 +179,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    genani1                           ../starter/source/output/anim/genani1.F
 !||    genh3d                            ../engine/source/output/h3d/h3d_results/genh3d.F
 !||    get_skew45                        ../starter/source/elements/joint/rjoint/rini45.F
+!||    get_sort_key_shell3n              ../starter/source/elements/sh3n/get_sort_key_shell3n.F90
 !||    gr_entity_ini                     ../starter/source/model/group/gr_entity_ini.F
 !||    groupdef_mod                      ../common_source/modules/groupdef_mod.F
 !||    h3d_gene_keyword                  ../engine/source/output/h3d/input_list/h3d_gene_keyword.F
@@ -315,6 +316,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_eref                      ../starter/source/loads/reference_state/eref/hm_read_eref.F
 !||    hm_read_fail                      ../starter/source/materials/fail/hm_read_fail.F
 !||    hm_read_fail_biquad               ../starter/source/materials/fail/biquad/hm_read_fail_biquad.F
+!||    hm_read_fail_energy               ../starter/source/materials/fail/energy/hm_read_fail_energy.F
 !||    hm_read_fail_gurson               ../starter/source/materials/fail/gurson/hm_read_fail_gurson.F
 !||    hm_read_fail_johnson              ../starter/source/materials/fail/johnson_cook/hm_read_fail_johnson.F
 !||    hm_read_fail_orthbiquad           ../starter/source/materials/fail/orthbiquad/hm_read_fail_orthbiquad.F
@@ -655,6 +657,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    i25pwr3_e2s                       ../starter/source/interfaces/inter3d1/i25pwr3_e2s.F
 !||    i25pwr3e                          ../starter/source/interfaces/inter3d1/i25pwr3e.F
 !||    i25sti3                           ../starter/source/interfaces/inter3d1/i25sti3.F
+!||    i25sti_edg                        ../starter/source/interfaces/inter3d1/i25sti_edg.F
 !||    i2buc1                            ../starter/source/interfaces/inter3d1/i2buc1.F
 !||    i2surfs                           ../starter/source/interfaces/inter3d1/i2surfs.F
 !||    i2tid3                            ../starter/source/interfaces/inter3d1/i2tid3.F
@@ -744,7 +747,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    law69_nlsqf_auto                  ../starter/source/materials/tools/law69_nlsqf_auto.F
 !||    law69_upd                         ../starter/source/materials/mat/mat069/law69_upd.F
 !||    law70_upd                         ../starter/source/materials/mat/mat070/law70_upd.F
-!||    law76_upd                         ../starter/source/materials/mat/mat076/law76_upd.F
 !||    law77_upd                         ../starter/source/materials/mat/mat077/law77_upd.F
 !||    law90_upd                         ../starter/source/materials/mat/mat090/law90_upd.F
 !||    law92_nlsqf                       ../starter/source/materials/mat/mat092/law92_nlsqf.F90

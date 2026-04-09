@@ -58,6 +58,7 @@
 !||    eigp                                     ../engine/stub/eigp.F
 !||    elasto_plastic_eq_stress                 ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
 !||    elasto_plastic_kinematic_hardening       ../engine/source/materials/mat/mat131/elasto_plastic_kinematic_hardening.F90
+!||    elasto_plastic_second_order_numerical    ../engine/source/materials/mat/mat131/elasto_plastic_second_order_numerical.F90
 !||    elasto_plastic_trial_stress              ../engine/source/materials/mat/mat131/elasto_plastic_trial_stress.F90
 !||    elasto_plastic_yield_stress              ../engine/source/materials/mat/mat131/elasto_plastic_yield_stress.F90
 !||    eosmain                                  ../common_source/eos/eosmain.F
@@ -69,11 +70,14 @@
 !||    fill_buffer_51                           ../starter/source/materials/mat/mat051/fill_buffer_51.F
 !||    fill_buffer_51_0                         ../starter/source/materials/mat/mat051/fill_buffer_51_0.F
 !||    fsdcod                                   ../starter/source/system/fsdcod.F
-!||    func_comp                                ../starter/source/materials/mat/mat076/law76_upd.F
 !||    funct_python_update_elements             ../engine/source/tools/curve/funct_python_update_elements.F90
 !||    genani                                   ../engine/source/output/anim/generate/genani.F
 !||    gendynain                                ../engine/source/output/dynain/gendynain.F
 !||    genh3d                                   ../engine/source/output/h3d/h3d_results/genh3d.F
+!||    get_element_group                        ../starter/source/elements/get_element_group.F90
+!||    get_sort_key_shell                       ../starter/source/elements/shell/get_sort_key_shell.F90
+!||    get_sort_key_shell3n                     ../starter/source/elements/sh3n/get_sort_key_shell3n.F90
+!||    get_sort_key_solid                       ../starter/source/elements/solid/get_sort_key_solid.F90
 !||    globmat                                  ../starter/source/materials/globmat.F
 !||    granular51                               ../engine/source/materials/mat/mat051/granular51.F90
 !||    h3d_quad_scalar                          ../engine/source/output/h3d/h3d_results/h3d_quad_scalar.F
@@ -88,6 +92,7 @@
 !||    hm_read_elasticity_anisotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
 !||    hm_read_elasticity_isotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_elasto_plastic                   ../starter/source/materials/mat/mat131/hm_read_elasto_plastic.F90
 !||    hm_read_eos                              ../starter/source/materials/eos/hm_read_eos.F
 !||    hm_read_eos_gruneisen                    ../starter/source/materials/eos/hm_read_eos_gruneisen.F
@@ -299,7 +304,6 @@
 !||    law42_upd                                ../starter/source/materials/mat/mat042/law42_upd.F
 !||    law58_upd                                ../starter/source/materials/mat/mat058/law58_upd.F
 !||    law70_upd                                ../starter/source/materials/mat/mat070/law70_upd.F
-!||    law76_upd                                ../starter/source/materials/mat/mat076/law76_upd.F
 !||    law77_upd                                ../starter/source/materials/mat/mat077/law77_upd.F
 !||    law81_upd                                ../starter/source/materials/mat/mat081/law81_upd.F90
 !||    law87_upd                                ../starter/source/materials/mat/mat087/law87_upd.F90

@@ -1102,6 +1102,7 @@ c---
             DO IFL = 1, NFAIL      ! loop over fail models in current layer                                      
               UVARF  => FBUF%FLOC(IFL)%VAR
               NVARF  =  FBUF%FLOC(IFL)%NVAR                                 
+              VARTMP => FBUF%FLOC(IFL)%VARTMP
               IRUPT  =  FBUF%FLOC(IFL)%ILAWF                                
               DAM    => FBUF%FLOC(IFL)%DAM
               DFMAX  => FBUF%FLOC(IFL)%DAMMX 
@@ -1113,6 +1114,7 @@ c---
               FAIL_PARAM => MAT_ELEM%MAT_PARAM(IMAT)%FAIL(IFL)
               NUPAR      =  MAT_ELEM%MAT_PARAM(IMAT)%FAIL(IFL)%NUPARAM
               NIPAR      =  MAT_ELEM%MAT_PARAM(IMAT)%FAIL(IFL)%NIPARAM
+              nvartmp    =  MAT_ELEM%MAT_PARAM(IMAT)%FAIL(IFL)%nvartmp
               NFUNC_FAIL =  MAT_ELEM%MAT_PARAM(IMAT)%FAIL(IFL)%NFUNC
               NTABL_FAIL =  MAT_ELEM%MAT_PARAM(IMAT)%FAIL(IFL)%NTABLE
               UPARAMF    => MAT_ELEM%MAT_PARAM(IMAT)%FAIL(IFL)%UPARAM(1:NUPAR)
@@ -1329,14 +1331,13 @@ c
      6               DMG_FLAG  ,DMG_LOC_SCALE ,ALDT  ,TSTAR     ,ISMSTR    )                                
 c
               CASE (11)     !    Energy failure model
-                CALL FAIL_ENERGY_C(
-     1               NEL       ,NUPAR     ,NVARF     ,NFUNC_FAIL   ,IFUNC_FAIL     , 
-     2               UPARAMF   ,UVARF     ,NPF       ,TF       ,TT         , 
-     3               NGL       ,IPG       ,ILAYER    ,IT       ,EPSPL      ,  
-     4               AREA      ,THKN      ,DMG_FLAG  , 
-     5               DMG_LOC_SCALE ,OFF   ,FOFF      ,DFMAX    ,TDEL       ,
-     6               SIGNXX    ,SIGNYY    ,SIGNXY    ,SIGNYZ   ,SIGNZX     ,
-     7               DEPSXX    ,DEPSYY    ,DEPSXY    ,DEPSYZ   ,DEPSZX     )     
+                call fail_energy_c(fail_param ,                      
+     &               nel       ,nvarf     ,nvartmp   ,uvarf    ,vartmp     ,
+     &               ngl       ,ipg       ,ilayer    ,it       ,epspl      ,
+     &               area      ,thkn      ,dmg_flag  ,tt       ,            
+     &               dmg_loc_scale ,off   ,foff      ,dfmax    ,tdel       ,
+     &               signxx    ,signyy    ,signxy    ,signyz   ,signzx     ,
+     &               depsxx    ,depsyy    ,depsxy    ,depsyz   ,depszx     )
 c
               CASE (13)     !    Chang-Chang failure model
                 CALL FAIL_CHANGCHANG_C(
@@ -1549,7 +1550,7 @@ c
      1            JLT      ,NUPAR    ,NVARF    ,NFUNC_FAIL,IFUNC_FAIL,
      2            NPF      ,TABLE    ,TF       ,TT       ,UPARAMF  , 
      3            NGL      ,EL_LEN   ,DPLA     ,EPSPL    ,UVARF    ,     
-     4            SIGNXX   ,SIGNYY   ,SIGNXY   ,              
+     4            SIGNXX   ,SIGNYY   ,SIGNXY   ,NVARTMP  ,VARTMP   ,              
      5            EL_TEMP  ,FOFF     ,DFMAX    ,TDEL     ,IPT      ,
      6            IPG      ,DMG_FLAG ,DMG_LOC_SCALE,NTABL_FAIL,ITABL_FAIL,
      7            NIPAR    ,IPARAMF  ,GBUF%NOFF,OFF      ,NPTT     ,

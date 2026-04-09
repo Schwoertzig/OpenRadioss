@@ -41,10 +41,13 @@
 !||    cutting_plane_solids          ../engine/source/materials/mat/mat131/return_mapping/cutting_plane_solids.F90
 !||    nice_shells                   ../engine/source/materials/mat/mat131/return_mapping/nice_shells.F90
 !||    nice_solids                   ../engine/source/materials/mat/mat131/return_mapping/nice_solids.F90
+!||--- calls      -----------------------------------------------------
+!||    table_mat_vinterp             ../engine/source/materials/tools/table_mat_vinterp.F
 !||--- uses       -----------------------------------------------------
 !||    constant_mod                  ../common_source/modules/constant_mod.F
 !||    matparam_def_mod              ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    precision_mod                 ../common_source/modules/precision_mod.F90
+!||    table_mat_vinterp_mod         ../engine/source/materials/tools/table_mat_vinterp.F
 !||====================================================================
       subroutine elasto_plastic_trial_stress(                                  &
         matparam ,nel      ,soundsp  ,cstf     ,young    ,rho      ,           &
@@ -52,13 +55,14 @@
         sigoxx   ,sigoyy   ,sigozz   ,sigoxy   ,sigoyz   ,sigozx   ,           &
         signxx   ,signyy   ,signzz   ,signxy   ,signyz   ,signzx   ,           &
         eltype   ,shf      ,s13      ,s23      ,s43      ,ieos     ,           &
-        dpdm     )
+        dpdm     ,nvartmp  ,vartmp   ,epsd     )
 !----------------------------------------------------------------
 !   M o d u l e s
 !----------------------------------------------------------------
         use matparam_def_mod
         use constant_mod
         use precision_mod, only : WP
+        use table_mat_vinterp_mod
 !----------------------------------------------------------------
 !   I m p l i c i t   T y p e s
 !----------------------------------------------------------------
@@ -97,10 +101,15 @@
         real(kind=WP), dimension(nel), intent(inout) :: s43      !< Compliance matrix component 43
         integer,                       intent(in)    :: ieos     !< Equation of state flag
         real(kind=WP), dimension(nel), intent(inout) :: dpdm     !< Pressure derivative of the shear modulus for EOS coupling
+        integer,                       intent(in)    :: nvartmp  !< Number of temporary variables for table interpolation
+        integer,dimension(nel,nvartmp),intent(inout) :: vartmp   !< Temporary variable array for table interpolation
+        real(kind=WP), dimension(nel), intent(in)    :: epsd     !< Equivalent strain rate
 !----------------------------------------------------------------
 !  L o c a l  V a r i a b l e s
 !----------------------------------------------------------------
         integer :: ielas,i
+        real(kind=WP), dimension(nel) :: young_fac,dyoung_fact
+        real(kind=WP), dimension(nel,1) :: xvec
 !===============================================================================
 !
         !< Initialize elastic stiffness matrix 
@@ -262,7 +271,7 @@
               cstf(1:nel,5,5) = matparam%uparam(28)*shf(1:nel)
               cstf(1:nel,5,6) = matparam%uparam(29)*shf(1:nel)
               cstf(1:nel,6,5) = matparam%uparam(29)*shf(1:nel)
-              cstf(1:nel,6,6) = matparam%uparam(30)*shf(1:nel)  
+              cstf(1:nel,6,6) = matparam%uparam(30)*shf(1:nel)
               !< Compliance matrix components for thickness update
               s13(1:nel) = matparam%uparam(31)
               s23(1:nel) = matparam%uparam(32)
@@ -271,47 +280,101 @@
               soundsp(1:nel) = sqrt(max(cstf(1:nel,1,1),cstf(1:nel,2,2),       &
                                             cstf(1:nel,4,4))/rho(1:nel))       
             endif
+          !---------------------------------------------------------------------
+          !< Viscous isotropic elastic model
+          !---------------------------------------------------------------------
+          case(4)
+            !< Interpolation of the Young modulus viscous factor
+            xvec(1:nel,1) = epsd(1:nel)
+            call table_mat_vinterp(matparam%table(1),nel,nel,vartmp(1:nel,1),  &
+              xvec(1:nel,1),young_fac(1:nel),dyoung_fact(1:nel))
+            !< Solids
+            if (eltype == 1) then     
+              !< Elastic stiffness matrix
+              cstf(1:nel,1,1) = matparam%uparam(1)*young_fac(1:nel)
+              cstf(1:nel,2,2) = matparam%uparam(1)*young_fac(1:nel)
+              cstf(1:nel,3,3) = matparam%uparam(1)*young_fac(1:nel)
+              cstf(1:nel,1,2) = matparam%uparam(2)*young_fac(1:nel)
+              cstf(1:nel,1,3) = matparam%uparam(2)*young_fac(1:nel)
+              cstf(1:nel,2,1) = matparam%uparam(2)*young_fac(1:nel)
+              cstf(1:nel,2,3) = matparam%uparam(2)*young_fac(1:nel)
+              cstf(1:nel,3,1) = matparam%uparam(2)*young_fac(1:nel)
+              cstf(1:nel,3,2) = matparam%uparam(2)*young_fac(1:nel)
+              cstf(1:nel,4,4) = matparam%shear*young_fac(1:nel)
+              cstf(1:nel,5,5) = matparam%shear*young_fac(1:nel)
+              cstf(1:nel,6,6) = matparam%shear*young_fac(1:nel)
+              young(1:nel) = matparam%young*young_fac(1:nel)
+              !< Sound speed
+              if (ieos > 0) then 
+                soundsp(1:nel) = sqrt((dpdm(1:nel) +                           &
+                                  four_over_3*matparam%shear*young_fac(1:nel)) &
+                                                                   /rho(1:nel))
+              else
+                soundsp(1:nel) = sqrt((matparam%bulk+                          &
+                                  four_over_3*matparam%shear)*young_fac(1:nel) &
+                                                                   /rho(1:nel))
+              endif
+            !< Shells
+            elseif (eltype == 2) then
+              !< Elastic stiffness matrix
+              cstf(1:nel,1,1) = matparam%uparam(3)*young_fac(1:nel)
+              cstf(1:nel,2,2) = matparam%uparam(3)*young_fac(1:nel)
+              cstf(1:nel,1,2) = matparam%uparam(4)*young_fac(1:nel)
+              cstf(1:nel,2,1) = matparam%uparam(4)*young_fac(1:nel)
+              cstf(1:nel,4,4) = matparam%shear*young_fac(1:nel)
+              cstf(1:nel,5,5) = matparam%shear*shf(1:nel)*young_fac(1:nel)
+              cstf(1:nel,6,6) = matparam%shear*shf(1:nel)*young_fac(1:nel)
+              !< Compliance matrix components for thickness update
+              s13(1:nel) = - matparam%nu / (matparam%young * young_fac(1:nel))
+              s23(1:nel) = - matparam%nu / (matparam%young * young_fac(1:nel))
+              s43(1:nel) = zero
+              !< Sound speed
+              soundsp(1:nel) = sqrt(cstf(1:nel,1,1)/rho(1:nel))
+            endif
         end select
 !
         !=======================================================================
         !< Elastic trial stress computation
         !=======================================================================
-        signxx(1:nel) = sigoxx(1:nel) + cstf(1:nel,1,1)*depsxx(1:nel) +        &
-                                        cstf(1:nel,1,2)*depsyy(1:nel) +        &
-                                        cstf(1:nel,1,3)*depszz(1:nel) +        &
-                                        cstf(1:nel,1,4)*depsxy(1:nel) +        &
-                                        cstf(1:nel,1,5)*depsyz(1:nel) +        &
-                                        cstf(1:nel,1,6)*depszx(1:nel)
-        signyy(1:nel) = sigoyy(1:nel) + cstf(1:nel,2,1)*depsxx(1:nel) +        &
-                                        cstf(1:nel,2,2)*depsyy(1:nel) +        &
-                                        cstf(1:nel,2,3)*depszz(1:nel) +        &
-                                        cstf(1:nel,2,4)*depsxy(1:nel) +        &
-                                        cstf(1:nel,2,5)*depsyz(1:nel) +        &
-                                        cstf(1:nel,2,6)*depszx(1:nel)
-        signzz(1:nel) = sigozz(1:nel) + cstf(1:nel,3,1)*depsxx(1:nel) +        & 
-                                        cstf(1:nel,3,2)*depsyy(1:nel) +        & 
-                                        cstf(1:nel,3,3)*depszz(1:nel) +        &
-                                        cstf(1:nel,3,4)*depsxy(1:nel) +        &
-                                        cstf(1:nel,3,5)*depsyz(1:nel) +        &
-                                        cstf(1:nel,3,6)*depszx(1:nel)
-        signxy(1:nel) = sigoxy(1:nel) + cstf(1:nel,4,1)*depsxx(1:nel) +        &
-                                        cstf(1:nel,4,2)*depsyy(1:nel) +        &
-                                        cstf(1:nel,4,3)*depszz(1:nel) +        &
-                                        cstf(1:nel,4,4)*depsxy(1:nel) +        &
-                                        cstf(1:nel,4,5)*depsyz(1:nel) +        &
-                                        cstf(1:nel,4,6)*depszx(1:nel)
-        signyz(1:nel) = sigoyz(1:nel) + cstf(1:nel,5,1)*depsxx(1:nel) +        &
-                                        cstf(1:nel,5,2)*depsyy(1:nel) +        &
-                                        cstf(1:nel,5,3)*depszz(1:nel) +        &
-                                        cstf(1:nel,5,4)*depsxy(1:nel) +        &
-                                        cstf(1:nel,5,5)*depsyz(1:nel) +        &
-                                        cstf(1:nel,5,6)*depszx(1:nel)
-        signzx(1:nel) = sigozx(1:nel) + cstf(1:nel,6,1)*depsxx(1:nel) +        &
-                                        cstf(1:nel,6,2)*depsyy(1:nel) +        &
-                                        cstf(1:nel,6,3)*depszz(1:nel) +        &
-                                        cstf(1:nel,6,4)*depsxy(1:nel) +        &
-                                        cstf(1:nel,6,5)*depsyz(1:nel) +        &
-                                        cstf(1:nel,6,6)*depszx(1:nel)
+#include "vectorize.inc"
+        do i = 1,nel
+          signxx(i) = sigoxx(i) + cstf(i,1,1)*depsxx(i) +                      &
+                                  cstf(i,1,2)*depsyy(i) +                      &
+                                  cstf(i,1,3)*depszz(i) +                      &
+                                  cstf(i,1,4)*depsxy(i) +                      &
+                                  cstf(i,1,5)*depsyz(i) +                      &
+                                  cstf(i,1,6)*depszx(i)
+          signyy(i) = sigoyy(i) + cstf(i,2,1)*depsxx(i) +                      &
+                                  cstf(i,2,2)*depsyy(i) +                      &
+                                  cstf(i,2,3)*depszz(i) +                      &
+                                  cstf(i,2,4)*depsxy(i) +                      &
+                                  cstf(i,2,5)*depsyz(i) +                      &
+                                  cstf(i,2,6)*depszx(i)
+          signzz(i) = sigozz(i) + cstf(i,3,1)*depsxx(i) +                      & 
+                                  cstf(i,3,2)*depsyy(i) +                      & 
+                                  cstf(i,3,3)*depszz(i) +                      &
+                                  cstf(i,3,4)*depsxy(i) +                      &
+                                  cstf(i,3,5)*depsyz(i) +                      &
+                                  cstf(i,3,6)*depszx(i)
+          signxy(i) = sigoxy(i) + cstf(i,4,1)*depsxx(i) +                      &
+                                  cstf(i,4,2)*depsyy(i) +                      &
+                                  cstf(i,4,3)*depszz(i) +                      &
+                                  cstf(i,4,4)*depsxy(i) +                      &
+                                  cstf(i,4,5)*depsyz(i) +                      &
+                                  cstf(i,4,6)*depszx(i)
+          signyz(i) = sigoyz(i) + cstf(i,5,1)*depsxx(i) +                      &
+                                  cstf(i,5,2)*depsyy(i) +                      &
+                                  cstf(i,5,3)*depszz(i) +                      &
+                                  cstf(i,5,4)*depsxy(i) +                      &
+                                  cstf(i,5,5)*depsyz(i) +                      &
+                                  cstf(i,5,6)*depszx(i)
+          signzx(i) = sigozx(i) + cstf(i,6,1)*depsxx(i) +                      &
+                                  cstf(i,6,2)*depsyy(i) +                      &
+                                  cstf(i,6,3)*depszz(i) +                      &
+                                  cstf(i,6,4)*depsxy(i) +                      &
+                                  cstf(i,6,5)*depsyz(i) +                      &
+                                  cstf(i,6,6)*depszx(i)
+        end do
 !
       end subroutine elasto_plastic_trial_stress
       end module elasto_plastic_trial_stress_mod

@@ -30,8 +30,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    detcord0                       ../starter/source/initial_conditions/detonation/detcord0.F
 !||    ecran1                         ../starter/source/initial_conditions/detonation/ecran1.F
 !||    ecran2                         ../starter/source/initial_conditions/detonation/ecran2.F
+!||    eikonal_bcs_sym_tag            ../starter/source/initial_conditions/detonation/eikonal_bcs_sym_tag.F90
 !||    eikonal_fast_marching_method   ../starter/source/initial_conditions/detonation/eikonal_fast_marching_method.F90
-!||    eikonal_init_start_list_2d     ../starter/source/initial_conditions/detonation/eikonal_init_start_list_2d.F90
+!||    eikonal_init_start_list        ../starter/source/initial_conditions/detonation/eikonal_init_start_list.F90
 !||    eikonal_solver                 ../starter/source/initial_conditions/detonation/eikonal_solver.F90
 !||    ig3dinit3                      ../starter/source/elements/ige3d/ig3dinit3.F
 !||    initia                         ../starter/source/elements/initia/initia.F
@@ -87,10 +88,17 @@ C-----------------------------------------------
           LOGICAL :: IS_MAT_VALID = .FALSE.
           INTEGER :: MAT = 0
           INTEGER :: SHADOW = 0
+          INTEGER :: iframe1 = 0 ! optional frame (1st sym plane)
+          INTEGER :: iframe2 = 0 ! optional frame (2nd sym plane)
+          my_real :: O1(3)=0. ! origin for iframe1
+          my_real :: O2(3)=0. ! origin for iframe2
+          my_real :: N1(3)=0. ! normal vector from plane defined with iframe1
+          my_real :: N2(3)=0. ! normal vector from plane defined with iframe1
           my_real :: TDET
           my_real :: XDET
           my_real :: YDET
           my_real :: ZDET
+          my_real :: R0
           !optional list of nodes
           INTEGER :: GRNOD_ID
           INTEGER :: NNOD

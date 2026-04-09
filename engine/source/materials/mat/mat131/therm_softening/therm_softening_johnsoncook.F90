@@ -69,7 +69,7 @@
         !=======================================================================
         !< - Johnson-Cook thermal softening model
         !=======================================================================
-        offset = matparam%iparam(12)
+        offset = matparam%iparam(14)
         !< Recover thermal softening parameters
         m     = matparam%uparam(offset + 1) !< Thermal softening exponent
         tref  = matparam%therm%tref         !< Reference temperature
@@ -77,7 +77,7 @@
         !< Limit temperature to melting temperature
         temp(1:nel) = min(temp(1:nel),tmelt)
         !< Compute thermal softening factor and its derivative
-        temp_minus_tref_over_tmelt_minus_tref(1:nel) = (temp(1:nel)-tref)/(tmelt-tref)
+        temp_minus_tref_over_tmelt_minus_tref(1:nel) = (max(temp(1:nel)-tref, zero))/(tmelt-tref)
         thermfac(1:nel) = one - temp_minus_tref_over_tmelt_minus_tref(1:nel)**m
         dthermfac(1:nel) = (-m/(tmelt-tref)) * temp_minus_tref_over_tmelt_minus_tref(1:nel)**(m-one)
         !< Apply thermal softening to sigy and dsigy_dpla using chain rule

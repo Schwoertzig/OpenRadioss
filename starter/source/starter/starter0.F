@@ -223,8 +223,8 @@ C First task check the exec arguments (fill common)
       ! Options not requiering Starter deck read
       ! ----------------------------------------
       
-      ! -checksum_read [rootname]
-      IF ( OUTPUT%CHECKSUM%ST_CHECKSUM_READ == 1 ) THEN
+      ! -checksum_report [rootname]
+      IF ( OUTPUT%CHECKSUM%ST_CHECKSUM_REPORT == 1 ) THEN
          CALL CHECKSUM_CHECK(OUTPUT%CHECKSUM%ROOTNAME,PATH,CPUNAM,ARCHTITLE,IRESP)
          STOP
       ENDIF
@@ -256,7 +256,7 @@ C CODVERS : VERSION CODE        = 2019 IF RELEASE 2019
 C IMINVER : MINOR VERSION CODE  = 1 IF MINOR RELEASE A(A~1) OF 4.4 RELEASE
 C ISRCVER : SOURCE VERSION CODE = 41*100+9
 C-------------------------------------------------------------------
-      CODVERS          = 2026
+      CODVERS          = 2612
       IMINVER          = 1
       ISRCVER          = 1
 C-------------------------------------------------------------------

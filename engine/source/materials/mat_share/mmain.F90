@@ -411,6 +411,7 @@
           &        idamp_freq_range,visctype
           integer :: ifunc(maxfunc)
           integer :: nvartmp_eos
+          integer ,dimension(:) ,pointer :: vartmp
 
           ! Float/Double
           real(kind=WP) :: facq0,e1,e2,e3,e4,e5,e6,alpha,tref,tmelt
@@ -681,7 +682,7 @@
 !-----due to too much returns of qa, temporarily add iresp here
           if((ale%global%incomp/=1.or.(jeul+jale)/=1).and.jlag/=0.and.n2d==0.and.jsph==0.and.iresp==1&
           &.and.impl_s==0.and.ismstr/=1.and.ismstr/=3.and.ismstr/=11)then
-!-----due to issue w/ sp ----in srho3.f r4_amu is calculated for sp :
+!-----due to issue with sp ----in srho3.f r4_amu is calculated for sp :
 !--    r4_amu =vol0dp/voldp -1   because rho*voldp=rho0*vol0dp
             amu(1:nel) =  r4_amu(1:nel)
           else
@@ -2383,7 +2384,8 @@
               end if
 !
 !----
-              uvarf => fbuf%floc(ir)%var
+              uvarf  =>fbuf%floc(ir)%var
+              vartmp =>fbuf%floc(ir)%vartmp
               irupt  = fbuf%floc(ir)%ilawf
               nvarf  = fbuf%floc(ir)%nvar
               dfmax => fbuf%floc(ir)%dammx
@@ -2393,7 +2395,8 @@
               failparam => mat_elem%mat_param(imat)%fail(ir)
               nparam  = mat_elem%mat_param(imat)%fail(ir)%nuparam
               niparam = mat_elem%mat_param(imat)%fail(ir)%niparam
-              uparamf=>mat_elem%mat_param(imat)%fail(ir)%uparam(1:nparam)
+              nvartmp = mat_elem%mat_param(imat)%fail(ir)%nvartmp
+              uparamf=> mat_elem%mat_param(imat)%fail(ir)%uparam(1:nparam)
               iparamf=> mat_elem%mat_param(imat)%fail(ir)%iparam(1:niparam)
               nfunc  = mat_elem%mat_param(imat)%fail(ir)%nfunc
               ifunc(1:nfunc) = mat_elem%mat_param(imat)%fail(ir)%ifunc(1:nfunc)
@@ -2521,12 +2524,12 @@
 !
               else if(irupt == 11)then
 !---- energy failure
-                call fail_energy_s(&
-                &llt      ,nparam   ,nvarf    ,nfunc    ,ifunc    ,npf      ,&
-                &tf       ,tt       ,dt1      ,uparamf,ngl ,epsp     ,&
-                &uvarf    ,off      ,dfmax    ,tdel     ,lbuf%dmgscl,&
-                &ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6      ,&
-                &de1      ,de2      ,de3      ,de4      ,de5      ,de6      )
+                call fail_energy_s(failparam  ,  &
+                 llt      ,nvarf    ,nvartmp  ,uvarf    ,vartmp   ,    &
+                 tt       ,dt1      ,ngl      ,epsp     ,&
+                 off      ,dfmax    ,tdel     ,lbuf%dmgscl,&
+                 ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6      ,&
+                 de1      ,de2      ,de3      ,de4      ,de5      ,de6      )
               else if (irupt == 13) then
 !---- chang - chang
                 call fail_changchang_s(&
@@ -2658,13 +2661,13 @@
               else if (irupt == 41) then
 !---- tabulated failure model version 2
                 call fail_tab2_s(&
-                &llt      ,nparam   ,nvarf    ,nfunc    ,ifunc    ,&
-                &npf      ,table    ,tf       ,tt       ,uparamf,&
-                &ngl      ,el_len   ,dpla     ,epsp     ,uvarf    ,&
-                &ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6      ,&
-                &el_temp  ,off      ,dfmax    ,tdel     ,lbuf%dmgscl,&
-                &gbuf%uelr,ipg      ,npg      ,lbuf%off ,ntabl_fail,itabl_fail,&
-                  gbuf%noff,voln      )
+                 llt      ,nparam   ,nvarf    ,nfunc    ,ifunc    ,&
+                 npf      ,table    ,tf       ,tt       ,uparamf,  &
+                 ngl      ,el_len   ,dpla     ,epsp     ,uvarf    ,&
+                 ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6      ,  &
+                 el_temp  ,off      ,dfmax    ,tdel     ,lbuf%dmgscl,          &
+                 gbuf%uelr,ipg      ,npg      ,lbuf%off ,ntabl_fail,itabl_fail,&
+                 gbuf%noff,voln     ,nvartmp  ,vartmp   )
 !
               else if (irupt == 42) then
 !---- inievo failure model
@@ -2830,7 +2833,7 @@
           if(ipartsph/=0)then
             do i=1,nel
               if(off(i) > zero .and. off(i) < one)then
-! replace solid w/sph within the same cycle.
+! replace solid with sph within the same cycle.
                 off(i)=zero
                 lbuf%sig(nel*(1-1) + i)  = zero
                 lbuf%sig(nel*(2-1) + i)  = zero

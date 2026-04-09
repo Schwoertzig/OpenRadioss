@@ -1616,9 +1616,8 @@
 !
               elseif (ilaw == 76) then
 
-                call sigeps76c(&
-                  jlt      ,nuparam0 ,nuvar    ,nfunc    ,ifunc    ,&
-                  npf      ,tf       ,matparam ,tt       ,dt1      ,&
+                call sigeps76c(matparam ,                           &
+                  jlt      ,nuparam0 ,nuvar    ,tt       ,dt1      ,&
                   uparam0  ,uvar     ,rho      ,off      ,ngl      ,&
                   depsxx   ,depsyy   ,depsxy   ,depsyz   ,depszx   ,&
                   sigoxx   ,sigoyy   ,sigoxy   ,sigoyz   ,sigozx   ,&
@@ -2085,6 +2084,7 @@
                 do ifl = 1, nfail      ! loop over fail models in current layer
                   uvarf  => fbuf%floc(ifl)%var
                   nvarf  =  fbuf%floc(ifl)%nvar
+                  vartmp => fbuf%floc(ifl)%vartmp
                   irupt  =  fbuf%floc(ifl)%ilawf
                   dam    => fbuf%floc(ifl)%dam
                   dfmax  => fbuf%floc(ifl)%dammx
@@ -2096,6 +2096,7 @@
                   fail_param => mat_elem%mat_param(imat)%fail(ifl)
                   nupar      =  mat_elem%mat_param(imat)%fail(ifl)%nuparam
                   nipar      =  mat_elem%mat_param(imat)%fail(ifl)%niparam
+                  nvartmp    =  mat_elem%mat_param(imat)%fail(ifl)%nvartmp
                   nfunc_fail =  mat_elem%mat_param(imat)%fail(ifl)%nfunc
                   ntabl_fail =  mat_elem%mat_param(imat)%fail(ifl)%ntable
                   uparamf    => mat_elem%mat_param(imat)%fail(ifl)%uparam(1:nupar)
@@ -2285,14 +2286,13 @@
                     &dmg_flag  ,dmg_loc_scale ,aldt  ,tstar     ,ismstr    )
 !
                    case (11)     !    energy failure model
-                    call fail_energy_c(&
-                    &nel       ,nupar     ,nvarf     ,nfunc_fail   ,ifunc_fail     ,&
-                    &uparamf   ,uvarf     ,npf       ,tf       ,tt         ,&
-                    &ngl       ,ipg       ,ilayer    ,it       ,epsd       ,&
-                    &area      ,thkn      ,dmg_flag  ,&
-                    &dmg_loc_scale ,off   ,foff      ,dfmax    ,tdel       ,&
-                    &signxx    ,signyy    ,signxy    ,signyz   ,signzx     ,&
-                    &depsxx    ,depsyy    ,depsxy    ,depsyz   ,depszx     )
+                    call fail_energy_c(fail_param    ,                      &
+                     nel       ,nvarf     ,nvartmp   ,uvarf    ,vartmp     ,&
+                     ngl       ,ipg       ,ilayer    ,it       ,epsd       ,&
+                     area      ,thkn      ,dmg_flag  ,tt       ,            &
+                     dmg_loc_scale ,off   ,foff      ,dfmax    ,tdel       ,&
+                     signxx    ,signyy    ,signxy    ,signyz   ,signzx     ,&
+                     depsxx    ,depsyy    ,depsxy    ,depsyz   ,depszx     )
 !
                    case (13)     !    chang-chang failure model
                     call fail_changchang_c(&
@@ -2508,7 +2508,7 @@
                     &jlt      ,nupar    ,nvarf    ,nfunc_fail   ,ifunc_fail   ,&
                     &npf      ,table    ,tf       ,tt       ,uparamf  ,&
                     &ngl      ,el_len   ,dpla     ,epsd     ,uvarf    ,&
-                    &signxx   ,signyy   ,signxy   ,&
+                    &signxx   ,signyy   ,signxy   ,nvartmp  ,vartmp   ,&
                     &el_temp  ,foff     ,dfmax    ,tdel     ,ipt      ,&
                     &ipg      ,dmg_flag ,dmg_loc_scale,ntabl_fail,itabl_fail,&
                     &nipar    ,iparamf  ,gbuf%noff,off      ,nptt     ,&

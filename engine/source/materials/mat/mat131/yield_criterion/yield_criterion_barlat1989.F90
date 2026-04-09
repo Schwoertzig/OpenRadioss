@@ -21,21 +21,23 @@
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    yield_criterion_barlat1989_mod   ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
+!||    yield_criterion_barlat1989_mod          ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
 !||--- called by ------------------------------------------------------
-!||    elasto_plastic_eq_stress         ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
+!||    elasto_plastic_eq_stress                ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
+!||    elasto_plastic_second_order_numerical   ../engine/source/materials/mat/mat131/elasto_plastic_second_order_numerical.F90
 !||====================================================================
       module yield_criterion_barlat1989_mod
       contains
 !||====================================================================
-!||    yield_criterion_barlat1989   ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
+!||    yield_criterion_barlat1989              ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
 !||--- called by ------------------------------------------------------
-!||    elasto_plastic_eq_stress     ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
+!||    elasto_plastic_eq_stress                ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
+!||    elasto_plastic_second_order_numerical   ../engine/source/materials/mat/mat131/elasto_plastic_second_order_numerical.F90
 !||--- uses       -----------------------------------------------------
-!||    constant_mod                 ../common_source/modules/constant_mod.F
-!||    matparam_def_mod             ../common_source/modules/mat_elem/matparam_def_mod.F90
-!||    mvsiz_mod                    ../engine/share/spe_inc/mvsiz_mod.F90
-!||    precision_mod                ../common_source/modules/precision_mod.F90
+!||    constant_mod                            ../common_source/modules/constant_mod.F
+!||    matparam_def_mod                        ../common_source/modules/mat_elem/matparam_def_mod.F90
+!||    mvsiz_mod                               ../engine/share/spe_inc/mvsiz_mod.F90
+!||    precision_mod                           ../common_source/modules/precision_mod.F90
 !||====================================================================
       subroutine yield_criterion_barlat1989(                                   &
           matparam ,nel      ,seq      ,signxx   ,signyy   ,signxy   ,         &
@@ -79,7 +81,7 @@
         !=======================================================================
         !< - Barlat (1989) yield criterion and its derivatives
         !=======================================================================
-        offset = matparam%iparam(2)
+        offset = matparam%iparam(3)
         !< Barlat 1989 coefficients
         c = matparam%uparam(offset + 1)
         a = matparam%uparam(offset + 2)
@@ -104,40 +106,47 @@
             c*(abs(two*k2(i)))**m
           if (seq(i) > zero) then
             seq(i) = exp((one/m)*log(half*seq(i)))
+!
+            !< Unnormalized equivalent stress
+            seq(i) = seq(i)*normsig(i)
+!
+            !< Derivative of equivalent stress w.r.t k1 and k2
+            dseq_dk1 = ((seq(i)/normsig(i))**(one-m))*(a/two)*(                  &
+                     sign(one,k1(i) + k2(i))*(abs(k1(i) + k2(i)))**(m-one)       &
+                   + sign(one,k1(i) - k2(i))*(abs(k1(i) - k2(i)))**(m-one))
+            dseq_dk2 = ((seq(i)/normsig(i))**(one-m))*((a/two)*(                 &
+                     sign(one,k1(i) + k2(i))*(abs(k1(i) + k2(i)))**(m-one)       &
+                   - sign(one,k1(i) - k2(i))*(abs(k1(i) - k2(i)))**(m-one))      &
+                   + c*(abs(two*k2(i)))**(m-one))
+!
+            !< Derivative of k1 w.r.t stress tensor components
+            dk1_dsigxx = half
+            dk1_dsigyy = h/two
+!
+            !< Derivative of k2 w.r.t stress tensor components
+            dk2_dsigxx = (signxx(i)-h*signyy(i))/                               &
+                         (max(normsig(i)*four*k2(i),em20))
+            dk2_dsigyy = -h*(signxx(i)-h*signyy(i))/                            &
+                         (max(normsig(i)*four*k2(i),em20))
+            dk2_dsigxy = (p**2)*signxy(i)/max(normsig(i)*k2(i),em20)
+!
+            !< Assembling the derivative of the eq. stress w.r.t stress tensor
+            normxx(i) = dseq_dk1*dk1_dsigxx + dseq_dk2*dk2_dsigxx
+            normyy(i) = dseq_dk1*dk1_dsigyy + dseq_dk2*dk2_dsigyy
+            normzz(i) = -(normxx(i) + normyy(i))
+            normxy(i) = dseq_dk2*dk2_dsigxy       
+            normyz(i) = zero
+            normzx(i) = zero
+!
           else
-            seq(i) = zero
+            seq(i)    = zero
+            normxx(i) = zero
+            normyy(i) = zero
+            normzz(i) = zero
+            normxy(i) = zero
+            normyz(i) = zero
+            normzx(i) = zero
           end if
-!
-          !< Unnormalized equivalent stress
-          seq(i) = seq(i)*normsig(i)
-!
-          !< Derivative of equivalent stress w.r.t k1 and k2
-          dseq_dk1 = ((seq(i)/normsig(i))**(one-m))*(a/two)*(                  &
-                   sign(one,k1(i) + k2(i))*(abs(k1(i) + k2(i)))**(m-one)       &
-                 + sign(one,k1(i) - k2(i))*(abs(k1(i) - k2(i)))**(m-one))
-          dseq_dk2 = ((seq(i)/normsig(i))**(one-m))*((a/two)*(                 &
-                   sign(one,k1(i) + k2(i))*(abs(k1(i) + k2(i)))**(m-one)       &
-                 - sign(one,k1(i) - k2(i))*(abs(k1(i) - k2(i)))**(m-one))      &
-                 + c*(abs(two*k2(i)))**(m-one))
-!
-          !< Derivative of k1 w.r.t stress tensor components
-          dk1_dsigxx = half
-          dk1_dsigyy = h/two
-!
-          !< Derivative of k2 w.r.t stress tensor components
-          dk2_dsigxx = (signxx(i)-h*signyy(i))/                               &
-                       (max(normsig(i)*four*k2(i),em20))
-          dk2_dsigyy = -h*(signxx(i)-h*signyy(i))/                            &
-                       (max(normsig(i)*four*k2(i),em20))
-          dk2_dsigxy = (p**2)*signxy(i)/max(normsig(i)*k2(i),em20)
-!
-          !< Assembling the derivative of the eq. stress w.r.t stress tensor
-          normxx(i) = dseq_dk1*dk1_dsigxx + dseq_dk2*dk2_dsigxx
-          normyy(i) = dseq_dk1*dk1_dsigyy + dseq_dk2*dk2_dsigyy
-          normzz(i) = -(normxx(i) + normyy(i))
-          normxy(i) = dseq_dk2*dk2_dsigxy       
-          normyz(i) = zero
-          normzx(i) = zero
         enddo
 !
       end subroutine yield_criterion_barlat1989

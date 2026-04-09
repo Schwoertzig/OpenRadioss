@@ -29,8 +29,13 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    compaction_tab_init           ../common_source/eos/compaction_tab.F90
 !||    condamage                     ../engine/source/materials/mat/mat190/condamage.F
 !||    conversion                    ../engine/source/materials/mat/mat190/conversion.F
+!||    elasto_plastic_trial_stress   ../engine/source/materials/mat/mat131/elasto_plastic_trial_stress.F90
 !||    fail_biquad_c                 ../engine/source/materials/fail/biquad/fail_biquad_c.F
 !||    fail_biquad_s                 ../engine/source/materials/fail/biquad/fail_biquad_s.F
+!||    fail_energy_b                 ../engine/source/materials/fail/energy/fail_energy_b.F
+!||    fail_energy_c                 ../engine/source/materials/fail/energy/fail_energy_c.F
+!||    fail_energy_ib                ../engine/source/materials/fail/energy/fail_energy_ib.F
+!||    fail_energy_s                 ../engine/source/materials/fail/energy/fail_energy_s.F
 !||    granular51                    ../engine/source/materials/mat/mat051/granular51.F90
 !||    mat87c_tabulated              ../engine/source/materials/mat/mat087/mat87c_tabulated.F90
 !||    mat87c_tabulated_3dir_ortho   ../engine/source/materials/mat/mat087/mat87c_tabulated_3dir_ortho.F90
@@ -54,6 +59,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sigeps50s                     ../engine/source/materials/mat/mat050/sigeps50s.F90
 !||    sigeps57c                     ../engine/source/materials/mat/mat057/sigeps57c.F90
 !||    sigeps70                      ../engine/source/materials/mat/mat070/sigeps70.F
+!||    sigeps76                      ../engine/source/materials/mat/mat076/sigeps76.F
+!||    sigeps76c                     ../engine/source/materials/mat/mat076/sigeps76c.F
 !||    sigeps88                      ../engine/source/materials/mat/mat088/sigeps88.F90
 !||    sigeps88c                     ../engine/source/materials/mat/mat088/sigeps88c.F90
 !||    srate_dependency_tabulated    ../engine/source/materials/mat/mat131/srate_dependency/srate_dependency_tabulated.F90
@@ -74,8 +81,13 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    compaction_tab_init           ../common_source/eos/compaction_tab.F90
 !||    condamage                     ../engine/source/materials/mat/mat190/condamage.F
 !||    conversion                    ../engine/source/materials/mat/mat190/conversion.F
+!||    elasto_plastic_trial_stress   ../engine/source/materials/mat/mat131/elasto_plastic_trial_stress.F90
 !||    fail_biquad_c                 ../engine/source/materials/fail/biquad/fail_biquad_c.F
 !||    fail_biquad_s                 ../engine/source/materials/fail/biquad/fail_biquad_s.F
+!||    fail_energy_b                 ../engine/source/materials/fail/energy/fail_energy_b.F
+!||    fail_energy_c                 ../engine/source/materials/fail/energy/fail_energy_c.F
+!||    fail_energy_ib                ../engine/source/materials/fail/energy/fail_energy_ib.F
+!||    fail_energy_s                 ../engine/source/materials/fail/energy/fail_energy_s.F
 !||    granular51                    ../engine/source/materials/mat/mat051/granular51.F90
 !||    mat87c_tabulated              ../engine/source/materials/mat/mat087/mat87c_tabulated.F90
 !||    mat87c_tabulated_3dir_ortho   ../engine/source/materials/mat/mat087/mat87c_tabulated_3dir_ortho.F90
@@ -98,6 +110,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sigeps50s                     ../engine/source/materials/mat/mat050/sigeps50s.F90
 !||    sigeps57c                     ../engine/source/materials/mat/mat057/sigeps57c.F90
 !||    sigeps70                      ../engine/source/materials/mat/mat070/sigeps70.F
+!||    sigeps76                      ../engine/source/materials/mat/mat076/sigeps76.F
+!||    sigeps76c                     ../engine/source/materials/mat/mat076/sigeps76c.F
 !||    sigeps88                      ../engine/source/materials/mat/mat088/sigeps88.F90
 !||    sigeps88c                     ../engine/source/materials/mat/mat088/sigeps88c.F90
 !||    srate_dependency_tabulated    ../engine/source/materials/mat/mat131/srate_dependency/srate_dependency_tabulated.F90

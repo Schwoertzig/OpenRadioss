@@ -105,6 +105,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    fxbgrav                             ../starter/source/constraints/fxbody/fxbgrav.F
 !||    fxbtagn                             ../starter/source/constraints/fxbody/fxbtagn.F
 !||    genani1                             ../starter/source/output/anim/genani1.F
+!||    get_element_group                   ../starter/source/elements/get_element_group.F90
 !||    get_size_inter24                    ../starter/source/spmd/get_size_tag.F
 !||    get_size_numnod_local               ../starter/source/spmd/get_size_tag.F
 !||    globmat                             ../starter/source/materials/globmat.F
@@ -337,6 +338,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    monvol_deallocate                   ../starter/share/modules1/monvol_struct_mod.F
 !||    multi_connectivity                  ../starter/source/multifluid/multi_connectivity.F
 !||    multi_unplug_neighbors              ../starter/source/multifluid/multi_unplug_neighbors.F
+!||    my_real_tot_int_transfer            ../starter/source/system/my_real_to_int_transfer.F90
 !||    nbfunct                             ../starter/source/tools/curve/nbfunc.F
 !||    nlocal                              ../starter/source/spmd/node/ddtools.F
 !||    nodm11                              ../starter/source/materials/mat/mat011/nodm11.F
@@ -485,10 +487,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod                           ../starter/share/modules1/drape_mod.F
 !||    dsgraph_mod                         ../starter/share/modules1/dsgraph_mod.F
 !||    elbuftag_mod                        ../starter/share/modules1/elbuftag_mod.F
+!||    elm_group_mod                       ../starter/source/modules/elm_group_mod.F90
 !||    fractal_elem_renum_mod              ../starter/source/materials/fail/fractal/fractal_elem_spmd_renum.F90
 !||    front_mod                           ../starter/share/modules1/front_mod.F
 !||    func2d_mod                          ../starter/share/modules1/func2d_mod.F
 !||    fvbag_mod                           ../starter/share/modules1/fvbag_mod.F
+!||    get_element_group_mod               ../starter/source/elements/get_element_group.F90
 !||    group_mod                           ../starter/share/modules1/group_mod.F
 !||    hierarchy_rbody_mod                 ../starter/source/constraints/general/rbody/hierarchy_rbody.F90
 !||    hm_option_read_mod                  ../starter/share/modules1/hm_option_read_mod.F
@@ -518,6 +522,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    message_mod                         ../starter/share/message_module/message_mod.F
 !||    mid_pid_mod                         ../starter/share/modules1/mid_pid_mod.F
 !||    monvol_struct_mod                   ../starter/share/modules1/monvol_struct_mod.F
+!||    my_real_tot_int_transfer_mod        ../starter/source/system/my_real_to_int_transfer.F90
 !||    nod2el_mod                          ../starter/share/modules1/nod2el_mod.F
 !||    option_mod                          ../starter/share/modules1/options_mod.F
 !||    python_duplicate_nodes_mod          ../starter/source/spmd/domain_decomposition/python_duplicate_nodes.F90
@@ -660,6 +665,9 @@ C-----------------------------------------------
       use sfem_exclude_mod
       use hm_read_inter_guided_cable_mod, ONLY : hm_read_inter_guided_cable
       use hm_print_inter_guided_cable_mod, ONLY : hm_print_inter_guided_cable
+      use get_element_group_mod , only : get_element_group
+      use elm_group_mod , only : elm_group_
+      use my_real_tot_int_transfer_mod , only : my_real_tot_int_transfer
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -825,6 +833,7 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE ::
      *        ISOLNOD,ISOLOFF,ISHEOFF,ITRUOFF,IPOUOFF,
      *        IRESOFF,ITRIOFF,IGRNRBY,IQUAOFF
+      integer, dimension(:), allocatable :: isolnod0,ishell3nod0
 C
       INTEGER(KIND=8) :: KVOISPH8,NUMSPH8,SIXSP8,LIMIT8
       INTEGER :: INTEGER_LIMIT32
@@ -1243,6 +1252,11 @@ C SPH
 C RWALL PENALTY   
       INTEGER :: SLN_PEN
       my_real, DIMENSION(:), ALLOCATABLE :: RWSTIF_PEN
+
+      integer, parameter :: nb_key = 8 
+      integer :: iwarnhb,n_entity
+      integer :: sh4tree_dim1,sh4tree_dim2,sh3tree_dim1,sh3tree_dim2
+      type(elm_group_) :: elm_group
 c=======================================================================
       IREAC = 0 
       PYTHON%NB_FUNCTS = 0
@@ -2130,7 +2144,7 @@ c in the skew, we put all the skews of the model
         XFRAME => SKEW
       END IF
 c      ALLOCATE(XFRAME(SXFRAME) ,STAT=stat)
-      ALLOCATE(EANI(SEANI) ,STAT=stat)
+      ALLOCATE(EANI(SEANI) ,STAT=stat)      
       IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='EANI')
       IF(SEANI > 0) EANI = 0
       IF(NUMELTG > 0) THEN
@@ -2138,6 +2152,8 @@ c      ALLOCATE(XFRAME(SXFRAME) ,STAT=stat)
       ELSE
         EANIT => EANIT2
       ENDIF
+      allocate(isolnod0(numels))
+      allocate(ishell3nod0(numeltg))
       PM   = 0
       SKEW = 0
       GEO  = 0
@@ -2175,7 +2191,8 @@ c---------------------------------------------------------------
      .     RWORK       ,SRWORK   ,IPM      ,PM         ,UNITAB    ,
      .     MULTI_FVM   ,FAILWAVE ,NLOC_DMG ,LSUBMODEL  ,TABLE     ,
      .     LTITR       ,USERL_AVAIL,MAT_NUMBER,
-     .     NPC         ,TF       ,SNPC     ,NPTS       ,SBUFMAT   )
+     .     NPC         ,TF       ,SNPC     ,NPTS       ,SBUFMAT   ,
+     .     IRESP       )
 c---------------------------------------------------------------
       ALLOCATE(BUFMAT(SBUFMAT)    ,STAT=stat)
       IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
@@ -2781,6 +2798,19 @@ C--------------------------------------------
       LEVELMAX=0
       LSH4TRIM=0
       LSH3TRIM=0
+
+      if(nadmesh==0) then
+        sh4tree_dim1 = 0
+        sh4tree_dim2 = 0
+        sh3tree_dim1 = 0
+        sh3tree_dim2 = 0
+      else
+        sh4tree_dim1 = ksh4tree
+        sh4tree_dim2 = numelc
+        sh3tree_dim1 = ksh3tree
+        sh3tree_dim2 = numeltg
+      endif
+
       IF(NADMESH/=0)THEN
 
         ALLOCATE(SH4TREE(KSH4TREE,NUMELC),STAT=stat)
@@ -2837,6 +2867,8 @@ C--------------------------------------------
         ALLOCATE(SH4TRIM(0))
         ALLOCATE(SH3TRIM(0))
       END IF
+
+      
 
       IF(ISTATCND/=0)THEN
         ALLOCATE(MSCND(NUMNOD),INCND(NUMNOD),STAT=stat)
@@ -4487,7 +4519,7 @@ C--------------------------------------------
       !new Reader
       CALL READ_DETONATORS(ITABM1   ,ITAB      ,IGRNOD  ,
      .                     PM       ,IPM       ,X       ,UNITAB ,
-     .                     LSUBMODEL,DETONATORS)
+     .                     LSUBMODEL,DETONATORS,XFRAME  ,IFRAME)
       CALL TRACE_OUT1()
 C--------------------------------------------
 C     A.L.E.
@@ -5895,6 +5927,24 @@ C
       ERR_MSG='DOMAIN DECOMPOSITION'
       ERR_CATEGORY='DOMAIN DECOMPOSITION'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
+
+      iwarnhb = 0 
+      call my_real_tot_int_transfer(numels,eani,isolnod0)
+      call my_real_tot_int_transfer(numeltg,eanit,ishell3nod0)
+
+      call get_element_group(numels,numelc,numeltg,nb_key, 
+     .                       nummat,numgeo,npart,npropgi, 
+     .                       npropmi,npropm,npropg,lipart1, 
+     .                       isms,idtgrs,npreload,icrack3d, 
+     .                       sh4tree_dim1,sh4tree_dim2,sh3tree_dim1,sh3tree_dim2, 
+     .                       ltitr,iwarnhb,trimat,nadmesh,iddlevel, 
+     .                       iparts,ipartc,ipartg,ipart,
+     .                       isoloff,isheoff,itrioff,isolnod0,ishell3nod0,
+     .                       iflag_bpreload,damp_range_part,tagprt_sms, 
+     .                       iworksh,ixs,ixc,ixtg, 
+     .                       igeo,ipm,sh4tree,sh3tree, 
+     .                       pm,geo,stack,mat_elem%mat_param,elm_group)
+      
       IF(IDDLEVEL==1) THEN
          NGROUP = 0
          LBUFEL = 0
@@ -5966,7 +6016,6 @@ C Average allowance normally sufficient if average group size> NVSIZ/2
       IF(.NOT. ALLOCATED(NPBY)) ALLOCATE(NPBY(0))
       IF(.NOT. ALLOCATED(LPBY)) ALLOCATE(LPBY(0))
       IF(.NOT. ALLOCATED( RBY)) ALLOCATE( RBY(0))
-
           CALL DOMETIS(
      1     IXS       ,IXQ      ,IXC      ,IXT     ,IXP      ,
      2     IXR       ,IXTG     ,CEP     ,GEO      ,
@@ -5986,8 +6035,7 @@ C Average allowance normally sufficient if average group size> NVSIZ/2
      6     POIN_PART_SHELL,POIN_PART_TRI,POIN_PART_SOL,
      7     MID_PID_SHELL,MID_PID_TRI,MID_PID_SOL,T_MONVOL,
      8     EBCS_TAG_CELL_SPMD,NPBY,LPBY,MAT_ELEM%MAT_PARAM,
-     9     iworksh)
-
+     9     iworksh,elm_group)
       DEALLOCATE(IWORK)
 C---------------------------
 C     Domdec SPH
@@ -6085,7 +6133,7 @@ C---------------------------------
 C
 C
         CALL SGRHEAD(
-     1       IXS     ,PM     ,GEO    ,INUM   ,BID13   ,
+     1       IXS     ,PM     ,GEO    ,INUM   ,
      2       ITRI1   ,EADD   ,INDEX1 ,ITRI2  ,IPARTS  ,
      3       ND      ,IGRSURF,IGRBRIC,EANI   ,
      4       CEP(OFF),ITRI3  ,IXS10  ,IXS20  ,IXS16   ,
@@ -6217,7 +6265,7 @@ C---------------------------------
        XNUM = ZERO
 C
        CALL CGRHEAD(
-     1   IXC     ,PM      ,GEO     ,INUM    ,BID13   ,
+     1   IXC     ,PM      ,GEO     ,INUM    ,
      2   ITR1    ,EADD    ,INDEX1  ,ITRI1   ,XNUM    ,
      3   IPARTC  ,ND      ,THKE    ,IGRSURF ,IGRSH4N ,
      4   CEP(OFF),XEP     ,IGEO    ,IPM     ,
@@ -6455,14 +6503,14 @@ C---------------------------------
        ENDIF
        IF(N2D==0)THEN
          CALL C3GRHEAD(
-     1     IXTG    ,PM      ,GEO      ,INUM    ,BID13   ,
+     1     IXTG    ,PM      ,GEO      ,INUM    ,
      2     ITR1    ,EADD    ,INDEX1   ,ITRI1   ,XNUM   ,
      3     IPARTG  ,ND      ,THKEC    ,IGRSURF ,IGRSH3N ,
      4     CEP(OFF),XEP      ,IXTG1   ,EANIT   ,
      5     IGEO    ,IPM     ,IPART    ,SH3TREE ,NOD2ELTG,
      6     ITRIOFF ,SH3TRIM ,TAGPRT_SMS,
      7     IWORKSH , STACK  ,DRAPE  ,RNOISE(1,MIN(SRNOISE2,NUMELC+1)),
-     8     MULTI_FVM , SH3ANG,DRAPEG,PTSH3N,MAT_ELEM%MAT_PARAM,
+     8     SH3ANG,DRAPEG,PTSH3N,MAT_ELEM%MAT_PARAM,
      9     DAMP_RANGE_PART)
        ELSE
          CALL T3GRHEAD(
@@ -11515,6 +11563,8 @@ C
          CLOSE(IFXM)
          CLOSE(IFXS) 
       ENDIF
+      if(allocated(isolnod0)) deallocate(isolnod0)
+      if(allocated(ishell3nod0)) deallocate(ishell3nod0)
 
       IF(ALLOCATED( DGAPINT ))  DEALLOCATE(DGAPINT)
 

@@ -52,7 +52,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    law62_upd              ../starter/source/materials/mat/mat062/law62_upd.F
 !||    law69_upd              ../starter/source/materials/mat/mat069/law69_upd.F
 !||    law70_upd              ../starter/source/materials/mat/mat070/law70_upd.F
-!||    law76_upd              ../starter/source/materials/mat/mat076/law76_upd.F
 !||    law77_upd              ../starter/source/materials/mat/mat077/law77_upd.F
 !||    law81_upd              ../starter/source/materials/mat/mat081/law81_upd.F90
 !||    law87_upd              ../starter/source/materials/mat/mat087/law87_upd.F90
@@ -286,12 +285,6 @@ c------------------
             CALL LAW70_UPD(MAT_PARAM(IMAT)    ,TITR     ,MAT_ID   ,NPARAM   ,UPARAM   ,
      .                     NFUNC    ,IFUNC    ,NPC      ,PLD      ,IOUT     ,
      .                     NFUNCT   ,FUNC_ID  ,NPROPM   ,PM(1,IMAT),MAT_PARAM(IMAT)%YOUNG0)       
-c------------------
-          CASE (76) 
-            CALL LAW76_UPD(IOUT   ,TITR    ,MAT_ID   ,NPARAM ,MAT_PARAM(IMAT) ,
-     .                     UPARAM ,NUMTABL ,ITABLE   ,TABLE   ,NFUNC    ,
-     .                     IFUNC  ,NPC     ,PLD      )       
-c
 c------------------
           CASE (77) 
             CALL LAW77_UPD(TITR    ,MAT_ID   ,NPARAM ,MAT_PARAM(IMAT) ,
