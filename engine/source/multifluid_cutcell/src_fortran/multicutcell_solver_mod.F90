@@ -279,7 +279,7 @@ module multicutcell_solver_mod
  
   subroutine update_fluid_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ALE_CONNECT, &
                           grid, vely, velz, rho, p, gamma, dt, threshold, sign, ebcs_tab, &
-                          full_rho, full_pres, full_vel, full_etot, dt_next, sound_speed)
+                          full_rho, full_pres, full_vel, full_etot, dt_next, sound_speed)!, i_print)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
     use ALE_CONNECTIVITY_MOD
@@ -296,6 +296,7 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:), intent(in) :: gamma
     integer, intent(in) :: sign
     type(t_ebcs_tab), target, intent(in) :: ebcs_tab              !< data structure for user boundary conditions
+    !integer(kind=8), intent(in) :: i_print    !Used for debugging : output the polygon after update that can be plotted using gnuplot.
     ! IN/OUTPUT arguments
     type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
     real(kind=wp), dimension(:,:) :: vely
@@ -379,7 +380,6 @@ module multicutcell_solver_mod
         lambdan_prev(i, k) = grid(i, k)%lambdanp1_per_cell
       end do 
     end do
-    write(*,*) "p(7,:) = ", p(7,:)
   
     normalVecy(:) = 0.0
     normalVecz(:) = 0.0
@@ -398,12 +398,13 @@ module multicutcell_solver_mod
     call smooth_vel_clipped_fortran(vec_move_clippedy, vec_move_clippedz, min_pos_Se, dt)
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, pressure_edge, &
                                 minimal_length, maximal_length, minimal_angle)
+    !call print_clipped_fortran(i_print)
   
     call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt) 
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
 
-    call multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
+    call multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, grid, target_cells, gamma, rho, vely, velz, p, fx)
     call multicutcell_compute_fluxes_boundary(NUMELQ, NUMELTG, IXQ, IXTG, X, gamma, &
                                               rho, vely, velz, p, ebcs_tab, fx)
     !Compute right hand side for non-fused or target cells
@@ -429,14 +430,6 @@ module multicutcell_solver_mod
         dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz + grid(i, k)%lambdan_per_cell * W(i, k)%rhovz  
         dW(ind_targ, k)%rhoE = dW(ind_targ, k)%rhoE + grid(i, k)%lambdan_per_cell * W(i, k)%rhoE  
     
-        if ((.not. (grid(i,k)%is_narrowband)) .and. ((grid(i,k)%lambdan_per_cell>0) .or. ((grid(i,k)%lambdanp1_per_cell>0)))) then
-          call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i, normals, nb_edges)
-          write(*,*) "Cell number ", i, ", region ", k, ", sums of fluxes in this cell are:"
-          write(*,*) sum(fx(i,k)%rho*normals(:)%y), sum(fx(i,k)%rhoE*normals(:)%y),&
-                     sum(fx(i,k)%rho*normals(:)%z), sum(fx(i,k)%rhoE*normals(:)%z)
-          write(*,*) sum(fx(i,k)%rhovz*normals(:)%z), sum(fx(i,k)%rhovy*normals(:)%y)
-        end if
-
         !Add numerical fluxes
         do j = 1,nb_edges
           dW(ind_targ, k)%rho   = dW(ind_targ, k)%rho   - dt * fx(i, k)%rho(j)   * grid(i, k)%lambda_per_edge(j) 
@@ -496,7 +489,6 @@ module multicutcell_solver_mod
     call build_full_states(grid, rho, vely, velz, p, gamma, &
                               full_rho, full_pres, full_vel, full_etot)
     
-    call system("sync")
     !Compute next dt
     largest_speed_wave = -1.
     do i = 1,nb_cell
@@ -534,7 +526,7 @@ module multicutcell_solver_mod
       W%rho = rho
       W%rhovy = rho*vely
       W%rhovz = rho*velz
-      W%rhoE = rho*(vely*vely + velz*velz) + p/(gamma-1)
+      W%rhoE = 0.5*rho*(vely*vely + velz*velz) + p/(gamma-1)
     end subroutine primal_to_conservative
 
     subroutine conservative_to_primal(gamma, vely, velz, rho, p, W)
@@ -787,7 +779,8 @@ module multicutcell_solver_mod
       call integer_LL_destroy(cells_to_be_merged)
     end subroutine fuse_cells
 
-    subroutine multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, gamma, rho, vely, velz, p, fx)
+    subroutine multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, grid, target_cells, gamma, &
+                                            rho, vely, velz, p, fx)
       use grid2D_struct_multicutcell_mod
       use ALE_CONNECTIVITY_MOD
 
@@ -798,6 +791,8 @@ module multicutcell_solver_mod
       integer, dimension(:,:), intent(in) :: IXQ, IXTG
       real(kind=wp), dimension(:,:), intent(in) :: X
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECT
+      type(grid2D_struct_multicutcell), dimension(:, :), intent(in) :: grid
+      integer(kind=8), dimension(:, :), intent(in) :: target_cells
       real(kind=wp), dimension(:), INTENT(IN) :: gamma
       real(kind=wp), dimension(:,:), intent(in) :: vely
       real(kind=wp), dimension(:,:), intent(in) :: velz
@@ -810,12 +805,23 @@ module multicutcell_solver_mod
       integer(kind=8) :: nb_cell, nb_regions, nb_edges
       integer(kind=8) :: other_edge, other_face
       type(Point2D), dimension(4) :: normals
+      integer(kind=8), dimension(:), allocatable :: fused_i
 
       nb_cell = size(vely, 1)
       nb_regions = size(vely, 2)
 
+      allocate(fused_i(nb_regions))
+
       do i=1,nb_cell
         call multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i, normals, nb_edges)
+        do k = 1,nb_regions
+          if ((grid(i,k)%lambdan_per_cell > 1e-16))  then
+            fused_i(k) = i
+          else
+            fused_i(k) = target_cells(i, k)
+          end if
+        end do
+
         do j=1,nb_edges
           call adjacency_edge(ALE_CONNECT, i, j, other_face, other_edge) 
           do k = 1,nb_regions
@@ -826,9 +832,9 @@ module multicutcell_solver_mod
             !normalVector = grid.λ_per_edge[e, r]
             !norm_vec = norm(normalVector)
             if (other_face > 0) then
-              call FV_flux_hllc_Euler(gamma(k), rho(i, k), rho(other_face, k), &
-                                  vely(i, k), vely(other_face, k), velz(i, k), velz(other_face, k), &
-                                  p(i, k), p(other_face, k), &
+              call FV_flux_hllc_Euler(gamma(k), rho(fused_i(k), k), rho(other_face, k), &
+                                  vely(fused_i(k), k), vely(other_face, k), velz(fused_i(k), k), velz(other_face, k), &
+                                  p(fused_i(k), k), p(other_face, k), &
                                   normals(j), &
                                   fx(i, k)%rho(j), fx(i, k)%rhovy(j), fx(i, k)%rhovz(j), fx(i, k)%rhoE(j))
             else !There is no neighbour!
@@ -1026,7 +1032,6 @@ module multicutcell_solver_mod
         enddo
       
       end do
-      call system("sync")
 
     end subroutine compute_all_id_pt_cell
 
@@ -1276,7 +1281,6 @@ module multicutcell_solver_mod
           multi_cutcell%phase_vely(elem_iid,imat) = 0.0
           multi_cutcell%phase_velz(elem_iid,imat) = 0.0
         end do
-
       end do
     enddo
 

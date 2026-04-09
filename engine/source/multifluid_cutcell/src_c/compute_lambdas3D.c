@@ -15,14 +15,45 @@ static void build_clipped_in_partial(Polyhedron3D* p, Point3D *n_face, Point3D *
     faces_in = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     volumes_in = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
 
+    //printf("mark_edge = %ld, sign_taken = %d\n", mark_edge, sign_taken);
+    //if (mark_edge == 4){
+        //printf("p = ");
+        //print_vec_pt3D(*(p->vertices));
+        //GrB_set (*(p->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*(p->edges), GrB_MATERIALIZE);
+        //GxB_print(*(p->edges), GxB_COMPLETE);
+        //GrB_wait(*(p->faces), GrB_MATERIALIZE);
+        //GxB_print(*(p->faces), GxB_COMPLETE);
+        //printf("status_face = ");
+        //print_vec_int(p->status_face);
+    //}
     cut_edges3D(p, n_face, pt_face, sign_taken, pts_copy, edges_in);
+    //if (mark_edge == 4){
+        //GrB_set (*edges_in, GrB_ROWMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*edges_in, GrB_MATERIALIZE);
+        //GxB_print(*edges_in, GxB_COMPLETE);
+    //}
 
+    //printf("Before close cells\n");
     close_cells(edges_in, p->faces, NULL, NULL, -1, faces_in);
+    //printf("After close cells\n");
 
     copy_vec_int(p->status_face, status_face);
     copy_vec_double(p->pressure_face, pressure_face);
     close_cells(faces_in, p->volumes, status_face, pressure_face, mark_edge, volumes_in);
 
+    //if (mark_edge == 4){
+    //    printf("pts_copy = ");
+    //    print_vec_pt3D(*pts_copy);
+    //    GrB_set (*edges_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+    //    GrB_wait(*edges_in, GrB_MATERIALIZE);
+    //    GxB_print(*edges_in, GxB_COMPLETE);
+    //    GrB_set (*faces_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+    //    GrB_wait(*faces_in, GrB_MATERIALIZE);
+    //    GxB_print(*faces_in, GxB_COMPLETE);
+    //    printf("status_face (of size %ld) = ", status_face->size);
+    //    print_vec_int(status_face);
+    //}
     //Copy new polyhedron in p.
     copy_vec_pts3D(pts_copy, p->vertices);
     dealloc_vec_pts3D(pts_copy); free(pts_copy);
@@ -91,6 +122,11 @@ Polyhedron3D* clip3D(const Polyhedron3D *clipper, const Polyhedron3D *clipped){
     long int *stf_i;
     int8_t vol_i;
 
+    char filename[1024];
+    int length_i;
+    char* i_string;
+
+
     copy_Polyhedron3D(clipped, clipped_in);
     //for i in eachindex(normal_vectors)
     for (i = 0; i<normal_vectors->size; i++){
@@ -99,10 +135,38 @@ Polyhedron3D* clip3D(const Polyhedron3D *clipper, const Polyhedron3D *clipped){
         stf_i = get_ith_elem_vec_int(clipper->status_face, i);
         if (*stf_i > 2){
             n_face = get_ith_elem_vec_pts3D(normal_vectors, i);
+            n_face->x /= sqrt(n_face->x*n_face->x + n_face->y*n_face->y + n_face->t*n_face->t);
+            n_face->y /= sqrt(n_face->x*n_face->x + n_face->y*n_face->y + n_face->t*n_face->t);
+            n_face->t /= sqrt(n_face->x*n_face->x + n_face->y*n_face->y + n_face->t*n_face->t);
             pt_face = first_point_of_ith_face(clipper, i);
             GrB_Matrix_extractElement(&vol_i, *(clipper->volumes), i, 0);
             build_clipped_in_partial(clipped_in, n_face, pt_face, *stf_i, -vol_i);
             clean_Polyhedron3D(clipped_in, &clipped_in);
+            //if (clipped_in){
+            //    //printf("clipped_in->vertices = ");
+            //    //print_vec_pt3D(*(clipped_in->vertices));
+            //    //GrB_set (*(clipped_in->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+            //    //GrB_wait(*(clipped_in->edges), GrB_MATERIALIZE);
+            //    //GxB_print(*(clipped_in->edges), GxB_COMPLETE);
+            ////    GrB_set (*(clipped_in->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+            //    //GrB_wait(*(clipped_in->faces), GrB_MATERIALIZE);
+            ////    GxB_print(*(clipped_in->faces), GxB_COMPLETE);
+            ////    printf("status_face (of size %ld) = ", clipped_in->status_face->size);
+            ////    print_vec_int(clipped_in->status_face);
+
+            //    length_i = snprintf(NULL, 0,"%ld", i);
+            //    i_string = (char*)calloc(length_i, sizeof(char));
+
+            //    sprintf(i_string, "%ld", i);
+            //    strcpy(filename, "Polyhedron");
+            //    strcat(filename, i_string);
+            //    strcat(filename, ".dat");
+
+            //    print_polyhedron3D(clipped_in, filename);
+            //    system("sync");
+
+            //    free(i_string);
+            //}
         }
     }
 
@@ -136,6 +200,7 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
 
     *lambdas = alloc_with_capacity_vec_pts3D(nb_edge);
     *mean_normal = (Point3D){0.0, 0.0, 0.0};
+    *total_pressure_face = (Point3D){0.0, 0.0, 0.0};
     for (j=0; j<nb_edge; j++){
         set_ith_elem_vec_pts3D(*lambdas, j, mean_normal);
     }
@@ -143,20 +208,51 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
     *is_narrowband = false;
     
     if(p){
+        //printf("grid = ");
+        //print_vec_pt3D(*(grid->vertices));
+        //GrB_set (*(grid->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*(grid->edges), GrB_MATERIALIZE);
+        //GxB_print(*(grid->edges), GxB_COMPLETE);
+        //GrB_set (*(grid->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*(grid->faces), GrB_MATERIALIZE);
+        //GxB_print(*(grid->faces), GxB_COMPLETE);
+        //printf("Status_face = ");
+        //print_vec_int(grid->status_face);
+        //printf("initial_p = ");
+        //print_vec_pt3D(*(initial_p->vertices));
+        //GrB_set (*(initial_p->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*(initial_p->edges), GrB_MATERIALIZE);
+        //GxB_print(*(initial_p->edges), GxB_COMPLETE);
+        //GrB_set (*(initial_p->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*(initial_p->faces), GrB_MATERIALIZE);
+        //GxB_print(*(initial_p->faces), GxB_COMPLETE);
+        //printf("Status_face = ");
+        //print_vec_int(initial_p->status_face);
+        //printf("clipped = ");
+        //print_vec_pt3D(*(p->vertices));
+        //GrB_set (*(p->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*(p->edges), GrB_MATERIALIZE);
+        //GxB_print(*(p->edges), GxB_COMPLETE);
+        //GrB_set (*(p->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(*(p->faces), GrB_MATERIALIZE);
+        //GxB_print(*(p->faces), GxB_COMPLETE);
+        //printf("Status_face = ");
+        //print_vec_int(p->status_face);
+
+
         norm_vec_poly = points3D_from_matrix(surfaces_poly3D(p));
-    
         GrB_Matrix_ncols(&nb_cols_vol, *(p->volumes)); 
         GrB_Matrix_ncols(&nb_cols_fac, *(p->faces)); 
         for(i=0; i<nb_cols_fac; i++){
             psfi = get_ith_elem_vec_int(p->status_face, i);
             nvpi = get_ith_elem_vec_pts3D(norm_vec_poly, i);
-            press_f = *get_ith_elem_vec_double(p->pressure_face, i);
             for (j=0; j<nb_cols_vol; j++){
                 pvij_int = 0; //if volumes[i,j] does not exist, it won't change the value of pvij_int.
                 GrB_Matrix_extractElement(&pvij_int, *(p->volumes), i, j);
                 if (pvij_int != 0){
                     if (*psfi<1){
                         pvij = (my_real_c) pvij_int;
+                        press_f = *get_ith_elem_vec_double(p->pressure_face, i);
                         inplace_xpay_points3D(mean_normal, pvij, nvpi);
                         nvpi->x *= press_f;
                         nvpi->y *= press_f;
@@ -166,6 +262,11 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
                     }
                     else {
                         lam = get_ith_elem_vec_pts3D(*lambdas, *psfi-1);
+                        if ((*psfi > 2) && (lam->t > 1e-10)){
+                            printf("Warning: a normal in time on face %lu ?! value = %lf\n", *psfi, lam->t);
+                            print_vec_int(p->status_face);
+                            print_vec_pt3D(**lambdas);
+                        }
                         inplace_axpy_points3D(lam, 1.0, nvpi);
                     }
                     //for (e = 1; e<=nb_edge; e++){
@@ -180,6 +281,10 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
     }
 
     if(p){
+        //printf("Status face = ");
+        //print_vec_int(p->status_face);
+        //printf("norm_vec_poly = ");
+        //print_vec_pt3D(*norm_vec_poly);
         dealloc_vec_pts3D(norm_vec_poly); free(norm_vec_poly);
         dealloc_Polyhedron3D(p); free(p);
     }
@@ -302,6 +407,10 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
             set_ijth_elem_arr_double(*lambdas_arr, i-2, 0, val);
             for(k = 1; k<nb_regions; k++){
                 nm = norm_pt3D(*get_ijth_elem_arr_pts3D(local_lambdas, i, k-1)) / dt;
+                //if (nm > 0.13){
+                //    printf("Warning: large effective area on face %lu of grid cell, value = %lf\n", i-2, nm);
+                //    print_vec_pt3D(*lambdas3D);
+                //}
                 set_ijth_elem_arr_double(*lambdas_arr, i-2, k, &nm); 
             }
         }

@@ -943,11 +943,8 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
                 infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
                 infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
                 infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
-                if(size_pt_indices>0){
-                    infogrb = GrB_Vector_extractElement(&val, pt_indices, 0);
-                    push_back_unique_vec_uint(&ind_kept_pts, &val);
-                    
-                    infogrb = GrB_Vector_extractElement(&val, pt_indices, 1);
+                for(ell=0; ell<size_pt_indices; ell++){
+                    infogrb = GrB_Vector_extractElement(&val, pt_indices, ell);
                     push_back_unique_vec_uint(&ind_kept_pts, &val);
                 }
             }
@@ -1036,4 +1033,76 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
     GrB_free(&ej);
     GrB_free(&extr_vals_ej);
     GrB_free(&pt_indices);
+    GrB_free(&vj);
+    GrB_free(&face_indices);
+    GrB_free(&extr_vals_vj);
+}
+
+void print_polyhedron3D(const Polyhedron3D* src, const char* file){
+    FILE* output = fopen(file, "w");
+    GrB_Info infogrb;
+    GrB_Vector vj, extr_vals_vj, face_indices;
+    GrB_Vector fj, extr_vals_fj, edge_indices;
+    GrB_Vector ej, extr_vals_ej, pt_indices;
+    GrB_Index nb_edges, nb_faces, nb_volumes, size_edge_indices, size_face_indices, size_pt_indices, val, nb_pts;
+    GrB_Index i, j_f, j, k, i_v, ell;
+    Point3D* pt;
+
+    GrB_Matrix_ncols(&nb_faces, *(src->faces));
+    GrB_Matrix_ncols(&nb_edges, *(src->edges));
+    GrB_Matrix_nrows(&nb_pts, *(src->edges));
+    GrB_Matrix_ncols(&nb_volumes, *(src->volumes));
+    GrB_Vector_new(&vj, GrB_INT8, nb_faces);
+    GrB_Vector_new(&face_indices, GrB_UINT64, nb_faces);
+    GrB_Vector_new(&extr_vals_vj, GrB_INT8, nb_faces);
+    GrB_Vector_new(&fj, GrB_INT8, nb_edges);
+    GrB_Vector_new(&edge_indices, GrB_UINT64, nb_edges);
+    GrB_Vector_new(&extr_vals_fj, GrB_INT8, nb_edges);
+    GrB_Vector_new(&ej, GrB_INT8, nb_pts);
+    GrB_Vector_new(&pt_indices, GrB_UINT64, nb_pts);
+    GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_pts);
+
+    for(k=0; k<nb_volumes; k++){
+        infogrb = GrB_extract(vj, GrB_NULL, GrB_NULL, *(src->volumes), GrB_ALL, 1, k, GrB_NULL); //Get indices of faces composing volume k
+        infogrb = GxB_Vector_extractTuples_Vector(face_indices, extr_vals_vj, vj, GrB_NULL);
+        infogrb = GrB_Vector_size(&size_face_indices, face_indices);
+        for (i_v=0; i_v<size_face_indices; i_v++){
+            infogrb = GrB_Vector_extractElement(&i, face_indices, i_v);
+
+            infogrb = GrB_extract(fj, GrB_NULL, GrB_NULL, *(src->faces), GrB_ALL, 1, i, GrB_NULL); //Get indices of edges composing face i
+            infogrb = GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL);
+            infogrb = GrB_Vector_size(&size_edge_indices, edge_indices);
+
+            for(j_f=0; j_f<size_edge_indices; j_f++){
+                infogrb = GrB_Vector_extractElement(&j, edge_indices, j_f);
+                infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(src->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
+                infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
+                infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
+                //if(size_pt_indices>0){
+                for(ell=0; ell<size_pt_indices; ell+=2){
+                    infogrb = GrB_Vector_extractElement(&val, pt_indices, ell);
+                    pt = get_ith_elem_vec_pts3D(src->vertices, val);
+                    fprintf(output, "%lf %lf %lf\n", pt->x, pt->y, pt->t);
+
+                    infogrb = GrB_Vector_extractElement(&val, pt_indices, ell+1);
+                    pt = get_ith_elem_vec_pts3D(src->vertices, val);
+                    fprintf(output, "%lf %lf %lf\n", pt->x, pt->y, pt->t);
+
+                    fprintf(output, "\n");
+                    fprintf(output, "\n");
+                }
+            }
+        }
+    }
+    fclose(output);
+
+    GrB_free(&fj);
+    GrB_free(&extr_vals_fj);
+    GrB_free(&edge_indices);
+    GrB_free(&ej);
+    GrB_free(&extr_vals_ej);
+    GrB_free(&pt_indices);
+    GrB_free(&vj);
+    GrB_free(&face_indices);
+    GrB_free(&extr_vals_vj);
 }

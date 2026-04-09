@@ -972,10 +972,10 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     //First nb_edges: original edges of f at t=tn
     //Following nb_edges: edges of f at t=tn+dt
     //Following nb_pts: edges linking pt at t=tn and pt at t=tn+dt
-    GrB_Matrix_nrows(&nb_rows_faces, *(fn->faces));
-    infogrb = GrB_Vector_new(&ed_i, GrB_INT8, nb_rows_faces);
-    infogrb = GrB_Vector_new(&nz_ei, GrB_UINT64, nb_rows_faces);
-    infogrb = GrB_Vector_new(&val_nz_ei, GrB_INT8, nb_rows_faces);
+    GrB_Matrix_ncols(&nb_rows_faces, *(fn->faces));
+    infogrb = GrB_Vector_new(&ed_i, GrB_INT8, nb_pts);
+    infogrb = GrB_Vector_new(&nz_ei, GrB_UINT64, nb_pts);
+    infogrb = GrB_Vector_new(&val_nz_ei, GrB_INT8, nb_pts);
     GrB_Vector_new(&fj, GrB_INT8, nb_edges);
     GrB_Vector_new(&edge_indices, GrB_UINT64, nb_edges);
     GrB_Vector_new(&extr_vals_fj, GrB_INT8, nb_edges);
@@ -1050,10 +1050,10 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
                     pt_index2 = temp;
                 }
 
-                GrB_Matrix_setElement(*new_faces,  1, i                        , curr_face); //edge at time tn
-                GrB_Matrix_setElement(*new_faces, -1, i + nb_edges             , curr_face); //edge at time tn+dt
-                GrB_Matrix_setElement(*new_faces,  1, v_edges_index + pt_index2, curr_face); //vertical edge
-                GrB_Matrix_setElement(*new_faces, -1, v_edges_index + pt_index1, curr_face); //vertical edge of pt_index1 between t=tn and t=tn+dt
+                infogrb = GrB_Matrix_setElement(*new_faces,  1, i                        , curr_face); //edge at time tn
+                infogrb = GrB_Matrix_setElement(*new_faces, -1, i + nb_edges             , curr_face); //edge at time tn+dt
+                infogrb = GrB_Matrix_setElement(*new_faces,  1, v_edges_index + pt_index2, curr_face); //vertical edge
+                infogrb = GrB_Matrix_setElement(*new_faces, -1, v_edges_index + pt_index1, curr_face); //vertical edge of pt_index1 between t=tn and t=tn+dt
 
                 val = 3+i;
                 set_ith_elem_vec_int(status_faces, curr_face, &val);
@@ -1431,7 +1431,6 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
     for (i=0; i<vertices_tnp1->size; i++){
         set_ith_elem_vec_pts2D(solid_tnp1->vertices, i, get_ith_elem_vec_pts2D(vertices_tnp1, i));
     }
-
 
     IntersecList = alloc_empty_vec_pts2D();
     edge_intersect1 = alloc_empty_vec_uint();

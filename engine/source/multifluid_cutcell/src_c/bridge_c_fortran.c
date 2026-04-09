@@ -225,6 +225,7 @@ void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVe
     Vector_points2D* normals_edges;
     GrB_Index nb_pts, nb_edges;
     uint64_t i;
+    my_real_c norm;
 
     GrB_Matrix_nrows(&nb_pts, *(clipped->edges));
     GrB_Matrix_ncols(&nb_edges, *(clipped->edges));
@@ -236,12 +237,14 @@ void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVe
 
 
     for(i=0; i<normals_pts->size; i++){
-        normalVecx[i] = normals_pts->points[i].x;
-        normalVecy[i] = normals_pts->points[i].y;
+        norm = sqrt(normals_pts->points[i].x*normals_pts->points[i].x + normals_pts->points[i].y*normals_pts->points[i].y);
+        normalVecx[i] = normals_pts->points[i].x/norm;
+        normalVecy[i] = normals_pts->points[i].y/norm;
     }
     for(i=0; i<normals_edges->size; i++){
-        normalVecEdgex[i] = normals_edges->points[i].x;
-        normalVecEdgey[i] = normals_edges->points[i].y;
+        norm = sqrt(normals_edges->points[i].x*normals_edges->points[i].x + normals_edges->points[i].y*normals_edges->points[i].y);
+        normalVecEdgex[i] = normals_edges->points[i].x/norm;
+        normalVecEdgey[i] = normals_edges->points[i].y/norm;
     }
 
     dealloc_vec_pts2D(normals_pts); free(normals_pts);
@@ -315,6 +318,9 @@ void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c
     unsigned long nb_edges;
     GrB_Matrix_ncols(&nb_edges, *(clipped->edges));
 
+    if (clipped->pressure_edge == NULL){
+        clipped->pressure_edge = alloc_empty_vec_double();
+    } 
     if (clipped->pressure_edge != NULL){
         free(clipped->pressure_edge->data);
     }
@@ -326,7 +332,6 @@ void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c
     update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, \
                     *minimal_length, *maximal_length, *minimal_angle);
 }                              
-
 
 void output_clipped_fortran_(my_real_c* x_v_clipped, my_real_c* y_v_clipped, long long* limits_polygons){ 
     uint64_t i, j_f, j, k, start, next, end_limits, pt_ind;
@@ -444,3 +449,67 @@ void output_clipped_fortran_(my_real_c* x_v_clipped, my_real_c* y_v_clipped, lon
     GrB_free(&I_vec_e_k);
     GrB_free(&extr_vals_e_k);
 }
+
+void print_clipped_fortran_(long long* i_print){
+    char filename[1024];
+    int length_i = snprintf(NULL, 0,"%lld", *i_print);
+    char* i_string = (char*)calloc(length_i, sizeof(char));
+
+    sprintf(i_string, "%lld", *i_print);
+    strcpy(filename, "Polygon");
+    strcat(filename, i_string);
+    strcat(filename, ".dat");
+
+    if(clipped){
+        print_polygon2D(clipped, filename);
+    }
+
+    free(i_string);
+}
+
+
+//void run_simple_test_(){
+//    my_real_c x_grid[4] = {0.0, 1.0, 1.0, 0.0};
+//    my_real_c y_grid[4] = {0.0, 0.0, 1.0, 1.0};
+//    long long int pt_indices[4] = {0, 1, 2, 3};
+//    long long int nb_pts = 4;
+//    my_real_c x_v[14] = {-2.0, 0.1, 1.1, 2.0, 2.0,  2.0,  1.1, 0.8, 0.3, -0.5, -0.8, -1.0, -1.8, -2.2};
+//    my_real_c y_v[14] = { 3.2, 3.2, 3.2, 2.4, 1.7,  1.1,  0.2, 0.2, 0.2,  0.2,  1.4,  0.2,  1.4,  2.0};
+//    my_real_c vec_move_x[14] = { 0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1};
+//    my_real_c vec_move_y[14] = {-1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2};
+//    my_real_c dt = 1.0;
+//    unsigned long nb_edges;
+//    Array_double *lambdas;
+//    Vector_double *Lambda_n;
+//    Vector_double *Lambda_np1;
+//    bool is_narrowband;
+//    Point3D mean_normal, pressure_face;
+//
+//    build_grid_from_points_fortran_(x_grid, y_grid, pt_indices, &nb_pts);
+//    clipped = polygon_from_consecutive_points(x_v, y_v, 14);
+//
+//    GrB_Matrix_ncols(&nb_edges, *(clipped->edges));
+//
+//    if (clipped->pressure_edge == NULL){
+//        clipped->pressure_edge = alloc_empty_vec_double();
+//    } 
+//    if (clipped->pressure_edge != NULL){
+//        free(clipped->pressure_edge->data);
+//    }
+//    clipped->pressure_edge->data = (my_real_c*)malloc(nb_edges*sizeof(my_real_c));
+//    clipped->pressure_edge->size = nb_edges;
+//    clipped->pressure_edge->capacity = nb_edges;
+//    
+//    update_solid(&clipped, &clipped3D, vec_move_x, vec_move_y, dt, \
+//                    -100.0, 100000.0, -100.0);
+// 
+//    print_polyhedron3D(clipped3D, "clipped3D.dat");
+//    compute_lambdas2D(grid, clipped3D, dt, &lambdas, &Lambda_n, &Lambda_np1, &mean_normal, &pressure_face, &is_narrowband);
+//
+//    printf("Lambda_n = ");
+//    print_vec_double(Lambda_n);
+//    printf("Lambda_np1 = ");
+//    print_vec_double(Lambda_np1);
+//    printf("lambdas = \n");
+//    print_arr_double(lambdas);
+//}

@@ -67,7 +67,7 @@ my_real_c compute_distance3D(const Point3D v, const Point3D n, const Point3D pt)
 Point3D find_intersection3D(const Point3D v1, const my_real_c d1, const Point3D v2, const my_real_c d2){
         my_real_c r;
         Point3D inter;
-        if (fabs(d1-d2)<1e-10)
+        if (fabs(d1-d2)<1e-15)
             return v1;
         else{
             r = d2/(d2-d1);

@@ -10,21 +10,27 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
     GrB_Matrix pts_in_m_ones, edges_in, addPoints;
     GrB_Vector broken_edges, temp_v;
     GrB_Vector nz_be, vals_be;
-    GrB_Index I_index[2];
-    int8_t extr_vals[2], val_be_i;
+    //GrB_Index I_index[2];
+    //int8_t extr_vals[2];
+    GrB_Vector I_index, extr_vals;
+    int8_t val_be_i;
     const uint64_t size = p->vertices->size;
     GrB_Index size_e, size_v, ind_2;
     unsigned int nb_cut_edges, countPoint;
     int64_t be_i;
     my_real_c* distances = (my_real_c*)malloc(size*sizeof(my_real_c));
     bool dist_i;
+    GrB_Index i_x1, i_x2, size_Iindex;
 
     copy_vec_pts3D(p->vertices, pts_copy);
 
+    //printf("Cutting edges of polyhedron with normal vector (%lf, %lf, %lf) and point (%lf, %lf, %lf)\n", normal->x, normal->y, normal->t, pt->x, pt->y, pt->t);
     //Compute distances of points to separation hyperplane
     for (i=0; i<size; i++){
         v = get_ith_elem_vec_pts3D(p->vertices, i);
         distances[i] = compute_distance3D(*v, *normal, *pt);
+        //if (v->t > 7.308e-4)
+            //printf("Distance of point (%lf, %lf, %lf) to plane = %lf\n", v->x, v->y, v->t, distances[i]);
     }
 
     //Mark points inside the domain
@@ -60,6 +66,8 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
     infogrb = GrB_Vector_new(&nz_be, GrB_INT64, size_e);
     infogrb = GrB_Vector_new(&vals_be, GrB_INT64, size_e);
     infogrb = GrB_Vector_new(&temp_v, GrB_INT8, size_e);
+    infogrb = GrB_Vector_new(&I_index, GrB_UINT64, size);
+    infogrb = GrB_Vector_new(&extr_vals, GrB_INT8, size);
     infogrb = GrB_reduce(broken_edges, GrB_NULL, GrB_NULL, GrB_PLUS_MONOID_INT8, edges_in, GrB_DESC_T0); //sum along the columns
     infogrb = GrB_assign(broken_edges, broken_edges, GrB_NULL, broken_edges, GrB_ALL, 0, GrB_DESC_R); //suppress all zeros
     infogrb = GrB_apply(temp_v, GrB_NULL, GrB_NULL, GrB_ABS_INT8, broken_edges, GrB_NULL); //abs on each component
@@ -79,13 +87,18 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
             infogrb = GrB_Vector_extractElement(&val_be_i, vals_be, i);
             ind_2 = 2;
             infogrb = GrB_extract(temp_v, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, be_i, GrB_NULL);
-            infogrb = GrB_Vector_extractTuples(I_index, extr_vals, &ind_2, temp_v);
+            infogrb = GxB_Vector_extractTuples_Vector(I_index, extr_vals, temp_v, GrB_NULL);
+            infogrb = GrB_Vector_size(&size_Iindex, I_index);
 
-            if (ind_2>0){ //Check that the vector is not empty
-                x1 = get_ith_elem_vec_pts3D(p->vertices, I_index[0]);
-                x2 = get_ith_elem_vec_pts3D(p->vertices, I_index[1]);
+            if (size_Iindex>1){ //Check that the vector is not empty
+                infogrb = GrB_Vector_extractElement(&i_x1, I_index, 0);
+                infogrb = GrB_Vector_extractElement(&i_x2, I_index, 1);
+                x1 = get_ith_elem_vec_pts3D(p->vertices, i_x1);
+                x2 = get_ith_elem_vec_pts3D(p->vertices, i_x2);
 
-                newPoint = find_intersection3D(*x1, distances[I_index[0]], *x2, distances[I_index[1]]);
+                newPoint = find_intersection3D(*x1, distances[i_x1], *x2, distances[i_x2]);
+                //printf("New point = (%lf, %lf, %lf), at distance %lf from point (%lf, %lf, %lf) and distance %lf from point (%lf, %lf, %lf)\n",
+                //         be_i, newPoint.x, newPoint.y, newPoint.t, distances[i_x1], x1->x, x1->y, x1->t, distances[i_x2], x2->x, x2->y, x2->t);
 
                 push_back_vec_pts3D(&pts_copy, &newPoint);
                 infogrb = GrB_Matrix_setElement(addPoints, -val_be_i, countPoint, be_i);
@@ -95,7 +108,6 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
         }
         infogrb = GrB_Matrix_new(new_edges_in, GrB_INT8, size + nb_cut_edges, size_e);
         GxB_Matrix_concat(*new_edges_in, (GrB_Matrix[]){edges_in, addPoints}, 2, 1, GrB_NULL);
-        GrB_free(&addPoints);
     } else {
         infogrb = GrB_Matrix_new(new_edges_in, GrB_INT8, size, size_e);
         GrB_Matrix_dup(new_edges_in, edges_in);
@@ -144,6 +156,8 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
         infogrb = GrB_apply(temp_tab, GrB_NULL, GrB_NULL, GrB_ABS_INT8, new_cells_in, GrB_NULL); //abs on each component
         infogrb = GrB_reduce(temp_v, GrB_NULL, GrB_NULL, GrB_PLUS_INT8, temp_tab, GrB_DESC_T0);
         infogrb = GrB_apply(clipped_in_cells, GrB_NULL, GrB_NULL, GrB_GT_INT8, temp_v, 0, GrB_NULL); 
+        //GrB_wait(clipped_in_cells, GrB_MATERIALIZE);
+        //GxB_print(clipped_in_cells, GxB_COMPLETE);
         
         //Build row matrix full of 1.
         infogrb = GrB_Matrix_ncols(&size_e, *supercells);
@@ -169,6 +183,9 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
         //infogrb = GrB_Matrix_new(supercells_in, GrB_INT8, size_v, size_e);
         infogrb = GrB_Matrix_resize(temp_tab, size_v, size_e);
         infogrb = GrB_eWiseMult(temp_tab, GrB_NULL, GrB_NULL, GrB_TIMES_INT8, *supercells, in_m_ones, GrB_NULL);
+        //GrB_set (temp_tab, GrB_ROWMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(temp_tab, GrB_MATERIALIZE);
+        //GxB_print(temp_tab, GxB_COMPLETE);
 
         //Add cells to close supercells
         infogrb = GrB_Matrix_nrows(&size_v, new_cells_in);
@@ -179,12 +196,17 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
         infogrb = GrB_mxm(subcells_supercells_in, GrB_NULL, GrB_NULL, GrB_PLUS_TIMES_SEMIRING_INT8, new_cells_in, temp_tab, GrB_NULL);
         infogrb = GrB_assign(subcells_supercells_in, subcells_supercells_in, GrB_NULL, subcells_supercells_in, GrB_ALL, 0, GrB_ALL, 0, GrB_DESC_R); //suppress all zeros
         infogrb = GrB_apply(abs_subcells_supercells_in, GrB_NULL, GrB_NULL, GrB_ABS_INT8, subcells_supercells_in, GrB_NULL); 
+        //GrB_set (subcells_supercells_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        //GrB_wait(subcells_supercells_in, GrB_MATERIALIZE);
+        //GxB_print(subcells_supercells_in, GxB_COMPLETE);
 
         infogrb = GrB_Vector_new(&sum_abs, GrB_INT64, size_e);
         infogrb = GrB_Vector_new(&open_supercells_in, GrB_UINT64, size_e);
         infogrb = GrB_reduce(sum_abs, GrB_NULL, GrB_NULL, GrB_PLUS_INT8, abs_subcells_supercells_in, GrB_DESC_T0); //sum along the columns
         infogrb = GrB_apply(open_supercells_in, GrB_NULL, GrB_NULL, GrB_GT_INT8, sum_abs, 0, GrB_NULL); //keep only strictly positive
         infogrb = GrB_reduce(&nb_open_supercells, GrB_NULL, GrB_PLUS_MONOID_UINT64, open_supercells_in, GrB_NULL); //sum 
+        //GrB_wait(open_supercells_in, GrB_MATERIALIZE);
+        //GxB_print(open_supercells_in, GxB_COMPLETE);
 
         if (nb_open_supercells>0){
             infogrb = GrB_Matrix_new(&addCells, GrB_INT8, nb_open_supercells, size_e);
@@ -198,21 +220,37 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
             infogrb = GxB_Vector_extractTuples_Vector(nz_osi, vals_osi, open_supercells_in, GrB_NULL);
             infogrb = GrB_Vector_size(&size_e, nz_osi);
             for (j=0; j<size_e; j++){
+                //printf("In newCells generation.\n");
                 infogrb = GrB_Vector_extractElement(&osi_j, nz_osi, j);
                 infogrb = GrB_Matrix_setElement(addCells, 1, j, osi_j);
+                //printf("osi_j = %lu\n", osi_j);
                 infogrb = GrB_extract(temp_v, GrB_NULL, GrB_NULL, subcells_supercells_in, GrB_ALL, 1, osi_j, GrB_NULL);
+                //GrB_wait(temp_v, GrB_MATERIALIZE);
+                //GxB_print(temp_v, GxB_COMPLETE);
                 infogrb = GrB_apply(temp_v, GrB_NULL, GrB_NULL, GrB_AINV_INT8, temp_v, GrB_DESC_R);
-                infogrb = GrB_Col_assign(newCells, GrB_NULL, GrB_NULL, temp_v, GrB_ALL, 0, j, GrB_NULL); //newCells[:,j] = -subcells_supercells_in[:,j]
+                infogrb = GrB_Col_assign(newCells, GrB_NULL, GrB_NULL, temp_v, GrB_ALL, 0, j, GrB_NULL); //newCells[:,j] = -subcells_supercells_in[:,osi_j]
             }
+            //GrB_set (new_cells_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+            //GrB_wait(new_cells_in, GrB_MATERIALIZE);
+            //GxB_print(new_cells_in, GxB_COMPLETE);
+            //GrB_set (newCells, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+            //GrB_wait(newCells, GrB_MATERIALIZE);
+            //GxB_print(newCells, GxB_COMPLETE);
 
             infogrb = GrB_Matrix_ncols(&size_e, new_cells_in);
             infogrb = GrB_Matrix_resize(*cells_in, size_v, size_e + nb_open_supercells);
             infogrb = GxB_Matrix_concat(*cells_in, (GrB_Matrix[]){new_cells_in, newCells}, 1, 2, GrB_NULL); //cells_in = [cells_in  newCells]
+            //GrB_set (*cells_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+            //GrB_wait(*cells_in, GrB_MATERIALIZE);
+            //GxB_print(*cells_in, GxB_COMPLETE);
 
             infogrb = GrB_Matrix_nrows(&size_v, temp_tab);
             infogrb = GrB_Matrix_ncols(&size_e, temp_tab);
             infogrb = GrB_Matrix_new(supercells_in, GrB_INT8,  size_v + nb_open_supercells, size_e);
             infogrb = GxB_Matrix_concat(*supercells_in, (GrB_Matrix[]){temp_tab, addCells}, 2, 1, GrB_NULL); //supercells_in = [supercells_in ; addCells]
+            //GrB_set (*supercells_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+            //GrB_wait(*supercells_in, GrB_MATERIALIZE);
+            //GxB_print(*supercells_in, GxB_COMPLETE);
 
             GrB_free(&addCells);
             GrB_free(&newCells);
@@ -591,7 +629,7 @@ static GrB_Matrix surfaces_poly3D_pef(const Vector_points3D* points, const GrB_M
             infogrb = GrB_extract(ee0, GrB_NULL, GrB_NULL, *edges, GrB_ALL, 1, e0, GrB_NULL); //Point indices of first edge of face j
             infogrb = GxB_Vector_extractTuples_Vector(nz_e0, extr_vals_ee0, ee0, GrB_NULL);
             infogrb = GrB_Vector_size(&size_nze0, nz_e0);
-            while ((size_nze0 == 0) && (it<size_nz_fj)){//In case the first edge is empty: check untile you find one not empty
+            while ((size_nze0 == 0) && (it<size_nz_fj)){//In case the first edge is empty: check until you find one not empty
                 it++;
                 infogrb = GrB_Vector_extractElement(&e0, nz_fj, it);
                 infogrb = GrB_extract(ee0, GrB_NULL, GrB_NULL, *edges, GrB_ALL, 1, e0, GrB_NULL); //Point indices of first edge of face j
@@ -686,7 +724,7 @@ static GrB_Vector volumes_poly3D_pefv(const Vector_points3D* points, const GrB_M
             infogrb = GrB_Vector_size(&size_nzf0, nz_f0);
 
             //infoit = GxB_Vector_Iterator_next (iterator) ; //Move on to next face in volume
-            while ((size_nzf0 == 0) && (it<size_nz_vj)){ //In case the first face is empty: check untile you find one not empty
+            while ((size_nzf0 == 0) && (it<size_nz_vj)){ //In case the first face is empty: check until you find one not empty
                 it++;
                 infogrb = GrB_Vector_extractElement(&f0, nz_vj, it);
                 infogrb = GrB_extract(ff0, GrB_NULL, GrB_NULL, *faces, GrB_ALL, 1, f0, GrB_NULL); //Edge indices of first face of volume j

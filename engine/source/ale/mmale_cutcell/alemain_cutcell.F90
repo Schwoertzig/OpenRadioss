@@ -107,6 +107,7 @@
           integer :: ibc !< boundary condition (several may be defined in the input file)
           integer :: ebcs_ityp !< boundary condition type
           integer :: nelem
+          integer(kind=8) :: i_print
           ! ----------------------------------------------------------------------------------------------------------------------
           !                                                   Precondition
           ! ----------------------------------------------------------------------------------------------------------------------
@@ -179,14 +180,16 @@
         gamma(2) =  ALE%SOLVER%MULTIMAT%gamma(2)   !defined in input file
         sign = 1 !not used for now
         
-        call system("sync")
         if (dt1>0) then
+          i_print = ncycle
           call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
           multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
           multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
           gamma, dt1, dt_scale, sign, ebcs_tab, &
           multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot, &
-          dt2t, multi_cutcell%sound_speed)
+          dt2t, multi_cutcell%sound_speed)!, i_print)
+          !call run_simple_test()
+          !call exit(0)
         else
           !Initialization
           call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
@@ -198,8 +201,8 @@
           multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
           gamma, &
           multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot)
+          largest_speed_wave = -1.
           do ng = 1,numelq+numeltg
-            largest_speed_wave = -1.
             multi_cutcell%sound_speed(ng) = (multi_cutcell%grid(ng,1)%lambdanp1_per_cell*& 
                                           sqrt(gamma(1) * multi_cutcell%phase_pres(ng,1) / multi_cutcell%phase_rho(ng,1)) + &
                                           multi_cutcell%grid(ng,2)%lambdanp1_per_cell*&
@@ -211,21 +214,6 @@
           end do
           dt2t = dt_scale * sqrt(minval(multi_cutcell%grid(:, 1)%area)) / largest_speed_wave
         end if
-        call system("sync")
-        
-        
-        
-        !write(*,*) "vely1 = ", multi_cutcell%phase_vely(:,1)
-        !write(*,*) "velz1 = ", multi_cutcell%phase_velz(:,1)
-        !write(*,*) "vely2 = ", multi_cutcell%phase_vely(:,2)
-        !write(*,*) "velz2 = ", multi_cutcell%phase_velz(:,2)
-        !write(*,*) "rho1 = ", multi_cutcell%phase_rho(:,1)
-        !write(*,*) "pres1 = ", multi_cutcell%phase_pres(:,1)
-        !write(*,*) "rho2 = ", multi_cutcell%phase_rho(:,2)
-        !write(*,*) "pres2 = ", multi_cutcell%phase_pres(:,2)
-        !write(*,*) "vol frac phase 1 = ", multi_cutcell%grid(:,1)%lambdanp1_per_cell
-        !write(*,*) "vol frac phase 2 = ", multi_cutcell%grid(:,2)%lambdanp1_per_cell
-        
         
         
         ! -------------------------DO POST-TREATMENT HERE
@@ -250,6 +238,10 @@
             elbuf(ng)%gbuf%sig(0*NEL+ii) = -multi_cutcell%pres(elem_iid)
             elbuf(ng)%gbuf%sig(1*NEL+ii) = -multi_cutcell%pres(elem_iid)
             elbuf(ng)%gbuf%sig(2*NEL+ii) = -multi_cutcell%pres(elem_iid)
+
+            !elbuf(ng)%gbuf%vel(0*NEL+ii) = multi_cutcell%vel(0, elem_iid)
+            !elbuf(ng)%gbuf%vel(1*NEL+ii) = multi_cutcell%vel(1, elem_iid)
+            !elbuf(ng)%gbuf%vel(2*NEL+ii) = multi_cutcell%vel(2, elem_iid)
             
             elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,1)
             elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%rho(ii) = multi_cutcell%phase_rho(elem_iid,2)
@@ -281,10 +273,10 @@
             ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 2)%lambdanp1_per_cell
             
             !velocity-phase1
-            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,1)
+            elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(ii)     = multi_cutcell%phase_vely(elem_iid,1)
             elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,1)
             !velocity-phase2
-            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(ii)        = multi_cutcell%phase_vely(elem_iid,2)
+            elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(ii)     = multi_cutcell%phase_vely(elem_iid,2)
             elbuf(ng)%BUFLY(2)%LBUF(1,1,1)%vel(nel+ii) = multi_cutcell%phase_velz(elem_iid,2)
             
             

@@ -1,4 +1,5 @@
 #include "Polygon2D.h"
+#include <stdio.h>
 
 Polygon2D* new_Polygon2D(){
     GrB_Info infogrb;
@@ -812,3 +813,56 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
 
     return res_p;
 }
+
+void print_polygon2D(const Polygon2D* src, const char* file){
+    FILE* output = fopen(file, "w");
+    GrB_Info infogrb;
+    GrB_Vector fj, extr_vals_fj, edge_indices;
+    GrB_Vector ej, extr_vals_ej, pt_indices;
+    GrB_Index nb_edges, nb_faces, size_edge_indices, size_pt_indices, val, nb_pts;
+    GrB_Index i, j_f, j;
+    Point2D* pt;
+
+    GrB_Matrix_ncols(&nb_faces, *(src->faces));
+    GrB_Matrix_ncols(&nb_edges, *(src->edges));
+    GrB_Matrix_nrows(&nb_pts, *(src->edges));
+    GrB_Vector_new(&fj, GrB_INT8, nb_edges);
+    GrB_Vector_new(&edge_indices, GrB_UINT64, nb_edges);
+    GrB_Vector_new(&extr_vals_fj, GrB_INT8, nb_edges);
+    GrB_Vector_new(&ej, GrB_INT8, nb_pts);
+    GrB_Vector_new(&pt_indices, GrB_UINT64, nb_pts);
+    GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_pts);
+
+    for (i=0; i<nb_faces; i++){
+        infogrb = GrB_extract(fj, GrB_NULL, GrB_NULL, *(src->faces), GrB_ALL, 1, i, GrB_NULL); //Get indices of edges composing face i
+        infogrb = GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL);
+        infogrb = GrB_Vector_size(&size_edge_indices, edge_indices);
+
+        for(j_f=0; j_f<size_edge_indices; j_f++){
+            infogrb = GrB_Vector_extractElement(&j, edge_indices, j_f);
+            infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(src->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
+            infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
+            infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
+            if(size_pt_indices>0){
+                infogrb = GrB_Vector_extractElement(&val, pt_indices, 0);
+                pt = get_ith_elem_vec_pts2D(src->vertices, val);
+                fprintf(output, "%lf %lf\n", pt->x, pt->y);
+                
+                infogrb = GrB_Vector_extractElement(&val, pt_indices, 1);
+                pt = get_ith_elem_vec_pts2D(src->vertices, val);
+                fprintf(output, "%lf %lf\n", pt->x, pt->y);
+            }
+            fprintf(output, "\n");
+            fprintf(output, "\n");
+        }
+    }
+    fclose(output);
+
+    GrB_free(&fj);
+    GrB_free(&extr_vals_fj);
+    GrB_free(&edge_indices);
+    GrB_free(&ej);
+    GrB_free(&extr_vals_ej);
+    GrB_free(&pt_indices);
+}
+

@@ -25,5 +25,6 @@ void copy_Polyhedron3D(const Polyhedron3D *src, Polyhedron3D *dest);
 void dealloc_Polyhedron3D(Polyhedron3D* p);
 Polyhedron3D* fuse_polyhedrons(const Polyhedron3D* p1, const Polyhedron3D* p2);
 void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p);
+void print_polyhedron3D(const Polyhedron3D* src, const char* file);
 
 #endif

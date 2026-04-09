@@ -157,12 +157,12 @@ C--------------------------------
      & 5X,40H  /MAT/LAW20 : 2D BI-MATERIAL LAW       ,/,
      & 5X,40H  -------------------------------       ,//)
  1300 FORMAT(
-     & 5X,40HREFERENCED MATERIAL NUMBER . . . . . .=,I5/,
-     & 5X,40HFILLING RATIO . . . . . . . . . . . . .=,E12.4/,
-     & 5X,40HINCOMING PHASIS CONTROL FLAG. . . . . .=,I5)
+     & 5X,'REFERENCED MATERIAL NUMBER . . . . . .=',I5/,
+     & 5X,'FILLING RATIO . . . . . . . . . . . . .=',E12.4/,
+     & 5X,'INCOMING PHASIS CONTROL FLAG. . . . . .=',I5)
  1400 FORMAT(
-     & 5X,40HREFERENCED MATERIAL NUMBER. . . . . . .=,I5/,
-     & 5X,40HFILLING RATIO . . . . . . . . . . . . .=,E12.4/)
+     & 5X,'REFERENCED MATERIAL NUMBER. . . . . . .=',I5/,
+     & 5X,'FILLING RATIO . . . . . . . . . . . . .=',E12.4/)
 C-----------
       RETURN
       END

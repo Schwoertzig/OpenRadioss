@@ -30,5 +30,6 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2);
 void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vector_points2D *normals_edges, my_real_c* min_lgth_nom_edg);
 void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p);
 Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index);
+void print_polygon2D(const Polygon2D* src, const char* file);
 
 #endif

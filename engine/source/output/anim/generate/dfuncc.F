@@ -1223,8 +1223,8 @@ c------------------------------------ 2D velocity VEL-GLOBAL
                 ENDDO
               ELSE
                 DO I=LFT,LLT
-                  VEL(2) = multi_cutcell%vel(1,i+nft)
-                  VEL(3) = multi_cutcell%vel(2,i+nft)
+                  VEL(2) = multi_cutcell%vel(2,i+nft)
+                  VEL(3) = multi_cutcell%vel(3,i+nft)
                   FUNC(EL2FA(NN3+NFT+I)) = SQRT(VEL(2)*VEL(2)+VEL(3)*VEL(3))
                 ENDDO
               ENDIF
@@ -1251,7 +1251,7 @@ c------------------------------------ 2D velocity VEL-Y
                 ENDDO
               ELSE
                 DO I=LFT,LLT
-                  VEL(2) = multi_cutcell%vel(1,i+nft)
+                  VEL(2) = multi_cutcell%vel(2,i+nft)
                   FUNC(EL2FA(NN3+NFT+I)) = VEL(2)
                 ENDDO
               ENDIF
@@ -1278,7 +1278,7 @@ c------------------------------------ 2D velocity VEL-Z
                 ENDDO
               ELSE
                 DO I=LFT,LLT
-                  VEL(3) = multi_cutcell%vel(2,i+nft)
+                  VEL(3) = multi_cutcell%vel(3,i+nft)
                   FUNC(EL2FA(NN3+NFT+I)) = VEL(3)
                 ENDDO
               ENDIF
