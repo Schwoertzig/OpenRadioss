@@ -82,11 +82,19 @@ C-----------------------------------------------
       INTEGER CMAT(5)
       DATA CMAT/0,0,0,0,0/
       LOGICAL :: IS_ENCRYPTED, IS_AVAILABLE
+      INTEGER :: IMMALE
 C-----------------------------------------------
 C     S o u r c e 
 C-----------------------------------------------
       IS_ENCRYPTED = .FALSE.
       IS_AVAILABLE = .FALSE.
+
+      IMMALE = 0
+      IF(ALE%GLOBAL%IS_ALE_SOLVER_MULTIMAT > 0)THEN
+        IF(ALE%SOLVER%MULTIMAT%LIST(1)%MMALE == 3)THEN
+            IMMALE = 3
+        ENDIF
+      ENDIF
       
       CALL HM_OPTION_IS_ENCRYPTED(IS_ENCRYPTED)
 
@@ -123,7 +131,7 @@ C     Material proportions
       IF(IS_ENCRYPTED)THEN
         WRITE(IOUT,'(5X,A,//)')'CONFIDENTIAL DATA'
       ELSE
-        IF(ALE%SOLVER%MULTIMAT%LIST(1)%MMALE /= 3)THEN
+        IF(IMMALE /= 3)THEN
           WRITE(IOUT,1300)(MAT(I),AMAT(I),CMAT(I),I=1,NMAT)
         ELSE
           WRITE(IOUT,1400)(MAT(I),AMAT(I),I=1,NMAT)
@@ -140,7 +148,7 @@ C
       ENDIF
 C---- Definition of internal variables (Elementary storage)
       MTAG%L_FRAC = 1   ! percentage of phase
-      IF(ALE%SOLVER%MULTIMAT%LIST(1)%MMALE == 3) MTAG%L_VEL = 2 ! independent velocity phase
+      IF(IMMALE == 3) MTAG%L_VEL = 2 ! independent velocity phase
 C-----------
       ! MATPARAM keywords
       CALL INIT_MAT_KEYWORD(MATPARAM,"INCOMPRESSIBLE")
