@@ -142,6 +142,7 @@ C-----------------------------------------------
           DO I=1,NEL
             IF(IPART(I+NFT) /= IDP)CYCLE
             LBUF%VOL(I) = KVOL(IMAT,I) * GBUF%VOL(I)
+            print *, "KVOL(IMAT,I)=", IMAT,I,KVOL(IMAT,I)
           ENDDO
         ENDDO
       ENDIF

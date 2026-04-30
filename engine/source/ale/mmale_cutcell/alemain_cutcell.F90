@@ -199,6 +199,12 @@
             print *, "number of mixed cells : ", num_mixed
             ! internal ids : 'list_mixed(1:num_mixed)'
             ! user ids : ixq(7, internal id)
+                !debug --- tcl script for HyperMesh
+                do ii=1,num_mixed
+                  print *, '*createmark elements 1 ', ixq(7, list_mixed(ii))
+                  print *, '*movemark elements 1 "component1"'
+                end do
+                !debug-end
           call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
           nb_polygon = ALE%solver%multimat%nb
           call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
