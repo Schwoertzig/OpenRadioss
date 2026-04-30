@@ -1287,6 +1287,62 @@ module multicutcell_solver_mod
   end subroutine multicutcell_initial_state
 
 
+  !identify mixed cells
+  subroutine multicutcell_mixed_cell(ngroup, elbuf, nparg, iparg, numelq, num_mixed, list_mixed)
+    use elbufdef_mod
+    use precision_mod , only : WP
+    use constant_mod , only : em10, one, zero
+
+    implicit none
+
+    !DUMMY ARGUMENTS
+    integer, intent(in) :: ngroup,nparg,iparg(nparg,ngroup),numelq
+    integer,intent(inout) :: num_mixed
+    integer,intent(inout),dimension(:),allocatable :: list_mixed
+    type(elbuf_struct_),dimension(ngroup) :: elbuf
+
+    !LOCAL VARIABLE
+    integer :: imat,elem_iid,nft,nel,ii,ng,mlw
+    real(kind=WP) :: subvol, vol, tol, bound1, bound2
+    integer :: itag(numelq), kk
+    real(kind=WP) :: vf
+    integer,dimension(numelq) :: list
+
+    itag(1:numelq)=0
+
+    tol=em10
+    bound1= tol
+    bound2= one-tol
+    num_mixed = 0
+    do ng=1,ngroup
+      nel = iparg(2,ng)
+      nft = iparg(3,ng) ! shift
+      mlw = iparg(1,ng)
+      if(mlw /= 20)cycle
+      do ii=1,nel
+        elem_iid = ii+nft
+        subvol = elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vol(ii)
+        vol = elbuf(ng)%gbuf%vol(ii)
+        vf = subvol / vol
+        if(vf > bound1 .and. vf < bound2)then
+          itag(ii+nft) = 1
+          num_mixed = num_mixed +1
+        end if
+      end do
+    enddo
+
+    allocate(list_mixed(num_mixed))
+    kk = 0
+    do ii=1,numelq
+      if(itag(ii)==1)then
+        kk = kk +1
+        list_mixed(kk) = ii
+      end if
+    end do
+
+  end subroutine multicutcell_mixed_cell
+
+
 end module multicutcell_solver_mod
 
 #undef NOT_FUSED 

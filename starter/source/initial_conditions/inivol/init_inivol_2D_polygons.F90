@@ -366,7 +366,7 @@
             ity     = iparg(5,ng)
             isolnod = iparg(28,ng)
             invol   = iparg(53,ng)
-            if (mtn /= 51 .and. mtn /= 151) cycle
+            if (mtn /= 20 .and. mtn /= 51 .and. mtn /= 151) cycle
             is_quad = .false.
             is_tria = .false.
             if(ity == 7)then
@@ -449,7 +449,7 @@
             mid     = iparg(18,ng)
             isolnod = iparg(28,ng)
             invol   = iparg(53,ng)
-            if (mtn /= 51 .and. mtn /= 151) cycle
+            if (mtn /= 20 .and.  mtn /= 51 .and. mtn /= 151) cycle
             is_quad = .false.
             is_tria = .false.
             if(ity == 7)then

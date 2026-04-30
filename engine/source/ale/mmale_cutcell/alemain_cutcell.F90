@@ -43,6 +43,7 @@
           use debug_mod , only : ITAB_DEBUG
           use multi_cutcell_mod, only : multi_cutcell_struct, allocate_multi_cutcell_type
           use multicutcell_solver_mod, only : initialize_solver_multicutcell, update_fluid_multicutcell, build_full_states
+          use multicutcell_solver_mod, only : multicutcell_mixed_cell
           use elbufdef_mod , only : elbuf_struct_
           use multicutcell_solver_mod , only : multicutcell_initial_state
           use ebcs_mod !, only : t_ebcs_tab, t_ebcs
@@ -108,6 +109,8 @@
           integer :: ebcs_ityp !< boundary condition type
           integer :: nelem
           integer(kind=8) :: i_print
+          integer :: num_mixed !< number of mixed cells (identified as cells intersected by the interface, and consequently requiring a cut-cell treatment)
+          integer, allocatable :: list_mixed(:) !< list of mixed cells internal ids
           ! ----------------------------------------------------------------------------------------------------------------------
           !                                                   Precondition
           ! ----------------------------------------------------------------------------------------------------------------------
@@ -192,6 +195,10 @@
           !call exit(0)
         else
           !Initialization
+          call multicutcell_mixed_cell(ngroup, elbuf, nparg, iparg, numelq, num_mixed, list_mixed) !Identifying mixed cells
+            print *, "number of mixed cells : ", num_mixed
+            ! internal ids : 'list_mixed(1:num_mixed)'
+            ! user ids : ixq(7, internal id)
           call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
           nb_polygon = ALE%solver%multimat%nb
           call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
