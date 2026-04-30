@@ -133,6 +133,7 @@
 !||    init_bcs_wall                      ../starter/source/boundary_conditions/init_bcs_wall.F90
 !||    init_h3d_engine                    ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    init_monvol                        ../starter/source/airbag/init_monvol.F
+!||    init_rwall_penalty                 ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
 !||    insert_clause_in_set               ../starter/source/model/sets/insert_clause_in_set.F
 !||    intbuf_fric_ini_starter            ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
 !||    intbuf_ini_starter                 ../starter/source/interfaces/intbuf/intbuf_ini_starter.F
@@ -156,6 +157,8 @@
 !||    r2r_split                          ../starter/source/coupling/rad2rad/r2r_split.F
 !||    r2r_void                           ../starter/source/coupling/rad2rad/r2r_void.F
 !||    r2r_void_1d                        ../starter/source/coupling/rad2rad/r2r_void.F
+!||    rbody_part_check                   ../starter/source/constraints/general/rbody/rbody_part_modif.F90
+!||    rbody_part_modif                   ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    rcheckmass                         ../starter/source/elements/spring/rcheckmass.F
 !||    read_box_box                       ../starter/source/model/box/read_box_box.F
 !||    read_eosparam                      ../engine/source/output/restart/read_eosparam.F90
@@ -178,6 +181,7 @@
 !||    rgwal0_pen                         ../engine/source/constraints/general/rwall/rgwall_pen.F90
 !||    ri2_int24p_ini                     ../starter/source/interfaces/inter3d1/i7remnode.F
 !||    rm_cand24                          ../starter/source/interfaces/inter3d1/i7remnode.F
+!||    rpart_inivel_check                 ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    rwall_fpen                         ../engine/source/constraints/general/rwall/rgwall_pen.F90
 !||    sensor_init                        ../engine/source/tools/sensor/sensor_init.F
 !||    set_user_window_nodes              ../starter/source/user_interface/user_windows_tools.F

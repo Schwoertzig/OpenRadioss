@@ -381,6 +381,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    r2r_split                           ../starter/source/coupling/rad2rad/r2r_split.F
 !||    r2r_void                            ../starter/source/coupling/rad2rad/r2r_void.F
 !||    rbe2modif1_nd                       ../starter/source/elements/solid/solide10/dim_s10edg.F
+!||    rbody_part_check                    ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    read_detonators                     ../starter/source/initial_conditions/detonation/read_detonators.F
 !||    read_ebcs                           ../starter/source/boundary_conditions/ebcs/read_ebcs.F
 !||    read_engine_driver                  ../starter/source/general_controls/engine/read_engine_driver.F
@@ -395,6 +396,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    rgrtails                            ../starter/source/elements/spring/rgrtails.F
 !||    rigid_mat                           ../starter/source/materials/mat/mat019/rigid_mat.F
 !||    rigmodif1_nd                        ../starter/source/elements/solid/solide10/dim_s10edg.F
+!||    rpart_inivel_check                  ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    s10edg_rlink                        ../starter/source/elements/solid/solide10/s10edg_rlink.F
 !||    scrint                              ../starter/source/interfaces/interf1/scrint.F
 !||    searchigeo3d                        ../starter/source/elements/ige3d/searchigeo3d.F
@@ -528,6 +530,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    python_duplicate_nodes_mod          ../starter/source/spmd/domain_decomposition/python_duplicate_nodes.F90
 !||    r2r_mod                             ../starter/share/modules1/r2r_mod.F
 !||    random_mod                          ../starter/share/modules1/random_mod.F
+!||    rbody_part_modif_mod                ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    read_funct_python_mod               ../starter/source/tools/curve/hm_read_funct_python.F90
 !||    reorder_mod                         ../starter/share/modules1/reorder_mod.F
 !||    restmod                             ../starter/share/modules1/restart_mod.F
@@ -552,7 +555,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE LECTUR(MULTI_FVM                   ,LSUBMODEL          ,IS_DYNA         ,DETONATORS   ,EBCS_TAB,
      .                  SEATBELT_CONVERTED_ELEMENTS ,NB_SEATBELT_SHELLS ,NB_DYNA_INCLUDE ,USER_WINDOWS ,OUTPUT  ,
      .                  MAT_ELEM,NAMES_AND_TITLES,DEFAULTS,glob_therm,pblast,
-     .                  SENSOR_USER_STRUCT,CHECK_USED)
+     .                  SENSOR_USER_STRUCT,CHECK_USED,N_NRBODY,NRBODY_TO_PART)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -668,6 +671,7 @@ C-----------------------------------------------
       use get_element_group_mod , only : get_element_group
       use elm_group_mod , only : elm_group_
       use my_real_tot_int_transfer_mod , only : my_real_tot_int_transfer
+      use rbody_part_modif_mod,     ONLY : rbody_part_check,rpart_inivel_check
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -691,6 +695,8 @@ C-----------------------------------------------
       TYPE(PBLAST_),INTENT(INOUT)           :: PBLAST
       TYPE(SENSOR_USER_STRUCT_)              :: SENSOR_USER_STRUCT
       INTEGER,INTENT(IN)                     :: CHECK_USED                          !< Flag to check if node is used
+      INTEGER,INTENT(IN)                     :: N_NRBODY                            !< Number of rigid bodies by part
+      INTEGER,DIMENSION(N_NRBODY),INTENT(IN) :: NRBODY_TO_PART                      !< rigid body to part mapping
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
@@ -4363,7 +4369,6 @@ C PRINT /BCS
      .              IGRNOD   ,IBCSLAG ,LAG_NCF ,LAG_NKF ,LAG_NHF,
      .              IKINE1LAG,ISKWN,NOM_OPT(LNOPT1*INOM_OPT(16)+1), NBCSLAG)
       ENDIF
-
 C--------------------------------------
 C
       ALLOCATE(ICODEP(0),ISKEWP(0))
@@ -6904,6 +6909,8 @@ C--------------------------------------------
        ALLOCATE(ITAGND(0),STAT=stat)
       END IF
 
+!     replace old /MAT/RIGID by RBODY by part	  
+      IF (N_NRBODY>0) IRIGID_MAT = 0
 C--------------------------------------------
 C     Domain Decomposition 1 (Reconstruction of Tables)
 C--------------------------------------------
@@ -6952,7 +6959,7 @@ C--------------------------------------------
       ERR_CATEGORY='GRAVITY'
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
 c      CALL PRELECGRAV(NUMGRAV ,IGRNOD)
-      CALL HM_PREREAD_GRAV(NUMGRAV ,IGRNOD , LSUBMODEL)
+      CALL HM_PREREAD_GRAV(NUMGRAV ,IGRNOD , LSUBMODEL,N_NRBODY)
       SIGRV = NIGRV*NGRAV
       SLGRAV = NUMGRAV
       IF(IDDLEVEL==0)THEN
@@ -8030,7 +8037,7 @@ C
      3       SENSORS   ,IMERGE  ,UNITAB  ,ISKWN   ,NOM_OPT   ,
      4       SLRBODY   ,KNOD2ELS,KNOD2ELC,KNOD2ELTG,KNOD2EL1D,
      5       KNOD2ELQ  ,ITAGND  ,ICNDS10 ,LSUBMODEL,ICFIELD  ,
-     6       LCFIELD   )
+     6       LCFIELD   ,SLRBODY ,N_NRBODY,NRBODY_TO_PART,IPART)
         ENDIF
 C--------------------------------------------
 C     Reading rigid body merges
@@ -8059,6 +8066,23 @@ C--------------------------------------------
      2       D      ,IDDLEVEL,NOM_OPT,SLRBODY,
      3       ROOTNAM,ROOTLEN )
       ENDIF
+C--------------------------------------------
+C     Checking rigid part
+C--------------------------------------------
+      IF(N_NRBODY > 0) THEN
+        CALL RBODY_PART_CHECK(NRBYKIN ,NNPBY ,NPBY  ,SLRBODY ,LPBY  ,       
+     .                        NUMNOD  ,ITAB  ,NPART ,IPART   ,LIPART1,       
+     .                        ICODE   ,ISKEW ,NFXVEL,NIFV    ,IBFV ,
+     .                        NGRAV   ,NIGRV ,IGRV  ,SLGRAV  ,LGRAV,
+     .                        NUMSKW) 
+        CALL RPART_INIVEL_CHECK(NRBYKIN ,NNPBY ,NPBY  ,SLPBY    ,LPBY   ,        
+     .                        HM_NINVEL ,NUMNOD,ITABM1,LSUBMODEL,UNITAB ,        
+     .                        NTRANSF   ,NRTRANS,RTRANS,RBY_INIAXIS,ISKWN,     
+     .                         LISKN    ,NUMSKW ,LSKEW  ,SKEW   ,IFRAME  ,        
+     .                         NUMFRAM  ,NXFRAME,XFRAME ,NGRNOD ,IGRNOD  , 
+     .                         N2D      ,X      ,V     ,VR  )
+
+      END IF
 C--------------------------------------------
 C     READING RB LAGRANGE
 C--------------------------------------------

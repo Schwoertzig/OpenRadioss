@@ -27,6 +27,9 @@
 !||====================================================================
       module hm_read_therm_softening_mod
         implicit none
+! \brief Read thermal softening input data for /MAT/LAW131
+! \details Read and dispatch the thermal softening model input data
+!          for /MAT/LAW131 (elasto-plastic material law).
       contains
 !||====================================================================
 !||    hm_read_therm_softening                   ../starter/source/materials/mat/mat131/therm_softening/hm_read_therm_softening.F90
@@ -91,31 +94,29 @@
           type(matparam_struct_),  intent(inout) :: matparam              !< Material parameter data structure
 !===============================================================================
 !    
-          !< Select thermal softening type
-          select case (type(1:4))
-            !===================================================================
-            !< Johnson-Cook thermal softening parameters
-            !===================================================================
-            case ('JOHN')
-              call hm_read_therm_softening_johnsoncook(                        &
-                ikey     ,itherm   ,nupar_therm  ,upar_therm  ,is_available,   &
-                unitab   ,lsubmodel,iout         ,is_encrypted,matparam    )
-            !===================================================================
-            !< Zhao thermal softening parameters
-            !===================================================================
-            case ('ZHAO')
-              call hm_read_therm_softening_zhao(                               &
-                ikey     ,itherm   ,nupar_therm  ,upar_therm  ,is_available,   &
-                unitab   ,lsubmodel,iout         ,is_encrypted,matparam    )
-            !===================================================================
-            !< Tabulated thermal softening parameters
-            !===================================================================
-            case ('TAB ')
-              call hm_read_therm_softening_tabulated(                          &
-                ikey     ,itherm   ,ntab_therm,itab_therm  ,x2vect ,x3vect   , &
-                x4vect   ,fscale   ,nvartmp   ,is_available,unitab ,lsubmodel, &
-                iout     ,is_encrypted,matparam)
-          end select
+          !=====================================================================
+          !< Johnson-Cook thermal softening parameters
+          !=====================================================================
+          if (type(1:11) == 'JOHNSONCOOK') then
+            call hm_read_therm_softening_johnsoncook(                          &
+              ikey     ,itherm   ,nupar_therm  ,upar_therm  ,is_available,     &
+              unitab   ,lsubmodel,iout         ,is_encrypted,matparam    )
+          !=====================================================================
+          !< Zhao thermal softening parameters
+          !=====================================================================
+          elseif (type(1:4) == 'ZHAO') then
+            call hm_read_therm_softening_zhao(                                 &
+              ikey     ,itherm   ,nupar_therm  ,upar_therm  ,is_available,     &
+              unitab   ,lsubmodel,iout         ,is_encrypted,matparam    )
+          !=====================================================================
+          !< Tabulated thermal softening parameters
+          !=====================================================================
+          elseif (type(1:3) == 'TAB') then
+            call hm_read_therm_softening_tabulated(                            &
+              ikey     ,itherm   ,ntab_therm,itab_therm  ,x2vect ,x3vect   ,   &
+              x4vect   ,fscale   ,nvartmp   ,is_available,unitab ,lsubmodel,   &
+              iout     ,is_encrypted,matparam)
+          endif
 !
           !< Set temperature variable tag
           if (mtag%g_temp == 0) mtag%g_temp = 1

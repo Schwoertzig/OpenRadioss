@@ -43,6 +43,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    s4deri3                ../engine/source/elements/solid/solide4/s4deri3.F
 !||    s4derit3               ../engine/source/elements/solid/solide4/s4derit3.F
 !||    s4derito3              ../engine/source/elements/solid/solide4/s4derito3.F
+!||    s4dlenmax_sm           ../engine/source/elements/solid/solide4/s4dlenmax_sm.F90
 !||    s4fillopt              ../engine/source/elements/solid/solide4/s4fillopt.F
 !||    s4fint3                ../engine/source/elements/solid/solide4/s4fint3.F
 !||    s4fint_reg             ../engine/source/elements/solid/solide4/s4fint_reg.F
@@ -80,6 +81,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    mmain_mod              ../engine/source/materials/mat_share/mmain.F90
 !||    nlocal_reg_mod         ../common_source/modules/nlocal_reg_mod.F
 !||    output_mod             ../common_source/modules/output/output_mod.F90
+!||    s4dlenmax_sm_mod       ../engine/source/elements/solid/solide4/s4dlenmax_sm.F90
 !||    sdistor_ini_mod        ../engine/source/elements/solid/solide/sdistror_ini.F90
 !||    sensor_mod             ../common_source/modules/sensor_mod.F90
 !||    table_mod              ../engine/share/modules/table_mod.F
@@ -106,7 +108,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      I   MAT_ELEM,   H3D_STRAIN,       DT,         IDEL7NOK,NSVOIS,SZ_BUFVOIS,
      *   SNPC,       STF,              SBUFMAT,    SVIS,IDTMINS,IRESP,
      *   IDEL7NG,    MAXFUNC,          USERL_AVAIL, GLOB_THERM,
-     V   impl_s,     idyna,            S_SFEM_NODVAR,s_flux,nv46,ITAG_NSFEM)
+     V   impl_s,     idyna,            S_SFEM_NODVAR,s_flux,nv46,need_it)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -125,6 +127,7 @@ C-----------------------------------------------
       use glob_therm_mod
       USE SENSOR_MOD
       use element_mod , only : nixs
+      use s4dlenmax_sm_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -166,7 +169,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: USERL_AVAIL
       integer, intent(in) :: s_flux !< first dimension of flux array
       integer, intent(in) :: nv46 !< second dimension of flux array
-      INTEGER, DIMENSION(NUMNOD), INTENT(IN)    :: ITAG_NSFEM
+      integer, dimension(nel), intent(in) :: need_it !< sfem option computation status for each element
       INTEGER IXS(NIXS,*), IPARG(NPARG,NGROUP), NPF(*),IADS(8,*),
      .        IPARTS(*),IPM(NPROPMI,*),IGEO(NPROPGI,*),ITASK,
      .        GRTH(*),IGRTH(*),IOUTPRT
@@ -202,7 +205,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,IBID,NF1,IFLAG,IPTR,IPTS,IPTT,ILAY,IMAT
-      INTEGER IBIDON(1),ITET,IP,ISUM
+      INTEGER IBIDON(1),ITET,IP
       my_real SUM
       INTEGER MXT(MVSIZ),NGL(MVSIZ),NGEO(MVSIZ)
       my_real
@@ -266,7 +269,7 @@ C-----------------------------------------------
      .  MFXX(MVSIZ),MFXY(MVSIZ),MFYX(MVSIZ),
      .  MFYY(MVSIZ),MFYZ(MVSIZ),MFZY(MVSIZ),
      .  MFZZ(MVSIZ),MFZX(MVSIZ),MFXZ(MVSIZ),BID(MVSIZ),AMU(MVSIZ),
-     .  FLD(MVSIZ),STI_C(MVSIZ),LL(MVSIZ),MU,FQMAX
+     .  FLD(MVSIZ),STI_C(MVSIZ),LL(MVSIZ),MU,FQMAX,VOLGS(MVSIZ),L_MIN(MVSIZ)
       my_real, 
      .  DIMENSION(:), POINTER :: EINT
       my_real, dimension(mvsiz) :: fheat
@@ -281,9 +284,11 @@ C
 
 C----- 
 c     Flag Bolt Preloading
-      INTEGER IBOLTP,NBPRELD,ISCTL,ISTAB(MVSIZ),PID,SZ_IX
+      INTEGER IBOLTP,NBPRELD,ISCTL,ISTAB(MVSIZ),PID,SZ_IX,NN_DEL
       my_real, 
      .  DIMENSION(:), POINTER :: BPRELD
+      my_real,
+     .  DIMENSION(:,:), POINTER :: SIG_2D
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C=======================================================================
@@ -308,6 +313,9 @@ C-----------
       PID = IXS(10,NF1)
       IGTYP = IGEO(11,PID)   
       ISCTL = IGEO(97,PID)
+      NN_DEL =0
+      IF (GEO(190,PID)+GEO(191,PID)+GEO(192,PID)+GEO(192,PID)>ZERO) NN_DEL=4
+      IF (NN_DEL ==0 .AND. DT%IDEL_BRICK>0) NN_DEL=4
 c
       CALL S4COOR3(
      1   X,         IXS(1,NF1),V,         W,
@@ -510,20 +518,16 @@ C-----------------------------------------------------
      5   MFZY,             MFZZ,        GBUF%VOL,    VOLN,
      6   LBUF%VOL0DP,      VOLDP,       GBUF%AMU,    DXX,
      7   DYY,              DZZ,         MAT_ELEM%MAT_PARAM,NEL,
-     8   ISMSTR,           S_SFEM_NODVAR, ITAG_NSFEM)
+     8   ISMSTR,           S_SFEM_NODVAR, need_it)
       ENDIF
       IF(JALE > 0 .AND. ISROT == 3 .AND. MTN /= 37 .AND. MTN /= 51 .AND.
      .   MTN /= 18 .AND. MTN /= 11) THEN
         DO I=LFT,LLT
          IF(OFF(I) /= 0) THEN
-         ISUM = ITAG_NSFEM(NC1(I)) + ITAG_NSFEM(NC2(I)) +
-     .          ITAG_NSFEM(NC3(I)) + ITAG_NSFEM(NC4(I))
-         IF (ISUM < 4) CYCLE
-         SUM=SFEM_NODVAR(NC1(I))*ITAG_NSFEM(NC1(I))+
-     .       SFEM_NODVAR(NC2(I))*ITAG_NSFEM(NC2(I))+
-     .       SFEM_NODVAR(NC3(I))*ITAG_NSFEM(NC3(I))+
-     .       SFEM_NODVAR(NC4(I))*ITAG_NSFEM(NC4(I))
-         VOLN(I)=SUM*GBUF%RHO(I)/PM(1,MXT(I))/ISUM
+         if(need_it(i)==0) cycle
+         SUM=SFEM_NODVAR(NC1(I)) + SFEM_NODVAR(NC2(I))+
+     .       SFEM_NODVAR(NC3(I))+  SFEM_NODVAR(NC4(I))          
+         VOLN(I)=SUM*GBUF%RHO(I)/PM(1,MXT(I))/4
          ENDIF
         ENDDO
       ENDIF
@@ -550,8 +554,9 @@ C----for Eint compute----
       ENDIF
 
 
+      SIG_2D(1:NEL,1:6) => GBUF%SIG(1:NEL*6)
       CALL SROTA3(
-     1   GBUF%SIG,S1,      S2,      S3,
+     1   SIG_2D,  S1,      S2,      S3,
      2   S4,      S5,      S6,      WXX,
      3   WYY,     WZZ,     NEL,     MTN,
      4   ISMSTR)
@@ -704,9 +709,20 @@ C--------------------------
       ENDIF
 C
       IF(JLAG+JALE+JEUL == 0)RETURN
+      IF (NN_DEL >0) THEN
+        IF (ISMSTR == 1 .OR. ISMSTR == 11) THEN 
+          CALL S4DLENMAX_SM(                          
+     1           NEL      ,X        ,L_MIN      ,VOLGS   ,            
+     2           NC1      ,NC2      ,NC3        ,NC4     ,       
+     3           NUMNOD )
+        ELSE
+          VOLGS(1:NEL) =VOLN(1:NEL)
+          L_MIN(1:NEL) =DELTAX(1:NEL)
+        END IF 
+        BID(LFT:LLT)=ZERO
+        CALL SGEODEL3(NGL,GBUF%OFF,VOLGS,L_MIN,GBUF%VOL,GEO(1,NGEO(1)),BID,DT,NEL,IDEL7NOK )
+      END IF !(NN_DEL >0) THEN
       ITET = 1
-      BID(LFT:LLT)=ZERO
-      CALL SGEODEL3(NGL,GBUF%OFF,VOLN,DELTAX,GBUF%VOL,GEO(1,NGEO(1)),BID,DT,NEL,IDEL7NOK )
 C-----------------------------
 C     SMALL STRAIN 
 C-----------------------------

@@ -29,7 +29,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_get_intv            ../starter/source/devtools/hm_reader/hm_get_intv.F
 !||    hm_option_read_key     ../starter/source/devtools/hm_reader/hm_option_read_key.F
 !||    hm_option_start        ../starter/source/devtools/hm_reader/hm_option_start.F
-!||    ngr2usrn               ../starter/source/system/nintrr.F
 !||--- uses       -----------------------------------------------------
 !||    hm_option_read_mod     ../starter/share/modules1/hm_option_read_mod.F
 !||    message_mod            ../starter/share/message_module/message_mod.F
@@ -65,9 +64,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,NLD,IGU,IGS,ISU,ISS,NN,ID,UID,
-     .        IFU,ISENS,NCUR,IGBR,IBID
-      INTEGER FLAG_FMT,FLAG_FMT_TMP,IFIX_TMP
+      INTEGER I,J,IGU,IGS,NN,ID
       INTEGER ,INTENT(IN)       :: NIMTEMP
       INTEGER ,INTENT(INOUT)    :: NFXTEMP
       CHARACTER(LEN=NCHARTITLE) :: TITR
@@ -75,9 +72,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER  NGR2USRN
-       my_real
-     .  FACX,FACY,H,FAC1,FAC2
+
 C=======================================================================
       IS_AVAILABLE = .FALSE.                                    
       NFXTEMP  = 0 

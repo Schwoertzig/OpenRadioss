@@ -28,7 +28,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_get_intv              ../starter/source/devtools/hm_reader/hm_get_intv.F
 !||    hm_option_read_key       ../starter/source/devtools/hm_reader/hm_option_read_key.F
 !||    hm_option_start          ../starter/source/devtools/hm_reader/hm_option_start.F
-!||    ngr2usr                  ../starter/source/system/nintrr.F
 !||    ngr2usrn                 ../starter/source/system/nintrr.F
 !||--- uses       -----------------------------------------------------
 !||    hm_option_read_mod       ../starter/share/modules1/hm_option_read_mod.F
@@ -63,15 +62,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER               :: I, ID, IGU, IGS, NN, UID, FLAG_FMT
-      INTEGER               :: FLAG_FMT_TMP, IFIX_TMP, ISU, IS, J
+      INTEGER               :: I, ID, IGU, IGS, NN
       CHARACTER(LEN=NCHARTITLE) :: TITR
       LOGICAL IS_AVAILABLE
-      INTEGER, DIMENSION(:), POINTER :: INGR2USR
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER  NGR2USRN, NGR2USR
+      INTEGER  NGR2USRN
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------

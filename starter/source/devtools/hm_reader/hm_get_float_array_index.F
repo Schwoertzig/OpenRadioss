@@ -27,8 +27,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_bem                              ../starter/source/loads/bem/hm_read_bem.F
 !||    hm_read_ebcs_inlet                       ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_inlet.F
 !||    hm_read_elasticity_anisotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
+!||    hm_read_elasticity_bimod_isotropic       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_bimod_isotropic.F90
 !||    hm_read_elasticity_isotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_temp_isotropic        ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_fail_inievo                      ../starter/source/materials/fail/inievo/hm_read_fail_inievo.F
 !||    hm_read_fail_orthbiquad                  ../starter/source/materials/fail/orthbiquad/hm_read_fail_orthbiquad.F
@@ -119,6 +121,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    r2r_prelec                               ../starter/source/coupling/rad2rad/r2r_prelec.F
 !||    read_impdisp_fgeo                        ../starter/source/constraints/general/impvel/read_impdisp_fgeo.F
 !||    read_sensor_gauge                        ../starter/source/tools/sensor/read_sensor_gauge.F
+!||    rpart_inivel_check                       ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    message_mod                              ../starter/share/message_module/message_mod.F

@@ -81,8 +81,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_eig                              ../starter/source/general_controls/computation/hm_read_eig.F
 !||    hm_read_elasticity                       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity.F90
 !||    hm_read_elasticity_anisotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
+!||    hm_read_elasticity_bimod_isotropic       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_bimod_isotropic.F90
 !||    hm_read_elasticity_isotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_temp_isotropic        ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_elasto_plastic                   ../starter/source/materials/mat/mat131/hm_read_elasto_plastic.F90
 !||    hm_read_eos                              ../starter/source/materials/eos/hm_read_eos.F
@@ -255,6 +257,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_mat132                           ../starter/source/materials/mat/mat132/hm_read_mat132.F90
 !||    hm_read_mat133                           ../starter/source/materials/mat/mat133/hm_read_mat133.F90
 !||    hm_read_mat134                           ../starter/source/materials/mat/mat134/hm_read_mat134.F90
+!||    hm_read_mat135                           ../starter/source/materials/mat/mat135/hm_read_mat135.F90
 !||    hm_read_mat14                            ../starter/source/materials/mat/mat014/hm_read_mat14.F
 !||    hm_read_mat15                            ../starter/source/materials/mat/mat015/hm_read_mat15.F
 !||    hm_read_mat151                           ../starter/source/materials/mat/mat151/hm_read_mat151.F
@@ -538,6 +541,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol                                    ../engine/source/engine/resol.F
 !||    resol_head                               ../engine/source/engine/resol_head.F
 !||    restmod                                  ../engine/share/modules/restart_mod.F
+!||    rpart_inivel_check                       ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    set_admesh                               ../starter/source/model/remesh/set_admesh.F
 !||    sort_logical_sensors                     ../starter/source/tools/sensor/sort_logical_sensors.F
 !||    split_ebcs                               ../starter/source/boundary_conditions/ebcs/split_ebcs.F

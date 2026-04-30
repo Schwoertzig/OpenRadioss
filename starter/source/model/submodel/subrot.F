@@ -45,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    lecsec42                        ../starter/source/tools/sect/hm_read_sect.F
 !||    lecsec4bolt                     ../starter/source/tools/sect/lecsec4bolt.F
 !||    lectrans                        ../starter/source/model/transformation/lectrans.F
+!||    rpart_inivel_check              ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||--- calls      -----------------------------------------------------
 !||    euler_vrot                      ../starter/source/model/submodel/euler_vrot.F
 !||--- uses       -----------------------------------------------------
@@ -342,7 +343,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER  I,L,K,CPTZERO,IDSUBMODEL,SUB_LEVEL,CUR_SUBMOD
       my_real
-     .   ROT(9),P(3),X0(3),L11,L22,L33,L12,L23,L13,S11,S12,
+     .   ROT(9),X0(3),L11,L22,L33,L12,L23,L13,S11,S12,
      .   S13,S21,S22,S23,S31,S32,S33,R11,R12,
      .   R13,R21,R22,R23,R31,R32,R33   
 C======================================================================   

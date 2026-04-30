@@ -71,6 +71,8 @@
 !||    resol_head                               ../engine/source/engine/resol_head.F
 !||    restalloc                                ../engine/source/output/restart/arralloc.F
 !||    set_new_node_values                      ../engine/source/engine/node_spliting/detach_node.F90
+!||    sfem_init                                ../engine/source/elements/solid/solide4_sfem/sfem_init.F90
+!||    sfem_init_spmd                           ../engine/source/elements/solid/solide4_sfem/sfem_init_spmd.F90
 !||    sortie_main                              ../engine/source/output/sortie_main.F
 !||    spmd_exch_deleted_surf_edge              ../engine/source/mpi/interfaces/spmd_exch_deleted_surf_edge.F
 !||    spmd_exch_neighbour_segment              ../engine/source/mpi/interfaces/spmd_exch_neighbour_segment.F90
@@ -146,6 +148,7 @@
           real(kind=wp), dimension(:), allocatable :: TEMP !< temperature
 
           ! 3*NUMNOD if IRESP == 1, else 3
+          integer :: s_xdp
           double precision, dimension(:,:), allocatable :: DDP !< double precision D
           double precision, dimension(:,:), allocatable :: XDP !< double precision X
           double precision, dimension(:,:), allocatable :: ACC_DP !< double precision acceleration
@@ -355,12 +358,14 @@
             call my_alloc(arrays%TEMP,0)
           end if
 #ifdef MYREAL4
+          arrays%s_xdp = numnod
           call my_alloc(arrays%DDP,3,numnod)
           call my_alloc(arrays%XDP,3,numnod)
           if(iparith==0) then
             call my_alloc(arrays%ACC_DP,3,numnod)
           end if
 #else
+          arrays%s_xdp = 1  
           call my_alloc(arrays%DDP,3,1)
           call my_alloc(arrays%XDP,3,1)
 #endif

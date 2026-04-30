@@ -27,6 +27,9 @@
 !||====================================================================
       module hm_read_yield_criterion_barlat2000_mod
         implicit none
+! \brief Read Barlat 2000 yield criterion input data for /MAT/LAW131
+! \details Read the Barlat 2000 (Yld2000-2d) anisotropic yield criterion
+!          parameters for /MAT/LAW131.
       contains
 !||====================================================================
 !||    hm_read_yield_criterion_barlat2000   ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
@@ -88,16 +91,17 @@
             gamma,delta,fct,yield,dx,dy,g1,g2,g3,g13,g23,g33,g15,g25,g35,      &
             df1,df2,df3,df13,df23,df33,df15,df25,df35,f1,f2,                   &
             dv1a7,dv11a8,dw11a8,r00,r45,r90,rb,s00,s45,s90,sb,                 &
-            x1,x2,x11,x22 ,v1,v11,w11,tal7,tal8,aswift,epso,qvoce,beta,ko,     &
-            alpha,nexp,conjtf4a8,tf4a8,dal78(2),expv,kswift,kvoce,puis,pla,    &
+            x1,x2,x11,x22 ,v1,v11,w11,tal7,tal8,                               &
+            conjtf4a8,tf4a8,dal78(2),                                           &
             residu,g(2),dal(8),dg(2,2),al(8),f(8),df(6,6),                     &
-            dfinv(6,6),dginv(2,2),dyld_dp(1),                                  &
-            xvec(1,2),yld(1),expa,expam2,k1,k2,ahs,bhs,mhs,eps0hs,nhs,hmart,   &
-            temp0,expo,aexp,atemp,vm0
+            dfinv(6,6),dginv(2,2),                                              &
+            expa,expam2
           double precision :: lp(3,3),lpp(3,3),wr(3),wi(3),work(102),vl(3,3),  &
             vr(3,3)
 !===============================================================================
-!  
+!
+          al = -HUGE(1.0_WP)
+          expa = -HUGE(1.0_WP)
           !===================================================================
           !< Barlat (2000) yield criterion
           !===================================================================
@@ -118,7 +122,7 @@
               if (al(k) == zero) al(k) = one
             end do
             if (expa == zero) expa = two
-          !< Alternative fitting procedure based on yield stresses in specific loading directions
+            !< Alternative fitting procedure based on yield stresses in specific loading directions
           elseif (ifit == 2) then
             call hm_get_float_array_index("CRIT_BARL00_SIG00",s00  ,ikey,is_available,lsubmodel,unitab)
             call hm_get_float_array_index("CRIT_BARL00_SIG45",s45  ,ikey,is_available,lsubmodel,unitab)
@@ -235,7 +239,7 @@
                     c2=titr,                                                   &
                     c3="CRIT_BARLAT2000_2",                                    &
                     c4="NO CONVERGENCE IN IDENTIFICATION ALGORITHM PLEASE" //  &
-                       " CHECK YOUR INPUT")  
+                    " CHECK YOUR INPUT")
                   exit
                 endif
               enddo
@@ -292,7 +296,7 @@
                     c2=titr,                                                   &
                     c3="CRIT_BARLAT2000_2",                                    &
                     c4="NO CONVERGENCE IN IDENTIFICATION ALGORITHM PLEASE" //  &
-                       " CHECK YOUR INPUT")  
+                    " CHECK YOUR INPUT")
                   exit
                 end if
               end do
@@ -312,7 +316,7 @@
                     c2=titr,                                                   &
                     c3="CRIT_BARLAT2000_2",                                    &
                     c4="NO CONVERGENCE IN IDENTIFICATION ALGORITHM PLEASE" //  &
-                       " CHECK YOUR INPUT")  
+                    " CHECK YOUR INPUT")
                   exit
                 endif
               enddo
@@ -340,8 +344,8 @@
               c2=titr,                                                         &
               c3="CRIT_BARLAT2000",                                            &
               c4="INPUT OR IDENTIFIED COMBINATION OF ALPHA_i PARAMETERS" //    &
-               " MIGHT LEAD TO NON-CONVEX YIELD SURFACE. EIGENVALUES OF FIRST"//&
-               " LINEAR TRANSFORMATION LP MUST BE STRICTLY POSITIVE. ")    
+              " MIGHT LEAD TO NON-CONVEX YIELD SURFACE. EIGENVALUES OF FIRST"//&
+              " LINEAR TRANSFORMATION LP MUST BE STRICTLY POSITIVE. ")
           endif
           !< Check second linear transformation matrix principal values
           ! (must be positive to ensure convexity)
@@ -394,47 +398,47 @@
               write(iout,1007) expa,al(1),al(2),al(3),al(4),al(5),al(6),al(7),al(8)
             else
               write(iout,1006) expa,s00,s45,s90,sb,yield,r00,r45,r90,rb,al(1),al(2),al(3),al(4),al(5),al(6),al(7),al(8)
-            endif  
+            endif
           endif
 ! ------------------------------------------------------------------------------
-1000 format(/                                                                  &
-          5X,"-------------------------------------------------------",/       &
-          5X,"BARLAT (2000) YIELD CRITERION                          ",/,      &
-          5X,"-------------------------------------------------------")
-1006 format(/                                                                  &
-          5X,"EXPERIMENTAL DATA USED TO FIT BARLAT 2000:             ",/,      &
-          5X,"------------------------------------------             ",/,      &
-          5X,"EXPONENT OF YIELD CRITERION A. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"YIELD STRESS IN DIRECTION 00 . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"YIELD STRESS IN DIRECTION 45 . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"YIELD STRESS IN DIRECTION 90 . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"YIELD STRESS FOR BIAXIAL . . . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"GLOBAL YIELD STRESS AT 0.2% PLASTIC STRAIN . . . . . .=",1PG20.13/&
-          5X,"R-VALUE IN DIRECTION 00. . . . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"R-VALUE IN DIRECTION 45. . . . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"R-VALUE IN DIRECTION 90. . . . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"R-VALUE FOR BIAXIAL. . . . . . . . . . . . . . . . . .=",1PG20.13/&
-          5X,"                                                       ",/,      &
-          5X,"FITTED BARLAT 2000 ANISOTROPY COEFFICIENTS:            ",/,      &
-          5X,"-------------------------------------------            ",/,      &
-          5X,"ANISOTROPY COEFFICIENT ALPHA1. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA2. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA3. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA4. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA5. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA6. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA7. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA8. . . . . . . . . . . . .=",1PG20.13/)
-1007 format(                                                                   &
-          5X,"EXPONENT OF YIELD CRITERION A. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA1. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA2. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA3. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA4. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA5. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA6. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA7. . . . . . . . . . . . .=",1PG20.13/&
-          5X,"ANISOTROPY COEFFICIENT ALPHA8. . . . . . . . . . . . .=",1PG20.13/)
+1000      format(/                                                                  &
+            5X,"-------------------------------------------------------",/       &
+            5X,"BARLAT (2000) YIELD CRITERION                          ",/,      &
+            5X,"-------------------------------------------------------")
+1006      format(/                                                                  &
+            5X,"EXPERIMENTAL DATA USED TO FIT BARLAT 2000:             ",/,      &
+            5X,"------------------------------------------             ",/,      &
+            5X,"EXPONENT OF YIELD CRITERION A. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"YIELD STRESS IN DIRECTION 00 . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"YIELD STRESS IN DIRECTION 45 . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"YIELD STRESS IN DIRECTION 90 . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"YIELD STRESS FOR BIAXIAL . . . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"GLOBAL YIELD STRESS AT 0.2% PLASTIC STRAIN . . . . . .=",1PG20.13/&
+            5X,"R-VALUE IN DIRECTION 00. . . . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"R-VALUE IN DIRECTION 45. . . . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"R-VALUE IN DIRECTION 90. . . . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"R-VALUE FOR BIAXIAL. . . . . . . . . . . . . . . . . .=",1PG20.13/&
+            5X,"                                                       ",/,      &
+            5X,"FITTED BARLAT 2000 ANISOTROPY COEFFICIENTS:            ",/,      &
+            5X,"-------------------------------------------            ",/,      &
+            5X,"ANISOTROPY COEFFICIENT ALPHA1. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA2. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA3. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA4. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA5. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA6. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA7. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA8. . . . . . . . . . . . .=",1PG20.13/)
+1007      format(                                                                   &
+            5X,"EXPONENT OF YIELD CRITERION A. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA1. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA2. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA3. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA4. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA5. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA6. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA7. . . . . . . . . . . . .=",1PG20.13/&
+            5X,"ANISOTROPY COEFFICIENT ALPHA8. . . . . . . . . . . . .=",1PG20.13/)
 ! -------------------------------------------------------------------------------
         end subroutine hm_read_yield_criterion_barlat2000
       end module hm_read_yield_criterion_barlat2000_mod

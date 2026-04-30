@@ -333,7 +333,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sensor_logical                               ../engine/source/tools/sensor/sensor_logical.F
 !||    sensor_spmd                                  ../engine/source/tools/sensor/sensor_spmd.F
 !||    sensor_temp0                                 ../engine/source/tools/sensor/sensor_temp0.F
-!||    sfem_init                                    ../common_source/modules/elements/sfem_mod.F90
+!||    sfem_init                                    ../engine/source/elements/solid/solide4_sfem/sfem_init.F90
 !||    smp_init                                     ../engine/source/engine/resol_init.F
 !||    sms_build_mat_2                              ../engine/source/ams/sms_build_mat_2.F
 !||    sms_encin_2                                  ../engine/source/ams/sms_encin_2.F
@@ -545,6 +545,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    seatbelt_mod                                 ../common_source/modules/seatbelt_mod.F
 !||    segvar_mod                                   ../engine/share/modules/segvar_mod.F
 !||    sensor_mod                                   ../common_source/modules/sensor_mod.F90
+!||    sfem_init_mod                                ../engine/source/elements/solid/solide4_sfem/sfem_init.F90
 !||    sfem_mod                                     ../common_source/modules/elements/sfem_mod.F90
 !||    shooting_node_mod                            ../engine/share/modules/shooting_node_mod.F90
 !||    skew_mod                                     ../common_source/modules/skew_mod.F90
@@ -777,6 +778,7 @@ C-----------------------------------------------
               use sfem_mod
               USE ALEMAIN_CUTCELL_MOD , ONLY : ALEMAIN_CUTCELL
               use init_global_boundary_list_mod , only : init_global_boundary_list
+              use sfem_init_mod , only : sfem_init
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1007,7 +1009,7 @@ c
               type (PBLAST_) ,intent(inout)                      :: PBLAST
               type (rbe3_) ,intent(inout)                        :: RBE3
               type (rwall_) ,intent(inout)                       :: RWALL
-              type (sfem_) ,intent(inout)                        :: SFEM
+              type (global_sfem_) ,intent(inout) :: SFEM
 C
               INTEGER ,INTENT(IN) :: NDAMP_VREL,NDAMP_VREL_RBYG
               INTEGER ,INTENT(IN) :: ID_DAMP_VREL(NDAMP_VREL),FR_DAMP_VREL(NSPMD+2,NDAMP_VREL)
@@ -2067,7 +2069,11 @@ C Init var parallel SMP
               ENDIF
 
               ! TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS
-              CALL sfem_init(SFEM)
+              !CALL sfem_init(SFEM)
+              l1 = 1+nixs*numels+nsvois*nixs ! address of ixs10
+              call sfem_init(numels,numels10,numels8,numnod,ngroup,
+     .                       nparg,ispmd,nspmd,
+     .                       iparg,ixs,ixs(l1),sfem,nodes)
 
 C========================================================================================
 C                                    NON PARALLEL SECTION (SMP)
@@ -3128,10 +3134,13 @@ C TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS
 C---------------------------------------------
               IF(SFEM%ISFEM == 1) THEN
                 IF(GLOB_THERM%ITHERM == 0)THEN
+                  if(imon>0) call startime(timers,timer_sfem)
                   L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-                  CALL S4LAGSFEM(IPARG, IXS, NODES%X, NODES%V, ELBUF_TAB, sfem%SFEM_NODVAR, sfem%S_SFEM_NODVAR,
-     .                           NODES%BOUNDARY_ADD, NODES%BOUNDARY, IXS(L1), NODES%XDP, SXDP,
-     .                           NUMNOD, NODES%BOUNDARY_SIZE , NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP)
+                  CALL S4LAGSFEM(IPARG, IXS, NODES%X, NODES%V, ELBUF_TAB, sfem%lag%nodvar, sfem%S_SFEM_NODVAR,
+     .                           IXS(L1), NODES%XDP, nodes%s_xdp,
+     .                           NUMNOD, NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP,
+     .                           0,ispmd,sfem%lag)
+                  if(imon>0) call stoptime(timers,timer_sfem)
                 ENDIF
               ENDIF
 
@@ -3385,6 +3394,18 @@ C-----------------------------------------------
 !$OMP END PARALLEL
 C
               ENDIF
+
+              IF(SFEM%ISFEM == 1) THEN
+                IF(GLOB_THERM%ITHERM == 0)THEN
+                  L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
+                  if(imon>0) call startime(timers,timer_sfem)
+                  CALL S4LAGSFEM(IPARG, IXS, NODES%X, NODES%V, ELBUF_TAB, sfem%lag%nodvar, sfem%S_SFEM_NODVAR,
+     .                           IXS(L1), NODES%XDP, nodes%s_xdp,
+     .                           NUMNOD, NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP,
+     .                           1,ispmd,sfem%lag)
+                  if(imon>0) call stoptime(timers,timer_sfem)
+                ENDIF
+              ENDIF
 C--------------------------------------------------------
 C       ALE flux + forces
 C--------------------------------------------------------
@@ -3442,7 +3463,7 @@ C
      M               IGRBRIC               ,NLOC_DMG ,ID_GLOBAL_VOIS,FACE_VOIS         ,EBCS_TAB           ,ALE_CONNECTIVITY,
      N               MAT_ELEM              ,H3D_DATA ,DT            ,OUTPUT            ,NEED_COMM_INTER18  ,IDTMINS         ,
      O               IDTMIN                ,MAXFUNC  ,IMON_MAT      ,USERL_AVAIL       ,
-     P               impl_s                ,idyna    ,PYTHON        ,MAT_ELEM%MAT_PARAM,GLOB_THERM,SFEM )
+     P               impl_s                ,idyna    ,PYTHON        ,MAT_ELEM%MAT_PARAM,GLOB_THERM,SFEM,nodes%s_xdp )
 
                 IF(INT22 /=0)  call my_barrier !INTER22in input files  - get also IDT_INT22
 #include "lockon.inc"
@@ -4177,6 +4198,7 @@ C
      .         DTMIN1         ,IDTMIN        ,IOUT        ,ISTDO   ,IDTMINS,DTFACS,NSVOIS,
      .         IRESP          ,MAXFUNC       ,USERL_AVAIL ,GLOB_THERM,IMON_MAT,DTMINS,SANIN,
      .         NGRTH          ,NELEM         ,SFEM  )
+
 C
 #include "lockon.inc"
               IF(DT2TT<DT2T)THEN
@@ -6083,7 +6105,7 @@ C--           IF no node/elemt on proc - dt2=10E6 -> dt2 can be equal to zero
               ENDIF
               ! ----------------------
 #ifdef DNC
-              IF(MDS_AVAIL==1) THEN
+              IF(MDS_AVAIL==1 .and. MDS_NMAT > 0) THEN
                 TSTOP_USER = TSTOP
                 TT_USER = TT
                 MSTOP_USER = 0
@@ -6138,13 +6160,11 @@ C processes in charge of the FVMBAGS know NPOLH)
 
 C --------------------------
               IF ( NCYCLE == 0 .AND. FLG_KJ2_RAZ > 0  ) THEN     ! All processes should go in this block
-
                 if (ispmd==0)then
                    write(iout,'(A)') ' '
                    write(iout,'(A/)') ' AUTOMATIC STIFFNESS COMPUTATION FOR JOINTS'
                    write(iout,'(A)') '  JOINT ID      TYPE                KNN                KNR'
                 endif
-                
                 IF (FLG_KJ2 == 1) then                        
                     CALL JOINT_BLOCK_STIFFNESS(NODES%ITAB,NODES%MS,NODES%IN,STK_SN,STK_SR,
      1                    NODES%WEIGHT,IXR,IPART,NODES%X,IPART(K6),
@@ -9411,7 +9431,7 @@ C--- //0 ----------------
                   IF(NVOLU > 0)  CALL FVSTATS(MONVOL)
                   CALL STOPTIME(TIMERS,TIMER_RESOL)
                   IF(IMONM>0) CALL PRINTIME_INTERF(INTERFACES%INTBUF_TAB,IPARI,INTLIST,NBINTC,TIMERS%REALTIME(1)*0.01D0)
-                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT)
+                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT,sfem)
                 ELSE
                   CALL ADD_ELAPSED_TIME_MON_OFF(TIMERS)
                 ENDIF
@@ -9599,7 +9619,7 @@ C
                   IF(NVOLU > 0)  CALL FVSTATS(MONVOL)
                   CALL STOPTIME(TIMERS,TIMER_RESOL)
                   IF(IMONM>0) CALL PRINTIME_INTERF(INTERFACES%INTBUF_TAB,IPARI,INTLIST,NBINTC,TIMERS%REALTIME(1)*0.01D0)
-                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT)
+                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT,sfem)
                 ELSE
                   CALL ADD_ELAPSED_TIME_MON_OFF(TIMERS)
                 ENDIF

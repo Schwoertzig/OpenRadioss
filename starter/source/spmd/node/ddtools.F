@@ -439,9 +439,9 @@ C-----------------------------------------------
       INTEGER N1,N2,N3,N4
       INTEGER ITY,NMN,NRTM,NM_SHARED
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: TAG,INDEX_IN_COMM
-      INTEGER, DIMENSION(:), ALLOCATABLE :: INDEX_IN_FRONT
       INTEGER :: S_FRONT8(NSPMD,NSPMD),IDX(NSPMD)
       INTEGER :: LOCAL_ID,II,JJ,KK,NSN
+      INTEGER :: NPROC_K, PROC_LIST(NSPMD)
 C--------------------------------------------------------------
 
 
@@ -453,10 +453,7 @@ C--------------------------------------------------------------
         NRTM = IPARI(4,NI)
         NSN  = IPARI(5,NI)
 
-        LOCAL_ID = 0
         IF(ITY == 8) THEN
-          ALLOCATE(INDEX_IN_FRONT(NMN))
-          INDEX_IN_FRONT(1:NMN) = 0
           ALLOCATE(TAG(NSPMD,NMN))
           ALLOCATE(INDEX_IN_COMM(NSPMD,NMN))
           TAG(1:NSPMD,1:NMN) = 0
@@ -474,22 +471,32 @@ C--------------------------------------------------------------
 
           ! Compute the number of main nodes shared between 
           ! each possible couple of proc (i,j) => S_FRONT8(i,j)
+          ! Optimized: iterate over nodes, collect per-node proc list,
+          ! then update only the relevant pairs.
+          ! Cost: O(NMN * (NSPMD + nk^2)) where nk is the number of
+          ! procs sharing node k (typically 1-2, so nk^2 << NSPMD)
           S_FRONT8 = 0
-          DO P = 1,NSPMD
-             DO Q = P+1,NSPMD
-               DO K = 1,NMN
-                 IF(TAG(P,K) == 1 .AND. TAG(Q,K) == 1) THEN
-                 !The main is shared between procs P and Q
-                   LOCAL_ID = LOCAL_ID + 1
-                   S_FRONT8(P,Q) = S_FRONT8(P,Q) + 1
-                   S_FRONT8(Q,P) = S_FRONT8(Q,P) + 1
-                   ! the kth main node will have to be communucated
-                   IF( INDEX_IN_FRONT(k) == 0) THEN 
-                     INDEX_IN_FRONT(k) = LOCAL_ID
-                   ENDIF
-                 ENDIF
-               ENDDO
-             ENDDO 
+          DO K = 1,NMN
+            ! Collect list of procs that own node K
+            NPROC_K = 0
+            DO P = 1,NSPMD
+              IF(TAG(P,K) == 1) THEN
+                NPROC_K = NPROC_K + 1
+                PROC_LIST(NPROC_K) = P
+              ENDIF
+            ENDDO
+            ! If node K is shared by more than one proc,
+            ! update S_FRONT8 for all pairs
+            IF(NPROC_K > 1) THEN
+              DO II = 1,NPROC_K
+                DO JJ = II+1,NPROC_K
+                  P = PROC_LIST(II)
+                  Q = PROC_LIST(JJ)
+                  S_FRONT8(P,Q) = S_FRONT8(P,Q) + 1
+                  S_FRONT8(Q,P) = S_FRONT8(Q,P) + 1
+                ENDDO
+              ENDDO
+            ENDIF
           ENDDO
           IDX(1:NSPMD) = 0
           INDEX_IN_COMM(1:NSPMD,1:NMN) = 0
@@ -691,7 +698,6 @@ C--------------------------------------------------------------
 
           DEALLOCATE(TAG)
           DEALLOCATE(INDEX_IN_COMM)
-          DEALLOCATE(INDEX_IN_FRONT)
           NBT8 = NBT8 + 1
         ENDIF !ITY == 8
       ENDDO
@@ -743,9 +749,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER ITY,NRTM,N,N1,N2,N3,N4,NSN,
+      INTEGER ITY,NRTM,N1,N2,N3,N4,
      .        NRTS,N1L,N2L,N3L,N4L,NLINM,NLINS
-      INTEGER NI,K,I,PROC,IE
+      INTEGER NI,K,PROC,IE
 C--------------------------------------------------------------
       DO NI=1,NINTER
       
@@ -1004,9 +1010,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER ITY,NRTM,N,N1,N2,N3,N4,NSN,
-     .        NRTS,N1L,N2L,N3L,N4L,NLINM,NLINS
-      INTEGER NI,K,I,PROC
+      INTEGER ITY,NRTM,N1,N2,N3,N4
+      INTEGER NI,K,PROC
 C--------------------------------------------------------------
       DO NI=1,NINTER
       
@@ -1070,7 +1075,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------    
       INTEGER IAD1,IAD2,IAD3,IAD4,
      .        P1,P2,P3,P4,PMAX
-      INTEGER TAB(4),NN 
+
       LOGICAL SEARCH
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -1269,7 +1274,6 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER TAILLE
       INTEGER N,ADJNCY(*),XADJ(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

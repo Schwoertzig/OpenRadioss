@@ -37,6 +37,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    newdbl                 ../starter/source/system/sysfus.F
 !||    ngr2usr                ../starter/source/system/nintrr.F
 !||    nodgrnr6               ../starter/source/starter/freform.F
+!||    rbody_part_modif       ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    rigmodif_nd            ../starter/source/elements/solid/solide10/dim_s10edg.F
 !||    spmdset                ../starter/source/constraints/general/rbody/spmdset.F
 !||    udouble                ../starter/source/system/sysfus.F
@@ -45,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_option_read_mod     ../starter/share/modules1/hm_option_read_mod.F
 !||    message_mod            ../starter/share/message_module/message_mod.F
 !||    r2r_mod                ../starter/share/modules1/r2r_mod.F
+!||    rbody_part_modif_mod   ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    submodel_mod           ../starter/share/modules1/submodel_mod.F
 !||====================================================================
       SUBROUTINE HM_READ_RBODY(RBY       ,NPBY    ,LPBY    ,ITAB     ,ITABM1   ,
@@ -52,7 +54,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3                         SENSORS   ,IMERGE  ,UNITAB  ,ISKN     ,NOM_OPT  ,
      4                         NUMSL     ,KNOD2ELS,KNOD2ELC,KNOD2ELTG,KNOD2EL1D,
      5                         KNOD2ELQ  ,ITAGND  ,ICDNS10 ,LSUBMODEL,ICFIELD  ,
-     6                         LCFIELD   )
+     6                         LCFIELD   ,SLRBODY ,N_NRBODY,NRBODY_TO_PART,IPART)
 C-------------------------------------
 C     READING STRUCTURE RIGIDES 
 C-----------------------------------------------
@@ -67,6 +69,7 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE SENSOR_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY
+      USE rbody_part_modif_mod, ONLY : rbody_part_modif
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -90,7 +93,9 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE (UNIT_TYPE_),INTENT(IN) ::UNITAB 
-      INTEGER NPBY(NNPBY,*), LPBY(*), ITAB(*), ITABM1(*)
+      INTEGER ,INTENT(IN) :: N_NRBODY,SLRBODY
+      INTEGER , DIMENSION(N_NRBODY), INTENT(IN) :: NRBODY_TO_PART
+      INTEGER NPBY(NNPBY,*), LPBY(SLRBODY), ITAB(*), ITABM1(*)
       INTEGER IBFV(NIFV,*)
       INTEGER IGRV(NIGRV,*),IBGR(*),IMERGE(*),
      .        ISKN(LISKN,*),NUMSL,
@@ -98,6 +103,7 @@ C-----------------------------------------------
      .        ITAGND(*),ICDNS10(*), ICFIELD(SIZFIELD,*), LCFIELD(*)
       my_real RBY(NRBY,*)
       INTEGER NOM_OPT(LNOPT1,*)
+      INTEGER ,DIMENSION(LIPART1,NPART),INTENT(IN) :: IPART
 C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
       TYPE (SURF_)   ,TARGET, DIMENSION(NSURF)   :: IGRSURF        
@@ -109,8 +115,9 @@ C-----------------------------------------------
       INTEGER I, J, K, N, NSL, NSL0, NSKEW, IC,
      .   ISPHER, IGU,IGS,ISENS,ID,ICDG,
      .   JC,UID,IFLAGUNIT,SUB_INDEX,NRB,
-     .   IFAIL,NRB_R2R
+     .   IFAIL,NRB_R2R,PART_ID,NP
       INTEGER IDSURF, ISU, NN, IAD, M, IOPT, IEXPAMS, NEL
+      INTEGER PARENT_OF(NRBODY),NRBYKIN0
       CHARACTER MESS*40
       CHARACTER(LEN=NCHARTITLE)::TITR,TITR1
       CHARACTER(LEN=NCHARKEY)::KEY
@@ -145,6 +152,8 @@ C   16 : NUMBER OF SECONDARY NODES WITH MERGING FLAG = 3
 C   17 : IKREM
 C   18 : IFAIL
 C   19 : INITIAL NUMBER OF SECONDARY NODES (NSN_G)
+C   20 : RIGID BODY HIERARCHY LEVEL
+C   21 : PART_ID (IF PART DEFINED)
 C-----------------------------------------------
 C   RBY(NRBY,NRBYKIN), NRBY=25
 C   LOADED DURING READING       AFTER INITIALIZATION (including in RD ENGINE)
@@ -180,6 +189,8 @@ C
       K=0
       NRB=0
       NRB_R2R=0
+      PARENT_OF=0
+      NRBYKIN0 = NRBYKIN-N_NRBODY
 C
       DO N=1,NRBODY
 C
@@ -303,8 +314,26 @@ C
         CALL ANODSET(NPBY(1,NRB), CHECK_RB_M)
 C
         NPBY(11,NRB)=K
+        NPBY(6,NRB)=ID
         M = NPBY(1,NRB)
-        NSL = NODGRNR6(M,IGU,IGS,LPBY(K+1),IGRNOD,ITABM1,MESS,ID)
+        NSL = 0
+        IF (IGU>0) NSL = NODGRNR6(M,IGU,IGS,LPBY(K+1),IGRNOD,ITABM1,MESS,ID)
+        IF (NRB>NRBYKIN0) THEN
+          CALL RBODY_PART_MODIF(NRBYKIN ,NNPBY ,NPBY  ,SLRBODY ,LPBY  ,          
+     .                           NUMNOD ,NRB   ,NSL   ,LPBY(K+1:K+NSL),
+     .                           NRBYKIN0,PARENT_OF)
+          PART_ID = NRBODY_TO_PART(NRB-NRBYKIN0)
+          NP = 0  
+          DO J=1,NPART
+            IF(PART_ID == IPART(4,J)) THEN
+              NP=J
+              EXIT
+            ENDIF
+          END DO
+          NPBY(21,NRB)= NP 
+        ELSE
+          NPBY(21,NRB)= 0 
+        END IF
 c
         DO I=1,NSL
           ITAG(LPBY(K+I)) = 1
@@ -352,7 +381,6 @@ C
           IKREM=1
         ENDIF
         NPBY(5,NRB)=ISPHER
-        NPBY(6,NRB)=ID
         NPBY(17,NRB)=IKREM
         IF(ISENS == 0)THEN
           NPBY(7,NRB)=1

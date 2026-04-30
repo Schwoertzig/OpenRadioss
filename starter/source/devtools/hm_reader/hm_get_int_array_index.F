@@ -63,6 +63,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_bem                              ../starter/source/loads/bem/hm_read_bem.F
 !||    hm_read_drape                            ../starter/source/properties/composite_options/drape/hm_read_drape.F
 !||    hm_read_ebcs_inlet                       ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_inlet.F
+!||    hm_read_elasticity_temp_isotropic        ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_eref                             ../starter/source/loads/reference_state/eref/hm_read_eref.F
 !||    hm_read_fail_inievo                      ../starter/source/materials/fail/inievo/hm_read_fail_inievo.F
@@ -159,6 +160,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    read_impdisp_fgeo                        ../starter/source/constraints/general/impvel/read_impdisp_fgeo.F
 !||    read_impvel_fgeo                         ../starter/source/constraints/general/impvel/read_impvel_fgeo.F
 !||    read_sensor_gauge                        ../starter/source/tools/sensor/read_sensor_gauge.F
+!||    rpart_inivel_check                       ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    sboxboxsurf                              ../starter/source/model/box/bigbox.F
 !||    set_admesh                               ../starter/source/model/remesh/set_admesh.F
 !||    sort_set                                 ../starter/source/model/sets/sort_sets.F

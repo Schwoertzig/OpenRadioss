@@ -70,9 +70,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,ISU,JREC,IDB,NBOX,BOXTYPE,IADBOX,
-     .        ICOUNT,ITER,FLAGG,INBOX,BOXNODS,IADISU
-      CHARACTER BOX*3
+      INTEGER I,N,ISU,JREC,IDB,NBOX,
+     .        ICOUNT,ITER,FLAGG,BOXNODS,IADISU
       LOGICAL BOOL
 C-----------------------------------------------
        DO I=1,NBBOX
@@ -210,8 +209,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,OK,ISK,IDBX,BOXNOD,BOXNOD_L,
-     .        IADB0,JAD,ITYPE
+      INTEGER I,OK,ISK,IDBX,BOXNOD,BOXNOD_L,
+     .        IADB0,ITYPE
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGN
       my_real
      .    XP1,YP1,ZP1,XP2,YP2,ZP2,DIAM,NODINB(3)
@@ -323,7 +322,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J,K,N,TAGPOS(NUMNOD),TAGNEG(NUMNOD),
-     . TAGN(NUMNOD),BOXNOD,IADB0,IADBOX,IDBX,NBOX,
+     . TAGN(NUMNOD),BOXNOD,IADB0,IDBX,NBOX,
      . JAD,IBS,BOXNODS
 C-----------------------------------------------
       TAGPOS(1:NUMNOD) = 0
@@ -446,8 +445,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,JJ,K,N,TAGPOS(NUMEL),TAGNEG(NUMEL),
-     . TAGN(NUMEL),IADB0,IADBOX,IDBX,NBOX,JAD,IBS,
+      INTEGER I,J,JJ,K,TAGPOS(NUMEL),TAGNEG(NUMEL),
+     . TAGN(NUMEL),IADB0,IDBX,NBOX,JAD,IBS,
      . BOXELE0,BOXELE
 C-----------------------------------------------
       TAGPOS(1:NUMEL) = 0
@@ -574,8 +573,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,JJ,K,N,TAGPOS(NUMEL),TAGNEG(NUMEL),
-     . TAGN(NUMEL),IADB0,IADBOX,IDBX,NBOX,
+      INTEGER I,J,JJ,K,TAGPOS(NUMEL),TAGNEG(NUMEL),
+     . TAGN(NUMEL),IADB0,IDBX,NBOX,
      . JAD,IBS,BOXSEG0,BOXSEG,DIF_NIX,KAD,POS_IEXT
 C-----------------------------------------------
       DIF_NIX = 6
@@ -747,7 +746,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,JJ,K,N,JJ_OLD,IADB0,IADBOX,IDBX,NBOX,IS,IIS,r,
+      INTEGER I,J,JJ,K,IADB0,IDBX,NBOX,IS,IIS,r,
      . JAD,IBS,BOXSEG0,BOXSEG,DIF_NIX,
      . NOD(4),NOLD(4),FAC,NFAC,IDEL,JFACE,
      . NFACE,POS_IEXT,KAD
@@ -998,7 +997,6 @@ C
          END DO
        END DO
 C---------------
-  40   CONTINUE
 C---
        IBOX(IB)%NENTITY=BOXSEG
        IBOX(IB)%SURFIAD=IADB0
@@ -1058,8 +1056,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,JJ,K,OK,OK1,ISK,IDBX,NELBOX,TAGELEM(NUMEL),
-     .    JAD,IP,NLEV,MY_LEV,ITYPE,IE,IADB0
+      INTEGER I,JJ,K,OK,OK1,ISK,IDBX,NELBOX,TAGELEM(NUMEL),
+     .    IP,NLEV,MY_LEV,ITYPE,IADB0
 C
       my_real
      .    XP1,YP1,ZP1,XP2,YP2,ZP2,DIAM,NODINB(3)
@@ -1279,12 +1277,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,ISU,IDB,ISK,TAGN(NUMEL),BOXTYPE,
-     . NEGBOX,TAGNEG(NUMEL),TAGPOS(NUMEL),
+      INTEGER I,J,ISU,IDB,BOXTYPE,
      . NBOX,BOXELE,ICOUNT,ITER,FLAGG,IADISU
-      my_real
-     .    XP1,YP1,ZP1,XP2,YP2,ZP2,DIAM,NODINB(3)
-      CHARACTER BOX*3
       LOGICAL BOOL
 C-----------------------------------------------
        DO I=1,NBBOX
@@ -1444,8 +1438,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,JJ,K,OK,OK1,ISK,IDBX,BOXSEG,
-     .        IADB0,JAD,ITYPE,DIF_NIX
+      INTEGER I,JJ,K,OK,OK1,ISK,IDBX,BOXSEG,
+     .        IADB0,ITYPE,DIF_NIX
 C
       my_real
      .    XP1,YP1,ZP1,XP2,YP2,ZP2,DIAM,NODINB(3)
@@ -1647,11 +1641,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,JJ,K,K1,J,JREC,ISK,BOXTYPE,ISU,TAGN(NUMEL),
-     .        ITYPE,IADBOX,IDB,NBOX,ID,IDBX,BOXSEG,IADISU,
-     .        ICOUNT,ITER,FLAGG,NIXEL
-      MY_REAL DIAM,XP1,YP1,ZP1,XP2,YP2,ZP2,NODINB(3)
-      CHARACTER BOX*3
+      INTEGER I,K,J,JREC,BOXTYPE,ISU,
+     .        IDB,NBOX,ID,BOXSEG,IADISU,
+     .        ICOUNT,ITER,FLAGG
       LOGICAL BOOL
 C=======================================================================
        DO I=1,NBBOX
@@ -1812,6 +1804,7 @@ C
 !||    checkcyl        ../starter/source/model/box/rdbox.F
 !||    checkpara       ../starter/source/model/box/rdbox.F
 !||    checksphere     ../starter/source/model/box/rdbox.F
+!||    freerr          ../starter/source/starter/freform.F
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE ELSTAGBOX(IXS    ,ELSTAG ,X   ,SKEW ,BOXTYPE,
@@ -1926,7 +1919,7 @@ C---
        ENDIF
 C-----------
       RETURN
- 999  CALL FREERR(1)
+      CALL FREERR(1)
       RETURN
       END
 !||====================================================================
@@ -1939,6 +1932,7 @@ C-----------
 !||    elstagbox                ../starter/source/model/box/bigbox.F
 !||    elstagboxbox             ../starter/source/model/box/boxbox.F
 !||    facebox                  ../starter/source/model/box/bigbox.F
+!||    freerr                   ../starter/source/starter/freform.F
 !||    hm_get_int_array_index   ../starter/source/devtools/hm_reader/hm_get_int_array_index.F
 !||--- uses       -----------------------------------------------------
 !||    hm_option_read_mod       ../starter/share/modules1/hm_option_read_mod.F
@@ -1989,10 +1983,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,JREC,IDB,BOXTYPE,ISU,ICOUNT,ITER,FLAGG,
+      INTEGER I,IDB,BOXTYPE,ISU,ICOUNT,ITER,FLAGG,
      .        BOXSEG,IADISU,ELSTAG(NUMELS)
-      CHARACTER BOX*3
-      LOGICAL BOOL,IS_AVAILABLE,IS_ENCRYPTED
+      LOGICAL BOOL,IS_AVAILABLE
 C-----------------------------------------------
        DO I=1,NBBOX
          IBOX(I)%NBLEVELS = 0
@@ -2109,7 +2102,7 @@ C
       END IF
 C--------------------------
       RETURN
- 999  CALL FREERR(1)
+      CALL FREERR(1)
       RETURN
       END
 !||====================================================================
@@ -2119,6 +2112,7 @@ C--------------------------
 !||    sboxboxsurf            ../starter/source/model/box/bigbox.F
 !||--- calls      -----------------------------------------------------
 !||    ancmsg                 ../starter/source/output/message/message.F
+!||    freerr                 ../starter/source/starter/freform.F
 !||    ssurf10tmp             ../starter/source/model/box/bigbox.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod            ../starter/share/message_module/message_mod.F
@@ -2162,7 +2156,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,N,J,K,JS,KS,II,JJ,K1,K2,LL,FACE(4),FC10(3),NN,KK,I1,
+      INTEGER I,J,K,JS,KS,II,JJ,K1,K2,FACE(4),FC10(3),NN,KK,I1,
      .        NI(4),NS(4),MI(4),MS(4),NMIN,MMIN,NF,MF,IPERM,N1,N2,
      .        BOXSEG,IADB0,NNS,ISHEL
       INTEGER NODTAG(NUMNOD),FASTAG(NUMELS)
@@ -2180,7 +2174,6 @@ C-----------------------------------------------
      .             1,2,3,
      .             4,5,1/
       DATA PWR/1,2,4,8,16,32,64/
-      CHARACTER BOX*3
 C-----------------------------------------------
       BOXSEG = 0
       IADB0  = IADB
@@ -2584,7 +2577,7 @@ C--------------------------
 C--------------------------
 C
       RETURN
- 999  CALL FREERR(1)
+      CALL FREERR(1)
       RETURN
       END
 !||====================================================================

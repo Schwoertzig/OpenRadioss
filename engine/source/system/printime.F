@@ -40,10 +40,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    inoutfile_mod     ../common_source/modules/inoutfile_mod.F
 !||    output_mod        ../common_source/modules/output/output_mod.F90
+!||    sfem_mod          ../common_source/modules/elements/sfem_mod.F90
 !||    time_mod          ../engine/share/modules/time_mod.F
 !||    timer_mod         ../engine/source/system/timer_mod.F90
 !||====================================================================
-      SUBROUTINE PRINTIME(T,ITHERM,OUTPUT)
+      SUBROUTINE PRINTIME(T,ITHERM,OUTPUT,sfem)
 C     timers display routine
 C-----------------------------------------------
 C   M o d u l e s
@@ -52,6 +53,7 @@ C-----------------------------------------------
       USE TIME_MOD
       USE INOUTFILE_MOD
       USE OUTPUT_MOD
+      use sfem_mod , only : global_sfem_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -80,16 +82,15 @@ C-----------------------------------------------
       TYPE(TIMER_), INTENT(INOUT) :: T
       INTEGER ,INTENT(IN) :: ITHERM
       TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT
+      type(global_sfem_), intent(in) :: sfem !< global fem data
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, NPROC, MSGTAG, IRSIZE, J, IH, IM, IS
       DOUBLE PRECISION  SECS, TOTAL, CUMUL(MAX_NB_TIMER),
-     .        AVERAGE(MAX_NB_TIMER), DEVIATION(MAX_NB_TIMER),
-     .        DMIN(MAX_NB_TIMER), DMAX(MAX_NB_TIMER),CUMUL_MAT,CUMUL_ELEM,
-     .        CUMUL_FAIL,ARRAY(NSPMD),X_MINVALUE,X_MAXVALUE,Y_MAXVALUE
+     .        CUMUL_MAT,CUMUL_ELEM,CUMUL_FAIL
       INTEGER MEMUSE(NSPMD),MEM_L,MMIN,MMAX,MTOT,MAVR,
-     .        OUTSIZE,RFILESIZE,NB_INTERV
+     .        OUTSIZE,RFILESIZE
       INTEGER VMPEAK, VMSIZE,VMRSS,VMHWM, VMSTK,MEMSTAT(5,NSPMD),
      .        GOT_MEM_MAP
       CHARACTER(LEN=9) TITLES(MAX_NB_TIMER)
@@ -283,14 +284,14 @@ C
       WRITE(ISTDO,*)'                          ** CPU USER TIME **'
       WRITE(ISTDO,*)' '
 
-        CALL PRINT_SUMMARY(1,MAX_NB_TIMER,CPUTIME,TITLES,ISTDO,ITHERM) 
+        CALL PRINT_SUMMARY(1,MAX_NB_TIMER,CPUTIME,TITLES,ISTDO,ITHERM,sfem) 
 
       WRITE(IOUT,*)' '
       WRITE(IOUT,*)'                          ** CPU USER TIME **'
       WRITE(IOUT,*)' '
 
         
-        CALL PRINT_SUMMARY(1,MAX_NB_TIMER,CPUTIME,TITLES,IOUT,ITHERM) 
+        CALL PRINT_SUMMARY(1,MAX_NB_TIMER,CPUTIME,TITLES,IOUT,ITHERM,sfem) 
 
 
 
@@ -439,7 +440,7 @@ C
        WRITE(IOUT,*)'                          ** ELAPSED TIME **'    
        WRITE(IOUT,*)' '                                               
         
-        CALL PRINT_SUMMARY(2,MAX_NB_TIMER,REALTIME,TITLES,IOUT,ITHERM) 
+        CALL PRINT_SUMMARY(2,MAX_NB_TIMER,REALTIME,TITLES,IOUT,ITHERM,sfem) 
 
        IF(.FALSE.)THEN
         WRITE(IOUT,*)' '
@@ -650,12 +651,12 @@ C      SECS = SECS/CLOCKRATE
       WRITE(IOUT,6100)IH,IM,IS
       IF(NPROC>1.AND.SECS>ZERO)WRITE(IOUT,8000)CUMUL(1)/SECS
 
- 1000 FORMAT(' ** PROCESSOR NUMBER **',16(I8,5x,"%",2x))
- 2000 FORMAT(' #PROC  ','CONT.SORT  ','CONT. F   ','ELEMENT  ',
-     .       'KIN.COND.  ','INTEGR.','    I/O     ','TASK0     ',
-     .       'ASSEMB.   ','RESOL  ')
- 3000 FORMAT(' #PROC  ','FORCES    ','RBY.FOR.  ','RBY.VEL.  ',
-     .       'VELOCITIES','   TOTAL   ','% CPU')
+! 1000 FORMAT(' ** PROCESSOR NUMBER **',16(I8,5x,"%",2x))
+! 2000 FORMAT(' #PROC  ','CONT.SORT  ','CONT. F   ','ELEMENT  ',
+!     .       'KIN.COND.  ','INTEGR.','    I/O     ','TASK0     ',
+!     .       'ASSEMB.   ','RESOL  ')
+! 3000 FORMAT(' #PROC  ','FORCES    ','RBY.FOR.  ','RBY.VEL.  ',
+!     .       'VELOCITIES','   TOTAL   ','% CPU')
  5550 FORMAT(I4,3x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,
      +       1x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,1x,E9.4,
      +       1x,E9.4,1x,E9.4)

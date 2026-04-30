@@ -105,16 +105,15 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,I_STOK, SOL_EDGE, SH_EDGE, 
-     .        N1,N2,NN,NE,K,L,J_STOK,II,JJ,NA,NB,
+      INTEGER I,J, SOL_EDGE, SH_EDGE, 
+     .        N1,N2,NE,K,L,J_STOK,JJ,
      .        PROV_S(MVSIZ),PROV_M(MVSIZ),
-     .        M,NS1,NS2,NSE,NS,SIZE,Z_FIRST,Z_LAST
+     .        M
 C     REAL
       my_real
-     .   DX,DY,DZ,XS,YS,ZS,XX,SX,SY,SZ,S2,
-     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX, TZ, GAPSMX, GAPL,
-     .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4,
-     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
+     .   DX,DY,DZ,
+     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX,
+     .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4
 c provisional
       INTEGER  TAGEDG(NEDGE)
       INTEGER  IX,IY,IZ,IEDG,
@@ -133,9 +132,6 @@ c provisional
      .   ZMAX_EDGM, ZMIN_EDGM
       INTEGER FIRST_ADD, PREV_ADD, CHAIN_ADD, CURRENT_ADD, MAX_ADD
       INTEGER BITGET
-      INTEGER WORK(70000)
-      INTEGER,  DIMENSION(:,:),ALLOCATABLE :: IIXYZ,LEDGE_TMP
-      INTEGER,  DIMENSION(:),ALLOCATABLE :: INDEX
       EXTERNAL BITGET
 C-----------------------------------------------
 C
@@ -167,7 +163,6 @@ C--- IREMGAP - array for tag of deactivated lines
       ALLOCATE(LCHAIN_NEXT(1:MAX_ADD))
       ALLOCATE(LCHAIN_LAST(1:MAX_ADD))
 
-      ALLOCATE(IIXYZ(4,NEDGE),LEDGE_TMP(NLEDGE,NEDGE),INDEX(2*NEDGE))
 C     Barrier to wait init voxel and allocation 
 C     CALL MY_BARRIER
 C
@@ -191,10 +186,6 @@ C 1   placing edges into boxes
 C=======================================================================
       IF(ITASK == 0)THEN
 
-       IIXYZ(1:4,1:NEDGE)=0
-       DO I=1,NEDGE
-        INDEX(I)  =I
-       END DO
 
        DO I=1,NEDGE
 
@@ -251,23 +242,7 @@ C       if(ledge(3,i)/=0) cycle   ! only retaining border edges
         IY2=MAX(1,2+MIN(NBY,IY2))
         IZ2=MAX(1,2+MIN(NBZ,IZ2))
 
-        IIXYZ(1,I)=MIN(N1,N2)
-        IIXYZ(2,I)=0
-        IIXYZ(3,I)=0
-        IIXYZ(4,I)=0
-
-        INDEX(I)  =I
-
        END DO
-
-       CALL MY_ORDERS(0,WORK,IIXYZ,INDEX,NEDGE,4)
-       LEDGE_TMP(1:NLEDGE,1:NEDGE)=LEDGE(1:NLEDGE,1:NEDGE)
-       DO I=1,NEDGE
-         K=INDEX(I)
-         LEDGE(1:NLEDGE,I)=LEDGE_TMP(1:NLEDGE,K)
-c        write(500,'(3I10)') I,LEDGE(5,I),LEDGE(6,I)
-       END DO
-       DEALLOCATE(IIXYZ,INDEX,LEDGE_TMP)
 
        CURRENT_ADD=1 ! first address
 
