@@ -58,7 +58,7 @@
           integer,                                   intent(in) :: buffer_size         !< the size of the buffer
           integer,                                intent(inout) :: buffer(buffer_size) !< it is possible to allocate arrays within the routine
           integer,                                   intent(in) :: acceleration_size !< the size of array must appear before the array
-          real(kind=WP),                                   intent(in) :: acceleration(3,acceleration_size) !< assumed size arrays are not allowed
+          real(kind=WP),                             intent(in) :: acceleration(3,acceleration_size) !< assumed size arrays are not allowed
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
