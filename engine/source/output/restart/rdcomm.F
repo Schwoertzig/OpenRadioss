@@ -1472,6 +1472,8 @@ C MUSCL keyword, compression parameter beta
       ALEMUSCL_Param%BETA      = TABVINT(NEXT)
       NEXT                     = NEXT + 1
       ALEMUSCL_Param%I_LAW     = TABVINT(NEXT)
+      NEXT                     = NEXT + 1
+      ALE%VOF%IS_DEFINED       = TABVINT(NEXT)      
 C ITETRA=3
       NEXT=NEXT+1
       ISFEM =TABVINT(NEXT)

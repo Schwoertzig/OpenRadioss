@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale51_upwind3                 ../engine/source/ale/ale51/ale51_upwind3.F
 !||    alemuscl_upwind               ../engine/source/ale/alemuscl/alemuscl_upwind.F
 !||    alemuscl_upwind2              ../engine/source/ale/alemuscl/alemuscl_upwind2.F
+!||    alevof_upwind2                ../engine/source/ale/alemuscl/alevof_upwind2.F90
 !||    initbuf                       ../engine/share/resol/initbuf.F
 !||    my_barrier                    ../engine/source/system/machine.F
 !||    startime                      ../engine/source/system/timer_mod.F90
@@ -61,19 +62,21 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-      USE INITBUF_MOD
-      USE TRIMAT_MOD
-      USE ELBUFDEF_MOD            
-      USE SEGVAR_MOD   
-      USE ALE_CONNECTIVITY_MOD
-      USE ALEMUSCL_MOD , only:ALEMUSCL_Param
-      USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
+      use initbuf_mod
+      use trimat_mod
+      use elbufdef_mod
+      use segvar_mod
+      use ale_connectivity_mod
+      use alemuscl_mod , only:alemuscl_param
+      use multimat_param_mod , only : m51_n0phas, m51_nvphas
       use element_mod , only : nixs
       use timer_mod
       use ale51_apply_remote_flux_mod , only : ale51_apply_remote_flux
-      use precision_mod , only : WP
+      use precision_mod , only : wp
       use array_mod
       use spmd_exch_n_neighbor_mod , only : spmd_exch_n_neighbor
+      use ale_mod , only : ale
+      use alevof_upwind2_mod , only : alevof_upwind2
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -83,6 +86,7 @@ C   C o m m o n   B l o c k s
 C-----------------------------------------------
 #include      "spmd_c.inc"
 #include      "com04_c.inc"
+#include      "com08_c.inc"
 #include      "vect01_c.inc"
 #include      "param_c.inc"
 #include      "task_c.inc"
@@ -116,6 +120,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       integer :: itrimat
       my_real, DIMENSION(:), POINTER :: UVAR,VOLG,VOLP,pDDVOL
+      my_real :: VFRAC
       INTEGER NG, I, K, II, NF1, NFIRST, NLAST
       integer :: s_flux_vois,n_entity0,n_entity,n_neighbor,n_node_per_elm
       real(kind=WP), dimension(:,:,:), allocatable, save :: flux_vois_mat
@@ -183,6 +188,24 @@ C     ALE ON / OFF
             ENDDO
           ENDDO
         enddo
+        !IF(ALE%VOF%IS_DEFINED == 1)THEN
+        !  DO K=1,NV46
+        !    DO I=LFT,LLT
+        !      II = I+NFT
+        !      VFRAC = alpha_mat(II,1)
+        !      IF(VFRAC < 1.0E-3)THEN
+        !        VFRAC = ZERO
+        !      ELSEIF(VFRAC > ONE - 1.0E-3)THEN
+        !        VFRAC = ONE
+        !      ENDIF
+        !      flux_mat(II,K,1) = VFRAC * FLUX_SAV(II,K)
+        !      flux_mat(II,K,2) = FLUX_SAV(II,K) - flux_mat(II,K,1)
+        !      DO ITRIMAT=3,TRIMAT
+        !        flux_mat(II,K,ITRIMAT) = ZERO
+        !      ENDDO
+        !    ENDDO
+        !  ENDDO
+        !ENDIF
         do itrimat=1,trimat
           DO K=1,NV46
             DO II=NFT+LFT,NFT+LLT
@@ -281,7 +304,11 @@ C     ALE ON / OFF
      .                             flux_vois_mat,nv46,trimat, SEGVAR,s_flux,s_flux_vois)
            ENDIF
         ELSE
-           IF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN
+           IF (ALE%VOF%IS_DEFINED  == 1) THEN
+              CALL ALEVOF_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X    , IXQ, flux_vois_mat,
+     .                              NV46,trimat,SEGVAR,s_flux,s_flux_vois,
+     .                              NUMELQ, NUMNOD, NSEGFLU, LLT, NFT, DT1)
+           ELSEIF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN
               CALL ALEMUSCL_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X    , IXQ, flux_vois_mat, 
      .                              NV46,trimat,SEGVAR,s_flux,s_flux_vois)
            ELSE

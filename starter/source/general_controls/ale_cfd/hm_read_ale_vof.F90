@@ -20,61 +20,70 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-      module my_subroutine_mod
-        implicit none
-      contains
 ! ======================================================================================================================
 !                                                   procedures
 ! ======================================================================================================================
+! ======================================================================================================================
 !! \brief Here is a small description of the routine, [after the header]
 !! \details if needed, more details can be added here
-        subroutine subroutine_example(intbuf_tab, buffer,buffer_size,acceleration,acceleration_size)
+      SUBROUTINE HM_READ_ALE_VOF(LSUBMODEL,N2D)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-!  [ the module names in use must be in uppercase for now, it will change later]
-!  [ ONLY is mandatory, note the space before the ,]
-          use intbuf_def_mod, only: intbuf_struct
-          use constant_mod, only : PI
-          use precision_mod, only : WP
-          use mvsiz_mod, only : MVSIZ
-          use names_and_titles_mod, only : ncharline100
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Implicit none
-! ----------------------------------------------------------------------------------------------------------------------
-          implicit none
+      USE HM_OPTION_READ_MOD
+      USE SUBMODEL_MOD
+      USE MESSAGE_MOD
+      USE ALE_MOD , ONLY : ALE
+       USE ALEMUSCL_MOD , only : ALEMUSCL_Param
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
-! [ no comment on the same line as #include #define #ifdef, #endif ]
-! [ generally speaking, #include is forbidden, there are only few exceptions: ]
-#include "task_c.inc"
-#include "units_c.inc"
+       implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(intbuf_struct),                       intent(in) :: intbuf_tab          !< intent(in) and intent(inout) are mandatory
-          integer,                                   intent(in) :: buffer_size         !< the size of the buffer
-          integer,                                intent(inout) :: buffer(buffer_size) !< it is possible to allocate arrays within the routine
-          integer,                                   intent(in) :: acceleration_size !< the size of array must appear before the array
-          real(kind=WP),                             intent(in) :: acceleration(3,acceleration_size) !< assumed size arrays are not allowed
+      TYPE(SUBMODEL_DATA), DIMENSION(NSUBMOD), INTENT(IN) :: LSUBMODEL
+      INTEGER, INTENT(IN) :: N2D
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
+!                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          integer :: i,l,k,m ! small integers can be declared in the same line
-          integer :: pos ! more complex variable should be declared in separate lines, and described
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   External functions
-! ----------------------------------------------------------------------------------------------------------------------
-! [ external functions must be kept to minimum ]
+      INTEGER :: NALEVOF, NALEMUSCL
+      INTEGER :: IFORM
+      LOGICAL :: IS_AVAILABLE
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-! [ the code must be indented with 2 spaces]
-! [ the code must be commented ]
-! [ routines must be short, and should not exceed 200 lines for leaf routines, 1000 lines for main routines]
+      CALL HM_OPTION_COUNT('/ALE/VOF', NALEVOF)
 
-! [ separators can be used between blocks of code]
-! ----------------------------------------------------------------------------------------------------------------------
-        end subroutine subroutine_example
-      end module my_subroutine_mod
+
+      IF (NALEVOF > 0) THEN
+         CALL HM_OPTION_START('/ALE/VOF')
+         CALL HM_OPTION_NEXT()
+         CALL HM_GET_INTV('IFORM', IFORM, IS_AVAILABLE, LSUBMODEL)
+         IF (IFORM < 0 .OR. IFORM > 1)THEN
+           IFORM = 0
+           CALL ANCMSG(MSGID   = 1139, MSGTYPE = MSGERROR, ANMODE = ANINFO, C1 = 'IFORM', I1 = IFORM )
+         ENDIF
+         IF(IFORM == 1)THEN
+           IF(N2D == 0)THEN
+               CALL ANCMSG(MSGID   = 1140, MSGTYPE = MSGERROR, ANMODE = ANINFO,  &
+               C1 = 'NOT COMPATIBLE WITH 3D ANALYSIS', I1 = IFORM )
+               IFORM = 0
+           END IF
+           ALE%VOF%IS_DEFINED = IFORM
+           IF (IFORM == 1 .AND. ALEMUSCL_Param%IALEMUSCL /= 0)THEN
+               ALEMUSCL_Param%IALEMUSCL = 0  ! LAW51 interface reconstruction :either UPWIND, or MUSCL or VOF. No possible combination
+               CALL HM_OPTION_COUNT('/ALE/MUSCL', NALEMUSCL)
+               IF (NALEMUSCL > 0) THEN
+                  CALL ANCMSG(MSGID   = 1140, MSGTYPE = MSGWARNING, ANMODE = ANINFO,  &
+                  C1 = 'MUSCL REPLACED WITH VOF (LAW51 INTERFACE RECONSTRUCTION)', I1 = IFORM )
+               ENDIF
+               IFORM = 0
+           END IF
+         END IF
+      ENDIF
+
+
+
+
+      END 

@@ -991,6 +991,12 @@ C---------------------------------------------------
       !*******************************************************************
       CALL HM_READ_ALE_MUSCL(LSUBMODEL, UNITAB)
 
+      !*******************************************************************
+      ! /ALE/VOF: activation of Volume of Fluid
+      !*******************************************************************
+      CALL HM_READ_ALE_VOF(LSUBMODEL,N2D)
+      ALE%VOF%is_defined = 1
+
       !************************
       ! /ALE/LINK/VEL: counting
       !************************
@@ -1399,6 +1405,12 @@ C
            WRITE (IOUT, 5504) ALEMUSCL_Param%BETA,ALEMUSCL_Param%IALEMUSCL-1
         ENDIF
       ENDIF
+      
+      IF(JALE+JEUL/=0)THEN
+        IF(ALE%VOF%IS_DEFINED == 1) THEN 
+           WRITE (IOUT, 5506) ALE%VOF%IS_DEFINED
+        ENDIF
+      ENDIF      
 
       WRITE (IOUT,'(//,A,I10)')  TITRE(130)(1:57),NANALY
 
@@ -1657,9 +1669,13 @@ c     & 4X,'MEMORY AVAILABLE FOR REALS. . . . . . . . . . . . . .',I10)
      & 4X,'MUSCL (MONOTONIC UPSTREAM-CENTERED SCHEME FOR CONSERVATION LAWS)'/
      & 4X,'----------------------------------------------------------------'/
      & 5X,'COMPRESSION COEFFICIENT (BETA). . . . . . . . . . . : ',1PG20.13/  
-     & 5X,'FORMULATION FLAG (IFLAG). . . . . . . . . . . . . . : ',I10)
+     & 5X,'FORMULATION FLAG (IFLAG). . . . . . . . . . . . . . : ',I10)    
  5505 FORMAT(
      & 4X,'ITEMP  : TEMPERATURE CUTOFF FLAG . . . . . . . . . . .',I10)
+ 5506 FORMAT(//
+     & 4X,'VOF (VOLUME OF FLUID) INTERFACE RECONSTRUCTION '/
+     & 4X,'-----------------------------------------------'/     ,
+     & 5X,'IS_DEFINED (IFORM)  . . . . . . . . . . . . . . . . : ',I10)
  5700 FORMAT(//
      & 4X,'LAGRANGE MULTIPLIER OPTIONS'/
      & 4X,'---------------------------'/
