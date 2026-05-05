@@ -19,7 +19,7 @@ Copyright>        Commercial Alternative: Simcenter Radioss Software
 Copyright>
 Copyright>        As an alternative to this open-source version, Siemens also offers Simcenter(TM) Radioss(R)
 Copyright>        software under a commercial license.  Contact Siemens to discuss further if the
-Copyright>        commercial version may interest you: 
+Copyright>        commercial version may interest you:
 Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
 !||====================================================================
 !||    restalloc               ../engine/source/output/restart/arralloc.F
@@ -113,6 +113,7 @@ C-----------------------------------------------
       use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
       USE Q1NP_RESTART_MOD
       use sfem_mod
+      use polygon_mod , only : polygon_create
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -163,6 +164,7 @@ C----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER IERR0, IERROR, NBMAT, ISIZ1, ISIZ2, NKQ1NP_LOC
+      INTEGER KK
 C-----------------------------------------------
       IERROR = 0
 C to avoid conflict with IERR in common
@@ -256,12 +258,12 @@ C Q1Np element arrays
             NKQ1NP_LOC = SKQ1NP_G / NUMELQ1NP_G
           ENDIF
           IF (NKQ1NP_LOC <= 0) THEN
-            WRITE(ISTDO,'(A)') 
+            WRITE(ISTDO,'(A)')
      .        ' ** ERROR: Invalid NKQ1NP dimension (<=0)'
             GOTO 1000
           ENDIF
           IF (MOD(SKQ1NP_G,NUMELQ1NP_G) /= 0) THEN
-            WRITE(ISTDO,'(A,I10,A,I10)') 
+            WRITE(ISTDO,'(A,I10,A,I10)')
      .        ' ** WARNING: SKQ1NP_G=', SKQ1NP_G,
      .        ' not divisible by NUMELQ1NP=', NUMELQ1NP_G
           ENDIF
@@ -269,7 +271,7 @@ C Q1Np element arrays
           CALL MY_ALLOC(KQ1NP_TAB, NKQ1NP_G, NUMELQ1NP_G, 'KQ1NP_TAB', STAT=IERR)
           IF (IERR/=0) GOTO 1000
           KQ1NP_TAB = 0
-          
+
           IF (SIQ1NP_G > 0) THEN
             CALL MY_ALLOC(IQ1NP_TAB, SIQ1NP_G, 'IQ1NP_TAB', STAT=IERR)
             IF (IERR/=0) GOTO 1000
@@ -277,7 +279,7 @@ C Q1Np element arrays
           ELSE
             CALL MY_ALLOC(IQ1NP_TAB, 0, 'IQ1NP_TAB', STAT=IERR)
           ENDIF
-          
+
           IF (SQ1NPBULK_G > 0) THEN
             CALL MY_ALLOC(IQ1NP_BULK_TAB, SQ1NPBULK_G, 'IQ1NP_BULK_TAB', STAT=IERR)
             IF (IERR/=0) GOTO 1000
@@ -285,7 +287,7 @@ C Q1Np element arrays
           ELSE
             CALL MY_ALLOC(IQ1NP_BULK_TAB, 0, 'IQ1NP_BULK_TAB', STAT=IERR)
           ENDIF
-          
+
           IF (SQ1NPWEIGHT_L_G > 0) THEN
             CALL MY_ALLOC(Q1NP_WTAB, SQ1NPWEIGHT_L_G, 'Q1NP_WTAB', STAT=IERR)
             IF (IERR/=0) GOTO 1000
@@ -293,7 +295,7 @@ C Q1Np element arrays
           ELSE
             CALL MY_ALLOC(Q1NP_WTAB, 0, 'Q1NP_WTAB', STAT=IERR)
           ENDIF
-          
+
           IF (SQ1NPKNOT_L_G > 0) THEN
             CALL MY_ALLOC(Q1NP_KTAB, SQ1NPKNOT_L_G, 'Q1NP_KTAB', STAT=IERR)
             IF (IERR/=0) GOTO 1000
@@ -301,7 +303,7 @@ C Q1Np element arrays
           ELSE
             CALL MY_ALLOC(Q1NP_KTAB, 0, 'Q1NP_KTAB', STAT=IERR)
           ENDIF
-          
+
           IF (SQ1NPCTRL_SHARED_G > 0) THEN
             CALL MY_ALLOC(Q1NP_CPTAB, 3, SQ1NPCTRL_SHARED_G, 'Q1NP_CPTAB', STAT=IERR)
             IF (IERR/=0) GOTO 1000
@@ -2161,7 +2163,50 @@ C
              ALEMUSCL_Buffer%ELCENTER(:, :) = ZERO
            ENDIF
         ENDIF
-        
+
+        ! VOLUME OF FLUID (VOF)
+          ! my_real, allocatable, dimension(:)    :: vol      !(nel)
+          ! my_real, allocatable, dimension(:)    :: alpha    !(nel)
+          ! my_real, allocatable, dimension(:,:)  :: alpha_f  !(6,nel)
+          ! my_real, allocatable, dimension(:,:)  :: n        !(3,nel)
+          ! my_real, allocatable, dimension(:)    :: d        !(nel)
+          ! my_real, allocatable, dimension(:)    :: Swet     !(6,nel)
+        IF(ALE%VOF%IS_DEFINED == 1)THEN
+          ALE%VOF%cell_data%num_mixed = 0
+          ! ELEM_IID
+          ALLOCATE(ALE%VOF%cell_data%elem_id(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%elem_id(:) = 0
+          ! MIXED_CELL_ID (reverse index : elem -> position in mixed list)
+          ALLOCATE(ALE%VOF%cell_data%mixed_cell_id(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%mixed_cell_id(:) = 0
+          ! PRINCIPAL PHASE_ID
+          ALLOCATE(ALE%VOF%cell_data%iphase(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%iphase(:) = 0
+          ! VOL
+          ALLOCATE(ALE%VOF%cell_data%vol(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%vol(:) = ZERO
+          ! ALPHA
+          ALLOCATE(ALE%VOF%cell_data%alpha(NUMELS + NSVOIS + NUMELQ + NQVOIS,TRIMAT),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%ALPHA(:,:) = ZERO
+          ! alpha_f
+          ALLOCATE(ALE%VOF%cell_data%alpha_f(6, NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%alpha_f(:,:) = ZERO
+          ! n
+          ALLOCATE(ALE%VOF%cell_data%n(3, NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%n(:,:) = ZERO
+          ! d
+          ALLOCATE(ALE%VOF%cell_data%d(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%d(:) = ZERO
+        ENDIF
+
         !/EBCS/NRF VOLUME FRACTION ALLOCATION
         IF(MULTI_FVM%IS_USED)THEN
            NBMAT = MULTI_FVM%NBMAT
