@@ -110,6 +110,7 @@ C-----------------------------------------------
       use rwall_mod
       use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
       use sfem_mod
+      use polygon_mod , only : polygon_create
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -158,6 +159,7 @@ C----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER IERR0,IERROR, NBMAT,ISIZ1,ISIZ2
+      INTEGER KK
 C-----------------------------------------------
       IERROR = 0
 C to avoid conflict with IERR in common
@@ -2076,6 +2078,49 @@ C
              IF (IERR /= 0) GOTO 1000
              ALEMUSCL_Buffer%ELCENTER(:, :) = ZERO
            ENDIF
+        ENDIF
+
+        ! VOLUME OF FLUID (VOF)
+          ! my_real, allocatable, dimension(:)    :: vol      !(nel)
+          ! my_real, allocatable, dimension(:)    :: alpha    !(nel)
+          ! my_real, allocatable, dimension(:,:)  :: alpha_f  !(6,nel)
+          ! my_real, allocatable, dimension(:,:)  :: n        !(3,nel)
+          ! my_real, allocatable, dimension(:)    :: d        !(nel)
+          ! my_real, allocatable, dimension(:)    :: Swet     !(6,nel)
+        IF(ALE%VOF%IS_DEFINED == 1)THEN
+          ALE%VOF%cell_data%num_mixed = 0
+          ! ELEM_IID
+          ALLOCATE(ALE%VOF%cell_data%elem_id(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%elem_id(:) = 0
+          ! MIXED_CELL_ID (reverse index : elem -> position in mixed list)
+          ALLOCATE(ALE%VOF%cell_data%mixed_cell_id(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%mixed_cell_id(:) = 0
+          ! PRINCIPAL PHASE_ID
+          ALLOCATE(ALE%VOF%cell_data%iphase(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%iphase(:) = 0
+          ! VOL
+          ALLOCATE(ALE%VOF%cell_data%vol(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%vol(:) = ZERO
+          ! ALPHA
+          ALLOCATE(ALE%VOF%cell_data%alpha(NUMELS + NSVOIS + NUMELQ + NQVOIS,TRIMAT),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%ALPHA(:,:) = ZERO
+          ! alpha_f
+          ALLOCATE(ALE%VOF%cell_data%alpha_f(6, NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%alpha_f(:,:) = ZERO
+          ! n
+          ALLOCATE(ALE%VOF%cell_data%n(3, NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%n(:,:) = ZERO
+          ! d
+          ALLOCATE(ALE%VOF%cell_data%d(NUMELS + NUMELQ),STAT=IERR)
+          IF (IERR /= 0) GOTO 1000
+          ALE%VOF%cell_data%d(:) = ZERO
         ENDIF
         
         !/EBCS/NRF VOLUME FRACTION ALLOCATION

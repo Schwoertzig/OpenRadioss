@@ -59,6 +59,7 @@ C-----------------------------------------------
       USE STACK_MOD 
       USE MULTI_FVM_MOD              
       USE ALEFVM_MOD
+      use ale_mod
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100
       use element_mod , only : nixq,nixc,nixtg
 C-----------------------------------------------
@@ -107,7 +108,8 @@ C-----------------------------------------------
      .        IVISC
       INTEGER 
      .        IOK_PART(MVSIZ),JJ(6),IUVAR,
-     .        IS_WRITTEN_VALUE(MVSIZ)
+     .        IS_WRITTEN_VALUE(MVSIZ),
+     .        N
  
  
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
@@ -211,13 +213,27 @@ C                OUTPUT TENSOR STORED IN GLOBAL SYSTEM TO BE TRANSFERRED IN THE 
 C--------------------------------------------------
             ELSEIF (KEYWORD == 'VECT/ACC') THEN
 C--------------------------------------------------
-               IF (MLW == 151 .AND. ALLOCATED(MULTI_FVM%ACC)) THEN
+
+               IF (MLW == 51 ) THEN
                   DO I = 1, NEL
-                     EVAR(1,I) = MULTI_FVM%ACC(1, I + NFT)
-                     EVAR(2,I) = MULTI_FVM%ACC(2, I + NFT)
-                     EVAR(3,I) = MULTI_FVM%ACC(3, I + NFT)
-                     IS_WRITTEN_VECTOR(I) = 1
+
+
+                                DO N=1,ALE%VOF%cell_data%num_mixed
+                                  if(i+nft == ALE%VOF%cell_data%elem_id(N) )then
+                                      EVAR(1,I) = 0.*ALE%VOF%cell_data%n(1, N)
+                                      EVAR(2,I) = ALE%VOF%cell_data%n(2, N)
+                                      EVAR(3,I) = ALE%VOF%cell_data%n(3, N)
+                                      IS_WRITTEN_VECTOR(I) = 1
+                                    exit
+                                  endif
+                                ENDDO
+
+
                   ENDDO
+               ENDIF
+               IF (JCVT == 0 .OR. ISORTH /= 0) THEN
+C                OUTPUT TENSOR STORED IN GLOBAL SYSTEM TO BE TRANSFERRED IN THE ELEMENT LOCAL ONE
+                 CALL QROTA_VECT(X,IXQ(1,NFT+1),JCVT,EVAR,GBUF%GAMA,NEL)
                ENDIF
 C--------------------------------------------------
             ENDIF  ! KEYWORD

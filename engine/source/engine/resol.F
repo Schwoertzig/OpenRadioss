@@ -8282,6 +8282,12 @@ C Regular animation
      v          SZ_NPCONT2    ,NPCONT2        ,GLOB_THERM     ,PBLAST             ,OUTPUT%TH%WFEXT,
      w          MASS0_START)
 
+               IF( ALE%VOF%is_defined > 0 )then
+                 ALE%VOF%cell_data%num_mixed = 0
+                 ALE%VOF%cell_data%mixed_cell_id(:) = 0
+                 ALE%VOF%cell_data%elem_id(:) = 0
+               endif
+
                 IF((MSTOP == 1 .AND. ICTLSTOP == 0) .OR. MSTOP == 2 .OR. DT2<=ZERO)THEN
                   CALL SORTIE_ERROR(
      1             NODES%V        ,NODES%NODGLOB    ,NODES%WEIGHT     ,NODES%ITAB       ,NODES%MS          ,

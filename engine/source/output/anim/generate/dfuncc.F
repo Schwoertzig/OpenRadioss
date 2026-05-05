@@ -61,6 +61,7 @@ C-----------------------------------------------
       USE STACK_MOD    
       USE MULTI_FVM_MOD            
       USE ALE_CONNECTIVITY_MOD
+      use ale_mod
       USE ALEFVM_MOD , only:ALEFVM_Param
       USE MULTIMAT_PARAM_MOD , ONLY : M51_N0PHAS, M51_NVPHAS
       USE MATPARAM_DEF_MOD , ONLY : MATPARAM_STRUCT_
@@ -149,6 +150,7 @@ C-----------------------------------------------
       my_real :: RHO0i(21) !< submaterial initial mass densities (max submat : 21)
       my_real :: RHOi(21) !< submaterial  mass densities (max submat : 21)
       my_real :: RHO0g !< global initial mass density (mixture)
+      integer :: iphase
       LOGICAL detected
       INTEGER :: IDX0,IDX1,IDX2
 C-----------------------------------------------
@@ -344,15 +346,48 @@ C
 c----
             ELSEIF(IFUNC>=20.AND.IFUNC<=24.AND.
      .             (MLW == 28.OR.MLW == 29.OR.MLW == 30.OR.
-     .              MLW == 31.OR.MLW == 52.OR.MLW == 79))THEN
+     .              MLW == 31.OR.MLW == 52.OR.MLW == 51))THEN
 c----         USER VARIABLES from 1 to 5
 
               IUS = IFUNC - 20
+             ! print * , "ies=", ALE%VOF%cell_data%elem_id(1:10)
               DO I=LFT,LLT
                 N = I + NFT
                 MT = IXQ(1,N)
                 NUVAR = IPM(8,MT)
+
                 IF (NUVAR > IUS) FUNC(EL2FA(NN3+N)) = UVAR(IUS*NEL + I)
+
+                    if(ius == 0)then
+                               FUNC(EL2FA(NN3+N))= 0
+                                DO N=1,ALE%VOF%cell_data%num_mixed
+                                  if(i+nft == ALE%VOF%cell_data%elem_id(N) )then
+                                    FUNC(EL2FA(NN3+i+nft)) = 1
+                                    !print *, "ok"
+                                    exit
+                                  endif
+                                ENDDO
+                    elseif(ius==1)then
+                               FUNC(EL2FA(NN3+N))= 0
+                                DO N=1,ALE%VOF%cell_data%num_mixed
+                                  if(i+nft == ALE%VOF%cell_data%elem_id(N) )then
+                                    FUNC(EL2FA(NN3+i+nft)) = ALE%VOF%cell_data%d(N)
+                                    !print *, "ok"
+                                    exit
+                                  endif
+                                ENDDO
+                    elseif(ius==2)then
+                               FUNC(EL2FA(NN3+N))= 0
+                                DO N=1,ALE%VOF%cell_data%num_mixed
+                                  if(i+nft == ALE%VOF%cell_data%elem_id(N) )then
+                                    iphase = ALE%VOF%cell_data%iphase(N)
+                                    FUNC(EL2FA(NN3+i+nft)) = ALE%VOF%cell_data%alpha(N,iphase)
+                                    !print *, "ok"
+                                    exit
+                                  endif
+                                ENDDO
+                    endif
+
               ENDDO
             ELSEIF(IFUNC == 25)THEN
                DO I=LFT,LLT
