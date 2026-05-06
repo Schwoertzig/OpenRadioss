@@ -108,6 +108,9 @@
       real(kind=WP) :: ALPHA_REMAIN !< remaining ratio (1 - alpha_main)
       real(kind=WP) :: SUM_VF !< sum of non-main phase fractions
       real(kind=WP) :: VFRAC(4)
+      real(kind=WP) :: VOL_AVAILABLE   !< available volume of a phase in the cell
+      real(kind=WP) :: VOL_OUTGOING    !< total outgoing volume of a phase (sum over faces)
+      real(kind=WP) :: LIMITER         !< reduction factor to enforce conservation
       type(polygon_) :: swept_polygon
       type(polygon_point_) :: pt
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -242,6 +245,48 @@
 
         ENDDO  ! KK
       ENDDO  ! I
+
+      ! -----------------------------------------------
+      ! FLUX LIMITER: ensure outgoing volume per phase ≤ available volume
+      ! -----------------------------------------------
+      DO I = 1, NEL
+        II = I + NFT
+        DO JJ = 1, trimat
+          ! Compute total outgoing volume for phase JJ
+          VOL_OUTGOING = ZERO
+          DO KK = 1, NV46
+            IF(flux_mat(II, KK, JJ) > ZERO) THEN
+              VOL_OUTGOING = VOL_OUTGOING + flux_mat(II, KK, JJ) * DT1
+            ENDIF
+          ENDDO
+          IF(VOL_OUTGOING > EM20) THEN
+            ! Available volume of phase JJ in cell II
+            VOL_AVAILABLE = ALE%VOF%cell_data%ALPHA(II, JJ) * ALE%VOF%cell_data%VOL(II)
+            IF(VOL_OUTGOING > VOL_AVAILABLE) THEN
+              ! Reduce all outgoing fluxes of this phase proportionally
+              LIMITER = VOL_AVAILABLE / VOL_OUTGOING
+              DO KK = 1, NV46
+                IF(flux_mat(II, KK, JJ) > ZERO) THEN
+                  flux_mat(II, KK, JJ) = flux_mat(II, KK, JJ) * LIMITER
+                ENDIF
+              ENDDO
+              ! Update neighbor fluxes accordingly
+              IAD2 = ALE_CONNECT%ee_connect%iad_connect(II)
+              DO KK = 1, NV46
+                IF(flux_mat(II, KK, JJ) > ZERO) THEN
+                  NEIGH = ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1)
+                  IF(NEIGH > 0 .AND. NEIGH <= NUMELQ) THEN
+                    FACE_NEIGH = ALE_CONNECT%ee_connect%IFACE2(IAD2 + KK - 1)
+                    IF(FACE_NEIGH > 0) THEN
+                      flux_mat(NEIGH, FACE_NEIGH, JJ) = -flux_mat(II, KK, JJ)
+                    ENDIF
+                  ENDIF
+                ENDIF
+              ENDDO
+            ENDIF
+          ENDIF
+        ENDDO
+      ENDDO
 
       ! -----------------------------------------------
       ! INCOMING FLUXES BY EBCS (boundary conditions)
