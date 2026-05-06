@@ -291,20 +291,22 @@
       ! -----------------------------------------------
       ! INCOMING FLUXES BY EBCS (boundary conditions)
       ! -----------------------------------------------
-      IF(NSEGFLU > 0) THEN
+      IF(NSEGFLU > 0 .AND. SEGVAR%HAS_PHASE_ALPHA) THEN
         DO I = 1, NEL
           II = I + NFT
           IAD2 = ALE_CONNECT%ee_connect%iad_connect(II)
-          DO KK = 1, 4
+          DO KK = 1, NV46
             IF(flux_save(II, KK) < ZERO .AND. &
                ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1) < 0) THEN
               FLUX_TOTAL = flux_save(II, KK)
               ! Use boundary phase fraction from SEGVAR
               IELEM = -ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1)
-              flux_mat(II, KK, 1) = SEGVAR%PHASE_ALPHA(1, IELEM) * FLUX_TOTAL
-              flux_mat(II, KK, 2) = SEGVAR%PHASE_ALPHA(2, IELEM) * FLUX_TOTAL
-              flux_mat(II, KK, 3) = SEGVAR%PHASE_ALPHA(3, IELEM) * FLUX_TOTAL
-              flux_mat(II, KK, 4) = SEGVAR%PHASE_ALPHA(4, IELEM) * FLUX_TOTAL
+              DO JJ = 1, MIN(trimat, SEGVAR%NBMAT)
+                flux_mat(II, KK, JJ) = SEGVAR%PHASE_ALPHA(JJ, IELEM) * FLUX_TOTAL
+              ENDDO
+              DO JJ = SEGVAR%NBMAT + 1, trimat
+                flux_mat(II, KK, JJ) = ZERO
+              ENDDO
             ENDIF
           ENDDO
         ENDDO
