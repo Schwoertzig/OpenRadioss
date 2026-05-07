@@ -59,8 +59,6 @@
       use precision_mod , only : WP
       use constant_mod , only : HALF, ZERO, ONE, EM20
       use ale_mod , only : ale
-      use polygon_mod , only : polygon_, polygon_list_, polygon_create, polygon_addpoint, polygon_point_
-      use polygon_clipping_mod , only : Clipping_Weiler_Atherton
       use ale51_vof_reconstruction2_mod , only : CLIPPED_AREA_QUAD4
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
@@ -94,7 +92,6 @@
       INTEGER :: ICELL
       INTEGER :: FACE_TO_NODE_LOCAL_ID(4, 2), NODEID1, NODEID2
       INTEGER :: ITRIMAT, IELEM
-      real(kind=WP) :: ALPHA_I, ALPHA_FACE
       real(kind=WP) :: EDGE_LEN, INV_EDGE_LEN, WET_FRAC
       real(kind=WP) :: FLUX_TOTAL
       real(kind=WP) :: Y1, Z1, Y2, Z2
@@ -111,12 +108,9 @@
       real(kind=WP) :: VOL_AVAILABLE   !< available volume of a phase in the cell
       real(kind=WP) :: VOL_OUTGOING    !< total outgoing volume of a phase (sum over faces)
       real(kind=WP) :: LIMITER         !< reduction factor to enforce conservation
-      type(polygon_) :: swept_polygon
-      type(polygon_point_) :: pt
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-      CALL polygon_create(swept_polygon, 4) ! swept polygon (advected volume) has always 4 nodes
 
       ! Face-to-node connectivity for QUAD4
       FACE_TO_NODE_LOCAL_ID(1, 1) = 1 ; FACE_TO_NODE_LOCAL_ID(1, 2) = 2
@@ -146,55 +140,42 @@
             !outgoing flux
 
             IF( ICELL > 0) THEN
-              ! --- MIXED cell: build swept polygon ---
-
-              ! CONSTRUCT SWEPT POLYGON
-              ! The quad is CCW in (y,z) plane.
-              ! Inward normal of edge [N1,N2] is: n_in = (-(Z2-Z1), +(Y2-Y1)) / |edge|
-              ! Swept depth = FLUX_TOTAL / EDGE_LEN (volume flux = area in 2D = depth * edge_len)
+              ! --- MIXED cell: swept polygon clipped by PLIC half-plane ---
               NODEID1 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 1), II)
               NODEID2 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 2), II)
               Y1 = X(2, NODEID1) ; Z1 = X(3, NODEID1)
               Y2 = X(2, NODEID2) ; Z2 = X(3, NODEID2)
               EDGE_LEN = SQRT((Y2 - Y1)**2 + (Z2 - Z1)**2)
               INV_EDGE_LEN = ONE / MAX(EDGE_LEN, EM20)
-              ! Inward unit normal (CCW connectivity → rotate edge vector -90°)
+              ! Inward unit normal (CCW quad → rotate edge vector -90°)
               NY = -(Z2 - Z1) * INV_EDGE_LEN
               NZ =  (Y2 - Y1) * INV_EDGE_LEN
-              ! Inward displacement = (flux_rate * DT1) / edge_length = swept depth
+              ! Inward displacement = swept depth = (flux_rate * DT1) / edge_length
               DY = NY * FLUX_TOTAL * DT1 * INV_EDGE_LEN
               DZ = NZ * FLUX_TOTAL * DT1 * INV_EDGE_LEN
-              ! Build swept quad: N1 → N2 → N2+d → N1+d (CCW)
-              swept_polygon%numpoint = 0
-              pt%y = Y1 ;      pt%z = Z1
-              IERR = polygon_addpoint(swept_polygon, pt)
-              pt%y = Y2 ;      pt%z = Z2
-              IERR = polygon_addpoint(swept_polygon, pt)
-              pt%y = Y2 + DY ; pt%z = Z2 + DZ
-              IERR = polygon_addpoint(swept_polygon, pt)
-              pt%y = Y1 + DY ; pt%z = Z1 + DZ
-              IERR = polygon_addpoint(swept_polygon, pt)
-              swept_polygon%area = FLUX_TOTAL*DT1
-              ! SWEPT POLYGON CONSTRUCTED
+              ! Build swept quad vertices: N1 → N2 → N2+d → N1+d
+              PTS_SWEPT(1, 1:4) = ZERO
+              PTS_SWEPT(2, 1) = Y1 ;      PTS_SWEPT(3, 1) = Z1
+              PTS_SWEPT(2, 2) = Y2 ;      PTS_SWEPT(3, 2) = Z2
+              PTS_SWEPT(2, 3) = Y2 + DY ; PTS_SWEPT(3, 3) = Z2 + DZ
+              PTS_SWEPT(2, 4) = Y1 + DY ; PTS_SWEPT(3, 4) = Z1 + DZ
 
-              !CLIPPING : SWEPT POLYGON ∩ PLIC half-plane {x | n.x >= d}
-              ! Clip the swept quad (4 vertices) by the PLIC plane using Sutherland-Hodgman
+              ! PLIC plane parameters
               D_PLIC = ALE%VOF%cell_data%d(ICELL)
+              NN_PLIC(1) = ZERO
               NN_PLIC(2) = ALE%VOF%cell_data%n(2, ICELL)
               NN_PLIC(3) = ALE%VOF%cell_data%n(3, ICELL)
-              ! Build PTS_SWEPT(3,4) from swept_polygon points
-              PTS_SWEPT(1, 1:4) = ZERO
-              DO JJ = 1, 4
-                PTS_SWEPT(2, JJ) = swept_polygon%point(JJ)%y
-                PTS_SWEPT(3, JJ) = swept_polygon%point(JJ)%z
-              ENDDO
+
+              ! Clip swept polygon by PLIC half-plane {x | n.x >= d}
               CALL CLIPPED_AREA_QUAD4(PTS_SWEPT, NN_PLIC, D_PLIC, CLIPPED_SWEPT)
 
-              alpha_main = CLIPPED_SWEPT / MAX(swept_polygon%area, EM20)
-              alpha_main = MIN(alpha_main, ONE)  ! cap at 1 (geometric safety)
-              ITRIMAT =  ALE%VOF%cell_data%IPHASE(II)
+              alpha_main = CLIPPED_SWEPT / MAX(FLUX_TOTAL * DT1, EM20)
+              alpha_main = MIN(alpha_main, ONE)
 
-              VFRAC(1:4) = ALE%VOF%cell_data%ALPHA(II,1:4)  ! phase fractions in the cell (sum to 1)
+              ITRIMAT = ALE%VOF%cell_data%IPHASE(II)
+
+              ! Distribute complementary flux among other phases
+              VFRAC(1:4) = ALE%VOF%cell_data%ALPHA(II,1:4)
               VFRAC(ITRIMAT) = ZERO
               SUM_VF = SUM(VFRAC(1:4))
               IF(SUM_VF > EM20) THEN

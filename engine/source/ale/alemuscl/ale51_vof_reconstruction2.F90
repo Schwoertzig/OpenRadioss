@@ -192,8 +192,8 @@
      ! --- IDENTIFY MIXED CELLS & SET ALPHA AT FACES
      ! A tolerance is introduced, otherwise random PLIC interface => spurious / cell detachment.
      num_mixed_cells = 0
-     tol1=1.0e-3_WP
-     tol2=ONE - 1.0e-3_WP
+     tol1=1.0e-8_WP
+     tol2=ONE - tol1
      ALE%VOF%cell_data%mixed_cell_id(1:NUMELQ+NUMELS) = 0
       DO IE=1,NUMELQ+NUMELS
          IF(ALE%VOF%cell_data%VOL(IE) <= ZERO) CYCLE  ! skip non-ALE elements (VOL not set)
@@ -242,15 +242,14 @@
             GRAD(3) = GRAD(3) + NN(3) * ALPHAF
          END DO
          !! normalize gradient to get unit interface normal direction
-         !! GRAD = Σ_f (alpha_f * N_f) where N_f is the outward edge normal (not unit)
-         !! The interface normal is n̂ = GRAD / |GRAD| (volume factor cancels out)
+         !! GRAD = Sum_f (alpha_f * N_f) where N_f is the outward edge normal (not unit)
+         !! The interface normal is n = GRAD / |GRAD| (volume factor cancels out)
          NORM_GRAD = SQRT(GRAD(2)**2 + GRAD(3)**2)
          IF(NORM_GRAD > 1.0e-10_WP) THEN
            ALE%VOF%cell_data%n(1, ICELL) = ZERO
            ALE%VOF%cell_data%n(2:3, ICELL) = GRAD(2:3) / NORM_GRAD
          ELSE
            ! Gradient is negligible (uniform alpha neighborhood) → mark with zero normal.
-           ! This cell will be treated as "no interface" later: Swet = alpha * edge_length.
            ALE%VOF%cell_data%n(1:3, ICELL) = ZERO
          ENDIF
      ENDDO
