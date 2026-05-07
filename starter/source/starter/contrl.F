@@ -995,7 +995,6 @@ C---------------------------------------------------
       ! /ALE/VOF: activation of Volume of Fluid
       !*******************************************************************
       CALL HM_READ_ALE_VOF(LSUBMODEL,N2D)
-      ALE%VOF%is_defined = 1
 
       !************************
       ! /ALE/LINK/VEL: counting
