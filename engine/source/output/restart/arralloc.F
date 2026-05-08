@@ -2212,7 +2212,6 @@ C
            NBMAT = MULTI_FVM%NBMAT
         ELSEIF (ALEMUSCL_Param%I_LAW == 51 .OR. ALE%VOF%IS_DEFINED == 1) THEN
            NBMAT = TRIMAT
-           print *, "NBMAT=", NBMAT
         ELSEIF (ALEMUSCL_PAram%I_LAW == 37) THEN   
            NBMAT = 1                  
         ELSE                          
