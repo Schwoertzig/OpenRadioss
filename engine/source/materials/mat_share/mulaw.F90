@@ -1293,7 +1293,7 @@
               nv46=4
             end if
             !numerical viscosity is managed inside sigeps51.f
-            facq0 = zero
+            !facq0 = zero
             call sigeps51( snpc, stf, &
               nel       ,npar        ,nuvar   ,nfunc ,ifunc     ,lbuf%tb   ,&
               npf       ,tf          ,tt      ,dt1   ,uparam0   ,numel     ,&
