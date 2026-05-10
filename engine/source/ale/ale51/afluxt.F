@@ -307,7 +307,7 @@ C     ALE ON / OFF
            IF (ALE%VOF%IS_DEFINED  == 1) THEN
               CALL ALEVOF_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X    , IXQ, flux_vois_mat,
      .                              NV46,trimat,SEGVAR,s_flux,s_flux_vois,
-     .                              NUMELQ, NUMNOD, NSEGFLU, LLT, NFT, DT1)
+     .                              NUMELQ, NUMNOD, NSEGFLU, LLT, NFT, DT1, N2D)
            ELSEIF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN
               CALL ALEMUSCL_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X    , IXQ, flux_vois_mat, 
      .                              NV46,trimat,SEGVAR,s_flux,s_flux_vois)

@@ -36,7 +36,7 @@
       SUBROUTINE ALE51_VOF_RECONSTRUCTION2(IPARG   ,ELBUF_TAB      ,ALE_CONNECT, NIXQ,IXQ, NUMNOD,X, &
                                            NERCVOIS ,NESDVOIS,LERCVOIS,LESDVOIS   ,LENCOM, ITASK, &
                                            SEGVAR  ,timers , &
-                                           NPARG,NGROUP,NUMELQ,NUMELS,TRIMAT,NQVOIS,NSVOIS,NSPMD)
+                                           NPARG,NGROUP,NUMELQ,NUMELS,TRIMAT,NQVOIS,NSVOIS,NSPMD,N2D)
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Comments
@@ -88,6 +88,7 @@
       INTEGER,intent(in) ::  IXQ(NIXQ, NUMELQ)
       INTEGER,INTENT(IN) :: NUMNOD
       real(kind=WP), intent(in) :: X(3, NUMNOD)
+      INTEGER,INTENT(IN) :: N2D !1:axisymmetric, 2:planar
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -124,6 +125,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
+      IF(N2D == 0)RETURN
       IF(TRIMAT==TRIMAT)ptr_debug => ALE%VOF%cell_data%ALPHA(1:NUMELQ+NUMELS+NQVOIS+NSVOIS,1)
 
       FACE_TO_NODE_LOCAL_ID(1, 1) = 1 ; FACE_TO_NODE_LOCAL_ID(1, 2) = 2   !!! Face 1
