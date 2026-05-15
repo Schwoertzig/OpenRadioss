@@ -12,12 +12,11 @@ Polyhedron3D* new_Polyhedron3D(){
     infogrb = GrB_Matrix_new(p->faces, GrB_INT8, 0,0);
     infogrb = GrB_Matrix_new(p->volumes, GrB_INT8, 0,0);
     p->status_face = alloc_empty_vec_int();
-    p->pressure_face = alloc_empty_vec_double();
     
     return p;
 }
 
-Polyhedron3D* new_Polyhedron3D_vefs(const Vector_points3D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces, const Vector_int* status_face, const Vector_double* pressure_face){
+Polyhedron3D* new_Polyhedron3D_vefs(const Vector_points3D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces, const Vector_int* status_face){
     GrB_Info infogrb;
     GrB_Index nb_rows;
     Polyhedron3D* p = (Polyhedron3D*) malloc(sizeof(Polyhedron3D));
@@ -36,13 +35,10 @@ Polyhedron3D* new_Polyhedron3D_vefs(const Vector_points3D* vertices, const GrB_M
     p->status_face = alloc_empty_vec_int();
     copy_vec_int(status_face, p->status_face);
 
-    p->pressure_face = alloc_empty_vec_double();
-    copy_vec_double(pressure_face, p->pressure_face);
-    
     return p;
 }
 
-Polyhedron3D* new_Polyhedron3D_vefvs(const Vector_points3D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces, const GrB_Matrix* volumes, const Vector_int* status_face, const Vector_double* pressure_face){
+Polyhedron3D* new_Polyhedron3D_vefvs(const Vector_points3D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces, const GrB_Matrix* volumes, const Vector_int* status_face){
     Polyhedron3D* p = (Polyhedron3D*) malloc(sizeof(Polyhedron3D));
 
     p->vertices = alloc_empty_vec_pts3D();
@@ -55,8 +51,6 @@ Polyhedron3D* new_Polyhedron3D_vefvs(const Vector_points3D* vertices, const GrB_
     GrB_Matrix_dup(p->volumes, *volumes);
     p->status_face = alloc_empty_vec_int();
     copy_vec_int(status_face, p->status_face);
-    p->pressure_face = alloc_empty_vec_double();
-    copy_vec_double(pressure_face, p->pressure_face);
     
     return p;
 }
@@ -75,7 +69,6 @@ Polyhedron3D* Polyhedron3D_from_vertices(const my_real_c* x_v, unsigned long int
     Point3D ptSWB;
     Vector_points3D* vertices;
     Vector_int* status_face;
-    Vector_double* pressure_face;
     GrB_Matrix* edges;
     GrB_Matrix* faces;
     GrB_Matrix* volumes;
@@ -713,13 +706,8 @@ Polyhedron3D* Polyhedron3D_from_vertices(const my_real_c* x_v, unsigned long int
     status_face->capacity = nb_faces;
     status_face->size = nb_faces;
 
-    pressure_face = alloc_empty_vec_double();
-    pressure_face->data = (my_real_c*) calloc(nb_faces, sizeof(my_real_c));
-    pressure_face->capacity = nb_faces;
-    pressure_face->size = nb_faces;
-    p = new_Polyhedron3D_vefvs(vertices, edges, faces, volumes, status_face, pressure_face);
+    p = new_Polyhedron3D_vefvs(vertices, edges, faces, volumes, status_face);
 
-    dealloc_vec_double(pressure_face); free(pressure_face);
     dealloc_vec_int(status_face); free(status_face);
     dealloc_vec_pts3D(vertices); free(vertices);
     GrB_free(edges); free(edges);
@@ -743,15 +731,11 @@ void copy_Polyhedron3D(const Polyhedron3D *src, Polyhedron3D *dest){
             if(dest->status_face){
                 dealloc_vec_int(dest->status_face); free(dest->status_face);
             }
-            if(dest->pressure_face){
-                dealloc_vec_double(dest->pressure_face); free(dest->pressure_face);
-            }
             dest->vertices = NULL;
             dest->edges = NULL;
             dest->faces = NULL;
             dest->volumes = NULL;
             dest->status_face = NULL;
-            dest->pressure_face = NULL;
         }
     } else {
         if (dest != NULL){
@@ -792,10 +776,6 @@ void copy_Polyhedron3D(const Polyhedron3D *src, Polyhedron3D *dest){
                 dest->status_face = alloc_empty_vec_int();
             }
             copy_vec_int(src->status_face, dest->status_face);
-            if (!dest->pressure_face){
-                dest->pressure_face = alloc_empty_vec_double();
-            }
-            copy_vec_double(src->pressure_face, dest->pressure_face);
         }
     }
 }
@@ -814,9 +794,6 @@ void dealloc_Polyhedron3D(Polyhedron3D* p){
         if(p->status_face){
             dealloc_vec_int(p->status_face); free(p->status_face);
         }
-        if(p->pressure_face){
-            dealloc_vec_double(p->pressure_face); free(p->pressure_face);
-        }
     }
 }
 
@@ -826,14 +803,12 @@ Polyhedron3D* fuse_polyhedrons(const Polyhedron3D* p1, const Polyhedron3D* p2){
     GrB_Matrix *fused_faces = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     GrB_Matrix *fused_volumes = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     Vector_int *fused_status;
-    Vector_double *fused_pressure;
     GrB_Index nrows1, ncols1, nrows2, ncols2;
     GrB_Matrix zeros1, zeros2;
     Polyhedron3D* res_p;
 
     fused_vertices = cat_vec_pts3D(p1->vertices, p2->vertices);
     fused_status = cat_vec_int(p1->status_face, p2->status_face);
-    fused_pressure = cat_vec_double(p1->pressure_face, p2->pressure_face);
 
     GrB_Matrix_nrows(&nrows1, *(p1->edges));
     GrB_Matrix_ncols(&ncols1, *(p1->edges));
@@ -856,7 +831,6 @@ Polyhedron3D* fuse_polyhedrons(const Polyhedron3D* p1, const Polyhedron3D* p2){
     GxB_Matrix_concat(*fused_faces, (GrB_Matrix[]){*(p1->faces), zeros1, zeros2, *(p2->faces)}, 2, 2, GrB_NULL);
     //fused_faces = [[p1.faces  spzeros(Int8, size(p1.faces, 1), size(p2.faces, 2))];
     //                [spzeros(Int8, size(p2.faces, 1), size(p1.faces, 2)) p2.faces]];
-    //fused_pressure = vcat(p1.pressure_edge, p2.pressure_edge) //TODO Report this
 
     GrB_Matrix_nrows(&nrows1, *(p1->volumes));
     GrB_Matrix_ncols(&ncols1, *(p1->volumes));
@@ -867,7 +841,7 @@ Polyhedron3D* fuse_polyhedrons(const Polyhedron3D* p1, const Polyhedron3D* p2){
     GrB_Matrix_new(fused_volumes, GrB_INT8, nrows1+nrows2, ncols1+ncols2);
     GxB_Matrix_concat(*fused_volumes, (GrB_Matrix[]){*(p1->volumes), zeros1, zeros2, *(p2->volumes)}, 2, 2, GrB_NULL);
 
-    res_p = new_Polyhedron3D_vefvs(fused_vertices, fused_edges, fused_faces, fused_volumes, fused_status, fused_pressure);
+    res_p = new_Polyhedron3D_vefvs(fused_vertices, fused_edges, fused_faces, fused_volumes, fused_status);
     
     GrB_free(&zeros1);
     GrB_free(&zeros2);
@@ -876,7 +850,6 @@ Polyhedron3D* fuse_polyhedrons(const Polyhedron3D* p1, const Polyhedron3D* p2){
     GrB_free(fused_faces); free(fused_faces);
     GrB_free(fused_volumes); free(fused_volumes);
     dealloc_vec_int(fused_status); free(fused_status);
-    dealloc_vec_double(fused_pressure); free(fused_pressure);
     
     return res_p;
 }
@@ -890,7 +863,6 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
     Vector_points3D* new_vertices;
     GrB_Matrix new_edges, new_faces, new_volumes;
     Vector_int *new_status_face;
-    Vector_double *new_pressure_face;
     GrB_Vector grb_ind_kept_pts, justone;
     GrB_Info infogrb;
     GrB_Index nb_edges, nb_faces, nb_pts, nb_volumes;
@@ -914,7 +886,6 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
     GrB_Vector_new(&justone, GrB_UINT64, 1);
     GrB_Matrix_new(&new_volumes, GrB_INT8, 1, 1);
     new_status_face = alloc_with_capacity_vec_int(1);
-    new_pressure_face = alloc_with_capacity_vec_double(1);
     GrB_Vector_new(&vj, GrB_INT8, nb_faces);
     GrB_Vector_new(&face_indices, GrB_UINT64, nb_faces);
     GrB_Vector_new(&extr_vals_vj, GrB_INT8, nb_faces);
@@ -989,24 +960,18 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
                 dealloc_vec_int(new_status_face);
                 free(new_status_face);
             }
-            if (new_pressure_face){
-                dealloc_vec_double(new_pressure_face);
-                free(new_pressure_face);
-            }
             new_status_face = alloc_with_capacity_vec_int(ncols_new_faces);
-            new_pressure_face = alloc_with_capacity_vec_double(ncols_new_faces);
             for(j_f = 0; j_f < ncols_new_faces; j_f++){
                 GrB_Vector_extractElement(&j, face_indices, j_f);
                 set_ith_elem_vec_int(new_status_face, j_f, get_ith_elem_vec_int(p->status_face, j));
-                set_ith_elem_vec_double(new_pressure_face, j_f, get_ith_elem_vec_double(p->pressure_face, j));
             }
 
             if (new_p){ //Faces already exist
                 copy_Polyhedron3D(new_p, copy_p);
                 dealloc_Polyhedron3D(new_p);
-                new_p = fuse_polyhedrons(copy_p, new_Polyhedron3D_vefvs(new_vertices, &new_edges, &new_faces, &new_volumes, new_status_face, new_pressure_face));
+                new_p = fuse_polyhedrons(copy_p, new_Polyhedron3D_vefvs(new_vertices, &new_edges, &new_faces, &new_volumes, new_status_face));
             } else { //First face created
-                new_p = new_Polyhedron3D_vefvs(new_vertices, &new_edges, &new_faces, &new_volumes, new_status_face, new_pressure_face);
+                new_p = new_Polyhedron3D_vefvs(new_vertices, &new_edges, &new_faces, &new_volumes, new_status_face);
             }
         }
     }
@@ -1021,7 +986,6 @@ void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
     dealloc_vec_uint(edge_indices);free(edge_indices);
     dealloc_vec_uint(ind_kept_pts);free(ind_kept_pts);
     dealloc_vec_int(new_status_face);free(new_status_face);
-    dealloc_vec_double(new_pressure_face);free(new_pressure_face);
     dealloc_vec_pts3D(new_vertices);free(new_vertices);
     GrB_free(&new_edges);
     GrB_free(&new_faces);

@@ -98,7 +98,7 @@ contains
     do while (abs(p - p_prev) > eps)
       res = phi(pL, aL, uL, gammaL, pR, aR, uR, gammaR, p)
       p_prev = p
-      p = p - res / Dphi(pL, aL, gammaL, pR, aR, gammaR, p)
+      p = max(1e-10, p - res / Dphi(pL, aL, gammaL, pR, aR, gammaR, p))
     end do
   end function find_root
 

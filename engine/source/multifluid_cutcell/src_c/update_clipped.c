@@ -864,7 +864,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     GrB_Matrix *new_faces = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     GrB_Matrix *new_volume = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     Vector_int *status_faces;
-    Vector_double *pressure_faces;
     const uint64_t nb_pts = fn->vertices->size;
     Vector_points3D *new_vertices = alloc_with_capacity_vec_pts3D(2*nb_pts);
     Polyhedron3D* p;
@@ -943,13 +942,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     for(i = 2*nb_cols_faces; i < nb_cols_newfaces; i++){
         set_ith_elem_vec_int(status_faces, i, &val);
     }
-    pressure_faces = alloc_with_capacity_vec_double(nb_cols_newfaces);
-    val_r = 0.;
-    for(i = 0; i < nb_cols_newfaces; i++){
-        set_ith_elem_vec_double(pressure_faces, i, &val_r);
-    }
 
-    //pressure_face = repeat([0.0], size(new_faces, 2)) //TODO : report that
     GrB_Matrix_new(new_volume, GrB_INT8, nb_cols_newfaces, 1);
     for(i=0; i<nb_edges; i++){
         infogrb = GrB_Matrix_setElement(*new_volume, -1, i, 0);
@@ -1017,9 +1010,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
                 set_ith_elem_vec_int(status_faces, curr_face    , &val);
                 set_ith_elem_vec_int(status_faces, curr_face + 1, &val);
 
-                set_ith_elem_vec_double(pressure_faces, curr_face    , get_ith_elem_vec_double(fn->pressure_edge, i));
-                set_ith_elem_vec_double(pressure_faces, curr_face + 1, get_ith_elem_vec_double(fn->pressure_edge, i));
-
                 GrB_Matrix_extractElement(&fne_ptind, *(fn->faces), i, j);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face    , 0);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face + 1, 0);
@@ -1057,7 +1047,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
 
                 val = 3+i;
                 set_ith_elem_vec_int(status_faces, curr_face, &val);
-                set_ith_elem_vec_double(pressure_faces, curr_face, get_ith_elem_vec_double(fn->pressure_edge, i));
 
                 GrB_Matrix_extractElement(&fne_ptind, *(fn->faces), i, j);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face, 0);
@@ -1067,7 +1056,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
         }
     }
 
-    p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces, pressure_faces);
+    p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces);
 
     free(pt3D);
     GrB_Matrix_free(&emptyNE);
@@ -1081,7 +1070,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     GrB_free(&extr_vals_fj);
     GrB_free(&edge_indices);
     dealloc_vec_int(status_faces); free(status_faces);
-    dealloc_vec_double(pressure_faces); free(pressure_faces);
     dealloc_vec_pts3D(new_vertices); free(new_vertices);
     GrB_Matrix_free(new_edges); free(new_edges);
     GrB_Matrix_free(new_faces); free(new_faces);
@@ -1109,7 +1097,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     GrB_Matrix *new_faces = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     GrB_Matrix *new_volume = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     Vector_int *status_faces;
-    Vector_double *pressure_faces;
     GrB_Index *I_index, *J_index;
     GrB_Index curr_edge, v_edges_index, curr_face;
     GrB_Vector fj, extr_vals_fj, edge_indices;
@@ -1195,11 +1182,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     for(i = nb_faces1 + nb_faces2; i < nb_cols_newfaces; i++){
         set_ith_elem_vec_int(status_faces, i, &val);
     }
-    pressure_faces = alloc_with_capacity_vec_double(nb_cols_newfaces);
-    val_r = 0.;
-    for(i = 0; i < nb_cols_newfaces; i++){
-        set_ith_elem_vec_double(pressure_faces, i, &val_r);
-    }
 
     GrB_Matrix_new(new_volume, GrB_INT8, nb_cols_newfaces, 1);
     for(i=0; i<nb_edges1; i++){
@@ -1272,9 +1254,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
                     val = -(3+i);
                     set_ith_elem_vec_int(status_faces, curr_face    , &val);
                     set_ith_elem_vec_int(status_faces, curr_face + 1, &val);
-                    set_ith_elem_vec_double(pressure_faces, curr_face    , get_ith_elem_vec_double(fn->pressure_edge, i));
-                    set_ith_elem_vec_double(pressure_faces, curr_face + 1, get_ith_elem_vec_double(fn->pressure_edge, i));
-
 
                     GrB_Matrix_extractElement(&in_out_f1, *(fn->faces), i, j);
                     GrB_Matrix_setElement(*new_volume, in_out_f1, curr_face    , 0);
@@ -1290,7 +1269,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
 
                     val = -(3+i);
                     set_ith_elem_vec_int(status_faces, curr_face, &val);
-                    set_ith_elem_vec_double(pressure_faces, curr_face, get_ith_elem_vec_double(fn->pressure_edge, i));
 
                     GrB_Matrix_extractElement(&in_out_f1, *(fn->faces), i, j);
                     GrB_Matrix_setElement(*new_volume, in_out_f1, curr_face, 0);
@@ -1305,7 +1283,7 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     GrB_Matrix_resize(*new_faces, curr_edge, curr_face);
     GrB_Matrix_resize(*new_volume, curr_face, 1);
     status_faces->size = curr_face;
-    res_p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces, pressure_faces);
+    res_p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces);
 
     GrB_free(&emptyNE);
     GrB_free(&emptySW);
@@ -1326,7 +1304,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     GrB_free(new_volume);
     if(new_volume) free(new_volume);
     dealloc_vec_int(status_faces); free(status_faces);
-    dealloc_vec_double(pressure_faces); free(pressure_faces);
     free(I_index);
     free(J_index);
 
