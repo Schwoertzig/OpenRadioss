@@ -53,7 +53,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    trimat_mod                    ../engine/share/modules/trimat.F
 !||====================================================================
       SUBROUTINE AFLUXT(IPARG   ,ELBUF_TAB   ,PM       ,IXS     ,IXQ     ,
-     2                  X       ,flux_mat    ,val2_mat     ,s_alpha_mat,
+     2                  X ,V      ,flux_mat    ,val2_mat     ,s_alpha_mat,
      3                  alpha_mat,ALE_CONNECT ,ITASK    ,
      4                  trimat  ,FLUX_SAV    ,NERCVOIS ,NESDVOIS,
      5                  LERCVOIS,LESDVOIS    ,qmv_mat ,
@@ -106,7 +106,7 @@ C-----------------------------------------------
       real(kind=WP), dimension(s_flux,nv46,trimat), intent(inout) :: flux_mat !< flux array  
       real(kind=WP), dimension(s_qmv,2*nv46,trimat), intent(inout) :: qmv_mat !< qmv array
       real(kind=WP), dimension(s_flux,trimat), intent(inout) :: val2_mat !< global flux???
-      my_real PM(NPROPM,NUMMAT), X(3,NUMNOD),FLUX_SAV(s_flux,nv46)
+      my_real PM(NPROPM,NUMMAT), X(3,NUMNOD),V(3,NUMNOD),FLUX_SAV(s_flux,nv46)
 
       INTEGER IPARG(NPARG,NGROUP), IXS(NIXS,NUMELS), IXQ(7,NUMELQ)
       INTEGER ITASK,ADD,NERCVOIS(*),NESDVOIS(*),LERCVOIS(*),LESDVOIS(*)
@@ -305,7 +305,7 @@ C     ALE ON / OFF
            ENDIF
         ELSE
            IF (ALE%VOF%IS_DEFINED  == 1) THEN
-              CALL ALEVOF_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X    , IXQ, flux_vois_mat,
+              CALL ALEVOF_UPWIND2(flux_mat,flux_sav, ALE_CONNECT, X  ,V , IXQ, flux_vois_mat,
      .                              NV46,trimat,SEGVAR,s_flux,s_flux_vois,
      .                              NUMELQ, NUMNOD, NSEGFLU, LLT, NFT, DT1, N2D)
            ELSEIF (ALEMUSCL_Param%IALEMUSCL  >  0) THEN

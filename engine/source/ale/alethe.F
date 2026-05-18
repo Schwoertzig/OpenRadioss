@@ -334,7 +334,7 @@ C----------------------
           call my_barrier
 
           call AFLUXT(IPARG   ,ELBUF_TAB  ,PM      ,IXS      ,IXQ,
-     2                X       ,flux_mat   ,val2_mat    ,s_alpha_mat,
+     2                X,V       ,flux_mat   ,val2_mat    ,s_alpha_mat,
      3                alpha_mat,ALE_CONNECT,ITASK   ,
      4                TRIMAT ,FLUX_SAV   ,NERCVOIS,NESDVOIS ,
      5                LERCVOIS,LESDVOIS   ,qmv_mat  ,
