@@ -47,7 +47,7 @@
        MODULE ALEVOF_UPWIND2_MOD
          IMPLICIT NONE
        CONTAINS
-       SUBROUTINE ALEVOF_UPWIND2(flux_mat,flux_save, ALE_CONNECT, X, IXQ, flux_vois_mat, &
+       SUBROUTINE ALEVOF_UPWIND2(flux_mat,flux_save, ALE_CONNECT, X,V, IXQ, flux_vois_mat, &
            NV46, trimat, SEGVAR,s_flux,s_flux_vois, &
            NUMELQ,NUMNOD,NSEGFLU,NEL,NFT,DT1,N2D)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@
       INTEGER, INTENT(IN) :: NV46
       real(kind=WP), dimension(s_flux,nv46), intent(in) :: flux_save
       real(kind=WP), dimension(s_flux,NV46,trimat), INTENT(INOUT) :: flux_mat
-      real(kind=WP), INTENT(IN) :: X(3, NUMNOD)
+      real(kind=WP), INTENT(IN) :: X(3, NUMNOD), V(3,NUMNOD)
       INTEGER, INTENT(IN) :: IXQ(NIXQ, NUMELQ)
       real(kind=WP), INTENT(INOUT) :: flux_vois_mat(s_flux_vois, NV46,trimat)
       real(kind=WP), INTENT(IN) :: DT1 !< time step
@@ -101,7 +101,7 @@
       real(kind=WP) :: NN_PLIC(3)     !< PLIC plane normal
       real(kind=WP) :: PTS_SWEPT(3,4) !< swept polygon vertices in PTS format
       real(kind=WP) :: CLIPPED_SWEPT  !< area of swept polygon clipped by PLIC half-plane
-      real(kind=WP), parameter :: TOL_PURE = 1.0e-3_WP  ! must match tol1 in ale51_vof_reconstruction2
+      real(kind=WP), parameter :: TOL_PURE = 1.0e-8_WP  ! must match tol1 in ale51_vof_reconstruction2
       real(kind=WP) :: ALPHA_MAIN !< main phase fraction in swept region
       real(kind=WP) :: ALPHA_REMAIN !< remaining ratio (1 - alpha_main)
       real(kind=WP) :: SUM_VF !< sum of non-main phase fractions
@@ -109,6 +109,8 @@
       real(kind=WP) :: VOL_AVAILABLE   !< available volume of a phase in the cell
       real(kind=WP) :: VOL_OUTGOING    !< total outgoing volume of a phase (sum over faces)
       real(kind=WP) :: LIMITER         !< reduction factor to enforce conservation
+      real(kind=WP) :: VY1,VY2,VZ1,VZ2
+      real(kind=WP) :: AREA_SWEPT
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -147,6 +149,8 @@
               NODEID2 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 2), II)
               Y1 = X(2, NODEID1) ; Z1 = X(3, NODEID1)
               Y2 = X(2, NODEID2) ; Z2 = X(3, NODEID2)
+              VY1 =V(2,NODEID1) ; VZ1 =V(3,NODEID1) ;
+              VY2 =V(2,NODEID2) ; VZ2 =V(3,NODEID2) ;
               EDGE_LEN = SQRT((Y2 - Y1)**2 + (Z2 - Z1)**2)
               INV_EDGE_LEN = ONE / MAX(EDGE_LEN, EM20)
               ! Inward unit normal (CCW quad → rotate edge vector -90°)
@@ -159,8 +163,14 @@
               PTS_SWEPT(1, 1:4) = ZERO
               PTS_SWEPT(2, 1) = Y1 ;      PTS_SWEPT(3, 1) = Z1
               PTS_SWEPT(2, 2) = Y2 ;      PTS_SWEPT(3, 2) = Z2
-              PTS_SWEPT(2, 3) = Y2 + DY ; PTS_SWEPT(3, 3) = Z2 + DZ
-              PTS_SWEPT(2, 4) = Y1 + DY ; PTS_SWEPT(3, 4) = Z1 + DZ
+
+              !rectangular advected polygon (mean velocity at face)
+              !PTS_SWEPT(2, 3) = Y2 + DY ; PTS_SWEPT(3, 3) = Z2 + DZ
+              !PTS_SWEPT(2, 4) = Y1 + DY ; PTS_SWEPT(3, 4) = Z1 + DZ
+
+              !semi-lagrangian step (more precise swept polygon)
+              PTS_SWEPT(2, 3) = Y2 - VY2*DT1 ; PTS_SWEPT(3, 3) = Z2 - VZ2*DT1
+              PTS_SWEPT(2, 4) = Y1 - VY1*DT1 ; PTS_SWEPT(3, 4) = Z1 - VZ1*DT1
 
               ! PLIC plane parameters
               D_PLIC = ALE%VOF%cell_data%d(ICELL)
@@ -171,10 +181,39 @@
               ! Clip swept polygon by PLIC half-plane {x | n.x >= d}
               CALL CLIPPED_AREA_QUAD4(PTS_SWEPT, NN_PLIC, D_PLIC, CLIPPED_SWEPT)
 
-              alpha_main = CLIPPED_SWEPT / MAX(FLUX_TOTAL * DT1, EM20)
+              !rectangular advected polygon (mean velocity at face)
+              !alpha_main = CLIPPED_SWEPT / MAX(FLUX_TOTAL * DT1, EM20)
+
+              !rectangular advected polygon (mean velocity at face)
+              AREA_SWEPT = HALF * ABS( &
+                (PTS_SWEPT(2,1) - PTS_SWEPT(2,3)) * (PTS_SWEPT(3,2) - PTS_SWEPT(3,4)) - &
+                (PTS_SWEPT(2,2) - PTS_SWEPT(2,4)) * (PTS_SWEPT(3,1) - PTS_SWEPT(3,3)) )
+
+                IF(AREA_SWEPT <= EM20) THEN
+                     ! print *,"here"
+                    ENDIF
+
+
+              alpha_main = CLIPPED_SWEPT / MAX(AREA_SWEPT, EM20)
+
+              IF(CLIPPED_SWEPT < ZERO) THEN
+                alpha_main = ZERO
+              END IF
+
+
               alpha_main = MIN(alpha_main, ONE)
 
               ITRIMAT = ALE%VOF%cell_data%IPHASE(II)
+
+              ! For near-pure cells, force upwind to avoid spurious detachment
+              IF(ALE%VOF%cell_data%ALPHA(II, ITRIMAT) > ONE - TOL_PURE) THEN
+                alpha_main = ONE
+              ENDIF
+
+              IF(ALE%VOF%cell_data%ALPHA(II, ITRIMAT) < TOL_PURE) THEN
+                alpha_main = ZERO
+
+              ENDIF
 
               ! Distribute complementary flux among other phases
               VFRAC(1:4) = ALE%VOF%cell_data%ALPHA(II,1:4)
