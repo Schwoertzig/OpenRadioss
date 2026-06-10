@@ -24,6 +24,7 @@
 !||    precision_mod                            ../common_source/modules/precision_mod.F90
 !||--- called by ------------------------------------------------------
 !||    aconve                                   ../engine/source/ale/aconve.F90
+!||    adinertia_mod                            ../starter/share/modules1/adinertia_mod.F90
 !||    afluxt                                   ../engine/source/ale/ale51/afluxt.F
 !||    afluxt_int22                             ../engine/source/ale/ale51/afluxt_int22.F90
 !||    ale51_antidiff2                          ../engine/source/ale/ale51/ale51_antidiff2.F
@@ -49,6 +50,7 @@
 !||    arezon                                   ../engine/source/ale/arezon.F90
 !||    arruda_boyce                             ../starter/source/materials/mat/mat092/law92_nlsqf.F90
 !||    arruda_boyce_dyda                        ../starter/source/materials/mat/mat092/law92_nlsqf.F90
+!||    bbc2005_calcul_coeffs                    ../starter/source/materials/mat/mat131/yield_criterion/bbc2005_calcul_coeffs.F90
 !||    bcs_mod                                  ../common_source/modules/boundary_conditions/bcs_mod.F90
 !||    bcs_nrf                                  ../engine/source/boundary_conditions/bcs_nrf.F90
 !||    bcs_wall_trigger                         ../engine/source/boundary_conditions/bcs_wall_trigger.F90
@@ -168,6 +170,7 @@
 !||    finter_mixed_mod                         ../engine/source/tools/finter_mixed.F90
 !||    fix_principal_dirs                       ../engine/source/materials/mat/mat130/sigeps130.F90
 !||    force                                    ../engine/source/loads/general/force.F90
+!||    forintc_prepare_gpu                      ../engine/source/elements/shell/coque/shell_internal_forces.F90
 !||    fpcont2_max_output                       ../engine/source/output/h3d/h3d_results/fpcont2_max_output.F90
 !||    fpcont2_min_output                       ../engine/source/output/h3d/h3d_results/fpcont2_min_output.F90
 !||    fractal_dmg_init                         ../starter/source/materials/fail/fractal/fractal_dmg_init.F90
@@ -190,6 +193,9 @@
 !||    get_volume_area                          ../engine/source/airbag/get_volume_area.F90
 !||    ghost_shells_mod                         ../engine/source/engine/node_spliting/ghost_shells.F90
 !||    glob_therm_mod                           ../common_source/modules/mat_elem/glob_therm_mod.F90
+!||    gpu_shell_internal_forces                ../engine/source/elements/shell/coque/shell_internal_forces.F90
+!||    gpu_shell_launch_async                   ../engine/source/elements/shell/coque/shell_internal_forces.F90
+!||    gpu_shell_sync_scatter                   ../engine/source/elements/shell/coque/shell_internal_forces.F90
 !||    gradient_reconstruction_new              ../engine/source/ale/alemuscl/gradient_reconstruction.F90
 !||    granular51                               ../engine/source/materials/mat/mat051/granular51.F90
 !||    group_param_mod                          ../common_source/modules/mat_elem/group_param_mod.F90
@@ -202,6 +208,8 @@
 !||    hm_pre_read_preload_axial                ../starter/source/loads/general/preload/hm_read_preload_axial.F90
 !||    hm_preread_inivel                        ../starter/source/initial_conditions/general/inivel/hm_preread_inivel.F90
 !||    hm_preread_skw                           ../starter/source/tools/skew/hm_preread_skw.F90
+!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
+!||    hm_read_adinertia_mod                    ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_bcs_nrf                          ../starter/source/boundary_conditions/hm_read_bcs_nrf.F90
 !||    hm_read_bcs_wall                         ../starter/source/boundary_conditions/hm_read_bcs_wall.F90
 !||    hm_read_ebcs_cyclic                      ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_cyclic.F90
@@ -281,6 +289,7 @@
 !||    hm_read_yield_criterion                  ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion.F90
 !||    hm_read_yield_criterion_barlat1989       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat1989.F90
 !||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_read_yield_criterion_vonmises         ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_vonmises.F90
@@ -449,6 +458,7 @@
 !||    s10get_x0                                ../engine/source/elements/solid/solide10/s10get_x0.F90
 !||    s20temp                                  ../starter/source/elements/solid/solide20/s20temp.F90
 !||    s4dlenmax_sm                             ../engine/source/elements/solid/solide4/s4dlenmax_sm.F90
+!||    s6cdlenmax_sm                            ../engine/source/elements/thickshell/solide6c/s6cdlenmax_sm.F90
 !||    s6chour_ctl                              ../engine/source/elements/thickshell/solide6c/s6chour_ctl.F90
 !||    s6fint_reg                               ../engine/source/elements/solid/solide6z/s6fint_reg.F90
 !||    s6for_distor                             ../engine/source/elements/thickshell/solide6c/s6for_distor.F90
@@ -477,6 +487,7 @@
 !||    s6zsav3                                  ../engine/source/elements/solid/solide6z/s6zsav3.F90
 !||    s6zupd11t12                              ../engine/source/elements/solid/solide6z/s6zupd11t12.F90
 !||    s8dlenmax_sm                             ../engine/source/elements/solid/solide/s8dlenmax_sm.F90
+!||    sc8dlenmax_sm                            ../engine/source/elements/thickshell/solidec/sc8dlenmax_sm.F90
 !||    sdistor_ini                              ../engine/source/elements/solid/solide/sdistror_ini.F90
 !||    select_s2s                               ../starter/source/interfaces/inter3d1/select_s2s.F90
 !||    self_heating_tabulated                   ../engine/source/materials/mat/mat131/self_heating/self_heating_tabulated.F90
@@ -493,6 +504,7 @@
 !||    sh_offset_jonct_chk                      ../starter/source/elements/shell/shell_offset/sh_offset_jonkt_chk.F90
 !||    sh_offset_nproj                          ../starter/source/elements/shell/shell_offset/shell_offset_nproj.F90
 !||    sh_offset_setn                           ../starter/source/elements/shell/shell_offset/sh_offset_setn.F90
+!||    shell_gpu_mod                            ../engine/source/elements/shell/coque/shell_gpu_mod.F90
 !||    shell_offset_ini                         ../starter/source/elements/shell/shell_offset/shell_offset_ini.F90
 !||    shell_offset_wm_ini                      ../engine/source/elements/shell/shell_offset_wm_ini.F90
 !||    shell_offsetp                            ../starter/source/elements/shell/shell_offset/shell_offsetp.F90
@@ -591,6 +603,7 @@
 !||    xyz16                                    ../engine/source/output/anim/generate/monvol_anim.F90
 !||    yield_criterion_barlat1989               ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
 !||    yield_criterion_barlat2000               ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat2000.F90
+!||    yield_criterion_bbc2005                  ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_BBC2005.F90
 !||    yield_criterion_hershey                  ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
 !||    yield_criterion_hill                     ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hill.F90
 !||    yield_criterion_vonmises                 ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_vonmises.F90

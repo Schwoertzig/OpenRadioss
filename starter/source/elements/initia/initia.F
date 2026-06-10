@@ -59,7 +59,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inirbys                         ../starter/source/constraints/general/rbody/inirby.F
 !||    inirig_mat                      ../starter/source/elements/initia/inirig_mat.F
 !||    inisrf                          ../starter/source/constraints/general/rbody/inisrf.F
-!||    init_bcs_nrf                    ../starter/source/boundary_conditions/init_bcs_nrf.F90
 !||    init_bcs_wall                   ../starter/source/boundary_conditions/init_bcs_wall.F90
 !||    init_inivol                     ../starter/source/initial_conditions/inivol/init_inivol.F90
 !||    init_rwall_penalty              ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
@@ -127,7 +126,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ini_guided_cable_mod            ../starter/source/tools/seatbelts/ini_guided_cable.F90
 !||    inimap1d_mod                    ../starter/share/modules1/inimap1d_mod.F
 !||    inimap2d_mod                    ../starter/share/modules1/inimap2d_mod.F
-!||    init_bcs_nrf_mod                ../starter/source/boundary_conditions/init_bcs_nrf.F90
 !||    init_bcs_wall_mod               ../starter/source/boundary_conditions/init_bcs_wall.F90
 !||    init_inivol_mod                 ../starter/source/initial_conditions/inivol/init_inivol.F90
 !||    init_rwall_penalty_mod          ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
@@ -200,7 +198,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      N                  PRELOAD_A  ,FAIL_FRACTAL  ,FAIL_BROKMANN    ,DEFAULTS       ,NDAMP_FREQ_RANGE,
      O                  DAMPR      ,IBEAM_VECTOR  ,RBEAM_VECTOR     ,IKINE          ,LSIGI     ,
      P                  LSIGSP     ,SRNOISE       ,NPRW             ,LPRW           , RWSTIF_PEN,
-     M                  SLN_PEN    ,ROOTLEN       ,ROOTNAM          ,NGUIDED_CABLE  ,TOTMAS1  )
+     M                  SLN_PEN    ,ROOTLEN       ,ROOTNAM          ,NGUIDED_CABLE  ,TOTMAS1   ,
+     N                  TOTADDINER )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------                     
@@ -240,7 +239,6 @@ C-----------------------------------------------
       USE DETONATION_TIMES_PRINTOUT_MOD , ONLY : DETONATION_TIMES_PRINTOUT
       USE S6ZINIT3_MOD
       USE INIT_BCS_WALL_MOD , ONLY : INIT_BCS_WALL
-      USE INIT_BCS_NRF_MOD , ONLY : INIT_BCS_NRF
       use init_inivol_mod , only : INIT_INIVOL
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
       use init_rwall_penalty_mod , only : init_rwall_penalty
@@ -356,6 +354,7 @@ C
       INTEGER,INTENT(IN) :: LSIGI
       INTEGER,INTENT(IN) :: LSIGSP
       INTEGER,INTENT(IN) :: SRNOISE
+      my_real,INTENT(IN) :: TOTADDINER
 !
       INTEGER,INTENT(IN) :: SLN_PEN
       INTEGER, DIMENSION(NNPRW*NRWALL),INTENT(IN) :: NPRW
@@ -824,14 +823,6 @@ C--------------------------------------------
         CALL INIT_BCS_WALL(IGRNOD,NGRNOD,NUMNOD,ALE_CONNECTIVITY,MULTI_FVM,
      .                     IXS,NIXS,NUMELS, IXQ,NIXQ,NUMELQ, IXTG,NIXTG,NUMELTG, N2D,
      .                     NGROUP,NPARG,IPARG,IPRI)
-      ENDIF
-C------------------------------------------------------
-C  Initialisation of Non Reflecting BOundary Conditions
-C------------------------------------------------------
-      IF(BCS%NUM_NRF > 0)THEN
-        CALL INIT_BCS_NRF(IGRNOD,NGRNOD,NUMNOD,MULTI_FVM,
-     .                    IXS,NIXS,NUMELS, IXQ,NIXQ,NUMELQ, IXTG,NIXTG,NUMELTG, N2D,
-     .                    NGROUP,NPARG,IPARG,IPRI,ITAB,NUMMAT, MAT_PARAM)
       ENDIF
 C---------------------------------------------------------
 C     Sorting of the bolt preloading vector
@@ -2305,6 +2296,8 @@ C
       WRITE(IOUT,'(//)')
       WRITE(IOUT,1300)
       WRITE(IOUT,1400) TOTADDMAS
+      WRITE(IOUT,1800)
+      WRITE(IOUT,1900) TOTADDINER
 C
 C-----------------------------------------------------------------------------------
 C     Initialization of non-local variable regularization structure for damage models
@@ -2364,6 +2357,10 @@ c-----------
      . 5X,'INITIAL NODAL MCP         ',/
      . 5X,'--------------------------',/
      . 6X,5('NODE MCP        ',15X),'NODE MCP        '/)
+ 1800 FORMAT(//
+     . 5X,'TOTAL ADDED INERTIA',/
+     . 5X,'------------------'/)
+ 1900 FORMAT(5X,' TOTAL ADDED INERTIA = ',1PG20.13//)
       RETURN
       END
 C

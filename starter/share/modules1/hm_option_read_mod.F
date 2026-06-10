@@ -114,6 +114,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_sphio                         ../starter/source/loads/sph/hm_preread_sphio.F
 !||    hm_rbodies_add_main_node                 ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_activ                            ../starter/source/tools/activ/hm_read_activ.F
+!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_grid                         ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
 !||    hm_read_ale_link                         ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -349,6 +350,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_yield_criterion                  ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion.F90
 !||    hm_read_yield_criterion_barlat1989       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat1989.F90
 !||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_read_yield_criterion_vonmises         ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_vonmises.F90

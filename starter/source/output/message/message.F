@@ -168,6 +168,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_prop_read21                         ../starter/source/properties/thickshell/hm_read_prop21.F
 !||    hm_rbodies_add_main_node               ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_activ                          ../starter/source/tools/activ/hm_read_activ.F
+!||    hm_read_adinertia                      ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                          ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_grid                       ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
 !||    hm_read_ale_link                       ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -221,6 +222,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_eos_sesame                     ../starter/source/materials/eos/hm_read_eos_sesame.F
 !||    hm_read_eos_stiffened_gas              ../starter/source/materials/eos/hm_read_eos_stiffened_gas.F
 !||    hm_read_eos_tabulated                  ../starter/source/materials/eos/hm_read_eos_tabulated.F
+!||    hm_read_eos_tillotson                  ../starter/source/materials/eos/hm_read_eos_tillotson.F
 !||    hm_read_eref                           ../starter/source/loads/reference_state/eref/hm_read_eref.F
 !||    hm_read_fail                           ../starter/source/materials/fail/hm_read_fail.F
 !||    hm_read_fail_biquad                    ../starter/source/materials/fail/biquad/hm_read_fail_biquad.F

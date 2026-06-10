@@ -706,8 +706,11 @@ C Element temperature
         ENDDO
       ENDIF
 C
-      DELTAXI(1:NEL) = DELTAX(1:NEL)   
-      IF (FAC_NU<ONE) DELTAXI(1:NEL) = MAX(DELTAXI(1:NEL),NU_SP*DELTAX(1:NEL))   
+      IF (FAC_NU<ONE) THEN 
+        DELTAXI(1:NEL) = MAX(DELTAXI(1:NEL),NU_SP*DELTAX(1:NEL)) 
+      ELSE 
+        DELTAXI(1:NEL) = DELTAX(1:NEL)   
+      ENDIF	  
 C-----------------------------------------------------------------------
       IF ((ITASK==0).AND.(IMON_MAT==1)) CALL STARTIME(TIMERS,35)
       ILAY = 1 
@@ -986,7 +989,7 @@ C
      O   SIGO,         ICP,          LBUF%PLA,     IMATVIS,
      P   ET,           R3_DAM,       NEL,          GBUF%STRHG,
      Q   ISTRAIN,      MTN,          ISMSTR,       JLAG,
-     R   IINT)
+     R   IINT, MAT_ELEM%MAT_PARAM(IMAT))
       END IF !(ISORTH>0) THEN
       IF (CNS2 > ZERO) 
      .     CALL NSVIS_SM12(GBUF%OFF ,CNS2,CXX  ,VOLN ,DXX     ,

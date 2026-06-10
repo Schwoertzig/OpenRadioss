@@ -69,7 +69,6 @@
 !||    aniskew                             ../engine/source/output/anim/generate/aniskew.F
 !||    arezon                              ../engine/source/ale/arezon.F90
 !||    atherm                              ../engine/source/ale/atherm.F
-!||    bcs_nrf                             ../engine/source/boundary_conditions/bcs_nrf.F90
 !||    bforc2                              ../engine/source/ale/bimat/bforc2.F
 !||    binit2                              ../starter/source/ale/bimat/binit2.F
 !||    bsigini                             ../starter/source/elements/beam/bsigini.F
@@ -228,6 +227,7 @@
 !||    failini                             ../starter/source/elements/solid/solide/failini.F
 !||    forint                              ../engine/source/elements/forint.F
 !||    forintc                             ../engine/source/elements/forintc.F
+!||    forintc_prepare_gpu                 ../engine/source/elements/shell/coque/shell_internal_forces.F90
 !||    forintp                             ../engine/source/elements/forintp.F
 !||    forints                             ../engine/source/elements/forints.F
 !||    funct_python_update_elements        ../engine/source/tools/curve/funct_python_update_elements.F90

@@ -23,6 +23,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
 !||    hm_get_float_array_index                 ../starter/source/devtools/hm_reader/hm_get_float_array_index.F
 !||--- called by ------------------------------------------------------
+!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_bem                              ../starter/source/loads/bem/hm_read_bem.F
 !||    hm_read_ebcs_inlet                       ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_inlet.F
@@ -115,6 +116,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_xref                             ../starter/source/loads/reference_state/xref/hm_read_xref.F
 !||    hm_read_yield_criterion_barlat1989       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat1989.F90
 !||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    lecfill                                  ../starter/source/elements/initia/lecfill.F

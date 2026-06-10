@@ -52,7 +52,7 @@
         private :: extend_array_real_2d
         private :: extend_array_real_3d
         private :: reallocate_array_integer_1d
-        private :: check_error_and_write
+        private :: extend_check
         public :: extend_array
 
         !\extend the array, copy the values
@@ -99,7 +99,7 @@
         end function build_error_message
 
 !||====================================================================
-!||    check_error_and_write         ../common_source/tools/memory/my_alloc.F90
+!||    extend_check                  ../common_source/tools/memory/extend_array.F90
 !||--- called by ------------------------------------------------------
 !||    extend_array_double_1d        ../common_source/tools/memory/extend_array.F90
 !||    extend_array_double_2d        ../common_source/tools/memory/extend_array.F90
@@ -110,62 +110,11 @@
 !||    extend_array_real_1d          ../common_source/tools/memory/extend_array.F90
 !||    extend_array_real_2d          ../common_source/tools/memory/extend_array.F90
 !||    extend_array_real_3d          ../common_source/tools/memory/extend_array.F90
-!||    my_alloc_8_double_1d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_double_2d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_double_3d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_1d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_2d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_3d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_1d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_2d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_3d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_1d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_2d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_3d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_1d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_2d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_3d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_1d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_2d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_3d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_1d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_2d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_3d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_1d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_2d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_3d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_1d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_2d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_3d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_1d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_2d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_3d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_1d             ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_2d             ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_3d             ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_1d              ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_2d              ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_3d              ../common_source/tools/memory/my_alloc.F90
 !||    reallocate_array_integer_1d   ../common_source/tools/memory/extend_array.F90
-!||    shrink_array_double_1d        ../common_source/tools/memory/shrink_array.F90
-!||    shrink_array_integer_1d       ../common_source/tools/memory/shrink_array.F90
-!||    shrink_array_real_1d          ../common_source/tools/memory/shrink_array.F90
 !||--- calls      -----------------------------------------------------
 !||    arret                         ../engine/source/system/arret.F
 !||====================================================================
-        subroutine check_error_and_write(stat,msg)
+        subroutine extend_check(stat,msg)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -182,14 +131,14 @@
             end if
             call arret(2)
           end if
-        end subroutine check_error_and_write
+        end subroutine extend_check
 
 
 !! \brief resize a 1D array of integer, copy the values
 !||====================================================================
 !||    extend_array_integer_1d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write     ../common_source/tools/memory/my_alloc.F90
+!||    extend_check              ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_integer_1d(a, oldsize, newsize, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -212,7 +161,7 @@
           if (.not. allocated(a)) then
             allocate(a(newsize), stat=ierr)
             if (ierr /= 0) then
-              if (present(msg)) call check_error_and_write(ierr, msg=msg)
+              if (present(msg)) call extend_check(ierr, msg=msg)
               if (present(stat)) stat = ierr
               return
             endif
@@ -224,9 +173,9 @@
             allocate(temp(newsize), stat=ierr)
             if(.not. present(stat)) then
               if(present(msg)) then
-                call check_error_and_write(ierr, msg=msg)
+                call extend_check(ierr, msg=msg)
               else
-                call check_error_and_write(ierr)
+                call extend_check(ierr)
               end if
             end if
             if(present(stat)) stat = ierr
@@ -243,7 +192,7 @@
 !||====================================================================
 !||    extend_array_integer_2d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write     ../common_source/tools/memory/my_alloc.F90
+!||    extend_check              ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_integer_2d(a, oldsize1, oldsize2, newsize1, newsize2, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -267,7 +216,7 @@
           if (.not. allocated(a)) then
             allocate(a(newsize1, newsize2), stat=ierr)
             if (ierr /= 0) then
-              if (present(msg)) call check_error_and_write(ierr, msg=msg)
+              if (present(msg)) call extend_check(ierr, msg=msg)
               if (present(stat)) stat = ierr
               return
             endif
@@ -282,7 +231,7 @@
               ! Extend only the second dimension (use move_alloc)
               allocate(temp(size(a, 1), newsize2), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -294,7 +243,7 @@
               ! Extend in the first dimension or both dimensions (fallback to temporary array)
               allocate(temp(newsize1, newsize2), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -335,7 +284,7 @@
 !||====================================================================
 !||    extend_array_integer_3d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write     ../common_source/tools/memory/my_alloc.F90
+!||    extend_check              ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_integer_3d(a, oldsize1, oldsize2, oldsize3, newsize1, newsize2, newsize3, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -365,7 +314,7 @@
               ! Extend only the third dimension (use move_alloc)
               allocate(temp(size(a, 1), size(a, 2), newsize3), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -374,7 +323,7 @@
             else
               allocate(temp(newsize1, newsize2, newsize3), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -412,9 +361,9 @@
         end subroutine extend_array_integer_3d
 
 !||====================================================================
-!||    extend_array_real_1d    ../common_source/tools/memory/extend_array.F90
+!||    extend_array_real_1d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    extend_check           ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_real_1d(a, oldsize, newsize, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -437,7 +386,7 @@
           if (.not. allocated(a)) then
             allocate(a(newsize), stat=ierr)
             if (ierr /= 0) then
-              if (present(msg)) call check_error_and_write(ierr, msg=msg)
+              if (present(msg)) call extend_check(ierr, msg=msg)
               if (present(stat)) stat = ierr
               return
             endif
@@ -450,9 +399,9 @@
             allocate(temp(newsize), stat=ierr)
             if(.not. present(stat)) then
               if(present(msg)) then
-                call check_error_and_write(ierr, msg=msg)
+                call extend_check(ierr, msg=msg)
               else
-                call check_error_and_write(ierr)
+                call extend_check(ierr)
               end if
             end if
             if(present(stat)) stat = ierr
@@ -467,9 +416,9 @@
         end subroutine extend_array_real_1d
 
 !||====================================================================
-!||    extend_array_real_2d    ../common_source/tools/memory/extend_array.F90
+!||    extend_array_real_2d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    extend_check           ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_real_2d(a, oldsize1, oldsize2, newsize1, newsize2, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -493,7 +442,7 @@
           if (.not. allocated(a)) then
             allocate(a(newsize1, newsize2), stat=ierr)
             if (ierr /= 0) then
-              if (present(msg)) call check_error_and_write(ierr, msg=msg)
+              if (present(msg)) call extend_check(ierr, msg=msg)
               if (present(stat)) stat = ierr
               return
             endif
@@ -507,7 +456,7 @@
               ! Extend only the second dimension (use move_alloc)
               allocate(temp(size(a, 1), newsize2), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -519,7 +468,7 @@
               ! Extend in the first dimension or both dimensions (fallback to temporary array)
               allocate(temp(newsize1, newsize2), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -558,9 +507,9 @@
         end subroutine extend_array_real_2d
 
 !||====================================================================
-!||    extend_array_real_3d    ../common_source/tools/memory/extend_array.F90
+!||    extend_array_real_3d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    extend_check           ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_real_3d(a, oldsize1, oldsize2, oldsize3, newsize1, newsize2, newsize3, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -590,7 +539,7 @@
               ! Extend only the third dimension (use move_alloc)
               allocate(temp(size(a, 1), size(a, 2), newsize3), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -599,7 +548,7 @@
             else
               allocate(temp(newsize1, newsize2, newsize3), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -641,7 +590,7 @@
 !||====================================================================
 !||    extend_array_double_1d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    extend_check             ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_double_1d(a, oldsize, newsize, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -664,7 +613,7 @@
           if (.not. allocated(a)) then
             allocate(a(newsize), stat=ierr)
             if (ierr /= 0) then
-              if (present(msg)) call check_error_and_write(ierr, msg=msg)
+              if (present(msg)) call extend_check(ierr, msg=msg)
               if (present(stat)) stat = ierr
               return
             endif
@@ -677,9 +626,9 @@
             allocate(temp(newsize), stat=ierr)
             if(.not. present(stat)) then
               if(present(msg)) then
-                call check_error_and_write(ierr, msg=msg)
+                call extend_check(ierr, msg=msg)
               else
-                call check_error_and_write(ierr)
+                call extend_check(ierr)
               end if
             end if
             if(present(stat)) stat = ierr
@@ -696,7 +645,7 @@
 !||====================================================================
 !||    extend_array_double_2d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    extend_check             ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_double_2d(a, oldsize1, oldsize2, newsize1, newsize2, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -720,7 +669,7 @@
           if (.not. allocated(a)) then
             allocate(a(newsize1, newsize2), stat=ierr)
             if (ierr /= 0) then
-              if (present(msg)) call check_error_and_write(ierr, msg=msg)
+              if (present(msg)) call extend_check(ierr, msg=msg)
               if (present(stat)) stat = ierr
               return
             endif
@@ -735,7 +684,7 @@
               ! Extend only the second dimension (use move_alloc)
               allocate(temp(size(a, 1), newsize2), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -747,7 +696,7 @@
               ! Extend in the first dimension or both dimensions (fallback to temporary array)
               allocate(temp(newsize1, newsize2), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -788,7 +737,7 @@
 !||====================================================================
 !||    extend_array_double_3d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    extend_check             ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine extend_array_double_3d(a, oldsize1, oldsize2, oldsize3, newsize1, newsize2, newsize3, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -818,7 +767,7 @@
               ! Extend only the third dimension (use move_alloc)
               allocate(temp(size(a, 1), size(a, 2), newsize3), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -827,7 +776,7 @@
             else
               allocate(temp(newsize1, newsize2, newsize3), stat=ierr)
               if (ierr /= 0) then
-                if (present(msg)) call check_error_and_write(ierr, msg=msg)
+                if (present(msg)) call extend_check(ierr, msg=msg)
                 if (present(stat)) stat = ierr
                 return
               end if
@@ -868,7 +817,7 @@
 !||====================================================================
 !||    reallocate_array_integer_1d   ../common_source/tools/memory/extend_array.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write         ../common_source/tools/memory/my_alloc.F90
+!||    extend_check                  ../common_source/tools/memory/extend_array.F90
 !||====================================================================
         subroutine reallocate_array_integer_1d(a, newsize, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -891,17 +840,17 @@
             if(allocated(a)) deallocate(a, stat=ierr)
             if(.not. present(stat)) then
               if(present(msg)) then
-                call check_error_and_write(ierr, msg=msg)
+                call extend_check(ierr, msg=msg)
               else
-                call check_error_and_write(ierr)
+                call extend_check(ierr)
               end if
             end if
             allocate(a(newsize), stat=ierr)
             if(.not. present(stat)) then
               if(present(msg)) then
-                call check_error_and_write(ierr, msg=msg)
+                call extend_check(ierr, msg=msg)
               else
-                call check_error_and_write(ierr)
+                call extend_check(ierr)
               end if
             end if
           end if

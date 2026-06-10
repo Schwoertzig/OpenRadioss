@@ -50,6 +50,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_skw                           ../starter/source/tools/skew/hm_preread_skw.F90
 !||    hm_prop_read21                           ../starter/source/properties/thickshell/hm_read_prop21.F
 !||    hm_read_activ                            ../starter/source/tools/activ/hm_read_activ.F
+!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_close                        ../starter/source/ale/hm_read_ale_close.F
 !||    hm_read_ale_grid                         ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
@@ -469,6 +470,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_yield_criterion                  ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion.F90
 !||    hm_read_yield_criterion_barlat1989       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat1989.F90
 !||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_read_yield_criterion_vonmises         ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_vonmises.F90

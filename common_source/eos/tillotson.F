@@ -26,9 +26,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    eosmain         ../common_source/eos/eosmain.F
 !||    eosmain51       ../engine/source/materials/mat/mat051/eosmain51.F90
 !||====================================================================
-      MODULE TILLOTSON_MOD
-      IMPLICIT NONE
-      CONTAINS
+        MODULE TILLOTSON_MOD
+          IMPLICIT NONE
+        CONTAINS
+
 !||====================================================================
 !||    tillotson       ../common_source/eos/tillotson.F
 !||--- called by ------------------------------------------------------
@@ -39,185 +40,365 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    eos_param_mod   ../common_source/modules/mat_elem/eos_param_mod.F90
 !||    precision_mod   ../common_source/modules/precision_mod.F90
 !||====================================================================
-      SUBROUTINE TILLOTSON(
-     1                     IFLAG,NEL  ,PMIN ,OFF   ,EINT    ,MU    , MU2,
-     2                     ESPE ,DVOL ,DF   ,VNEW  ,PSH     ,
-     3                     PNEW ,DPDM ,DPDE ,VAREOS, NVAREOS, EOS_STRUCT)
-C-----------------------------------------------
-C   M o d u l e s
-C-----------------------------------------------
-        USE CONSTANT_MOD , ONLY : ZERO, EM15, HALF, ONE, TWO
-        USE EOS_PARAM_MOD , ONLY : eos_param_
-        use precision_mod , only : WP
-        IMPLICIT NONE
-C-----------------------------------------------
-C   D e s c r i p t i o n
-C-----------------------------------------------
-!----------------------------------------------------------------------------
-!! \details STAGGERED SCHEME IS EXECUTED IN TWO PASSES IN EOSMAIN : IFLG=0 THEN IFLG=1
-!! \details COLLOCATED SCHEME IS DOING A SINGLE PASS : IFLG=2
-!! \details
-!! \details  STAGGERED SCHEME
-!! \details     EOSMAIN / IFLG = 0 : DERIVATIVE CALCULATION FOR SOUND SPEED ESTIMATION c[n+1] REQUIRED FOR PSEUDO-VISCOSITY (DPDE:partial derivative, DPDM:total derivative)
-!! \details     MQVISCB            : PSEUDO-VISCOSITY Q[n+1]
-!! \details     MEINT              : INTERNAL ENERGY INTEGRATION FOR E[n+1] : FIRST PART USING P[n], Q[n], and Q[n+1] CONTRIBUTIONS
-!! \details     EOSMAIN / IFLG = 1 : UPDATE P[n+1], T[N+1]
-!! \details                          INTERNAL ENERGY INTEGRATION FOR E[n+1] : LAST PART USING P[n+1] CONTRIBUTION
-!! \details                            (second order integration dE = -P.dV where P = 0.5(P[n+1] + P[n]) )
-!! \details  COLLOCATED SCHEME
-!! \details     EOSMAIN / IFLG = 2 : SINGLE PASS FOR P[n+1] AND DERIVATIVES
-!----------------------------------------------------------------------------
-C
-C Solver for Tillotson Equation of State.
-C This equation of state depends of material state. It has several region in (P,v) diagram :
-C        REGION=1 / (I)  : compression
-C        REGION=2 / (II) : cold expansion
-C        REGION=3 / (III): transition (currently empty but can be implemented)
-C        REGION=4 / (IV) : hot expansion
-C
-C  in following source code regions are identified with following criteria :
-C         !IF(MU(I) => ZERO)THEN
-C         !  REGION = 1
-C         !ELSEIF(MU(I) < ZERO)THEN
-C         !  REGION = 2
-C         !  IF( V>VSUBL_(I) .OR.  (V<VSUBL .AND. ESPE(I)>=ESUBL_(I)) )THEN
-C         !    REGION=4
-C         !  ENDIF
-C         !ENDIF
-C-----------------------------------------------
-C   D u m m y   A r g u m e n t s
-C-----------------------------------------------
-      INTEGER,INTENT(IN) ::  IFLAG, NEL, NVAREOS
-      real(kind=WP) :: PMIN,
-     .           OFF(NEL) , EINT(NEL), MU(NEL)  ,
-     .           MU2(NEL) , ESPE(NEL), DVOL(NEL), DF(NEL),
-     .           VNEW(NEL), PNEW(NEL), DPDM(NEL), DPDE(NEL)
-      real(kind=WP),INTENT(INOUT) :: VAREOS(NEL,NVAREOS)
-      real(kind=WP),INTENT(INOUT) :: PSH(NEL)
-      TYPE(EOS_PARAM_),INTENT(IN) :: EOS_STRUCT
-C-----------------------------------------------
-C   L o c a l   V a r i a b l e s
-C-----------------------------------------------
-      INTEGER :: I
-      real(kind=WP) :: AA, BB, DVV, ETA, ENEW, OMEGA, XX, EXPA, EXPB,
-     .                 PP, FACC1, FACC2, FACPB,
-     .                 C1,C2,PTIA,PTIB,EZERO,
-     .                 ALPHA,BETA,ESUBL,VSUBL,
-     .                 REGION
-C--------------------------------------------------------------------
-      C1      = EOS_STRUCT%UPARAM(1)
-      C2      = EOS_STRUCT%UPARAM(2)
-      PTIA    = EOS_STRUCT%UPARAM(3)
-      PTIB    = EOS_STRUCT%UPARAM(4)
-      EZERO   = EOS_STRUCT%UPARAM(5)
-      ESUBL   = EOS_STRUCT%UPARAM(6)
-      VSUBL   = EOS_STRUCT%UPARAM(7)
-      ALPHA   = EOS_STRUCT%UPARAM(8)
-      BETA    = EOS_STRUCT%UPARAM(9)
-      PSH(:)  = EOS_STRUCT%PSH
+          SUBROUTINE TILLOTSON(
+     .        IFLAG, NEL, PMIN, OFF, EINT, MU, MU2,
+     .        ESPE, DVOL, DF, VNEW, PSH,
+     .        PNEW, DPDM, DPDE, VAREOS, NVAREOS, EOS_STRUCT)
 
-      IF(IFLAG == 0) THEN
-        DO I=1,NEL
-          FACC1=ONE
-          FACC2=ONE
-          FACPB=ONE
-          REGION=1
-          IF(MU(I) < ZERO) THEN
-            REGION=2
-            FACC2=ZERO
-            IF(DF(I) > VSUBL .OR. (DF(I) <= VSUBL .AND. ESPE(I) >= ESUBL)) THEN
-             REGION=4
-             XX=MU(I)/(ONE+MU(I))
-             EXPA=EXP(-ALPHA*XX*XX)
-             EXPB=EXP(BETA*XX)
-             FACC1=EXPA*EXPB
-             FACPB=EXPA
+            USE CONSTANT_MOD , ONLY : ZERO, EM15, HALF, ONE, TWO
+            USE EOS_PARAM_MOD, ONLY : eos_param_
+            USE precision_mod, ONLY : WP
+
+            IMPLICIT NONE
+
+            INTEGER, INTENT(IN) :: IFLAG, NEL, NVAREOS
+
+            REAL(KIND=WP), INTENT(IN) :: PMIN
+            REAL(KIND=WP), INTENT(IN) :: OFF(NEL), MU(NEL), MU2(NEL)
+            REAL(KIND=WP), INTENT(IN) :: ESPE(NEL), DVOL(NEL), DF(NEL), VNEW(NEL)
+
+            REAL(KIND=WP), INTENT(INOUT) :: EINT(NEL)
+            REAL(KIND=WP), INTENT(INOUT) :: PSH(NEL)
+            REAL(KIND=WP), INTENT(INOUT) :: PNEW(NEL), DPDM(NEL), DPDE(NEL)
+            REAL(KIND=WP), INTENT(INOUT) :: VAREOS(NEL, NVAREOS)
+
+            TYPE(EOS_PARAM_), INTENT(IN) :: EOS_STRUCT
+
+            INTEGER :: I, REG
+
+            REAL(KIND=WP) :: A, B, C1, C2_VAL
+            REAL(KIND=WP) :: EREF, ALPHA, BETA, EIV, ECV, VIV
+            REAL(KIND=WP) :: INV_EREF, INV_ERANGE
+
+            REAL(KIND=WP) :: MU_I, MU2_I, E_I, OFF_I, PSH_I
+            REAL(KIND=WP) :: ETA, ETA2, INV_ETA, INV_ETA2, ETAE
+            REAL(KIND=WP) :: W, INV_W, INV_W2
+            REAL(KIND=WP) :: ABW, ABWX
+            REAL(KIND=WP) :: DE_W, DN_W
+            REAL(KIND=WP) :: C2I
+
+            REAL(KIND=WP) :: XX, C1EB, EAX, C1EBEAX
+            REAL(KIND=WP) :: P12, P3, P4
+            REAL(KIND=WP) :: DE_P12, DE_P3, DE_P4
+            REAL(KIND=WP) :: DM_P12, DM_P3, DM_P4
+            REAL(KIND=WP) :: DPDM12, DPDM3, DPDM4
+
+            REAL(KIND=WP) :: I12, I4, KK, TMP3
+            REAL(KIND=WP) :: DVV, DENOM
+            REAL(KIND=WP) :: P_LOC, DPDM_LOC, DPDE_LOC
+
+            C1      = EOS_STRUCT%UPARAM(1)
+            C2_VAL  = EOS_STRUCT%UPARAM(2)
+            A       = EOS_STRUCT%UPARAM(3)
+            B       = EOS_STRUCT%UPARAM(4)
+            EREF    = EOS_STRUCT%UPARAM(5)
+            ECV     = EOS_STRUCT%UPARAM(6)
+            VIV     = EOS_STRUCT%UPARAM(7)
+            ALPHA   = EOS_STRUCT%UPARAM(8)
+            BETA    = EOS_STRUCT%UPARAM(9)
+            EIV     = EOS_STRUCT%UPARAM(10)
+
+            INV_EREF  = ONE / EREF  ! pre-condition (checked during Starter Reader) : |EREF| > 1E-20
+
+            IF(ECV /= EIV)THEN
+              INV_ERANGE = ONE / (ECV - EIV) ! relevant only in Region=3 if EIV/=ECV
+            ELSE
+              INV_ERANGE = ZERO ! not used otherwise
             ENDIF
-          ENDIF
-          ETA=ONE+MU(I)
-          OMEGA= ONE+ESPE(I)/(EZERO*ETA**2)
-          AA=FACC1*C1*MU(I)+FACC2*C2*MU2(I)
-          BB=PTIA+FACPB*PTIB/OMEGA
-          PP=MAX(AA+BB*ETA*ESPE(I),PMIN)*OFF(I)
-          DPDM(I)=FACC1*C1+TWO*FACC2*C2*MU(I)+BB*ETA*PP*DF(I)*DF(I)
-     .           +ESPE(I)*( BB+(TWO*ESPE(I)/ETA-PP*DF(I)*DF(I))
-     .           *PTIB*FACPB/(EZERO*ETA*OMEGA**2) )
-          DPDE(I)=BB*ETA
-          VAREOS(I,1)=REGION
-          PNEW(I) = MAX(PP,PMIN)*OFF(I)! P(mu[n+1],E[n])
-        ENDDO
 
-      ELSEIF(IFLAG == 1) THEN
+            PSH(1:NEL) = EOS_STRUCT%PSH
 
-        DO I=1,NEL
-          DVV=HALF*DVOL(I)*DF(I) / MAX(EM15,VNEW(I))
-          ETA=ONE+MU(I)
-          OMEGA= ONE+ESPE(I)/(EZERO*ETA**2)
-          FACC1=ONE
-          FACC2=ONE
-          FACPB=ONE
-          REGION=1
-          IF(MU(I) < ZERO) THEN
-            REGION=2
-            FACC2=ZERO
-            IF(DF(I) > VSUBL .OR. (DF(I) <= VSUBL .AND. ESPE(I) >= ESUBL)) THEN
-              REGION=4
-              XX=MU(I)/(ONE+MU(I))
-              EXPA=EXP(-ALPHA*XX*XX)
-              EXPB=EXP(BETA*XX)
-              FACC1=EXPA*EXPB
-              FACPB=EXPA
+            ! ================================================================
+            ! IFLAG = 0 : first staggered pass
+            ! IFLAG = 2 : collocated explicit pass
+            ! These two branches share the same pressure/derivative kernel.
+            ! ================================================================
+            IF (IFLAG == 0 .OR. IFLAG == 2) THEN
+
+              !$OMP SIMD
+              DO I = 1, NEL
+
+                MU_I  = MU(I)
+                MU2_I = MU2(I)
+                E_I   = ESPE(I)
+                OFF_I = OFF(I)
+                PSH_I = PSH(I)
+
+                ! Region identification, scalar only.
+                IF (MU_I < ZERO) THEN
+                  IF (DF(I) > VIV) THEN
+                    REG = 4
+                  ELSEIF (E_I >= ECV) THEN
+                    REG = 4
+                  ELSEIF (E_I < EIV) THEN
+                    REG = 2
+                  ELSE
+                    REG = 3
+                  ENDIF
+                ELSE
+                  REG = 1
+                ENDIF
+
+                VAREOS(I, 1) = REAL(REG, KIND=WP)
+
+                IF (IFLAG == 2 .AND. VNEW(I) <= ZERO) CYCLE
+
+                ETA      = ONE + MU_I
+                ETA2     = ETA * ETA
+                INV_ETA  = ONE / ETA
+                INV_ETA2 = INV_ETA * INV_ETA
+                ETAE     = ETA * E_I
+
+                DE_W = INV_EREF * INV_ETA2
+                DN_W = -TWO * E_I * DE_W * INV_ETA
+
+                W      = ONE + E_I * DE_W
+                INV_W  = ONE / W
+                INV_W2 = INV_W * INV_W
+                ABW    = A + B * INV_W
+
+                I12 = ZERO
+                I4  = ZERO
+                TMP3 = ZERO
+
+                P12 = ZERO
+                P4  = ZERO
+
+                DE_P12 = ZERO
+                DE_P4  = ZERO
+                DPDM12 = ZERO
+                DPDM4  = ZERO
+
+                ! ------------------------------------------------------------
+                ! Regions 1, 2 and 3: Tillotson compressed / cold branch.
+                ! Original semantics preserved:
+                ! P12 is floored and multiplied by OFF before DPDM12.
+                ! ------------------------------------------------------------
+                IF (REG <= 3) THEN
+
+                  IF (REG == 1) THEN
+                    C2I = C2_VAL
+                  ELSE
+                    C2I = ZERO
+                  ENDIF
+
+                  P12 = ABW * ETAE + C1 * MU_I + C2I * MU2_I
+                  P12 = MAX(P12, PMIN) * OFF_I
+
+                  DE_P12 = -B * DE_W * ETAE * INV_W2 + ABW * ETA
+                  DM_P12 = -B * DN_W * ETAE * INV_W2 + ABW * E_I + C1 + TWO * C2I * MU_I
+
+                  DPDM12 = DM_P12 + P12 * INV_ETA2 * DE_P12
+                  I12 = ONE
+
+                ENDIF
+
+                ! ------------------------------------------------------------
+                ! Regions 3 and 4: hot expansion branch.
+                ! ------------------------------------------------------------
+                IF (REG >= 3) THEN
+
+                  XX       = MU_I * INV_ETA
+                  C1EB     = C1 * EXP(BETA * XX)
+                  EAX      = EXP(-ALPHA * XX * XX)
+                  C1EBEAX  = C1EB * EAX
+                  ABWX     = A + B * EAX * INV_W
+
+                  P4 = C1EBEAX * MU_I + ABWX * ETAE
+                  P4 = MAX(P4, PMIN) * OFF_I
+
+                  DE_P4 = -B * EAX * DE_W * ETAE * INV_W2 + ABWX * ETA
+
+                  DM_P4 = BETA * INV_ETA2 * C1EBEAX * MU_I
+     .                  - TWO * C1EBEAX * ALPHA * XX * MU_I * INV_ETA2
+     .                  + C1EBEAX
+     .                  + ETAE * ( -TWO * B * ALPHA * XX * EAX * INV_W * INV_ETA2
+     .                  - B * EAX * DN_W * INV_W2 )
+     .                  + ABWX * E_I
+
+                  DPDM4 = DM_P4 + P4 * INV_ETA2 * DE_P4
+                  I4 = ONE
+
+                ENDIF
+
+                ! ------------------------------------------------------------
+                ! Region 3 transition interpolation.
+                ! Original semantics preserved:
+                ! interpolation uses already floored/OFF-scaled P12 and P4.
+                ! ------------------------------------------------------------
+                IF (REG == 3) THEN
+                  KK   = (E_I - EIV) * INV_ERANGE
+                  I12  = ONE - KK
+                  I4   = KK
+                  TMP3 = (P4 - P12) * INV_ERANGE
+                ENDIF
+
+                PNEW(I) = I12 * P12 + I4 * P4
+                DPDM(I) = I12 * DPDM12 + I4 * DPDM4
+                DPDE(I) = I12 * DE_P12 + I4 * DE_P4 + TMP3
+
+                ! Final scaling, kept identical to the current routine.
+                PNEW(I) = (MAX(PNEW(I), PMIN) - PSH_I) * OFF_I
+                DPDM(I) = DPDM(I) * OFF_I
+                DPDE(I) = DPDE(I) * OFF_I
+
+              ENDDO
+
+            ! ================================================================
+            ! IFLAG = 1 : second staggered pass, CN closure.
+            ! ================================================================
+            ELSEIF (IFLAG == 1) THEN
+
+              !$OMP SIMD
+              DO I = 1, NEL
+
+                MU_I  = MU(I)
+                MU2_I = MU2(I)
+                E_I   = ESPE(I)
+                OFF_I = OFF(I)
+                PSH_I = PSH(I)
+
+                ! Region identification, scalar only.
+                IF (MU_I < ZERO) THEN
+                  IF (DF(I) > VIV) THEN
+                    REG = 4
+                  ELSEIF (E_I >= ECV) THEN
+                    REG = 4
+                  ELSEIF (E_I < EIV) THEN
+                    REG = 2
+                  ELSE
+                    REG = 3
+                  ENDIF
+                ELSE
+                  REG = 1
+                ENDIF
+
+                VAREOS(I, 1) = REAL(REG, KIND=WP)
+
+                DVV = HALF * DVOL(I) * DF(I) / MAX(EM15, VNEW(I))
+
+                ETA      = ONE + MU_I
+                ETA2     = ETA * ETA
+                INV_ETA  = ONE / ETA
+                INV_ETA2 = INV_ETA * INV_ETA
+                ETAE     = ETA * E_I
+
+                DE_W = INV_EREF * INV_ETA2
+                DN_W = -TWO * E_I * DE_W * INV_ETA
+
+                W      = ONE + E_I * DE_W
+                INV_W  = ONE / W
+                INV_W2 = INV_W * INV_W
+                ABW    = A + B * INV_W
+
+                SELECT CASE (REG)
+
+                CASE (1, 2)
+
+                  IF (REG == 1) THEN
+                    C2I = C2_VAL
+                  ELSE
+                    C2I = ZERO
+                  ENDIF
+
+                  P12 = ABW * ETAE + C1 * MU_I + C2I * MU2_I
+
+                  DE_P12 = -B * DE_W * ETAE * INV_W2 + ABW * ETA
+
+                  DM_P12 = -B * DN_W * ETAE * INV_W2 + ABW * E_I  + C1 + TWO * C2I * MU_I
+
+                  DENOM = ONE + DVV * DE_P12
+                  DENOM = SIGN(MAX(ABS(DENOM), EM15), DENOM)
+
+                  P12 = P12 / DENOM
+
+                  P_LOC    = P12
+                  DPDE_LOC = DE_P12 / DENOM
+                  DPDM_LOC = DM_P12 + P12 * INV_ETA2 * DE_P12
+
+                CASE (4)
+
+                  XX       = MU_I * INV_ETA
+                  C1EB     = C1 * EXP(BETA * XX)
+                  EAX      = EXP(-ALPHA * XX * XX)
+                  C1EBEAX  = C1EB * EAX
+                  ABWX     = A + B * EAX * INV_W
+
+                  P4 = C1EBEAX * MU_I + ABWX * ETAE
+
+                  DE_P4 = -B * EAX * DE_W * ETAE * INV_W2 + ABWX * ETA
+
+                  DM_P4 = BETA * INV_ETA2 * C1EBEAX * MU_I
+     .                  - TWO * C1EBEAX * ALPHA * XX * MU_I * INV_ETA2
+     .                  + C1EBEAX
+     .                  + ETAE * ( -TWO * B * ALPHA * XX * EAX * INV_W * INV_ETA2
+     .                  - B * EAX * DN_W * INV_W2 )
+     .                  + ABWX * E_I
+
+                  DENOM = ONE + DVV * DE_P4
+                  DENOM = SIGN(MAX(ABS(DENOM), EM15), DENOM)
+
+                  P4 = P4 / DENOM
+
+                  P_LOC    = P4
+                  DPDE_LOC = DE_P4 / DENOM
+                  DPDM_LOC = DM_P4 + P4 * INV_ETA2 * DE_P4
+
+                CASE DEFAULT
+
+                  ! Region 3 transition.
+                  XX       = MU_I * INV_ETA
+                  C1EB     = C1 * EXP(BETA * XX)
+                  EAX      = EXP(-ALPHA * XX * XX)
+                  C1EBEAX  = C1EB * EAX
+                  ABWX     = A + B * EAX * INV_W
+
+                  P12 = ABW * ETAE + C1 * MU_I
+
+                  DE_P12 = -B * DE_W * ETAE * INV_W2 + ABW * ETA
+
+                  DM_P12 = -B * DN_W * ETAE * INV_W2 + ABW * E_I + C1
+
+                  P4 = C1EBEAX * MU_I + ABWX * ETAE
+
+                  DE_P4 = -B * EAX * DE_W * ETAE * INV_W2 + ABWX * ETA
+
+                  DM_P4 = BETA * INV_ETA2 * C1EBEAX * MU_I
+     .                  - TWO * C1EBEAX * ALPHA * XX * MU_I * INV_ETA2
+     .                  + C1EBEAX
+     .                  + ETAE * ( -TWO * B * ALPHA * XX * EAX * INV_W * INV_ETA2
+     .                  - B * EAX * DN_W * INV_W2 )
+     .                  + ABWX * E_I
+
+                  KK   = (E_I - EIV) * INV_ERANGE
+                  I12  = ONE - KK
+                  TMP3 = (P4 - P12) * INV_ERANGE
+
+                  P3     = I12 * P12    + KK * P4
+                  DE_P3  = I12 * DE_P12 + KK * DE_P4 + TMP3
+                  DM_P3  = I12 * DM_P12 + KK * DM_P4
+
+                  DENOM = ONE + DVV * DE_P3
+                  DENOM = SIGN(MAX(ABS(DENOM), EM15), DENOM)
+
+                  P3 = P3 / DENOM
+
+                  P_LOC    = P3
+                  DPDE_LOC = DE_P3 / DENOM
+                  DPDM_LOC = DM_P3 + P3 * INV_ETA2 * DE_P3
+
+                END SELECT
+
+                PNEW(I) = (MAX(P_LOC, PMIN) - PSH_I) * OFF_I
+                DPDM(I) = DPDM_LOC * OFF_I
+                DPDE(I) = DPDE_LOC * OFF_I
+
+                EINT(I) = EINT(I) - HALF * DVOL(I) * (PNEW(I) + PSH_I)
+
+              ENDDO
+
             ENDIF
-          ENDIF
-          AA=FACC1*C1*MU(I)+FACC2*C2*MU2(I)
-          BB=(PTIA+FACPB*PTIB/OMEGA)*ETA
-          PNEW(I)=(AA +BB*ESPE(I))/(ONE+ BB*DVV)
-          ENEW=ESPE(I) - PNEW(I)*DVV
-          !one iteration
-          OMEGA= ONE+ENEW/(EZERO*ETA**2)
-          BB=(PTIA+FACPB*PTIB/OMEGA)*ETA
-          PNEW(I)=(AA +BB*ESPE(I))/(ONE+ BB*DVV)
-          PNEW(I)= MAX(PNEW(I),PMIN)*OFF(I)! P(mu[n+1],E[n+1])
-          EINT(I)= EINT(I) - HALF*DVOL(I)*PNEW(I)
-          DPDE(I) = BB
-          VAREOS(I,1)=REGION
-        ENDDO
 
-      ELSEIF(IFLAG == 2) THEN
+          END SUBROUTINE TILLOTSON
 
-        DO I=1, NEL
-          REGION=1
-          IF (VNEW(I) > ZERO) THEN
-            FACC1=ONE
-            FACC2=ONE
-            FACPB=ONE
-            REGION=1
-            IF(MU(I)<ZERO) THEN
-               REGION=2
-               FACC2=ZERO
-               IF(DF(I) > VSUBL .OR. (DF(I) <= VSUBL .AND. ESPE(I) >= ESUBL)) THEN
-                  REGION=4
-                  XX  = MU(I)/(ONE+MU(I))
-                  EXPA= EXP(-ALPHA*XX*XX)
-                  EXPB= EXP(BETA*XX)
-                  FACC1=EXPA*EXPB
-                  FACPB=EXPA
-               ENDIF
-            ENDIF
-            ETA=ONE+MU(I)
-            OMEGA= ONE+ESPE(I)/(EZERO*ETA**2)
-            AA=FACC1*C1*MU(I)+FACC2*C2*MU2(I)
-            BB=PTIA+FACPB*PTIB/OMEGA
-            PP=MAX(AA+BB*ETA*ESPE(I),PMIN)*OFF(I)
-            DPDM(I)=FACC1*C1+TWO*FACC2*C2*MU(I)+BB*ETA*PP*DF(I)*DF(I)
-     .             +ESPE(I)*( BB+(TWO*ESPE(I)/ETA-PP*DF(I)*DF(I))
-     .             *PTIB*FACPB/(EZERO*ETA*OMEGA**2) )
-            DPDE(I)=BB*ETA
-            PNEW(I) = PP
-          ENDIF
-          VAREOS(I,1)=REGION
-        ENDDO
-      ENDIF
-      RETURN
-      END SUBROUTINE TILLOTSON
-      END MODULE TILLOTSON_MOD
+        END MODULE TILLOTSON_MOD

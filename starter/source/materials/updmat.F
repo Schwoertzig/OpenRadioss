@@ -43,7 +43,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    law129_upd             ../starter/source/materials/mat/mat129/law129_upd.F90
 !||    law133_upd             ../starter/source/materials/mat/mat133/law133_upd.F90
 !||    law158_upd             ../starter/source/materials/mat/mat158/law158_upd.F
-!||    law163_upd             ../starter/source/materials/mat/mat163/law163_upd.F90
 !||    law190_upd             ../starter/source/materials/mat/mat190/law190_upd.F90
 !||    law19_upd              ../starter/source/materials/mat/mat019/law19_upd.F90
 !||    law36_upd              ../starter/source/materials/mat/mat036/law36_upd.F
@@ -66,7 +65,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    law123_upd_mod         ../starter/source/materials/mat/mat123/law123_upd.F90
 !||    law129_upd_mod         ../starter/source/materials/mat/mat129/law129_upd.F90
 !||    law133_upd_mod         ../starter/source/materials/mat/mat133/law133_upd.F90
-!||    law163_upd_mod         ../starter/source/materials/mat/mat163/law163_upd.F90
 !||    law190_upd_mod         ../starter/source/materials/mat/mat190/law190_upd.F90
 !||    law19_upd_mod          ../starter/source/materials/mat/mat019/law19_upd.F90
 !||    law81_upd_mod          ../starter/source/materials/mat/mat081/law81_upd.F90
@@ -93,7 +91,6 @@ C-----------------------------------------------
       USE LAW123_UPD_MOD , ONLY : LAW123_UPD
       USE LAW129_UPD_MOD , ONLY : LAW129_UPD
       USE LAW133_UPD_MOD , ONLY : LAW133_UPD
-      USE LAW163_UPD_MOD , ONLY : LAW163_UPD
       USE LAW190_UPD_MOD , ONLY : LAW190_UPD
       USE VISC_PARAM_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
@@ -405,9 +402,6 @@ c-------------------------
             CALL LAW158_UPD(MAT_PARAM(IMAT),TITR,NPC,PLD,
      .                      NFUNC,NFUNCL,IFUNC,MAT_ID,FUNC_ID,
      .                      PM(1,IMAT),SENSORS)
-c------------------
-          CASE (163)
-            CALL LAW163_UPD(MAT_PARAM(IMAT),PM(1,IMAT),NPROPM)
 c------------------
           CASE (190) !Path DEPENDE FAAM (DUBOIS)
             CALL LAW190_UPD(MAT_PARAM(IMAT) ,NUMTABL ,ITABLE   ,TABLE   ,PM(1,IMAT),
