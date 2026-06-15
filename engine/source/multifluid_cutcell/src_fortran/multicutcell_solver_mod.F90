@@ -1108,7 +1108,7 @@ module multicutcell_solver_mod
 
   !(y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
   subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, &
-                              nb_id_polygon, list_id_polygon, ngrnod, igrnode, grid)
+                              nb_id_polygon, list_id_polygon, ngrnod, igrnode, grid, num_mixed,list_mixed)
     use grid2D_struct_multicutcell_mod
     use groupdef_mod , only : group_
     use polygon_cutcell_mod, only : Point3D
@@ -1122,10 +1122,11 @@ module multicutcell_solver_mod
     integer,intent(in) :: ngrnod                                  !< number of group of nodes(array size for igrnod)
     type(group_), dimension(ngrnod), intent(in)  :: igrnode
     type(grid2D_struct_multicutcell), dimension(:, :), allocatable, intent(out) :: grid
+    integer,intent(in) :: num_mixed,list_mixed(num_mixed)
 
     !DUMMY ARGUMENTS
     integer nb_cell, nb_regions
-    integer(kind=8) i, k, nb_pts_poly, old_nb_pts_poly
+    integer(kind=8) i, k, j, nb_pts_poly, old_nb_pts_poly
     real(kind=wp), dimension(:), allocatable :: vec_move_clippedy, vec_move_clippedz
     real(kind=wp) :: dt, dx, minimal_length, minimal_angle, maximal_length
     real(kind=wp), dimension(:), allocatable :: y_polygon, z_polygon
@@ -1148,7 +1149,13 @@ module multicutcell_solver_mod
     call launch_grb() !C call
     do i=1,nb_cell
       do k=1,nb_regions
-        grid(i,k) = makegrid(NUMELQ, NUMELTG, IXQ, IXTG, X, i)
+        grid(i,k) = makegrid(NUMELQ, NUMELTG, IXQ, IXTG, X, i )
+        do j=1,num_mixed
+            if (i == list_mixed(j)) then
+              grid(i,k)%is_narrowband = .true.
+              grid(i,k)%close_cells = .true.
+            end if
+        end do
       end do
     end do
 

@@ -53,8 +53,8 @@ module grid2D_struct_multicutcell_mod
     my_real, dimension(:,:) :: X
     type(grid2D_struct_multicutcell) :: grid
 
-    grid%close_cells = .true.
-    grid%is_narrowband = .true.
+    grid%is_narrowband = .false.
+    grid%close_cells = .false.
 
     if (NUMELQ > 0) then
       grid%area = compute_area(4, X(2:3, IXQ(2:5, i_cell)))
