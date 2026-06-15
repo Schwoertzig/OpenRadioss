@@ -8,7 +8,6 @@
 static void build_clipped_in_partial(Polyhedron3D* p, Point3D *n_face, Point3D *pt_face, long int mark_edge, int8_t sign_taken){
     Vector_points3D *pts_copy = alloc_empty_vec_pts3D();
     Vector_int *status_face = alloc_empty_vec_int();
-    Vector_double *pressure_face = alloc_empty_vec_double();
     GrB_Matrix *edges_in, *faces_in, *volumes_in;
     
     edges_in = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
@@ -35,12 +34,11 @@ static void build_clipped_in_partial(Polyhedron3D* p, Point3D *n_face, Point3D *
     //}
 
     //printf("Before close cells\n");
-    close_cells(edges_in, p->faces, NULL, NULL, -1, faces_in);
+    close_cells(edges_in, p->faces, NULL, -1, faces_in);
     //printf("After close cells\n");
 
     copy_vec_int(p->status_face, status_face);
-    copy_vec_double(p->pressure_face, pressure_face);
-    close_cells(faces_in, p->volumes, status_face, pressure_face, mark_edge, volumes_in);
+    close_cells(faces_in, p->volumes, status_face, mark_edge, volumes_in);
 
     //if (mark_edge == 4){
     //    printf("pts_copy = ");
@@ -58,9 +56,7 @@ static void build_clipped_in_partial(Polyhedron3D* p, Point3D *n_face, Point3D *
     copy_vec_pts3D(pts_copy, p->vertices);
     dealloc_vec_pts3D(pts_copy); free(pts_copy);
     copy_vec_int(status_face, p->status_face);
-    copy_vec_double(pressure_face, p->pressure_face);
     dealloc_vec_int(status_face); free(status_face);
-    dealloc_vec_double(pressure_face); free(pressure_face);
     GrB_Matrix_dup(p->edges, *edges_in);
     GrB_Matrix_dup(p->faces, *faces_in);
     GrB_Matrix_dup(p->volumes, *volumes_in);
@@ -142,31 +138,6 @@ Polyhedron3D* clip3D(const Polyhedron3D *clipper, const Polyhedron3D *clipped){
             GrB_Matrix_extractElement(&vol_i, *(clipper->volumes), i, 0);
             build_clipped_in_partial(clipped_in, n_face, pt_face, *stf_i, -vol_i);
             clean_Polyhedron3D(clipped_in, &clipped_in);
-            //if (clipped_in){
-            //    //printf("clipped_in->vertices = ");
-            //    //print_vec_pt3D(*(clipped_in->vertices));
-            //    //GrB_set (*(clipped_in->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-            //    //GrB_wait(*(clipped_in->edges), GrB_MATERIALIZE);
-            //    //GxB_print(*(clipped_in->edges), GxB_COMPLETE);
-            ////    GrB_set (*(clipped_in->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-            //    //GrB_wait(*(clipped_in->faces), GrB_MATERIALIZE);
-            ////    GxB_print(*(clipped_in->faces), GxB_COMPLETE);
-            ////    printf("status_face (of size %ld) = ", clipped_in->status_face->size);
-            ////    print_vec_int(clipped_in->status_face);
-
-            //    length_i = snprintf(NULL, 0,"%ld", i);
-            //    i_string = (char*)calloc(length_i, sizeof(char));
-
-            //    sprintf(i_string, "%ld", i);
-            //    strcpy(filename, "Polyhedron");
-            //    strcat(filename, i_string);
-            //    strcat(filename, ".dat");
-
-            //    print_polyhedron3D(clipped_in, filename);
-            //    system("sync");
-
-            //    free(i_string);
-            //}
         }
     }
 
@@ -183,63 +154,42 @@ Polyhedron3D* clip3D(const Polyhedron3D *clipper, const Polyhedron3D *clipped){
 /// @param grid [IN] Clipper cell
 /// @param initial_p [IN] Clipped polygon
 /// @param lambdas [OUT] effective areas (allocated inside the function)
-/// @param mean_normal [OUT] normal vector of the surface of `initial_p` clipped inside `grid`.
+/// @param normals_ptr [OUT] list of normal vectors of the faces of `initial_p` inside `grid`.
+/// @param edge_indices [OUT] list of edge indices clipped inside grid.
 /// @param is_narrowband [OUT] true if the intersection of `grid` and `initial_p` is not empty, false otherwise.
 void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initial_p, \
-                            Vector_points3D **lambdas, Point3D *mean_normal, Point3D* total_pressure_face, bool *is_narrowband){
+                        Vector_points3D **lambdas, Vector_points3D **normals_ptr, Vector_int64 **edge_indices, bool *is_narrowband){
     Polyhedron3D *p = clip3D(grid, initial_p);
     GrB_Index nb_edge, nb_cols_vol, nb_cols_fac, i, j;//, e;
-    Point3D *nvpi, *lam;
+    Point3D *nvpi, *lam, nm;
     my_real_c press_f;
     int8_t pvij_int;
     long int *psfi;
+    int64_t psfim2;
     my_real_c pvij;
     Vector_points3D *norm_vec_poly;
+
+    if (!(*normals_ptr)){
+        *normals_ptr = alloc_empty_vec_pts3D();
+    }
+    (*normals_ptr)->size = 0;
+    if (!(*edge_indices)){
+        *edge_indices = alloc_empty_vec_int64();
+    }
+    (*edge_indices)->size = 0;
 
     GrB_Matrix_ncols(&nb_edge, *(grid->faces)); //actually number of edges + 2 faces at times tn and tn+dt
 
     *lambdas = alloc_with_capacity_vec_pts3D(nb_edge);
-    *mean_normal = (Point3D){0.0, 0.0, 0.0};
-    *total_pressure_face = (Point3D){0.0, 0.0, 0.0};
+    nm = (Point3D){0.0, 0.0, 0.0};
     for (j=0; j<nb_edge; j++){
-        set_ith_elem_vec_pts3D(*lambdas, j, mean_normal);
+        set_ith_elem_vec_pts3D(*lambdas, j, &nm);
     }
+
 
     *is_narrowband = false;
     
     if(p){
-        //printf("grid = ");
-        //print_vec_pt3D(*(grid->vertices));
-        //GrB_set (*(grid->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*(grid->edges), GrB_MATERIALIZE);
-        //GxB_print(*(grid->edges), GxB_COMPLETE);
-        //GrB_set (*(grid->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*(grid->faces), GrB_MATERIALIZE);
-        //GxB_print(*(grid->faces), GxB_COMPLETE);
-        //printf("Status_face = ");
-        //print_vec_int(grid->status_face);
-        //printf("initial_p = ");
-        //print_vec_pt3D(*(initial_p->vertices));
-        //GrB_set (*(initial_p->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*(initial_p->edges), GrB_MATERIALIZE);
-        //GxB_print(*(initial_p->edges), GxB_COMPLETE);
-        //GrB_set (*(initial_p->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*(initial_p->faces), GrB_MATERIALIZE);
-        //GxB_print(*(initial_p->faces), GxB_COMPLETE);
-        //printf("Status_face = ");
-        //print_vec_int(initial_p->status_face);
-        //printf("clipped = ");
-        //print_vec_pt3D(*(p->vertices));
-        //GrB_set (*(p->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*(p->edges), GrB_MATERIALIZE);
-        //GxB_print(*(p->edges), GxB_COMPLETE);
-        //GrB_set (*(p->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*(p->faces), GrB_MATERIALIZE);
-        //GxB_print(*(p->faces), GxB_COMPLETE);
-        //printf("Status_face = ");
-        //print_vec_int(p->status_face);
-
-
         norm_vec_poly = points3D_from_matrix(surfaces_poly3D(p));
         GrB_Matrix_ncols(&nb_cols_vol, *(p->volumes)); 
         GrB_Matrix_ncols(&nb_cols_fac, *(p->faces)); 
@@ -251,13 +201,20 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
                 GrB_Matrix_extractElement(&pvij_int, *(p->volumes), i, j);
                 if (pvij_int != 0){
                     if (*psfi<1){
-                        pvij = (my_real_c) pvij_int;
-                        press_f = *get_ith_elem_vec_double(p->pressure_face, i);
-                        inplace_xpay_points3D(mean_normal, pvij, nvpi);
-                        nvpi->x *= press_f;
-                        nvpi->y *= press_f;
-                        nvpi->t *= press_f;
-                        inplace_xpay_points3D(total_pressure_face, pvij, nvpi); 
+                        //pvij = (my_real_c) pvij_int;
+                        nvpi->x *= pvij_int;
+                        nvpi->y *= pvij_int;
+                        nvpi->t *= pvij_int;
+                        push_back_vec_pts3D(normals_ptr, nvpi);
+                        psfim2 = -(*psfi + 2);
+                        push_back_vec_int64(edge_indices, &psfim2);
+
+                        //press_f = *get_ith_elem_vec_double(p->pressure_face, i);
+                        //inplace_xpay_points3D(mean_normal, pvij, nvpi);
+                        //nvpi->x *= press_f;
+                        //nvpi->y *= press_f;
+                        //nvpi->t *= press_f;
+                        //inplace_xpay_points3D(total_pressure_face, pvij, nvpi); 
                         *is_narrowband = true;
                     }
                     else {
@@ -290,10 +247,8 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
     }
 }
 
-/// @brief Compute the effective areas in `grid` when occupied by `clipped` moving with vectors `vec_move_solid` for time `dt`. 
-/// @details vec_move_solid should be an array of array of size #columns(clipped.faces), 
-///           and each member i of this vector should be of size mini_clipped->vertices->size, 
-///           where mini_clipped = extract_ith_face(clipped, i)
+/// @brief Compute the effective areas in `grid` when occupied by `clipped3D` represeting a moving polygon.
+/// @details clipped3D is built using update_solid.
 /// @param grid [IN] non-moving polygon, clipper.
 /// @param clipped3D [IN] moving polygon.
 /// @param dt [IN] time-step
@@ -302,10 +257,12 @@ void compute_lambdas2D_time(const Polyhedron3D* grid, const Polyhedron3D *initia
 /// @param lambdas_arr [OUT] Array of effective area for each edge of `grid`. Allocated inside the function.
 /// @param big_lambda_n [OUT] First cell: effective area at time t^n. Second cell: area of grid - effective area. Allocated inside the function.
 /// @param big_lambda_np1 [OUT] First cell: effective area at time t^n+`dt`. Second cell: area of grid - effective area. Allocated inside the function.
+/// @param normals_ptr [OUT] list of normal vectors of the faces of `clipped3D` inside `grid`.
+/// @param edge_indices [OUT] list of edge indices clipped inside grid.
 /// @param is_narrowband [OUT] True if the intersection of `grid` and `clipped` is not empty at time t^n or t^n+`dt`, false otherwise.
 void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, const my_real_c dt, \
                         Array_double **lambdas_arr, Vector_double** big_lambda_n, Vector_double** big_lambda_np1, \
-                        Point3D *mean_normal, Point3D* pressure_clipped, bool *is_narrowband){
+                        Vector_points3D **normals_ptr, Vector_int64 **edge_indices, bool *is_narrowband){
     const unsigned int nb_regions = 2;
     my_real_c *val = (my_real_c*)malloc(sizeof(my_real_c));
     my_real_c nm;
@@ -314,7 +271,7 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
     //Polygon2D *mini_clipped;
     Polyhedron3D *cell3D = NULL;
     //long *sfj;
-    Point3D *pt3D, local_mean_normal, *local_l, local_pressure_face;
+    Point3D *pt3D, *local_l, zero_pt;
     bool local_narrowband;
     //Vector_points2D *vec_move_grid;
     my_real_c *vec_move_gridx = NULL, *vec_move_gridy = NULL;
@@ -337,10 +294,9 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
         set_ith_elem_vec_double(*big_lambda_np1, i, val);
     }
     
-    *pressure_clipped = (Point3D){0.,0.,0.};
-    *mean_normal = (Point3D){0.,0.,0.};
+    zero_pt = (Point3D){0., 0., 0.};
     for (i=0; i<nb_edge + 2; i++){
-        set_ith_elem_vec_pts3D(occupied_area, i, mean_normal);
+        set_ith_elem_vec_pts3D(occupied_area, i, &zero_pt);
     }
 
     *is_narrowband = false;
@@ -352,16 +308,9 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
     if ((clipped3D) && (clipped3D->vertices->size>2)){
         k = 0; //should be k = clipped->status_edge[i], or another variable to indicate what region covers face nb i.
         
-        compute_lambdas2D_time(cell3D, clipped3D, &lambdas3D, &local_mean_normal, &local_pressure_face, &local_narrowband);
+        compute_lambdas2D_time(cell3D, clipped3D, &lambdas3D, normals_ptr, edge_indices, &local_narrowband);
 
-        mean_normal->x += local_mean_normal.x;
-        mean_normal->y += local_mean_normal.y;
-        mean_normal->t += local_mean_normal.t;
-        pressure_clipped->x += local_pressure_face.x;
-        pressure_clipped->y += local_pressure_face.y;
-        pressure_clipped->t += local_pressure_face.t;
         *is_narrowband |= local_narrowband;
-
         
         //λe += λ[2:end]
         for (j=0; j<lambdas3D->size; j++){
@@ -437,6 +386,9 @@ void compute_lambdas2D(const Polygon2D* grid, const Polyhedron3D *clipped3D, con
             for(k = 1; k<nb_regions; k++){
                 set_ijth_elem_arr_double(*lambdas_arr, i-2, k, &nm); 
             }
+        }
+        if (!(*normals_ptr)){
+            *normals_ptr = alloc_empty_vec_pts3D();
         }
     }
 

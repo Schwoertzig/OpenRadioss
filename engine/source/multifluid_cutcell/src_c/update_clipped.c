@@ -417,14 +417,15 @@ static void split_edge(Polygon2D* p, uint64_t i_e, const Point2D *new_pt){
 static void fuse_points(Polygon2D *p, int64_t ind_e0_fused, int64_t ind_e1_fused, int64_t ind_face){
     GrB_Info infogrb;
     GrB_Vector ej, extr_vals_ej, inds_pts_edge0, inds_pts_edge1;
-    GrB_Index i_e0_pt0, i_e0_pt1, i_e1_pt0, i_e1_pt1;
+    GrB_Index i_e0_pt0, i_e0_pt1, i_e1_pt0, i_e1_pt1, nb_edges;
     uint64_t ind_pt_del, ind_pt1, ind_pt2;
     int8_t val;
 
-    infogrb = GrB_Vector_new(&ej, GrB_INT8, 2);
-    infogrb = GrB_Vector_new(&extr_vals_ej, GrB_INT8, 2);
-    infogrb = GrB_Vector_new(&inds_pts_edge0, GrB_UINT64, 2);
-    infogrb = GrB_Vector_new(&inds_pts_edge1, GrB_UINT64, 2);
+    infogrb = GrB_Matrix_ncols(&nb_edges, *(p->edges));
+    infogrb = GrB_Vector_new(&ej, GrB_INT8, nb_edges);
+    infogrb = GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_edges);
+    infogrb = GrB_Vector_new(&inds_pts_edge0, GrB_UINT64, nb_edges);
+    infogrb = GrB_Vector_new(&inds_pts_edge1, GrB_UINT64, nb_edges);
 
     if (ind_e1_fused != ind_e0_fused) { //one edge to suppress, the other one is modified.
         infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, ind_e0_fused, GrB_NULL);
@@ -864,7 +865,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     GrB_Matrix *new_faces = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     GrB_Matrix *new_volume = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     Vector_int *status_faces;
-    Vector_double *pressure_faces;
     const uint64_t nb_pts = fn->vertices->size;
     Vector_points3D *new_vertices = alloc_with_capacity_vec_pts3D(2*nb_pts);
     Polyhedron3D* p;
@@ -943,13 +943,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     for(i = 2*nb_cols_faces; i < nb_cols_newfaces; i++){
         set_ith_elem_vec_int(status_faces, i, &val);
     }
-    pressure_faces = alloc_with_capacity_vec_double(nb_cols_newfaces);
-    val_r = 0.;
-    for(i = 0; i < nb_cols_newfaces; i++){
-        set_ith_elem_vec_double(pressure_faces, i, &val_r);
-    }
 
-    //pressure_face = repeat([0.0], size(new_faces, 2)) //TODO : report that
     GrB_Matrix_new(new_volume, GrB_INT8, nb_cols_newfaces, 1);
     for(i=0; i<nb_edges; i++){
         infogrb = GrB_Matrix_setElement(*new_volume, -1, i, 0);
@@ -1017,9 +1011,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
                 set_ith_elem_vec_int(status_faces, curr_face    , &val);
                 set_ith_elem_vec_int(status_faces, curr_face + 1, &val);
 
-                set_ith_elem_vec_double(pressure_faces, curr_face    , get_ith_elem_vec_double(fn->pressure_edge, i));
-                set_ith_elem_vec_double(pressure_faces, curr_face + 1, get_ith_elem_vec_double(fn->pressure_edge, i));
-
                 GrB_Matrix_extractElement(&fne_ptind, *(fn->faces), i, j);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face    , 0);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face + 1, 0);
@@ -1057,7 +1048,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
 
                 val = 3+i;
                 set_ith_elem_vec_int(status_faces, curr_face, &val);
-                set_ith_elem_vec_double(pressure_faces, curr_face, get_ith_elem_vec_double(fn->pressure_edge, i));
 
                 GrB_Matrix_extractElement(&fne_ptind, *(fn->faces), i, j);
                 GrB_Matrix_setElement(*new_volume, fne_ptind, curr_face, 0);
@@ -1067,7 +1057,7 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
         }
     }
 
-    p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces, pressure_faces);
+    p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces);
 
     free(pt3D);
     GrB_Matrix_free(&emptyNE);
@@ -1081,7 +1071,6 @@ static Polyhedron3D* build_space_time_cell_given_tnp1_vertices(const Polygon2D* 
     GrB_free(&extr_vals_fj);
     GrB_free(&edge_indices);
     dealloc_vec_int(status_faces); free(status_faces);
-    dealloc_vec_double(pressure_faces); free(pressure_faces);
     dealloc_vec_pts3D(new_vertices); free(new_vertices);
     GrB_Matrix_free(new_edges); free(new_edges);
     GrB_Matrix_free(new_faces); free(new_faces);
@@ -1109,7 +1098,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     GrB_Matrix *new_faces = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     GrB_Matrix *new_volume = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     Vector_int *status_faces;
-    Vector_double *pressure_faces;
     GrB_Index *I_index, *J_index;
     GrB_Index curr_edge, v_edges_index, curr_face;
     GrB_Vector fj, extr_vals_fj, edge_indices;
@@ -1195,11 +1183,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     for(i = nb_faces1 + nb_faces2; i < nb_cols_newfaces; i++){
         set_ith_elem_vec_int(status_faces, i, &val);
     }
-    pressure_faces = alloc_with_capacity_vec_double(nb_cols_newfaces);
-    val_r = 0.;
-    for(i = 0; i < nb_cols_newfaces; i++){
-        set_ith_elem_vec_double(pressure_faces, i, &val_r);
-    }
 
     GrB_Matrix_new(new_volume, GrB_INT8, nb_cols_newfaces, 1);
     for(i=0; i<nb_edges1; i++){
@@ -1272,9 +1255,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
                     val = -(3+i);
                     set_ith_elem_vec_int(status_faces, curr_face    , &val);
                     set_ith_elem_vec_int(status_faces, curr_face + 1, &val);
-                    set_ith_elem_vec_double(pressure_faces, curr_face    , get_ith_elem_vec_double(fn->pressure_edge, i));
-                    set_ith_elem_vec_double(pressure_faces, curr_face + 1, get_ith_elem_vec_double(fn->pressure_edge, i));
-
 
                     GrB_Matrix_extractElement(&in_out_f1, *(fn->faces), i, j);
                     GrB_Matrix_setElement(*new_volume, in_out_f1, curr_face    , 0);
@@ -1290,7 +1270,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
 
                     val = -(3+i);
                     set_ith_elem_vec_int(status_faces, curr_face, &val);
-                    set_ith_elem_vec_double(pressure_faces, curr_face, get_ith_elem_vec_double(fn->pressure_edge, i));
 
                     GrB_Matrix_extractElement(&in_out_f1, *(fn->faces), i, j);
                     GrB_Matrix_setElement(*new_volume, in_out_f1, curr_face, 0);
@@ -1305,7 +1284,7 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     GrB_Matrix_resize(*new_faces, curr_edge, curr_face);
     GrB_Matrix_resize(*new_volume, curr_face, 1);
     status_faces->size = curr_face;
-    res_p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces, pressure_faces);
+    res_p = new_Polyhedron3D_vefvs(new_vertices, new_edges, new_faces, new_volume, status_faces);
 
     GrB_free(&emptyNE);
     GrB_free(&emptySW);
@@ -1326,7 +1305,6 @@ static Polyhedron3D* build_space_time_cell_with_intersection(const Polygon2D* fn
     GrB_free(new_volume);
     if(new_volume) free(new_volume);
     dealloc_vec_int(status_faces); free(status_faces);
-    dealloc_vec_double(pressure_faces); free(pressure_faces);
     free(I_index);
     free(J_index);
 
@@ -1375,6 +1353,12 @@ static void refine_interface(Polygon2D *p, my_real_c maximal_length){
 static void coarsen_interface(Polygon2D *p, Array_int *list_changed_edges){
     uint64_t i;
     int64_t ind_e1_fused, ind_e2_fused, ind_f;
+    GrB_Index nb_pts, nb_faces;
+    GrB_Matrix ef_m;
+
+    nb_pts = p->vertices->size;
+    GrB_Matrix_ncols(&nb_faces, *(p->faces));
+    GrB_Matrix_new(&ef_m, GrB_FP64, nb_pts, nb_faces);
 
     for (i=0; i<p->vertices->size; i++){
         ind_e1_fused = *get_ijth_elem_arr_int(list_changed_edges, i, 0);
@@ -1384,6 +1368,8 @@ static void coarsen_interface(Polygon2D *p, Array_int *list_changed_edges){
             fuse_points(p, ind_e1_fused, ind_e2_fused, ind_f);
         }
     }
+
+    GrB_free(&ef_m);
 }
 
 /// @brief Using a polygon `solid` defined at time t^n and a set of vectors `vs` defining the translation of each point of `solid` at time t^{n+1} = t^n+`dt`,
@@ -1587,6 +1573,10 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
 
     //Clean the result if some points were suppressed
     clean_Polygon2D(solid_new, solid);
+    GrB_Matrix_ncols(&nb_edges, *(solid_new->edges));
+    GrB_Matrix_nrows(&nb_edges, *(solid_new->faces));
+    GrB_Matrix_ncols(&nb_edges, *((*solid)->edges));
+    GrB_Matrix_nrows(&nb_edges, *((*solid)->faces));
 
     dealloc_vec_pts2D(vertices_tnp1); free(vertices_tnp1);
     dealloc_vec_pts2D(IntersecList); free(IntersecList);

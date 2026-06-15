@@ -122,8 +122,8 @@ void find_all_self_intersection(Polygon2D *p, Vector_points2D* IntersecList, Vec
 
     //rowvals_edges = rowvals(edges)
     GrB_Vector_new(&J_vect, GrB_UINT64, nb_pts);
-    GrB_Vector_new(&pt_indices, GrB_UINT64, 2);
-    GrB_Vector_new(&val_extr, GrB_INT8, 2);
+    GrB_Vector_new(&pt_indices, GrB_UINT64, nb_pts);
+    GrB_Vector_new(&val_extr, GrB_INT8, nb_pts);
     list_edges = (Indexed_Edge2D*) malloc(nb_edges * sizeof(Indexed_Edge2D));
     for (i = 0; i<nb_edges; i++){
         GrB_extract(J_vect, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, i, GrB_NULL);

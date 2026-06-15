@@ -128,7 +128,7 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
 //[INOUT] status_cell
 //[IN] mark_cells
 //[OUT] supercells_in
-void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int *status_cell, Vector_double *pressure_cell, long int mark_cells, GrB_Matrix *supercells_in){
+void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int *status_cell, long int mark_cells, GrB_Matrix *supercells_in){
         GrB_Info infogrb;
         GrB_Matrix temp_tab, in_m_ones;
         GrB_Matrix new_cells_in;
@@ -263,7 +263,6 @@ void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int 
         if (mark_cells > 0){
             for(i = 0; i<nb_open_supercells; i++){
                 if(status_cell) push_back_vec_int(&status_cell, &mark_cells); 
-                if(pressure_cell) push_back_vec_double(&pressure_cell, &val); 
             }
         }
 

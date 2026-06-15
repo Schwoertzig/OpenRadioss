@@ -184,13 +184,13 @@
         sign = 1 !not used for now
         
         if (dt1>0) then
-          i_print = ncycle
+          i_print = ncycle + 1
           call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
           multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
           multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
           gamma, dt1, dt_scale, sign, ebcs_tab, &
           multi_cutcell%rho, multi_cutcell%pres, multi_cutcell%vel, multi_cutcell%etot, &
-          dt2t, multi_cutcell%sound_speed)!, i_print)
+          dt2t, multi_cutcell%sound_speed, i_print)
           !call run_simple_test()
           !call exit(0)
         else
@@ -210,6 +210,8 @@
           call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
           nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid,num_mixed,list_mixed)
           call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
+          call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
+          nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid, multi_cutcell, gamma)
           call build_full_states(multi_cutcell%grid, multi_cutcell%phase_rho, &
           multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
           gamma, &
@@ -226,6 +228,8 @@
                                               + multi_cutcell%sound_speed(ng))
           end do
           dt2t = dt_scale * sqrt(minval(multi_cutcell%grid(:, 1)%area)) / largest_speed_wave
+          i_print = 1
+          call print_clipped_fortran(i_print)
         end if
         
         
