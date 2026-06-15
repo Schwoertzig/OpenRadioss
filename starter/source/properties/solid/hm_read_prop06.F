@@ -40,7 +40,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE HM_READ_PROP06(GEO      ,IGEO    ,PROP_TAG,MULTI_FVM ,IGTYP   ,
      .                          IG       ,IDTITL  ,UNITAB  ,LSUBMODEL ,RTRANS  ,
-     .                          SUB_ID   ,ISKN    ,IPART   ,SUB_INDEX,DEFAULTS_SOLID)
+     .                          SUB_ID   ,ISKN    ,IPART   ,SUB_INDEX,DEFAULTS_SOLID,
+     .                          ISMS  )
 C-----------------------------------------------
 C   ROUTINE DESCRIPTION :
 C   ===================
@@ -102,6 +103,7 @@ C-----------------------------------------------
       INTEGER,INTENT(IN) :: IGTYP
       INTEGER,INTENT(IN) :: SUB_ID 
       INTEGER,INTENT(IN) :: SUB_INDEX 
+      INTEGER,INTENT(IN) :: ISMS
 C
       my_real,INTENT(INOUT) :: GEO(NPROPG)
       my_real,INTENT(IN) :: RTRANS(NTRANSF,NRTRANS)
@@ -126,6 +128,7 @@ C-----------------------------------------------
       INTEGER     IHBE_DS,ISST_DS,IFRAME_DS,
      .            ITET4_D,ITET10_D,ICPRE_D
       LOGICAL IS_AVAILABLE, IS_ENCRYPTED
+      CHARACTER(LEN=NCHARLINE) ::  MSGLINE
 C-----------------------------------------------
       IS_ENCRYPTED = .FALSE.
       IS_AVAILABLE = .FALSE.
@@ -206,8 +209,15 @@ C-----removed flags:
       IPLAS = 2
       IET = 0
 C----------------------
+      IGEO(29) = ITET4  !itet4_prev
       IF(ITET4 == 0)  ITET4 = ITET4_D
       IF(ITET10 == 0) ITET10 = ITET10_D
+      IF(ITET4 == 10) THEN ! switched to tetra10 w/ itetra10=2
+        IF (ISMS == 0) ITET10 = 2
+        ITET4 = 0  
+        MSGLINE='   ITETR4 IS CONVERTED TO TETRA10'
+        CALL ANCMSG(MSGID=3146,MSGTYPE=MSGWARNING,ANMODE=ANINFO,I1=IG,C1=IDTITL,I2=10,C2=TRIM(MSGLINE))      
+      ENDIF
 C
 C
       IF (SUB_ID /= 0)
@@ -602,7 +612,7 @@ C---
      & 5X,'NUMBER OF SPH PARTICLES PER DIRECTION .=',I10/,
      & 5X,'CORRESPONDING PART FOR SPH PARTICLES. .=',I10/)
  2001 FORMAT(
-     & 5X,'ORTHOTROPIC DIRECTIONS BY ELEMENT CONNECTIVITY,IP='I10)
+     & 5X,'ORTHOTROPIC DIRECTIONS BY ELEMENT CONNECTIVITY,IP=',I10)
  2002 FORMAT(
      & 5X,'ORTHOTROPIC DIRECTION FLAG IP. . . . . =',I10/,
      & 5X,'REFERENCE POINT PX . . . . . . . . . . =',1PG20.13/,

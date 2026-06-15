@@ -69,6 +69,7 @@
 !||    fail_setoff_wind_frwave   ../engine/source/materials/fail/fail_setoff_wind_frwave.F
 !||    forint                    ../engine/source/elements/forint.F
 !||    forintc                   ../engine/source/elements/forintc.F
+!||    forintc_prepare_gpu       ../engine/source/elements/shell/coque/shell_internal_forces.F90
 !||    forintp                   ../engine/source/elements/forintp.F
 !||    fractal_dmg_init          ../starter/source/materials/fail/fractal/fractal_dmg_init.F90
 !||    genstat                   ../engine/source/output/sta/genstat.F
@@ -95,6 +96,9 @@
 !||    pforc3                    ../engine/source/elements/beam/pforc3.F
 !||    q4forc2                   ../engine/source/elements/solid_2d/quad4/q4forc2.F
 !||    qforc2                    ../engine/source/elements/solid_2d/quad/qforc2.F
+!||    r23forc3                  ../engine/source/elements/spring/r23forc3.F
+!||    r23law135                 ../engine/source/elements/spring/r23law135.F90
+!||    r2len3law135              ../engine/source/elements/spring/r2len3law135.F90
 !||    radioss2                  ../engine/source/engine/radioss2.F
 !||    rdcomi                    ../engine/source/output/restart/rdcomm.F
 !||    rdresa                    ../engine/source/output/restart/rdresa.F

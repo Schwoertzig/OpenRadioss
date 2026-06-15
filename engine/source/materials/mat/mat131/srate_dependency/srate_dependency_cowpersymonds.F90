@@ -26,6 +26,9 @@
 !||    elasto_plastic_yield_stress          ../engine/source/materials/mat/mat131/elasto_plastic_yield_stress.F90
 !||====================================================================
       module srate_dependency_cowpersymonds_mod
+! \brief Compute Cowper-Symonds strain rate dependency for /MAT/LAW131
+! \details Compute the strain rate scaling factor using the Cowper-Symonds
+!          model for /MAT/LAW131.
       contains
 !||====================================================================
 !||    srate_dependency_cowpersymonds   ../engine/source/materials/mat/mat131/srate_dependency/srate_dependency_cowpersymonds.F90
@@ -37,7 +40,7 @@
 !||    precision_mod                    ../common_source/modules/precision_mod.F90
 !||====================================================================
       subroutine srate_dependency_cowpersymonds(                               &
-        matparam ,nel      ,sigy     ,epsd     ,dsigy_dpla)
+        matparam ,nel      ,sigy     ,epsd     ,dsigy_dpla,offset   )
 !----------------------------------------------------------------
 !   M o d u l e s
 !----------------------------------------------------------------
@@ -56,10 +59,10 @@
         real(kind=WP), dimension(nel), intent(inout) :: sigy       !< Equivalent stress
         real(kind=WP), dimension(nel), intent(in)    :: epsd       !< Strain rate
         real(kind=WP), dimension(nel), intent(inout) :: dsigy_dpla !< Derivative of eq. stress w.r.t. cumulated plastic strain
+        integer,                       intent(in)    :: offset     !< Offset in the material parameters array for strain rate dependency parameters
 !----------------------------------------------------------------
 !  L o c a l  V a r i a b l e s
 !----------------------------------------------------------------
-        integer :: offset
         real(kind=WP) :: c,p
         real(kind=WP), dimension(nel) :: ratefac
 !===============================================================================
@@ -67,7 +70,6 @@
         !=======================================================================
         !< - Cowper-Symonds strain rate dependency
         !=======================================================================
-        offset = matparam%iparam(9)
         !< Recover strain rate dependency parameters
         c = matparam%uparam(offset + 1) !< Cowper-Symonds strain rate sensitivity coefficient
         p = matparam%uparam(offset + 2) !< Strain rate dependency exponent

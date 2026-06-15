@@ -23,12 +23,15 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
 !||    hm_get_float_array_index                 ../starter/source/devtools/hm_reader/hm_get_float_array_index.F
 !||--- called by ------------------------------------------------------
+!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_bem                              ../starter/source/loads/bem/hm_read_bem.F
 !||    hm_read_ebcs_inlet                       ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_inlet.F
 !||    hm_read_elasticity_anisotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
+!||    hm_read_elasticity_bimod_isotropic       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_bimod_isotropic.F90
 !||    hm_read_elasticity_isotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_temp_isotropic        ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_fail_inievo                      ../starter/source/materials/fail/inievo/hm_read_fail_inievo.F
 !||    hm_read_fail_orthbiquad                  ../starter/source/materials/fail/orthbiquad/hm_read_fail_orthbiquad.F
@@ -113,12 +116,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_xref                             ../starter/source/loads/reference_state/xref/hm_read_xref.F
 !||    hm_read_yield_criterion_barlat1989       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat1989.F90
 !||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    lecfill                                  ../starter/source/elements/initia/lecfill.F
 !||    r2r_prelec                               ../starter/source/coupling/rad2rad/r2r_prelec.F
 !||    read_impdisp_fgeo                        ../starter/source/constraints/general/impvel/read_impdisp_fgeo.F
 !||    read_sensor_gauge                        ../starter/source/tools/sensor/read_sensor_gauge.F
+!||    rpart_inivel_check                       ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    message_mod                              ../starter/share/message_module/message_mod.F

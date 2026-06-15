@@ -117,7 +117,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      M         IGRBRIC     ,NLOC_DMG    ,ID_GLOBAL_VOIS  ,FACE_VOIS  ,EBCS_TAB          ,ALE_CONNECTIVITY,
      N         MAT_ELEM    ,H3D_DATA    ,DT              ,OUTPUT     ,NEED_COMM_INTER18 ,IDTMINS         ,
      O         IDTMIN      ,MAXFUNC     ,IMON_MAT        ,USERL_AVAIL,
-     P         impl_s      ,idyna       ,PYTHON          ,MATPARAM   ,GLOB_THERM  ,SFEM )
+     P         impl_s      ,idyna       ,PYTHON          ,MATPARAM   ,GLOB_THERM  ,SFEM,s_xdp )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -209,6 +209,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: IDTMINS
       ! for parith/on : ID_GLOBAL_VOIS --> user id ; FACE_VOIS --> face of the remote element
       INTEGER, DIMENSION(*), INTENT(in) :: ID_GLOBAL_VOIS,FACE_VOIS
+      integer, intent(in) :: s_xdp !< size of the second dimension of xdp
       LOGICAL, INTENT(inout) :: NEED_COMM_INTER18 !< true if the mpi comm "exchange of remote XCELL data" is mandatory
       DOUBLE PRECISION XDP(3,*)
       
@@ -247,7 +248,7 @@ C-----------------------------------------------
       TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT !< output structure
       TYPE(PYTHON_) :: PYTHON
       type (glob_therm_) ,intent(inout)   :: glob_therm
-      TYPE (SFEM_) ,INTENT(INOUT) :: SFEM
+      TYPE (global_sfem_) ,INTENT(INOUT) :: SFEM
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -811,10 +812,12 @@ C
           
          !---------------------------------------------
          ! TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS
-         !---------------------------------------------
+         !---------------------------------------------          
 !$OMP SINGLE
           IF(SFEM%ISFEM == 1) THEN
-            CALL S4ALESFEM(IPARG,IXS,X,ELBUF_TAB,SFEM%SFEM_NODVAR_ALE,SFEM%S_SFEM_NODVAR,PM,IAD_ELEM,FR_ELEM)
+            if(itask==0) call startime(timers,timer_sfem)
+            CALL S4ALESFEM(IPARG,IXS,X,ELBUF_TAB,sfem%ale%nodvar,SFEM%S_SFEM_NODVAR,PM,ispmd,sfem%ale,s_xdp)
+            if(itask==0) call stoptime(timers,timer_sfem)
           ENDIF
 !$OMP END SINGLE
 
@@ -885,14 +888,14 @@ C
      D                  ISTRA,           ITASK,           BID,             BID,
      E                  BID,             IBID,            GRESAV,          GRTH,
      F                  IGRTH,           MSSA,            DMELS,           TABLE,
-     G                  XDP,        SFEM%SFEM_NODVAR_ALE, VOLN,            BID,
+     G                  XDP,        sfem%ale%nodvar, VOLN,            BID,
      H                  BID,             D,               SENSORS,         IOUTPRT,
      I                  MAT_ELEM,        IBID,            DT,              IDEL7NOK,
      J                  NSVOIS,          SZ_BUFVOIS,      SNPC,            STF,
      K                  SBUFMAT,         SVIS,            IDTMINS,         IRESP, 
      *                  IDEL7NG,         MAXFUNC,         USERL_AVAIL,     GLOB_THERM, 
      V                  impl_s,          idyna,           SFEM%S_SFEM_NODVAR,ale%global%s_flux,
-     W                  ale%global%nv46,SFEM%itag_nsfem)
+     W                  ale%global%nv46,sfem%ale%need_it(nf1:nf1+nel-1))
 C
                   ELSEIF (ITY == 1 .AND. ISOLNOD /= 4) THEN
                     NULLIFY(pQMV);
@@ -1075,14 +1078,14 @@ C     ALE ON / OFF
      D                  ISTRA,           ITASK,           BID,             BID,
      E                  BID,             IBID,            GRESAV,          GRTH,
      F                  IGRTH,           MSSA,            DMELS,           TABLE,
-     G                  XDP,        SFEM%SFEM_NODVAR_ALE, VOLN,            BID,
+     G                  XDP,        sfem%ale%nodvar, VOLN,            BID,
      H                  BID,             D,               SENSORS,         IOUTPRT,
      I                  MAT_ELEM,        IBID,            DT,              IDEL7NOK,
      J                  NSVOIS,          SZ_BUFVOIS,      SNPC,            STF,
      K                  SBUFMAT,         SVIS,            IDTMINS,         IRESP, 
      *                  IDEL7NG,         MAXFUNC,         USERL_AVAIL,     GLOB_THERM, 
      V                  impl_s,          idyna,         SFEM%S_SFEM_NODVAR,ale%global%s_flux,
-     W                  ale%global%nv46,SFEM%itag_nsfem)
+     W                  ale%global%nv46,sfem%ale%need_it(nf1:nf1+nel-1))
 
                     ELSEIF(ITY == 1 .AND. ISOLNOD /= 4)THEN
                       NULLIFY(pQMV);

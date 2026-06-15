@@ -27,6 +27,9 @@
 !||====================================================================
       module hm_read_elasticity_mod
         implicit none
+! \brief Read elasticity input data for /MAT/LAW131
+! \details Read and dispatch the elasticity model input data
+!          for /MAT/LAW131 (elasto-plastic material law).
       contains
 !||====================================================================
 !||    hm_read_elasticity                         ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity.F90
@@ -34,14 +37,19 @@
 !||    hm_read_elasto_plastic                     ../starter/source/materials/mat/mat131/hm_read_elasto_plastic.F90
 !||--- calls      -----------------------------------------------------
 !||    hm_read_elasticity_anisotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
+!||    hm_read_elasticity_bimod_isotropic         ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_bimod_isotropic.F90
 !||    hm_read_elasticity_isotropic               ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_temp_isotropic          ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||--- uses       -----------------------------------------------------
+!||    elbuftag_mod                               ../starter/share/modules1/elbuftag_mod.F
 !||    hm_option_read_mod                         ../starter/share/modules1/hm_option_read_mod.F
 !||    hm_read_elasticity_anisotropic_mod         ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
+!||    hm_read_elasticity_bimod_isotropic_mod     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_bimod_isotropic.F90
 !||    hm_read_elasticity_isotropic_mod           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic_mod         ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_temp_isotropic_mod      ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic_mod   ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    submodel_mod                               ../starter/share/modules1/submodel_mod.F
 !||====================================================================
@@ -49,7 +57,8 @@
           ikey     ,type     ,ielas    ,nupar_elas,upar_elas,is_available,     &
           unitab   ,lsubmodel,matparam ,parmat    ,iout     ,is_encrypted,     &
           mat_id   ,titr     ,iresp    ,ntab_elas ,itab_elas,x2vect      ,     &
-          x3vect   ,x4vect   ,fscale   ,nvartmp   ,israte   ,vpflag      )
+          x3vect   ,x4vect   ,fscale   ,nvartmp   ,israte   ,vpflag      ,     &
+          mtag     ,nuvar_elas)
 !----------------------------------------------------------------
 !   M o d u l e s
 !----------------------------------------------------------------
@@ -59,10 +68,13 @@
           use constant_mod
           use matparam_def_mod
           use precision_mod, only : WP
+          use elbuftag_mod
           use hm_read_elasticity_isotropic_mod
           use hm_read_elasticity_orthotropic_mod
           use hm_read_elasticity_anisotropic_mod
           use hm_read_elasticity_viscous_isotropic_mod
+          use hm_read_elasticity_temp_isotropic_mod
+          use hm_read_elasticity_bimod_isotropic_mod
 !----------------------------------------------------------------
 !   I m p l i c i t   T y p e s
 !----------------------------------------------------------------
@@ -94,45 +106,63 @@
           integer,                 intent(inout) :: nvartmp               !< Number of variables used in tabulated elasticity dependency
           integer,                 intent(inout) :: israte                !< Strain rate filtering flag
           integer,                 intent(inout) :: vpflag                !< Viscous formulation flag
+          type(mlaw_tag_),         intent(inout) :: mtag                  !< Material tag for internal variables in element buffer
+          integer,                 intent(inout) :: nuvar_elas            !< Number of user variables for elasticity
 !===============================================================================
 ! 
-          !< Select elasticity type
-          select case (type(1:4))
-            !===================================================================
-            !< Isotropic elasticity parameters
-            !===================================================================
-            case ('ISOT')
-              call hm_read_elasticity_isotropic(                               &
-                ikey     ,ielas    ,nupar_elas,upar_elas,is_available,         &
-                unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,         &
-                is_encrypted,mat_id,titr      )
-            !===================================================================
-            !< Orthotropic elasticity parameters
-            !===================================================================
-            case ('ORTH')
-              call hm_read_elasticity_orthotropic(                             &
-                ikey     ,ielas    ,nupar_elas,upar_elas,is_available,         &
-                unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,         &
-                is_encrypted,mat_id,titr      )
-            !===================================================================
-            !< Anisotropic elasticity parameters
-            !===================================================================
-            case ('ANIS')
-              call hm_read_elasticity_anisotropic(                             &
-                ikey     ,ielas    ,nupar_elas,upar_elas,is_available,         &
-                unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,         &
-                is_encrypted,mat_id,titr      ,iresp    )
-            !===================================================================
-            !< Viscous isotropic elasticity parameters
-            !===================================================================
-            case ('VISC')
-              call hm_read_elasticity_viscous_isotropic(                       &
-                ikey     ,ielas    ,nupar_elas,upar_elas,is_available,         &
-                unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,         &
-                is_encrypted,mat_id,titr      ,ntab_elas,itab_elas   ,         &
-                x2vect   ,x3vect   ,x4vect    ,fscale   ,nvartmp     ,         &
-                israte   ,vpflag   )
-          end select
+          !=====================================================================
+          !< Isotropic elasticity parameters
+          !=====================================================================
+          if (type(1:9) == 'ISOTROPIC') then
+            call hm_read_elasticity_isotropic(                                 &
+              ikey     ,ielas    ,nupar_elas,upar_elas,is_available,           &
+              unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,           &
+              is_encrypted,mat_id,titr      )
+          !=====================================================================
+          !< Orthotropic elasticity parameters
+          !=====================================================================
+          elseif (type(1:11) == 'ORTHOTROPIC') then
+            call hm_read_elasticity_orthotropic(                               &
+              ikey     ,ielas    ,nupar_elas,upar_elas,is_available,           &
+              unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,           &
+              is_encrypted,mat_id,titr      )
+          !=====================================================================
+          !< Anisotropic elasticity parameters
+          !=====================================================================
+          elseif (type(1:11) == 'ANISOTROPIC') then
+            call hm_read_elasticity_anisotropic(                               &
+              ikey     ,ielas    ,nupar_elas,upar_elas,is_available,           &
+              unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,           &
+              is_encrypted,mat_id,titr      ,iresp    )
+          !=====================================================================
+          !< Viscous isotropic elasticity parameters
+          !=====================================================================
+          elseif (type(1:14) == 'VISC_ISOTROPIC') then
+            call hm_read_elasticity_viscous_isotropic(                         &
+              ikey     ,ielas    ,nupar_elas,upar_elas,is_available,           &
+              unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,           &
+              is_encrypted,mat_id,titr      ,ntab_elas,itab_elas   ,           &
+              x2vect   ,x3vect   ,x4vect    ,fscale   ,nvartmp     ,           &
+              israte   ,vpflag   )
+          !=====================================================================
+          !< Temperature-dependent isotropic elasticity parameters
+          !=====================================================================
+          elseif (type(1:14) == 'TEMP_ISOTROPIC') then
+            call hm_read_elasticity_temp_isotropic(                            &
+              ikey     ,ielas    ,nupar_elas,is_available,                     &
+              unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,           &
+              is_encrypted,mat_id,titr      ,ntab_elas,itab_elas   ,           &
+              x2vect   ,x3vect   ,x4vect    ,fscale   ,nvartmp     ,           &
+              mtag     ,nuvar_elas)
+          !=====================================================================
+          !< Bimodular isotropic elasticity parameters
+          !=====================================================================
+          elseif (type(1:15) == 'BIMOD_ISOTROPIC') then
+            call hm_read_elasticity_bimod_isotropic(                           &
+              ikey     ,ielas    ,nupar_elas,upar_elas,is_available,           &
+              unitab   ,lsubmodel,matparam  ,parmat   ,iout        ,           &
+              is_encrypted,mat_id,titr      )
+          endif
 ! -------------------------------------------------------------------------------
         end subroutine hm_read_elasticity
       end module hm_read_elasticity_mod

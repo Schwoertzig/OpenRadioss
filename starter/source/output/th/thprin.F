@@ -26,9 +26,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_thgrou         ../starter/source/output/th/hm_read_thgrou.F
 !||--- calls      -----------------------------------------------------
 !||    fretitl2               ../starter/source/starter/freform.F
-!||    nintrn                 ../starter/source/system/nintrn.F
-!||    ulist2s                ../starter/source/system/sysfus.F
-!||    usr2sys                ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE THPRIN(
@@ -55,21 +52,19 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NPASU,NUM,NVG,NID,NVPS,
+      INTEGER NPASU,NUM,NID,NVPS,
      .        IPASU(NPASU,*),ITHBUF(*)
       CHARACTER*10 VARE(*),KEY
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER J,JJ, I,ISU,ID,NNE,NOSYS,J10(10),NTOT,KK,IER,
-     .        OK,IGS,IGRS,NSU,K,L,JREC,CONT,IAD0,IADV,NTRI,NL,
-     .        IFITMP,IADFIN,NVAR,M,N,IAD2,IAD1,ISK,IPROC
+      INTEGER J,ID,
+     .        NVAR,N,IAD1
       CHARACTER(LEN=NCHARTITLE) :: TITR
       CHARACTER MESS*40
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS,ULIST2S,LISTCNT,NINTRN,THVARC
       DATA MESS/'TH GROUP DEFINITION                     '/
 C-----------------------------------------------
 C
@@ -101,10 +96,6 @@ C
 !||    thprin_sub             ../starter/source/output/th/thprin.F
 !||--- called by ------------------------------------------------------
 !||    hm_read_thgrou         ../starter/source/output/th/hm_read_thgrou.F
-!||--- calls      -----------------------------------------------------
-!||    nintrn                 ../starter/source/system/nintrn.F
-!||    ulist2s                ../starter/source/system/sysfus.F
-!||    usr2sys                ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE THPRIN_SUB(
@@ -126,7 +117,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NUM,NVG,NID,NVPS,
+      INTEGER NUM,NID,NVPS,
      .        ITHBUF(*),ITHFLAG
       CHARACTER*10 VARE(*),KEY
 !
@@ -134,15 +125,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER J,JJ, I,ISU,ID,NNE,NOSYS,J10(10),NTOT,KK,IER,
-     .        OK,IGS,IGRS,NSU,K,L,JREC,CONT,IAD0,IADV,NTRI,NL,
-     .        IFITMP,IADFIN,NVAR,M,N,IAD2,IAD1,ISK,IPROC
+      INTEGER J,ID,
+     .        NVAR,N,IAD1
       CHARACTER(LEN=NCHARTITLE) :: TITR
       CHARACTER :: MESS*40
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS,ULIST2S,LISTCNT,NINTRN,THVARC
       DATA MESS/'TH GROUP DEFINITION                     '/
 C-----------------------------------------------
 C

@@ -26,7 +26,7 @@
 !||    eikonal_init_start_list   ../starter/source/initial_conditions/detonation/eikonal_init_start_list.F90
 !||====================================================================
       module eikonal_bcs_sym_tag_mod
-      implicit none
+        implicit none
       contains
 !||====================================================================
 !||    eikonal_bcs_sym_tag       ../starter/source/initial_conditions/detonation/eikonal_bcs_sym_tag.F90
@@ -36,7 +36,7 @@
 !||    detonators_mod            ../starter/share/modules1/detonators_mod.F
 !||====================================================================
         subroutine eikonal_bcs_sym_tag(neldet, elem_list, uelem_list, numnod, x, nix, numel, ix, &
-                                        detonators, idet, itag_boundFaces, ISYM, nvois, Lmax)
+          detonators, idet, itag_boundFaces, ISYM, nvois, Lmax)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Description
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -80,11 +80,6 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          integer,allocatable,dimension(:) :: indx
-          integer,allocatable,dimension(:) :: int_tmp_array
-          real(kind=WP),allocatable,dimension(:) :: real_tmp_array
-          integer :: kk
-          integer :: iad,lgth
           integer :: ICT(6,4)
           integer :: listnod(4) !< list of face nodes (2d:2max, 3d:4max)
           integer :: inod !< loop variable to identify face nodes
@@ -93,7 +88,7 @@
           real(kind=WP) :: OO(3,1:2) !< origins (iframe1 & iframe 2)
           real(kind=WP) :: NN(3,1:2) !< normal vectors (iframe1 & iframe 2)
           real(kind=WP) :: P(3)  !< temp point to identify if a node is laying on the symmetry plane
-          real(kind=WP) :: DOTPROD, vy, vz !< geometric variables used to identify if a node is laying on the symmetry plane
+          real(kind=WP) :: DOTPROD, vx, vy, vz !< geometric variables used to identify if a node is laying on the symmetry plane
           real(kind=WP) :: tol !< tolerance to identify if a node is laying on the symmetry plane
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
@@ -106,7 +101,7 @@
           iframe2 = detonators%point(idet)%Iframe2
 
           If(Iframe1 > 0)then
-             ISYM(1) = 1
+            ISYM(1) = 1
           endif
 
           If(Iframe2 > 0)then
@@ -117,10 +112,10 @@
             ! 3D (HEXA) : 6  4-node faces
             ICT(1,1:4)=(/1,2,3,4/)
             ICT(2,1:4)=(/4,3,7,8/)
-            ICT(3,1:4)=(/5,6,7,8/)
-            ICT(4,1:4)=(/1,2,6,5/)
-            ICT(5,1:4)=(/2,3,6,7/)
-            ICT(6,1:4)=(/1,4,5,8/)
+            ICT(3,1:4)=(/8,7,6,5/)
+            ICT(4,1:4)=(/5,6,2,1/)
+            ICT(5,1:4)=(/2,6,7,3/)
+            ICT(6,1:4)=(/4,8,5,1/)
           else
             ! 2D (QUAD/TRIA) : 4 2-node faces
             ICT(:,:) = 0
@@ -162,28 +157,25 @@
             end do
 
           ELSE
-           do ii=1,2
+            do ii=1,2
               if(isym(ii) == 0)cycle
               do iel=1,neldet
                 ie = elem_list(iel)
                 do ifac=1,nvois
                   listnod(1:4) = ix(1+ict(ifac,1:4),ie)
-                  if(listnod(3) == listnod(4) .or. listnod(4) == 0)cycle  !tria case
                   itag = 0
                   do inod=1,4
+                    if(listnod(inod) == 0)cycle
                     p(1:3) = x(1:3,listnod(inod))
                     ! <op,n> = 0  => on plane of symmetry
+                    vx = p(1)-oo(1,ii)
                     vy = p(2)-oo(2,ii)
                     vz = p(3)-oo(3,ii)
-                    dotprod = (vy*nn(2,ii) + vz*nn(3,ii))
-                    if(abs(dotprod) < tol) itag=itag+1
+                    dotprod = (vx*nn(1,ii) + vy*nn(2,ii) + vz*nn(3,ii))
+                    if(abs(dotprod) < tol) itag=itag + 1
                   end do
                   if(itag >= 3)then
-                    if(listnod(3) == listnod(4) .or. listnod(4) == 0)then
-                      itag_boundfaces(iel,ifac) = 1
-                    elseif(itag == 4)then
-                      itag_boundfaces(iel,ifac) = 1
-                    end if
+                    itag_boundfaces(iel,ifac) = 1
                   end if
                 end do
               end do

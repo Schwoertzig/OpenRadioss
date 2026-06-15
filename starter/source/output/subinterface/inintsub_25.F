@@ -36,7 +36,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                       NRTM      ,NRTM0  ,NSN     ,NISUBS  ,NISUBM    ,
      .                       NOINT     ,NI     ,NOD2NSV ,NOD2RTM ,KAD       ,
      .                       TAGNOD    ,TAGRTM ,IADD    ,NSNE    ,NTY       ,
-     .                       NRTSE     )   
+     .                       NRTSE     ,NEDGE_1D,NOD2EDG,TAGEDG  ,MAXEDG    ,
+     .                       NEDGE     ,NISUBE  ,NLEDGE )   
 
 C-----------------------------------------------
 C   M o d u l e s
@@ -63,23 +64,25 @@ C-----------------------------------------------
       INTEGER NRTM, NRTM0, NSN, NISUBS, NISUBM, NOINT, NI
       INTEGER NOM_OPT(LNOPT1,*)
       INTEGER ,INTENT(IN) :: NSNE, NTY, NRTSE
+      INTEGER ,INTENT(IN) :: NEDGE_1D, MAXEDG, NEDGE,NISUBE  ,NLEDGE
+      INTEGER ,INTENT(INOUT) :: NOD2EDG(2*MAXEDG)
+      INTEGER ,INTENT(INOUT) :: TAGEDG(MAXEDG)
 
       TYPE(INTBUF_STRUCT_) INTBUF_TAB(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,JGRN,ISU,ISU1,ISU2,
+      INTEGER I,J,K,JGRN,ISU1,ISU2,
      .   JSUB, KSUB, NNE, IS, ISV, CUR, ID1,
-     .   NEXT, IM, KM, JAD, IN, II, N,STAT,K1,K2,NT19,INOD,IFNRT,
-     .   IS1,IS2,IS3,IS4,IE,IE1,IE2,NS,
+     .   NEXT, IM, KM, JAD, IN, II, IFNRT,
+     .   IS1,IS2,NS,
      .   NS1,NS2
       LOGICAL ISS1_1,ISS2_1,ISS1_2,ISS2_2,IGRN_1,IGRN_2
       CHARACTER MESS*40
-      CHARACTER(LEN=NCHARTITLE) :: TITR,TITR1
+      CHARACTER(LEN=NCHARTITLE) :: TITR1
 C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRNOD)  :: IGRNOD
       TYPE (SURF_)   , DIMENSION(NSURF)   :: IGRSURF
-      TYPE (SURF_)   , DIMENSION(NSLIN)   :: IGRSLIN
 C-----------------------------------------------
 C   D a t a
 C-----------------------------------------------
@@ -88,9 +91,13 @@ C=======================================================================
 C
         INTBUF_TAB(NI)%ADDSUBS(1:NSN+1)  = 0   ! address of different subinter related to secondary node
         INTBUF_TAB(NI)%ADDSUBM(1:NRTM+1) = 0   ! address of different subinter related to main segment
+        IF(NEDGE_1D > 0) INTBUF_TAB(NI)%ADDSUBE(1:NEDGE+1) = 0   ! address of different subinter related to the edge
 
         INTBUF_TAB(NI)%INFLG_SUBS(1:NISUBS)=0  ! Flags for determining what is surface Surf1 or Surf2
         INTBUF_TAB(NI)%INFLG_SUBM(1:NISUBM)=0
+        IF(NEDGE_1D > 0) INTBUF_TAB(NI)%INFLG_SUBE(1:NISUBE) = 0   ! address of different subinter related to the edge
+
+        IF(NSN >0) THEN
 
 C----------------------------------------
 C  TAG nodes second calculate addresses
@@ -153,18 +160,20 @@ C
                   DO I=1,NNE
                      DO J=1,4
                       IN = IGRSURF(ISU1)%NODES(I,J)
-                      IS = NOD2NSV(IN)
-                      IF (IS==0) THEN
-                        CALL ANCMSG(MSGID=580,
+                      IF(IN/=0) THEN
+                        IS =NOD2NSV(IN)
+                        IF (IS==0) THEN
+                          CALL ANCMSG(MSGID=580,
      .                            MSGTYPE=MSGWARNING,
      .                            ANMODE=ANINFO_BLIND_1,
      .                            I1=ID1,
      .                            C1=TITR1,
      .                            I2=ITAB(IN),
      .                            I3=NOINT)
-                      ELSEIF (TAGNOD(IN)==0) THEN
-                        INTBUF_TAB(NI)%ADDSUBS(IS) = INTBUF_TAB(NI)%ADDSUBS(IS)+1
-                        TAGNOD(IN) = 1
+                        ELSEIF (TAGNOD(IN)==0) THEN
+                          INTBUF_TAB(NI)%ADDSUBS(IS) = INTBUF_TAB(NI)%ADDSUBS(IS)+1
+                          TAGNOD(IN) = 1
+                        ENDIF
                       ENDIF
                     END DO
                  END DO
@@ -173,18 +182,20 @@ C
                  DO I=1,NNE
                     DO J=1,4
                       IN = IGRSURF(ISU2)%NODES(I,J)
-                      IS = NOD2NSV(IN)
-                      IF (IS==0) THEN
-                        CALL ANCMSG(MSGID=580,
+                      IF(IN/=0) THEN
+                        IS =NOD2NSV(IN)
+                        IF (IS==0) THEN
+                          CALL ANCMSG(MSGID=580,
      .                            MSGTYPE=MSGWARNING,
      .                            ANMODE=ANINFO_BLIND_1,
      .                            I1=ID1,
      .                            C1=TITR1,
      .                            I2=ITAB(IN),
      .                            I3=NOINT)
-                      ELSEIF (TAGNOD(IN)==0) THEN
-                        INTBUF_TAB(NI)%ADDSUBS(IS) = INTBUF_TAB(NI)%ADDSUBS(IS)+1
-                        TAGNOD(IN) = 1
+                        ELSEIF (TAGNOD(IN)==0) THEN
+                          INTBUF_TAB(NI)%ADDSUBS(IS) = INTBUF_TAB(NI)%ADDSUBS(IS)+1
+                          TAGNOD(IN) = 1
+                        ENDIF
                       ENDIF
                     END DO
                  END DO
@@ -212,12 +223,14 @@ C
                   DO I=1,IGRSURF(ISU2)%NSEG
                    DO K=1,4
                      IN=IGRSURF(ISU2)%NODES(I,K)
-                     IS =NOD2NSV(IN)
-                     IF(IS/=0.AND.TAGNOD(IN)==0) THEN 
-                      INTBUF_TAB(NI)%ADDSUBS(IS) = 
+                     IF(IN/=0) THEN
+                       IS =NOD2NSV(IN)
+                       IF(IS/=0.AND.TAGNOD(IN)==0) THEN 
+                         INTBUF_TAB(NI)%ADDSUBS(IS) = 
      .                         INTBUF_TAB(NI)%ADDSUBS(IS)+1
-                      TAGNOD(IN) = 1
-                     END IF
+                         TAGNOD(IN) = 1
+                       END IF
+                     ENDIF
                    ENDDO
                   ENDDO 
                ENDIF
@@ -228,12 +241,14 @@ C
                   DO I=1,IGRSURF(ISU1)%NSEG
                    DO K=1,4
                      IN=IGRSURF(ISU1)%NODES(I,K)
-                     IS =NOD2NSV(IN)
-                     IF(IS/=0.AND.TAGNOD(IN)==0) THEN 
-                      INTBUF_TAB(NI)%ADDSUBS(IS) = 
+                     IF(IN/=0) THEN
+                       IS =NOD2NSV(IN)
+                       IF(IS/=0.AND.TAGNOD(IN)==0) THEN 
+                        INTBUF_TAB(NI)%ADDSUBS(IS) = 
      .                         INTBUF_TAB(NI)%ADDSUBS(IS)+1
-                      TAGNOD(IN) = 1
-                     END IF
+                        TAGNOD(IN) = 1
+                       END IF
+                     ENDIF
                    ENDDO
                   ENDDO 
                ENDIF
@@ -298,18 +313,20 @@ C
                   NNE  =IGRNOD(JGRN)%NENTITY
                   DO I=1,NNE
                     IN=IGRNOD(JGRN)%ENTITY(I)
-                    IS =NOD2NSV(IN)
-                    IF(IS/=0)THEN
-                      IF(TAGNOD(IN)==0) THEN ! beware to GRNOD NODENS
-                        INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=
-     .                    IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),2)
-                        INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
-                        KAD(IS)=KAD(IS)+1
-                      ELSE                   
-                        INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)=
-     .                    IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),2)
-                      END IF
-                      TAGNOD(IN) = 1                     
+                     IF(IN/=0) THEN
+                       IS =NOD2NSV(IN)
+                       IF(IS/=0)THEN
+                         IF(TAGNOD(IN)==0) THEN ! beware to GRNOD NODENS
+                           INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=
+     .                     IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),2)
+                           INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
+                           KAD(IS)=KAD(IS)+1
+                         ELSE                   
+                           INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)=
+     .                     IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),2)
+                         END IF
+                         TAGNOD(IN) = 1     
+                       ENDIF                
                     END IF
                   END DO
                ENDIF
@@ -321,18 +338,20 @@ C
                   DO I=1,NNE
                     DO J=1,4
                       IN = IGRSURF(ISU1)%NODES(I,J)
-                      IS = NOD2NSV(IN)
-                      IF (IS/=0)THEN
-                        IF(TAGNOD(IN)==0) THEN
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=
-     .                      IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),0)
-                          INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
-                          KAD(IS)=KAD(IS)+1
-                          TAGNOD(IN) = 1  
-                        ELSE                   
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)=
-     .                      IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),0)
-                        ENDIF
+                      IF(IN/=0) THEN
+                        IS =NOD2NSV(IN)
+                        IF (IS/=0)THEN
+                          IF(TAGNOD(IN)==0) THEN
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=
+     .                        IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),0)
+                            INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
+                            KAD(IS)=KAD(IS)+1
+                            TAGNOD(IN) = 1  
+                          ELSE                   
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)=
+     .                        IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),0)
+                          ENDIF
+                       ENDIF
                       ENDIF
                     END DO
                   ENDDO
@@ -341,15 +360,17 @@ C
                   DO I=1,NNE
                     DO J=1,4
                       IN = IGRSURF(ISU2)%NODES(I,J)
-                      IS = NOD2NSV(IN)
-                      IF (IS/=0)THEN
-                        IF(TAGNOD(IN)==0) THEN
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=  IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),1)
-                          INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
-                          KAD(IS)=KAD(IS)+1
-                          TAGNOD(IN) = 1                     
-                        ELSE                   
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)=  IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),1)
+                      IF(IN/=0) THEN
+                        IS =NOD2NSV(IN)
+                        IF (IS/=0)THEN
+                          IF(TAGNOD(IN)==0) THEN
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=  IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),1)
+                            INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
+                            KAD(IS)=KAD(IS)+1
+                            TAGNOD(IN) = 1                     
+                          ELSE                   
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)=  IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),1)
+                          ENDIF
                         ENDIF
                       ENDIF
                     END DO
@@ -376,15 +397,17 @@ C
                   DO I=1,IGRSURF(ISU2)%NSEG
                    DO K=1,4
                      IN=IGRSURF(ISU2)%NODES(I,K)
-                     IS =NOD2NSV(IN)
-                     IF (IS/=0)THEN
-                        IF(TAGNOD(IN)==0) THEN
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))= IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),0)
-                          INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
-                          KAD(IS)=KAD(IS)+1
-                          TAGNOD(IN) = 1                     
-                        ELSE                   
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)= IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),0)
+                     IF(IN/=0) THEN
+                       IS =NOD2NSV(IN)
+                       IF (IS/=0)THEN
+                          IF(TAGNOD(IN)==0) THEN
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))= IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),0)
+                            INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
+                            KAD(IS)=KAD(IS)+1
+                            TAGNOD(IN) = 1                     
+                          ELSE                   
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)= IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),0)
+                          ENDIF
                         ENDIF
                      ENDIF
 
@@ -398,16 +421,18 @@ C
                   DO I=1,IGRSURF(ISU1)%NSEG
                    DO K=1,4
                      IN=IGRSURF(ISU1)%NODES(I,K)
-                     IS =NOD2NSV(IN)
-                     IF (IS/=0)THEN
-                       IF(TAGNOD(IN)==0) THEN
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=
-     .                      IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),1)
-                          INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
-                          KAD(IS)=KAD(IS)+1
-                          TAGNOD(IN) = 1                     
-                       ELSE                   
-                          INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)= IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),1)
+                     IF(IN/=0) THEN
+                       IS =NOD2NSV(IN)
+                       IF (IS/=0)THEN
+                         IF(TAGNOD(IN)==0) THEN
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS))=
+     .                        IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)),1)
+                            INTBUF_TAB(NI)%LISUBS(KAD(IS))=KSUB
+                            KAD(IS)=KAD(IS)+1
+                            TAGNOD(IN) = 1                     
+                         ELSE                   
+                            INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1)= IBSET(INTBUF_TAB(NI)%INFLG_SUBS(KAD(IS)-1),1)
+                         ENDIF
                        ENDIF
                      ENDIF
                    ENDDO
@@ -451,12 +476,12 @@ C
 
 
         END DO
-
+        ENDIF
 
 C----------------------------------------
 C  TAG main segments calculate addresses
 C---------------------------------------------
-
+        IF(NRTM > 0) THEN
 C
 C           Use IADD (1: Numnod+1)
         IADD(1:NUMNOD+1) = 0
@@ -500,7 +525,6 @@ C           utilise NOD2RTM(4*NRTM0)
            NOD2RTM(KAD(IN)) = IM
               KAD(IN) = KAD(IN) + 1
         ENDDO
-
 C
 C      prepare ADDSUBM : 
         KSUB=0
@@ -879,6 +903,410 @@ C
 C
            END IF
         END DO
+       ENDIF
+
+C----------------------------------------
+C  TAG edge 1D element  calculate addresses
+C---------------------------------------------
+       IF(NEDGE_1D > 0) THEN
+
+C
+C          Use IADD (1: Numnod+1)
+          IADD(1:NUMNOD+1) = 0
+
+          DO I=1,NEDGE_1D
+            IN       = INTBUF_TAB(NI)%LEDGE(NLEDGE*(I-1)+5)
+            IADD(IN) = IADD(IN)+1
+            IN       = INTBUF_TAB(NI)%LEDGE(NLEDGE*(I-1)+6)
+            IADD(IN) = IADD(IN)+1
+          END DO
+C
+          CUR=1
+          DO I=1,NUMNOD
+             NEXT     =CUR+IADD(I)
+             IADD(I)  =CUR
+             CUR      =NEXT
+          END DO
+          IADD(NUMNOD+1)=CUR
+C
+C           utilise KAD(NUMNOD)
+          DO I=1,NUMNOD
+             KAD(I)=IADD(I)
+          END DO
+C
+C           utilise NOD2RTM(4*NRTM0)
+          DO I=1,NEDGE_1D
+             IN       = INTBUF_TAB(NI)%LEDGE(NLEDGE*(I-1)+5)
+             NOD2EDG(KAD(IN)) = I
+             KAD(IN) = KAD(IN) + 1
+             IN       = INTBUF_TAB(NI)%LEDGE(NLEDGE*(I-1)+6)
+             NOD2EDG(KAD(IN)) = I
+             KAD(IN) = KAD(IN) + 1
+          ENDDO
+
+C
+C      prepare ADDSUBE : 
+          KSUB=0
+          DO JSUB=1,NINTSUB
+            ID1=NOM_OPT(1,NINTER+JSUB)
+            CALL FRETITL2(TITR1,
+     .                NOM_OPT(LNOPT1-LTITR+1,NINTER+JSUB),LTITR)
+
+            IF(NOM_OPT(2,NINTER+JSUB)==NOINT
+     .           .AND.NOM_OPT(5,NINTER+JSUB)==1)THEN
+                KSUB=KSUB+1
+C
+C      Lisub (ksub) = internal JSUB of the sub-interface
+               INTBUF_TAB(NI)%LISUB(KSUB) = JSUB
+               INTBUF_TAB(NI)%TYPSUB(KSUB) = 1
+C
+                TAGEDG(1:NEDGE_1D) = 0
+C
+                ISU1  =NOM_OPT(3,NINTER+JSUB)
+                NNE  =IGRSURF(ISU1)%NSEG
+                DO I=1,NNE
+                   IN=IGRSURF(ISU1)%NODES(I,1)
+                   KM=0
+                   DO JAD=IADD(IN),IADD(IN+1)-1
+                      IM = NOD2EDG(JAD)
+                      IFNRT = 0
+                      DO J=1,4
+                         II=IGRSURF(ISU1)%NODES(I,J)
+                         IF(II/=0)THEN
+                           DO K=5,6
+                              IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                           END DO
+                         ENDIF
+                      ENDDO
+                      IF(IFNRT >= 2) THEN
+                          KM=IM 
+                          EXIT
+                      ENDIF
+                   ENDDO
+
+                   IF(KM/=0)THEN
+                     IF(TAGEDG(KM)==0)THEN
+                       INTBUF_TAB(NI)%ADDSUBE(KM)=INTBUF_TAB(NI)%ADDSUBE(KM)+1
+                       TAGEDG(KM)=1
+                     ENDIF
+                   END IF
+                END DO
+C
+                ISU2  =NOM_OPT(6,NINTER+JSUB)
+                IF(ISU2/=0)THEN
+                   NNE  =IGRSURF(ISU2)%NSEG
+                   DO I=1,NNE
+                      IN=IGRSURF(ISU2)%NODES(I,1)
+                      KM=0
+  
+                      DO JAD=IADD(IN),IADD(IN+1)-1
+                         IM = NOD2EDG(JAD)
+                         IFNRT = 0
+                         DO J=1,4
+                            II=IGRSURF(ISU2)%NODES(I,J)
+                            IF(II/=0)THEN
+                               DO K=5,6
+                                  IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                               END DO
+                            ENDIF
+                          ENDDO
+                          IF(IFNRT >= 2) THEN
+                            KM=IM 
+                            EXIT
+                          ENDIF
+                      ENDDO
+
+                      IF(KM/=0)THEN
+                         IF(TAGEDG(KM)==0)THEN
+                           INTBUF_TAB(NI)%ADDSUBE(KM)=INTBUF_TAB(NI)%ADDSUBE(KM)+1
+                           TAGEDG(KM)=1
+                         ENDIF
+                      END IF
+                   END DO
+                END IF
+C
+C
+
+
+C
+C---------Case of subinter defined with inter 0 -------------
+C
+           ELSEIF(NOM_OPT(2,NINTER+JSUB) == 0 
+     .      .AND. NOM_OPT(5,NINTER+JSUB) == 1) THEN
+
+                KSUB=KSUB+1
+               INTBUF_TAB(NI)%LISUB (KSUB) = JSUB
+C
+                TAGEDG(1:NEDGE_1D) = 0
+C
+                ISU1  =NOM_OPT(3,NINTER+JSUB)
+                ISU2  =NOM_OPT(6,NINTER+JSUB)
+
+                IF(ISU2 > 0 ) INTBUF_TAB(NI)%TYPSUB(KSUB) = 2
+                IF(ISU1 > 0 ) THEN
+                  INTBUF_TAB(NI)%TYPSUB(KSUB) = 3
+                  NNE  =IGRSURF(ISU1)%NSEG
+                  DO I=1,NNE
+                     IN=IGRSURF(ISU1)%NODES(I,1)
+                     KM=0
+
+                     DO JAD=IADD(IN),IADD(IN+1)-1
+                       IM = NOD2EDG(JAD)
+                       IFNRT = 0
+                       DO J=1,4
+                         II=IGRSURF(ISU1)%NODES(I,J)
+                         IF(J/=4.OR.II/=0)THEN
+                           DO K=5,6
+                              IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                           END DO
+                         ENDIF
+                       ENDDO
+                       IF(IFNRT >= 2) THEN
+                          KM=IM 
+                          EXIT
+                       ENDIF
+                    ENDDO
+
+                    IF(KM/=0)THEN
+                      IF(TAGEDG(KM)==0)THEN
+                        INTBUF_TAB(NI)%ADDSUBE(KM)=INTBUF_TAB(NI)%ADDSUBE(KM)+1
+                        TAGEDG(KM)=1
+                      ENDIF
+                    END IF
+                  END DO
+                ENDIF
+C
+
+                IF(ISU2 > 0 ) THEN
+                  NNE  =IGRSURF(ISU2)%NSEG
+                  DO I=1,NNE
+                     IN=IGRSURF(ISU2)%NODES(I,1)
+                     KM=0
+
+                     DO JAD=IADD(IN),IADD(IN+1)-1
+                       IM = NOD2EDG(JAD)
+                       IFNRT = 0
+                       DO J=1,4
+                         II=IGRSURF(ISU2)%NODES(I,J)
+                         IF(J/=4.OR.II/=0)THEN
+                           DO K=5,6
+                              IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                           END DO
+                         ENDIF
+                       ENDDO
+                       IF(IFNRT >= 2) THEN
+                          KM=IM 
+                          EXIT
+                       ENDIF
+                    ENDDO
+
+                    IF(KM/=0)THEN
+                      IF(TAGEDG(KM)==0) THEN
+                         INTBUF_TAB(NI)%ADDSUBE(KM)=INTBUF_TAB(NI)%ADDSUBE(KM)+1
+                         TAGEDG(KM)=1
+                      ENDIF
+                    END IF
+                  END DO
+                ENDIF
+C
+           END IF
+
+          END DO
+C
+          CUR=1
+          DO IM=1,NEDGE_1D
+            NEXT                  =CUR+INTBUF_TAB(NI)%ADDSUBE(IM)
+            INTBUF_TAB(NI)%ADDSUBE(IM)=CUR
+            CUR                  =NEXT
+          END DO
+         INTBUF_TAB(NI)%ADDSUBE(NEDGE_1D+1)=CUR
+C
+C           utilise KAD(1:NRTM0)
+          DO IM=1,NEDGE_1D
+            KAD(IM)=INTBUF_TAB(NI)%ADDSUBE(IM)
+          END DO
+
+C
+C      prepare LISUBM : 
+C      LISUBM(ADDSUBM(IM):ADDSUBM(IM+1)-1) SS. INTERF CONTENANT LE SEG.MAIN IM
+          KSUB=0
+          DO JSUB=1,NINTSUB
+             IF(NOM_OPT(2,NINTER+JSUB)==NOINT
+     .           .AND.NOM_OPT(5,NINTER+JSUB)==1)THEN
+                KSUB=KSUB+1
+C
+                TAGEDG(1:NEDGE_1D) = 0
+C
+                ISU1 =NOM_OPT(3,NINTER+JSUB)
+                NNE  =IGRSURF(ISU1)%NSEG
+                DO I=1,NNE
+                   IN=IGRSURF(ISU1)%NODES(I,1)
+                   KM=0
+                   DO JAD=IADD(IN),IADD(IN+1)-1
+                      IM = NOD2EDG(JAD)
+                      IFNRT = 0
+                      DO J=1,4
+                         II=IGRSURF(ISU1)%NODES(I,J)
+                         IF(II/=0)THEN
+                           DO K=5,6
+                              IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                           END DO
+                         ENDIF
+                      ENDDO
+                      IF(IFNRT >= 2) THEN
+                          KM=IM 
+                          EXIT
+                      ENDIF
+                   ENDDO
+                   IF(KM/=0)THEN
+                     IF(TAGEDG(KM)==0)THEN
+                       INTBUF_TAB(NI)%INFLG_SUBE(KAD(IM))=
+     .                   IBSET(INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM)),0)
+                       INTBUF_TAB(NI)%LISUBE(KAD(KM))=KSUB
+                       KAD(KM)=KAD(KM)+1
+                       TAGEDG(KM)=1
+C                   ELSE
+C                     INTBUF_TAB(NI)%INFLG_SUBM(KAD(IM)-1)=
+C    .                  IBSET(INTBUF_TAB(NI)%INFLG_SUBM(KAD(IM)-1),0)
+                     END IF
+                   END IF
+                END DO
+
+                ISU2  =NOM_OPT(6,NINTER+JSUB)
+                IF(ISU2/=0)THEN
+                  NNE  =IGRSURF(ISU2)%NSEG
+                  DO I=1,NNE
+                     IN=IGRSURF(ISU2)%NODES(I,1)
+                     KM=0
+                     DO JAD=IADD(IN),IADD(IN+1)-1
+                         IM = NOD2EDG(JAD)
+                         IFNRT = 0
+                         DO J=1,4
+                            II=IGRSURF(ISU2)%NODES(I,J)
+                            IF(II/=0)THEN
+                               DO K=5,6
+                                  IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                               END DO
+                            ENDIF
+                          ENDDO
+                          IF(IFNRT >= 2) THEN
+                            KM=IM 
+                            EXIT
+                          ENDIF
+                     ENDDO
+                     IF(KM/=0)THEN
+                       IF(TAGEDG(KM)==0)THEN
+                        INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM))=
+     .                    IBSET(INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM)),1)
+                        INTBUF_TAB(NI)%LISUBE(KAD(KM))=KSUB
+                        KAD(IM)=KAD(KM)+1
+                        TAGEDG(KM)=1
+                       ELSE
+                        INTBUF_TAB(NI)%INFLG_SUBE(KAD(IM)-1)=
+     .                    IBSET(INTBUF_TAB(NI)%INFLG_SUBE(KAD(IM)-1),1)
+                       END IF
+                     END IF
+                  END DO
+                END IF
+
+
+
+C
+C---------Case of subinter defined with inter 0 -------------
+C
+           ELSEIF(NOM_OPT(2,NINTER+JSUB) == 0 
+     .         .AND. NOM_OPT(5,NINTER+JSUB) == 1) THEN
+
+                KSUB=KSUB+1
+C
+                TAGEDG(1:NEDGE_1D) = 0
+C
+
+                ISU1 =NOM_OPT(3,NINTER+JSUB)
+                IF(ISU1 > 0 ) THEN
+
+                  NNE  =IGRSURF(ISU1)%NSEG
+                  DO I=1,NNE
+                    IN=IGRSURF(ISU1)%NODES(I,1)
+                    KM=0
+
+                    DO JAD=IADD(IN),IADD(IN+1)-1
+                      IM = NOD2EDG(JAD)
+                      IFNRT = 0
+                      DO J=1,4
+                         II=IGRSURF(ISU1)%NODES(I,J)
+                         IF(II/=0)THEN
+                           DO K=5,6
+                              IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                           END DO
+                         ENDIF
+                      ENDDO
+                      IF(IFNRT >= 2) THEN
+                          KM=IM 
+                          EXIT
+                      ENDIF
+                    ENDDO
+
+                    IF(KM/=0)THEN
+                      IF(TAGEDG(KM)==0)THEN
+                        INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM))=
+     .                    IBSET(INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM)),1)
+                        INTBUF_TAB(NI)%LISUBE(KAD(KM))=KSUB
+                        KAD(KM)=KAD(KM)+1
+                        TAGEDG(KM)=1
+                      ENDIF
+                    END IF
+
+                  END DO
+C
+                ENDIF
+C
+                ISU2 =NOM_OPT(6,NINTER+JSUB)
+                IF(ISU2 > 0 ) THEN
+
+                  NNE  =IGRSURF(ISU2)%NSEG
+                  DO I=1,NNE
+                    IN=IGRSURF(ISU2)%NODES(I,1)
+                    KM=0
+
+                    DO JAD=IADD(IN),IADD(IN+1)-1
+                       IM = NOD2EDG(JAD)
+                       IFNRT = 0
+                       DO J=1,4
+                         II=IGRSURF(ISU2)%NODES(I,J)
+                         IF(J/=4.OR.II/=0)THEN
+                           DO K=5,6
+                              IF(INTBUF_TAB(NI)%LEDGE(NLEDGE*(IM-1)+K)==II) IFNRT = IFNRT + 1
+                           END DO
+                         ENDIF
+                       ENDDO
+                       IF(IFNRT >= 2) THEN
+                          KM=IM 
+                          EXIT
+                       ENDIF
+                    ENDDO
+
+                    IF(KM/=0)THEN
+                      IF(TAGEDG(KM)==0)THEN
+                        INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM))=
+     .                    IBSET(INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM)),0)
+                        INTBUF_TAB(NI)%LISUBE(KAD(KM))=KSUB
+                        KAD(KM)=KAD(KM)+1
+                        TAGEDG(KM)=1
+                      ELSE
+                        INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM)-1)=
+     .                    IBSET(INTBUF_TAB(NI)%INFLG_SUBE(KAD(KM)-1),0)
+                      END IF
+                    END IF
+
+                  END DO
+C
+                ENDIF
+C
+           END IF
+        END DO
+      ENDIF
+
 C-------------------------------------
       RETURN
       END

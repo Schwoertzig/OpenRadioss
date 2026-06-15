@@ -1708,9 +1708,10 @@
             &cxx,        lbuf%vol,   lbuf%epsd,  lbuf%pla,&
             &lbuf%stra,  sigl,       lbuf%tsaiwu,&
             &lbuf%off,   ngl,        nel,        nft,&
-            &ilay,       npt,        ipg,&
+            &ilay,       npg,        ipg,&
             &jcvt,       jsph,       isorth,     lbuf%dmg,&
-            &elbuf_tab(ng)%bufly(ilay)%l_dmg,gbuf%ierr)
+            &elbuf_tab(ng)%bufly(ilay)%l_dmg,gbuf%ierr,&
+            &gbuf%noff,  nlay,       igtyp )
 !
             if (jsph == 0) then
               call mqviscb(&
@@ -2572,14 +2573,13 @@
                 &off      ,table    ,dfmax    ,tdel     ,nfunc     ,ifunc     )
               else if (irupt == 24) then
 !   --- orthotropic strain failure
-                call fail_orthstrain(&
-                &llt      ,nparam   ,nvarf    ,nfunc    ,ifunc    ,&
-                &npf      ,tf       ,tt       ,dt1      ,uparamf,ismstr,&
-                &ep1      ,ep2      ,ep3      ,ep4      ,ep5      ,ep6     ,&
-                &es1      ,es2      ,es3      ,es4      ,es5      ,es6     ,&
-                &ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6     ,&
-                &uvarf    ,off      ,ipg      ,ngl      ,dfmax    ,tdel    ,&
-                &gbuf%uelr,npg      ,deltax   ,lf_dammx )
+                call fail_orthstrain(failparam,                               &
+                 llt      ,nvarf    ,tt       ,dt1      ,ismstr   ,           &
+                 ep1      ,ep2      ,ep3      ,ep4      ,ep5      ,ep6     ,  &
+                 es1      ,es2      ,es3      ,es4      ,es5      ,es6     ,  &
+                 ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6     ,  &
+                 uvarf    ,off      ,ipg      ,ngl      ,dfmax    ,tdel    ,  &
+                 gbuf%uelr,npg      ,deltax   ,lf_dammx ,nvartmp  ,vartmp  )
               else if (irupt == 27) then
 ! ---   extended mohr coulomb failure model
                 call fail_emc(&
@@ -2641,15 +2641,14 @@
 !
               else if (irupt == 39) then
 !  --- gene1 failure model
-                call fail_gene1_s(&
-                &llt      ,nparam   ,nvarf    ,nfunc    ,ifunc    ,lbuf%off ,&
-                &npf      ,tf       ,tt       ,dt1      ,uparamf,ipg ,&
-                &ngl      ,gbuf%dt  ,epsp     ,uvarf    ,off      ,npg      ,&
-                &es1      ,es2      ,es3      ,es4      ,es5      ,es6      ,&
-                &ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6      ,&
-                &el_temp  ,voln     ,dfmax    ,tdel     ,deltax   ,table    ,&
-                &ir       ,elbuf_tab(ng),ilay ,ntabl_fail,itabl_fail,lf_dammx,&
-                &niparam  ,iparamf  )
+                call fail_gene1_s(mat_elem%mat_param(imat)%fail(ir),&
+                 llt      ,nvarf    ,uvarf    ,nvartmp  ,vartmp   ,lbuf%off ,&
+                 tt       ,dt1      ,ipg      ,&
+                 ngl      ,gbuf%dt  ,epsp     ,off      ,npg      ,&
+                 es1      ,es2      ,es3      ,es4      ,es5      ,es6      ,&
+                 ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6      ,&
+                 el_temp  ,voln     ,dfmax    ,tdel     ,deltax   ,table    ,&
+                 ir       ,elbuf_tab(ng),ilay ,ntabl_fail,itabl_fail,lf_dammx)
 !
               else if (irupt == 40) then
 !  --- rtcl failure model
@@ -2672,8 +2671,8 @@
               else if (irupt == 42) then
 !---- inievo failure model
                 call fail_inievo_s(&
-                &llt      ,nparam   ,nvarf    ,&
-                &table    ,ntabl_fail,itabl_fail,tt       ,uparamf,&
+                &llt      ,nparam   ,nvarf    ,nvartmp  ,vartmp   ,&
+                &table    ,ntabl_fail,itabl_fail,tt     ,uparamf  ,&
                 &ngl      ,el_len   ,dpla     ,epsp     ,uvarf    ,&
                 &ss1      ,ss2      ,ss3      ,ss4      ,ss5      ,ss6      ,&
                 &el_pla   ,el_temp  ,sigy     ,off      ,dfmax    ,&

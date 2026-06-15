@@ -59,10 +59,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_merge                         ../starter/source/constraints/general/merge/hm_preread_merge.F
 !||    hm_preread_properties                    ../starter/source/properties/hm_preread_properties.F
 !||    hm_preread_rbe3                          ../starter/source/constraints/general/rbe3/hm_preread_rbe3.F
+!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_bem                              ../starter/source/loads/bem/hm_read_bem.F
 !||    hm_read_drape                            ../starter/source/properties/composite_options/drape/hm_read_drape.F
 !||    hm_read_ebcs_inlet                       ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_inlet.F
+!||    hm_read_elasticity_temp_isotropic        ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_eref                             ../starter/source/loads/reference_state/eref/hm_read_eref.F
 !||    hm_read_fail_inievo                      ../starter/source/materials/fail/inievo/hm_read_fail_inievo.F
@@ -140,6 +142,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_thgrsurf                         ../starter/source/output/th/hm_read_thgrsurf.F
 !||    hm_read_work_hardening_tabulated         ../starter/source/materials/mat/mat131/work_hardening/hm_read_work_hardening_tabulated.F90
 !||    hm_read_xref                             ../starter/source/loads/reference_state/xref/hm_read_xref.F
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_set                                   ../starter/source/model/sets/hm_set.F
 !||    hm_surfnod                               ../starter/source/groups/hm_surfnod.F
@@ -159,6 +162,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    read_impdisp_fgeo                        ../starter/source/constraints/general/impvel/read_impdisp_fgeo.F
 !||    read_impvel_fgeo                         ../starter/source/constraints/general/impvel/read_impvel_fgeo.F
 !||    read_sensor_gauge                        ../starter/source/tools/sensor/read_sensor_gauge.F
+!||    rpart_inivel_check                       ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    sboxboxsurf                              ../starter/source/model/box/bigbox.F
 !||    set_admesh                               ../starter/source/model/remesh/set_admesh.F
 !||    sort_set                                 ../starter/source/model/sets/sort_sets.F

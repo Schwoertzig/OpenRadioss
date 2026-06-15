@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    fretitl2               ../starter/source/starter/freform.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod            ../starter/share/message_module/message_mod.F
+!||    reorder_mod            ../starter/share/modules1/reorder_mod.F
 !||====================================================================
       SUBROUTINE QGRHEAD(
      1       IXQ     ,PM      ,GEO     ,INUM    ,ISEL    ,
@@ -43,6 +44,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE ALE_MOD , ONLY : ALE
+      use reorder_mod
 C-----------------------------------------------
 C            A R G U M E N T S
 C-----------------------------------------------
@@ -99,6 +101,7 @@ C-----------------------------------------------
       INTEGER WORK(70000)
       EXTERNAL MY_SHIFTL,MY_SHIFTR,MY_AND
       INTEGER MY_SHIFTL,MY_SHIFTR,MY_AND
+      integer, dimension(:), allocatable :: index2
 C
       DATA MSKMLN /O'07770000000'/
       DATA MSKJAL /O'00000070000'/
@@ -115,6 +118,9 @@ C----------------------------------------------------------
 C   GLOBAL SORT ON ALL CRITERIA FOR ALL ELEMENTS
 C----------------------------------------------------------
 C
+      allocate(index2(numelq))
+      index2(1:numelq) = permutation%quad(1:numelq)
+
       DO I=1,NUMELQ
         EADD(I)=1
         ITRI(4,I)=I
@@ -246,6 +252,7 @@ C
       ENDDO
       DO I=1,NUMELQ
         CEP(I)=XEP(INDEX(I))
+        permutation%quad(i) = index2(index(i))
       ENDDO
       DO  K=1,7
         DO  I=1,NUMELQ
@@ -305,6 +312,7 @@ C--------------------------------------------------------------
         ENDIF
       ENDDO
       EADD(ND+1) = NUMELQ+1
+      deallocate(index2)
 C
       RETURN
       END

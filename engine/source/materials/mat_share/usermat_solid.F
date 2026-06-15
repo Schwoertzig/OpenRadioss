@@ -1367,14 +1367,13 @@ C---- tabulated failure model
      5         OFF      ,TABLE    ,DFMAX    ,TDEL  ,NFUNC    ,IFUNC )                                      
           ELSEIF (IRUPT == 24) THEN                                      
 c   --- Orthotropic strain failure
-              CALL FAIL_ORTHSTRAIN(
-     1        LLT      ,NPAR     ,NVARF    ,NFUNC    ,IFUNC    ,
-     2        NPF      ,TF       ,TT       ,DT1      ,UPARAMF  ,ISMSTR  ,
+              CALL FAIL_ORTHSTRAIN(FAILPARAM,
+     1        LLT      ,NVARF    ,TT       ,DT1      ,ISMSTR   ,
      3        EP1      ,EP2      ,EP3      ,EP4      ,EP5      ,EP6     ,
      4        ES1      ,ES2      ,ES3      ,ES4      ,ES5      ,ES6     ,
      5        S1       ,S2       ,S3       ,S4       ,S5       ,S6      ,
      6        UVARF    ,OFF      ,IPG      ,NGL      ,DFMAX    ,TDEL    ,
-     7        GBUF%UELR,NPG      ,DELTAX   ,LF_DAMMX )
+     7        GBUF%UELR,NPG      ,DELTAX   ,LF_DAMMX ,NVARTMP  ,VARTMP  )
           ELSEIF (IRUPT == 27) THEN                                      
 c ---   extended mohr coulomb failure model                                             
               CALL FAIL_EMC(
@@ -1444,15 +1443,14 @@ c  --- Orthotropic biquadratic failure model
 c
           ELSEIF (IRUPT == 39) THEN                                      
 c  --- GENE1 failure model                                  
-              CALL FAIL_GENE1_S(
-     1          LLT      ,NPAR     ,NVARF    ,NFUNC    ,IFUNC    ,LBUF%OFF ,
-     2          NPF      ,TF       ,TT       ,DT1      ,UPARAMF  ,IPG      ,
-     3          NGL      ,GBUF%DT  ,EPSP1    ,UVARF    ,OFF      ,NPG      ,     
-     4          ES1      ,ES2      ,ES3      ,ES4      ,ES5      ,ES6      ,           
-     5          S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,
-     6          EL_TEMP  ,VOLN     ,DFMAX    ,TDEL     ,DELTAX   ,TABLE    ,
-     7          IR       ,ELBUF_TAB(NG),ILAY ,NTABL_FAIL,ITABL_FAIL,LF_DAMMX,
-     8          NIPAR    ,IPARAMF  )
+            CALL FAIL_GENE1_S(mat_elem%mat_param(imat)%fail(ir)   ,   
+     1           LLT      ,NVARF    ,UVARF    ,NVARTMP  ,VARTMP   ,LBUF%OFF ,
+     2           TT       ,DT1      ,IPG      ,
+     3           NGL      ,GBUF%DT  ,EPSP1    ,OFF      ,NPG      ,     
+     4           ES1      ,ES2      ,ES3      ,ES4      ,ES5      ,ES6      ,        
+     5           S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,
+     6           EL_TEMP  ,VOLN     ,DFMAX    ,TDEL     ,DELTAX   ,TABLE    ,
+     7           IR       ,ELBUF_TAB(NG),ILAY ,NTABL_FAIL,ITABL_FAIL,LF_DAMMX)
 c
           ELSEIF (IRUPT == 40) THEN                                      
 c  --- RTCL failure model                                  
@@ -1475,8 +1473,8 @@ c
           ELSEIF (IRUPT == 42) THEN                                      
 C---- Inievo failure model
               CALL FAIL_INIEVO_S(
-     1          NEL      ,NPAR     ,NVARF    ,
-     2          TABLE    ,NTABL_FAIL,ITABL_FAIL,TT       ,UPARAMF  , 
+     1          NEL      ,NPAR     ,NVARF    ,NVARTMP  ,VARTMP   ,
+     2          TABLE    ,NTABL_FAIL,ITABL_FAIL,TT     ,UPARAMF  , 
      3          NGL      ,EL_LEN   ,DPLA     ,EPSP1    ,UVARF    ,     
      5          S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,               
      6          EL_PLA   ,EL_TEMP  ,SIGY     ,OFF      ,DFMAX    ,

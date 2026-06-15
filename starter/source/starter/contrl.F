@@ -67,6 +67,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    nbadmesh                       ../starter/source/model/remesh/nbadmesh.F
 !||    nbsph                          ../starter/source/elements/sph/nbsph.F
 !||--- uses       -----------------------------------------------------
+!||    adinertia_mod                  ../starter/share/modules1/adinertia_mod.F90
 !||    ascii_encoding_mu_letter_mod   ../starter/source/starter/ascii_encoding_mu_letter.F90
 !||    defaults_mod                   ../starter/source/modules/defaults_mod.F90
 !||    detonators_mod                 ../starter/share/modules1/detonators_mod.F
@@ -115,6 +116,7 @@ C-----------------------------------------------
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
       use element_mod , only : nixs
       use SEATBELT_MOD, only : NGUIDED_CABLE
+      use adinertia_mod, only : NBADDINER
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -724,6 +726,8 @@ C-----
 C-----
       CALL HM_OPTION_COUNT('/ADMAS',NODMAS)
 C-----
+      CALL HM_OPTION_COUNT('/ADINERTIA',NBADDINER)
+C-----
       CALL HM_OPTION_COUNT('/CLUSTER',NCLUSTER)
 C-----
       CALL HM_OPTION_COUNT('/PYTHON_FUNCT'  , NPYFUN)
@@ -1316,7 +1320,7 @@ C=======================================================================
      .      TITRE(150)(1:57),NODMAS,TITRE(183)(1:57),NIMPDISP,
      .      TITRE(184)(1:57),NIMPVEL,TITRE(185)(1:57),NIMPACC,
      .      TITRE(152)(1:57),NRIVET,TITRE(153)(1:57),NSECT,
-     .      TITRE(155)(1:57),NJOINT
+     .      TITRE(155)(1:57),NJOINT,TITRE(192)(1:57),NBADDINER
 C
       IF(NINTERFRIC > 0) WRITE (IOUT,'(A,I10)') TITRE(190)(1:57),NINTERFRIC
       IF(NALELK>0)WRITE(IOUT,'(A,I10)')

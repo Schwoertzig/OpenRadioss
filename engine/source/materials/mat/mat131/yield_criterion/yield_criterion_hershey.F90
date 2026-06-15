@@ -26,6 +26,10 @@
 !||    elasto_plastic_eq_stress      ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
 !||====================================================================
       module yield_criterion_hershey_mod
+! \brief Compute Hershey yield criterion for /MAT/LAW131
+! \details Compute the equivalent stress and its first and second-order
+!          derivatives using the Hershey isotropic yield criterion
+!          for /MAT/LAW131.
       contains
 !||====================================================================
 !||    yield_criterion_hershey        ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
@@ -45,7 +49,7 @@
           matparam ,nel      ,seq      ,iresp    ,eltype   ,                   &
           signxx   ,signyy   ,signzz   ,signxy   ,signyz   ,signzx   ,         &
           normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,         &
-          N        ,second_order)
+          N        ,second_order,offset)
 !----------------------------------------------------------------
 !   M o d u l e s
 !----------------------------------------------------------------
@@ -80,10 +84,11 @@
         real(kind=WP), dimension(nel), intent(inout) :: normzx   !< 1st derivative of equivalent stress wrt stress zx
         real(kind=WP), dimension(nel,6,6), intent(inout) :: N    !< 2nd derivative of equivalent stress
         logical,                       intent(in)    :: second_order !< Flag for computing second order derivatives
+        integer,                       intent(in)    :: offset   !< Offset in the material parameters array for yield criterion parameters
 !----------------------------------------------------------------
 !  L o c a l  V a r i a b l e s
 !----------------------------------------------------------------
-        integer :: offset,i,j
+        integer :: i,j
         real(kind=WP), dimension(mvsiz,6) :: strs
         real(kind=WP), dimension(mvsiz,3) :: pr_strs
         real(kind=WP), dimension(mvsiz,3,3) :: dir
@@ -117,7 +122,6 @@
         !=======================================================================
         !< - Hershey yield criterion and its derivatives
         !=======================================================================
-        offset = matparam%iparam(3)
         !< Hershey exponent
         nexp = matparam%uparam(offset + 1)
         !< Compute constant

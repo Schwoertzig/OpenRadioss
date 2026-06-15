@@ -1420,7 +1420,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER 
-     .        I,K,L,M,N,JJ,
+     .        K,L,N,
      .        CNRTM_L,CNSN_L,CNMN_L,MY_NODE
 C ----------------------------------------
       DO K=1,NSN
@@ -1529,7 +1529,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,K,N
+      INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
       ALLOCATE(IBUF(DIM1))
@@ -1620,9 +1620,9 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER 
      .        NSN,NRTM,NMN,
-     .        I,J,K,N,N1,N2,N3,N4,E,
+     .        I,K,N,N1,N2,N3,N4,
      .        CNSN_L,CNRTM_L,CNMN_L,NSN0,
-     .        NSN_FE, NSN_IGE
+     .        NSN_IGE
 C ----------------------------------------
       IF(IPARI(7) == 7) THEN
         NRTM = IPARI(4)
@@ -1808,7 +1808,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,P,E,MULTOK,MSGID,
+      INTEGER I,K,N,P,E,MULTOK,
      .        SPLIST,C_NSNR,MY_NODE
       INTEGER NUMP(NSPMD),WORK(70000)
 
@@ -2072,7 +2072,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,SIZ,
+      INTEGER K,SIZ,
      .        L,SIZ1,SIZ2,M,N
 
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
@@ -2200,13 +2200,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER :: I,J,K,L,M,N1,N2,JJ,N
+      INTEGER :: I,J,K,L,M,JJ,N
       INTEGER :: ID,E1,E2,K1,K2
       INTEGER :: NB_FREE_EDGES            ! number of free edges
       INTEGER :: NB_INTERNAL_EDGES        ! number of edges internal to the domain
       INTEGER :: NB_BOUNDARY_EDGES_LOCAL  ! boundary edges treated by current domain 
       INTEGER :: NB_BOUNDARY_EDGES_REMOTE ! boundary edges treated by the other domain 
-      INTEGER :: NEDGE_1D_L, NB_1D_EDGES          ! number of 1D edges
+      INTEGER :: NB_1D_EDGES          ! number of 1D edges
       INTEGER, DIMENSION(:),ALLOCATABLE :: KCANDMS,ICANDMS,CANDMS
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAGREMCAND_E2E, TAGREMCAND_E2S ! tabs to tag edges to be deactivated 
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAG1D
@@ -2245,7 +2245,7 @@ C FREE EDGES
 C INTERNAL EDGES 
       NB_INTERNAL_EDGES = 0
       DO I=1, NEDGE
-        IF(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE)/=3) THEN
+        IF(IABS(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE))/=3) THEN
           E1=INTBUF_TAB%LEDGE(1+(I-1)*NLEDGE)
           K1=SEGLOC(E1)
           E2=INTBUF_TAB%LEDGE(3+(I-1)*NLEDGE)
@@ -2262,12 +2262,19 @@ C INTERNAL EDGES
             TAG_EDGE(ID) = I
             ID = ID + 1
           ENDIF
+        ELSE
+          E1=INTBUF_TAB%LEDGE(15+(I-1)*NLEDGE)
+          IF(CEP(E1)==PROC) THEN
+            NB_INTERNAL_EDGES = NB_INTERNAL_EDGES + 1
+            TAG_EDGE(ID) = I
+            ID = ID + 1
+          ENDIF
         ENDIF
       ENDDO
 
       NB_BOUNDARY_EDGES_LOCAL = 0
       DO I=1, NEDGE
-        IF(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE)/=3) THEN
+        IF(IABS(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE))/=3) THEN
           E1=INTBUF_TAB%LEDGE(1+(I-1)*NLEDGE)
           K1=SEGLOC(E1)
           E2=INTBUF_TAB%LEDGE(3+(I-1)*NLEDGE)
@@ -2288,7 +2295,7 @@ C INTERNAL EDGES
 
       NB_BOUNDARY_EDGES_REMOTE = 0
       DO I=1, NEDGE
-        IF(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE)/=3) THEN
+        IF(IABS(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE))/=3) THEN
           E1=INTBUF_TAB%LEDGE(1+(I-1)*NLEDGE)
           K1=SEGLOC(E1)
           E2=INTBUF_TAB%LEDGE(3+(I-1)*NLEDGE)
@@ -2307,22 +2314,10 @@ C INTERNAL EDGES
         ENDIF
       ENDDO
 
-C INTERNAL EDGES 
-      NB_1D_EDGES = 0
-      DO I=1,NEDGE
-        IF(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE)==3) THEN
-          E1=INTBUF_TAB%LEDGE(15+(I-1)*NLEDGE)
-          IF(CEP(E1)==PROC) THEN
-            NB_1D_EDGES = NB_1D_EDGES + 1
-            TAG_EDGE(ID) = I
-            ID = ID + 1
-          ENDIF
-        ENDIF
-      ENDDO
       ALLOCATE(TAG1D(NUMNOD))
       TAG1D(1:NUMNOD)=0
       DO I=1,NEDGE
-        IF(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE)==3) THEN
+        IF(IABS(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE))==3) THEN
           E1=INTBUF_TAB%LEDGE(15+(I-1)*NLEDGE)
           IF(CEP(E1)==PROC) THEN
             N=INTBUF_TAB%LEDGE(5+(I-1)*NLEDGE)
@@ -2529,8 +2524,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER :: I,J,K,JJ ,ss1,ss2,mm1,mm2 ,s,m
-      INTEGER :: ID,E1,E2,K1,K2
+      INTEGER :: I,J,JJ
+      INTEGER :: ID
       INTEGER, DIMENSION(:), ALLOCATABLE :: CANDM_E2E,CANDS_E2E
       INTEGER, DIMENSION(:), ALLOCATABLE :: CANDM_E2S,CANDS_E2S
 
@@ -2651,7 +2646,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,SIZ,LL,
+      INTEGER I,K,SIZ,
      .        L,SIZ1 ,SIZ2 ,M ,N ,NS
 
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
@@ -3067,7 +3062,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,L,N,N2,NSN_L2,NMN_L2,
+      INTEGER K,L,N,N2,NSN_L2,NMN_L2,
      .        SIZ_XSAV,TAG
 
       my_real, DIMENSION(:),ALLOCATABLE :: RBUF
@@ -3506,7 +3501,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER 
      .        NSN,NRTM,NRTS,NMN,
-     .        I,J,K,N,IE,IE_LOC,PROC2,
+     .        I,K,N,IE,IE_LOC,PROC2,
      .        CNSN_L,CNMN_L,CNRTS_L,CNRTM_L
 C ----------------------------------------
       NRTS = IPARI(3)
@@ -3642,7 +3637,7 @@ C-----------------------------------------------
      .        NSN,NRTM,NMN,NRTS
 
       INTEGER 
-     .        I,J,K,L,M,N,N1,N2,JJ,
+     .        I,K,N,N1,N2,
      .        CNRTM_L,CNRTS_L,CNSN_L,CNMN_L
 C ----------------------------------------
       NRTS = IPARI(3)
@@ -3763,13 +3758,13 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,L,N,N1,N2,P,E,MULTOK,MSGID,
-     .        SPLIST,C_NRTSR
+      INTEGER I,K,L,N,N1,N2,E,
+     .        C_NRTSR
       INTEGER NUMP(NSPMD),WORK(70000)
 
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
      .  IBUF_E,IBUF_N,NRTSLOCAL,CPULOCAL,CANDR,PLIST,
-     .  INDEX,CANDS
+     .  INDEX
 
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ITRI
 
@@ -3954,9 +3949,9 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER 
-     .        NSN,NRTM,NRTS,NME,
-     .        J,K,IE,
-     .        IGE,IGN,NAD,EAD,NAS,
+     .        NSN,NRTS,NME,
+     .        K,IE,
+     .        IGE,IGN,
      .        CNME_L,CNSN_L
 
 C ----------------------------------------
@@ -4048,7 +4043,7 @@ C-----------------------------------------------
       INTEGER 
      .        NSN,NRTM,NMN,NLN,
      .        NLINS,NLINM,NLINSA,NLINMA,NSNE,NMNE,
-     .        I,J,K,L,N,N1,N2,N3,N4,E,
+     .        I,K,L,N,N1,N2,N3,N4,
      .        NL,N1L,N2L,N3L,N4L,
      .        NCONT,NCONT1,NCONT2,
      .        CNSN_L,CNRTM_L,CNMN_L,CNLN_L,
@@ -4410,7 +4405,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K
+      INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
       ALLOCATE(IBUF(DIM1))
@@ -4512,7 +4507,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,P,E,MULTOK,MSGID,
+      INTEGER I,K,N,P,E,MULTOK,
      .        SPLIST,C_NSNR
       INTEGER NUMP(NSPMD),WORK(70000)
 
@@ -4736,12 +4731,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,L,N,P,N1L,N2L,N1,N2,E,MULTOK,MSGID,
-     .        SPLIST,C_NLINSR
+      INTEGER I,K,L,N,P,N1L,N2L,N1,N2,E,
+     .        C_NLINSR
       INTEGER NUMP(NSPMD),WORK(70000)
 
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
-     .  IBUF_E,IBUF_N,NRTSLOCAL,CPULOCAL,CANDR,PLIST,
+     .  IBUF_E,IBUF_N,NRTSLOCAL,CPULOCAL,CANDR,
      .  INDEX
 
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ITRI
@@ -4954,7 +4949,7 @@ C-----------------------------------------------
      .        NSN,NRTM,NMN,NRTS,INTTH, NMNG,FLAGLOADP
 
       INTEGER 
-     .        I,J,K,L,M,N,N1,N2,N3,N4,JJ,SPLIST,
+     .        I,K,N,SPLIST,
      .        CNRTM_L,CNRTS_L,CNSN_L,CNMN_L
 C ----------------------------------------
       NRTS = IPARI(3)
@@ -5070,7 +5065,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER TAB(*),TAG_II(*),II_STOK_L,MULTIMP,NCONT,
+      INTEGER TAB(*),TAG_II(*),II_STOK_L,
      .        DIM1,DIM2
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -5119,7 +5114,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N
+      INTEGER I,K,N
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
       ALLOCATE(IBUF(DIM1))
@@ -5256,7 +5251,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER 
      .        NSN,NRTM,NMN,NRTS,
-     .        I,J,K,N,N1,N2,N3,N4,E,IE,IE_LOC,PROC2,
+     .        I,K,N,N1,N2,N3,N4,IE,IE_LOC,
      .        CNSN_L,CNRTM_L,CNMN_L,NRTSE,NSNE,NSN0,NSNE_COUNT,SE1,
      .        CNRTS_L
       INTEGER 
@@ -5533,11 +5528,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER TAB(5,*),TAG_SEG(*),DIM1,DIM2,NODLOCAL(*)
+      INTEGER TAB(5,*),TAG_SEG(*),DIM1,NODLOCAL(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N1,N2,N3,N4,NI
+      INTEGER I,K,N1,N2,N3,N4,NI
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: IBUF
 C ----------------------------------------
       ALLOCATE(IBUF(5,DIM1))
@@ -5598,7 +5593,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER PROC,NSN,NSN_L,II_STOK,MULTIMP,NCONT,
      .        TAG_SEGM2(*),NOINT,INACTI,
-     .        TAG_SCRATCH(*) , II_STOK_L, ITYP 
+     .        TAG_SCRATCH(*) , II_STOK_L
       INTEGER, INTENT(INOUT) :: NINDX_SCRT
       INTEGER, INTENT(IN) :: NUMNOD_L
       INTEGER, DIMENSION(*), INTENT(INOUT) :: INDX_SCRT
@@ -5631,7 +5626,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,P,E,MULTOK,MSGID,
+      INTEGER I,K,N,P,E,MULTOK,
      .        SPLIST,C_NSNR,NN,SE1,MY_NODE
       INTEGER NUMP(NSPMD),WORK(70000)
 
@@ -5640,7 +5635,6 @@ C-----------------------------------------------
      .  INDEX
 
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ITRI
-      LOGICAL CONDITION
 C ----------------------------------------
 C       w to be done :modif w/ edge
 C ----------------------------------------
@@ -5991,7 +5985,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER 
      .        NSN,NRTM,NMN,
-     .        I,J,K,L,N,N1,N2,N3,N4,E,
+     .        I,K,N,N1,N2,N3,N4,
      .        CNSN_L,CNRTM_L,CNMN_L,NADMSR_L,NRTM_L
 C ----------------------------------------
       NRTM = IPARI(4)
@@ -6195,7 +6189,7 @@ C-----------------------------------------------
       INTEGER :: ID
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
       INTEGER :: NB_FREE_EDGES
-      INTEGER :: NB_INTERNAL_EDGES,NB_1D_EDGES
+      INTEGER :: NB_INTERNAL_EDGES
       INTEGER :: NB_BOUNDARY_EDGES_LOCAL ! boundary edges treated by current domain 
       INTEGER :: NB_BOUNDARY_EDGES_REMOTE ! boundary edges treated by the other domain 
       INTEGER :: IAS,JAS,IS,N1,N2,I1,I2
@@ -6207,7 +6201,7 @@ C ----------------------------------------
       NB_FREE_EDGES = 0
 C FREE EDGES
       DO I=1, NEDGE
-        IF(LEDGE(7,I)/=3) THEN
+        IF(IABS(LEDGE(7,I))/=3) THEN
           E1=LEDGE(1,I)
           K1=SEGLOC(E1)
           E2=LEDGE(3,I)
@@ -6289,7 +6283,7 @@ C orientation segment 2
 C INTERNAL EDGES 
       NB_INTERNAL_EDGES = 0
       DO I=1, NEDGE
-        IF(LEDGE(7,I)/=3) THEN
+        IF(IABS(LEDGE(7,I))/=3) THEN
           E1=LEDGE(1,I)
           K1=SEGLOC(E1)
           E2=LEDGE(3,I)
@@ -6386,12 +6380,60 @@ C orientation segment 2
             ASSERT(TAG_SM(I2) > 0)
 
           END IF
+        ELSE
+          E1=LEDGE(15,I)
+          IF(CEP(E1)==PROC) THEN
+            NB_INTERNAL_EDGES = NB_INTERNAL_EDGES + 1
+
+! Internal edge 
+            TAG_EDGE(ID) = I
+C at starter phase 9 and 10 are used to save PROC and local ID
+            ASSERT(LEDGE(9,I) == PROC) 
+            ASSERT(LEDGE(10,I) == ID)
+            LEDGE(9,I) = PROC 
+            LEDGE(10,I) = ID
+
+            ID = ID + 1
+            CMPT=CMPT+1
+            IBUF(CMPT) = 0
+            CMPT=CMPT+1
+            IBUF(CMPT) = 0
+            CMPT=CMPT+1
+            IBUF(CMPT) = 0
+            CMPT=CMPT+1
+            IBUF(CMPT) = 0
+            CMPT=CMPT+1
+            IBUF(CMPT) = NODLOCAL(LEDGE(5,I))
+            CMPT=CMPT+1
+            IBUF(CMPT) = NODLOCAL(LEDGE(6,I))
+            CMPT=CMPT+1
+            IBUF(CMPT) = LEDGE(7,I)
+            CMPT=CMPT+1
+            IBUF(CMPT) = I !  + 10000* ITAB(LEDGE(6,I))
+            CMPT=CMPT+1
+            IBUF(CMPT) = 1 !  Weight                         
+C orientation  segment 1
+            CMPT=CMPT+1 
+            IBUF(CMPT) = 0
+            CMPT = CMPT +1 
+            IBUF(CMPT) = 0
+            CMPT=CMPT+1
+            IBUF(CMPT) = 0
+
+C orientation segment 2
+            CMPT=CMPT+1
+            IBUF(CMPT) = 0
+            CMPT = CMPT +1 
+            IBUF(CMPT) = 0
+            CMPT=CMPT+1
+            IBUF(CMPT) = 0
+          END IF
         ENDIF
       ENDDO
 
       NB_BOUNDARY_EDGES_LOCAL = 0
       DO I=1, NEDGE
-        IF(LEDGE(7,I)/=3) THEN
+        IF(IABS(LEDGE(7,I))/=3) THEN
           E1=LEDGE(1,I)
           K1=SEGLOC(E1)
           E2=LEDGE(3,I)
@@ -6493,7 +6535,7 @@ C orientation segment 2
 
       NB_BOUNDARY_EDGES_REMOTE = 0
       DO I=1, NEDGE
-        IF(LEDGE(7,I)/=3) THEN
+        IF(IABS(LEDGE(7,I))/=3) THEN
           E1=LEDGE(1,I)
           K1=SEGLOC(E1)
           E2=LEDGE(3,I)
@@ -6587,63 +6629,6 @@ C orientation segment 2
         ENDIF
       ENDDO
 
-C
-C 1D element EDGES
-C INTERNAL EDGES 
-      NB_1D_EDGES = 0
-      DO I=1, NEDGE
-        IF(LEDGE(7,I)==3) THEN
-          E1=LEDGE(15,I)
-          IF(CEP(E1)==PROC) THEN
-            NB_1D_EDGES = NB_1D_EDGES + 1
-
-! Internal edge 
-            TAG_EDGE(ID) = I
-C at starter phase 9 and 10 are used to save PROC and local ID
-            ASSERT(LEDGE(9,I) == PROC) 
-            ASSERT(LEDGE(10,I) == ID)
-            LEDGE(9,I) = PROC 
-            LEDGE(10,I) = ID
-
-            ID = ID + 1
-            CMPT=CMPT+1
-            IBUF(CMPT) = 0
-            CMPT=CMPT+1
-            IBUF(CMPT) = 0
-            CMPT=CMPT+1
-            IBUF(CMPT) = 0
-            CMPT=CMPT+1
-            IBUF(CMPT) = 0
-            CMPT=CMPT+1
-            IBUF(CMPT) = NODLOCAL(LEDGE(5,I))
-            CMPT=CMPT+1
-            IBUF(CMPT) = NODLOCAL(LEDGE(6,I))
-            CMPT=CMPT+1
-            IBUF(CMPT) = LEDGE(7,I)
-            CMPT=CMPT+1
-            IBUF(CMPT) = I !  + 10000* ITAB(LEDGE(6,I))
-            CMPT=CMPT+1
-            IBUF(CMPT) = 1 !  Weight                         
-C orientation  segment 1
-            CMPT=CMPT+1 
-            IBUF(CMPT) = 0
-            CMPT = CMPT +1 
-            IBUF(CMPT) = 0
-            CMPT=CMPT+1
-            IBUF(CMPT) = 0
-
-C orientation segment 2
-            CMPT=CMPT+1
-            IBUF(CMPT) = 0
-            CMPT = CMPT +1 
-            IBUF(CMPT) = 0
-            CMPT=CMPT+1
-            IBUF(CMPT) = 0
-
-
-          END IF
-        ENDIF
-      ENDDO
 C      WRITE(6,*) __FILE__,"NEDGE_L",NEDGE_L
 C      WRITE(6,*) "NB_FREE_EDGES=",NB_FREE_EDGES
 C      WRITE(6,*) "NB_INTERNAL_EDGES=",NB_INTERNAL_EDGES
@@ -6652,7 +6637,7 @@ C      WRITE(6,*) "NB_BOUNDARY_EDGES_REMOTE=",NB_BOUNDARY_EDGES_REMOTE
 
 
 
-      I = NB_FREE_EDGES+NB_INTERNAL_EDGES+NB_BOUNDARY_EDGES_LOCAL + NB_BOUNDARY_EDGES_REMOTE+ NB_1D_EDGES 
+      I = NB_FREE_EDGES+NB_INTERNAL_EDGES+NB_BOUNDARY_EDGES_LOCAL + NB_BOUNDARY_EDGES_REMOTE 
       ASSERT(NEDGE_L == I)
 
       CALL WRITE_I_C(IBUF,NLEDGE*NEDGE_L)
@@ -6695,7 +6680,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER PROC,NSN,NSN_L,II_STOK,MULTIMP,NCONT,
      .        TAG_SEGM2(*),NOINT,INACTI,
-     .        TAG_SCRATCH(*) , II_STOK_L, ITYP   
+     .        TAG_SCRATCH(*) , II_STOK_L
       INTEGER, INTENT(INOUT) :: NINDX_SCRT
       INTEGER, DIMENSION(*), INTENT(INOUT) :: INDX_SCRT
 
@@ -6708,7 +6693,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,N,P,E,MULTOK,MSGID,
+      INTEGER I,K,N,P,E,MULTOK,
      .        SPLIST,C_NSNR
       INTEGER NUMP(NSPMD),WORK(70000)
 
@@ -7107,7 +7092,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,SIZ,L,SIZ1,SIZ2,M,N,SE1,NS,NUMNODT
+      INTEGER K,SIZ,L,SIZ1,SIZ2,M,N,SE1,NS,NUMNODT
 
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
      .  IBUF1,IBUF2,NODDEL,NODDELREMOTE
@@ -7231,7 +7216,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER PROC,NRTM,NRTM_L,
-     .        TAG_SEGM2(*),NREMNODE,NODLOCAL(*),
+     .        TAG_SEGM2(*),NODLOCAL(*),
      .        ITAB(*),TAG_SEGS2(*)
       INTEGER, INTENT(IN) :: NUMNOD_L,NREMNODE_L
 
@@ -7244,7 +7229,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,SIZ,
+      INTEGER K,SIZ,
      .        L,SIZ1,SIZ2,M,N,CPT_L,INDEX1
 
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
@@ -7362,7 +7347,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,SIZ,
+      INTEGER K,SIZ,
      .        L,SIZ1,SIZ2,M,N,CPT_L,INDEX1,IK,
      .        KM1,EM1,KM2,EM2,KS1,ES1,KS2,ES2
 
@@ -7383,7 +7368,7 @@ C---  Split of KERMNODE -> IBUF1
       DO IK=1,NEDGE_L
          K = TAG_EDGE(IK)
          IK_LOC = .FALSE.
-         IF(INTBUF_TAB%LEDGE(7+(K-1)*NLEDGE)/=3) THEN
+         IF(IABS(INTBUF_TAB%LEDGE(7+(K-1)*NLEDGE))/=3) THEN
            EM1=INTBUF_TAB%LEDGE(1+(K-1)*NLEDGE)
            KM1=0
            IF(EM1/=.0) KM1=SEGLOC(EM1)
@@ -7393,7 +7378,11 @@ C---  Split of KERMNODE -> IBUF1
            IF(KM1 /= 0.OR.KM2/=0) IK_LOC =.TRUE.
          ELSE
            EM1=INTBUF_TAB%LEDGE(15+(K-1)*NLEDGE)
-           IF(CEP(EM1)==PROC) IK_LOC =.TRUE.
+           IF(CEP(EM1)==PROC) THEN
+             IK_LOC =.TRUE.
+             KM1 = 1
+             KM2 = 1
+           ENDIF
          ENDIF 
          IF(IK_LOC)THEN
             SIZ = INTBUF_TAB%KREMNODE_EDG(K+1)-INTBUF_TAB%KREMNODE_EDG(K)
@@ -7402,7 +7391,7 @@ C---  Split of KERMNODE -> IBUF1
             SIZ2 = 0
             DO M=1,SIZ
                N = INTBUF_TAB%REMNODE_EDG(L+M-1)
-               IF(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE)/=3) THEN
+               IF(IABS(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE))/=3) THEN
                   ES1=INTBUF_TAB%LEDGE(1+(N-1)*NLEDGE)
                   KS1=0
                   IF(ES1/=0) KS1=SEGLOC(ES1)
@@ -7416,7 +7405,7 @@ C--           Local segment - local id is stored
 C--           Remote segment - line is stored as ITAB1 / ITAB2 (2 values)
                     SIZ2 = SIZ2 + 2
                   ENDIF
-               ELSEIF(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE)==3) THEN
+               ELSEIF(IABS(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE))==3) THEN
                   ES1=INTBUF_TAB%LEDGE(15+(N-1)*NLEDGE)
                   IF(CEP(ES1)==PROC) THEN
 C--           Local segment - local id is stored
@@ -7442,7 +7431,7 @@ C---  Split of ERMNODE -> IBUF2
       DO IK=1,NEDGE_L
          K = TAG_EDGE(IK)
          IK_LOC = .FALSE.
-         IF(INTBUF_TAB%LEDGE(7+(K-1)*NLEDGE)/=3) THEN
+         IF(IABS(INTBUF_TAB%LEDGE(7+(K-1)*NLEDGE))/=3) THEN
             EM1=INTBUF_TAB%LEDGE(1+(K-1)*NLEDGE)
             KM1=0
             IF(EM1/=.0) KM1=SEGLOC(EM1)
@@ -7452,7 +7441,11 @@ C---  Split of ERMNODE -> IBUF2
             IF(KM1 /= 0.OR.KM2/=0) IK_LOC =.TRUE.
          ELSE
             EM1=INTBUF_TAB%LEDGE(15+(K-1)*NLEDGE)
-            IF(CEP(EM1)==PROC) IK_LOC =.TRUE.
+            IF(CEP(EM1)==PROC) THEN
+              IK_LOC =.TRUE.
+              KM1 = 1
+              KM2 = 1
+            ENDIF
          ENDIF 
          IF(IK_LOC)THEN
 C
@@ -7464,7 +7457,7 @@ C
 C
             DO M=1,SIZ
                N = INTBUF_TAB%REMNODE_EDG(L+M-1)
-               IF(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE)/=3) THEN
+               IF(IABS(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE))/=3) THEN
                  KS1=0
                  ES1=INTBUF_TAB%LEDGE(1+(N-1)*NLEDGE)
                  IF(ES1/=0) KS1=SEGLOC(ES1)
@@ -7481,7 +7474,7 @@ C-- Remote segment - line is stored as ITAB1 / ITAB2 (2 values)
                    IBUF2(SIZ2+1) = ITAB(INTBUF_TAB%LEDGE(6+(N-1)*NLEDGE))
                    SIZ2 = SIZ2+2
                  ENDIF
-               ELSEIF(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE)==3) THEN
+               ELSEIF(IABS(INTBUF_TAB%LEDGE(7+(N-1)*NLEDGE))==3) THEN
                  ES1=INTBUF_TAB%LEDGE(15+(N-1)*NLEDGE)
                  IF(CEP(ES1)==PROC) THEN
 C-- Local segment - local id is stored
@@ -7548,9 +7541,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K,SIZ,
-     .        L,SIZ1,SIZ2,M,N,CPT_L,INDEX1,IK,
-     .        KM1,EM1,KM2,EM2,KS1,ES1,KS2,ES2
+      INTEGER K,SIZ,
+     .        L,SIZ1,SIZ2,M,N,CPT_L,INDEX1,
+     .        ES1
 
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
      .        IBUF1,IBUF2

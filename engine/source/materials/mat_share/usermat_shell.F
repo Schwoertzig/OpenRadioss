@@ -1387,14 +1387,13 @@ c
                 ENDIF
 c
               CASE (24)     !    Orthotropic strain failure model
-                CALL FAIL_ORTHSTRAIN_C(
-     1              NEL       ,NUPAR     ,NVARF     ,UPARAMF   ,UVARF     ,
-     2              NFUNC_FAIL,IFUNC_FAIL,NPF       ,TF        ,NGL       ,
-     3              TT        ,DT1       ,IPG       ,ILAYER    ,IT        , 
-     4              EPSXX     ,EPSYY     ,EPSXY     ,DMG_FLAG  ,DMG_LOC_SCALE ,
-     5              EPSPXX    ,EPSPYY    ,EPSPXY    ,ALDT      ,ISMSTR    ,
-     6              SIGNXX    ,SIGNYY    ,SIGNXY    ,LF_DAMMX  ,   
-     7              OFF       ,OFFLY     ,FOFF      ,DFMAX     ,TDEL      )
+                call fail_orthstrain_c(fail_param,                              
+     &               nel       ,nvarf     ,uvarf     ,nvartmp   ,vartmp  ,      
+     &               tt        ,dt1       ,ipg       ,ilayer    ,it        ,    
+     &               epsxx     ,epsyy     ,epsxy     ,dmg_flag  ,dmg_loc_scale ,
+     &               epspxx    ,epspyy    ,epspxy    ,aldt      ,ismstr    ,    
+     &               lf_dammx  ,ngl       ,    
+     &               off       ,offly     ,foff      ,dfmax     ,tdel      )
 c
               CASE (25)     !    NXT Failure
                 CALL FAIL_NXT_C(
@@ -1526,15 +1525,15 @@ c
 c
               CASE (39)     !    GENE1
 c
-                CALL FAIL_GENE1_C(
-     1            JLT      ,NUPAR    ,NVARF    ,NFUNC_FAIL   ,IFUNC_FAIL   ,
-     2            NPF      ,TF       ,TT       ,DT1C     ,UPARAMF  ,IPG      ,
-     3            NGL      ,GBUF%DT  ,EPSPL    ,UVARF    ,OFF      ,    
+                CALL FAIL_GENE1_C(mat_elem%mat_param(imat)%fail(ifl),
+     1            JLT      ,NVARF    ,nvartmp  ,UVARF    ,vartmp   ,
+     2            TT       ,DT1C     ,IPG      ,
+     3            NGL      ,GBUF%DT  ,EPSPL    ,OFF      ,    
      4            EPSXX    ,EPSYY    ,EPSXY    ,AREA     ,THKN     ,            
      5            SIGNXX   ,SIGNYY   ,SIGNXY   ,SIGNYZ   ,SIGNZX   , 
      6            EL_TEMP  ,DFMAX    ,ALDT     ,TABLE    ,TDEL     ,
      7            THK0     ,IPT      ,FOFF     ,THKLYL   ,NTABL_FAIL,
-     8            ITABL_FAIL,LF_DAMMX,NIPAR    ,IPARAMF  ,DT)
+     8            ITABL_FAIL,LF_DAMMX,DT)
 c
               CASE (40)     !    RTCL
 c
@@ -1559,7 +1558,7 @@ c
               CASE (42)     !    INIEVO
 c
                 CALL FAIL_INIEVO_C(
-     1            JLT      ,NUPAR    ,NVARF    ,
+     1            JLT      ,NUPAR    ,NVARF    ,NVARTMP  ,VARTMP   ,
      2            TABLE    ,NTABL_FAIL,ITABL_FAIL   ,TT       ,UPARAMF  , 
      3            NGL      ,EL_LEN   ,DPLA     ,EPSPL    ,UVARF    ,     
      4            SIGNXX   ,SIGNYY   ,SIGNXY   ,SIGNYZ   ,SIGNZX   ,              

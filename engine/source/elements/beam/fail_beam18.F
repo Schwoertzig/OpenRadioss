@@ -259,33 +259,28 @@ C--------------
      .                       UVARF    ,ISMSTR   ,DTIME    , IPT)
 c-------------
         CASE (39)     ! GENE1 failure model                                        
-          CALL FAIL_GENE1_IB(                         
-     .                       NEL  ,FAIL%NUPARAM ,FBUF%FLOC(IFL)%NVAR   ,FAIL%NFUNC,   
-     .                FAIL%IFUNC  ,NPF          ,TF               ,            
-     .                      TIME  ,DTIME     ,FAIL%UPARAM         ,IPT ,    
-     .                       NGL  ,ELBUF_STR%GBUF%DT,EPSD         ,FBUF%FLOC(IFL)%VAR, 
-     .                       OFF  ,EPSXX            ,
-     .                     EPSXY  ,EPSXZ        ,  
-     .                    SIGNXX  ,SIGNXY       ,   
-     .                    SIGNXZ  ,TEMPEL       ,   
-     .                     FBUF%FLOC(IFL)%DAMMX ,  AL, TABLE,    
-     .                     FAIL%NTABLE  ,    
-     .                     FAIL%TABLE       , FBUF%FLOC(IFL)%LF_DAMMX, FAIL%NIPARAM ,FAIL%IPARAM,    
-     .                    SNPC    ,STF      ,NTABLE,  FOFF,ELBUF_STR%GBUF%UELR ,NPT, TDEL)
+          CALL FAIL_GENE1_IB(FAIL,
+     .            NEL  ,NUVAR,FBUF%FLOC(IFL)%VAR,NVARTMP,FBUF%FLOC(IFL)%VARTMP,
+     .           TIME  ,DTIME     ,IPT ,    
+     .            NGL  ,ELBUF_STR%GBUF%DT,EPSD         ,
+     .            OFF  ,EPSXX  ,EPSXY  ,EPSXZ        ,  
+     .         SIGNXX  ,SIGNXY       ,SIGNXZ  ,TEMPEL       ,   
+     .          FBUF%FLOC(IFL)%DAMMX ,  AL, TABLE,FAIL%NTABLE  ,    
+     .          FAIL%TABLE, FBUF%FLOC(IFL)%LF_DAMMX,    
+     .           NTABLE,  FOFF,ELBUF_STR%GBUF%UELR ,NPT, TDEL)
 
 
 c-------------
         CASE (42)     ! Inievo failure model  
 
           CALL FAIL_INIEVO_IB(                         
-     .                       NEL  ,FAIL%NUPARAM ,FBUF%FLOC(IFL)%NVAR ,
-     .                     TABLE  ,FAIL%NTABLE  ,FAIL%TABLE ,TIME    ,FAIL%UPARAM       ,
-     .                       NGL  ,AL           ,DPLA_IPT       ,EPSD , FBUF%FLOC(IFL)%VAR,
-     .                    SIGNXX  ,SIGNXY       ,SIGNXZ     ,
-     .                    PLA_IPT ,SIGY_IPT     ,FOFF ,FBUF%FLOC(IFL)%DAMMX  ,
-     .                    TDEL    ,LBUF%DMGSCL  ,ELBUF_STR%GBUF%UELR ,IPT  ,NPT,
-     .                    FBUF%FLOC(IFL)%DAMINI ,
-     .                    NTABLE  ,OFF)  
+     .         NEL     ,FAIL%NUPARAM ,NUVAR      ,NVARTMP ,FBUF%FLOC(IFL)%VARTMP,
+     .         TABLE   ,FAIL%NTABLE  ,FAIL%TABLE ,TIME    ,FAIL%UPARAM       ,
+     .         NGL     ,AL           ,DPLA_IPT       ,EPSD , FBUF%FLOC(IFL)%VAR,
+     .         SIGNXX  ,SIGNXY       ,SIGNXZ     ,
+     .         PLA_IPT ,SIGY_IPT     ,FOFF ,FBUF%FLOC(IFL)%DAMMX  ,
+     .         TDEL    ,LBUF%DMGSCL  ,ELBUF_STR%GBUF%UELR ,IPT  ,NPT,
+     .         FBUF%FLOC(IFL)%DAMINI ,NTABLE  ,OFF)  
 
 c-------------
         CASE (41)     ! TAB2 failure model         

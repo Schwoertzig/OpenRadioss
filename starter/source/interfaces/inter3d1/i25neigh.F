@@ -89,10 +89,10 @@ C-----------------------------------------------
      4        IBASE, KBASE, KOLD, FIN, NE, EJ, NEDGE_TMP, 
      5        SOL_EDGE, SH_EDGE, ISTORE,
      6        LL, KK, CUR, NEXT, JSUB, KSUB, IMS1, IMS2, IMS3, IMS4, 
-     7        NISUBN, INFLG, MAXADD, STAT
+     7        NISUBN, INFLG, MAXADD, STAT, NRTM_S,N_VINT,DNE,IS
       INTEGER IX1, IX2, IX3, IX4,
      ,        JX1, JX2, JX3, JX4,
-     .        NA, NB, EA, EB,JM,MJ,DN_EI
+     .        NA, NB, EA, EB,JM,MJ,DN_EI,N1,N2
       INTEGER, DIMENSION(:),ALLOCATABLE :: MVOI
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: EIDNOD
       my_real
@@ -105,10 +105,11 @@ C-----------------------------------------------
      .     X01,Y01,Z01,X02,Y02,Z02,
      .     XNA, YNA, ZNA, XNB, YNB, ZNB, AAA, BBB, ANG
       INTEGER WORK(70000)
-      INTEGER,  DIMENSION(:,:),ALLOCATABLE :: CLEF,LEDGE_TMP1,LEDGE_TMP2,LEDGE_TMP3
-      INTEGER,  DIMENSION(:),ALLOCATABLE :: INDEX, ITAG, NTAG, ROOT
+      INTEGER,  DIMENSION(:,:),ALLOCATABLE :: CLEF,LEDGE_TMP1,LEDGE_TMP2,LEDGE_TMP3,LEDGE_TMP
+      INTEGER,  DIMENSION(:),ALLOCATABLE :: INDEX, ITAG, NTAG, ROOT,INDEX2,ITAG_S
       INTEGER, DIMENSION(:), ALLOCATABLE :: MLOC,KAD,ADDSUBN,ADDSUBN_TMP,
-     .                                      LISUBN,INFLG_SUBN,IXSUB
+     .                                      LISUBN,INFLG_SUBN,IXSUB,EBINFLG_TMP,
+     .                                      IIXYZ , ADDSUBE_TMP,LISUBE_TMP,INFLG_SUBE_TMP
       INTEGER, DIMENSION(:,:,:),ALLOCATABLE :: MNEIGH_SOLID
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
@@ -183,40 +184,54 @@ C------------MVOISIN-(seg number) ---
        END DO
       END DO
 C
+      NRTM_S = 0
+      IF(IDEL_SOLID > 0) THEN 
+        ALLOCATE(ITAG_S(NRTM))
+        ITAG_S(1:NRTM)=0 
+      ENDIF 
       DO I=1,NRTM
         IF(IELEM_M(2,I) == 0) THEN
           N_EI=0
+          N_VINT = 1
 C----seg 1-2------
           I1 =IRECT(1,I)
           I2 =IRECT(2,I)
           CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
      1                    N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
-     2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR   )
+     2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE   )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
+          N_VINT = MAX(N_VINT,DNE)          
 C----seg 2-3------
           I1 =IRECT(2,I)
           I2 =IRECT(3,I)
           CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
      1                    N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
-     2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR   )
+     2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE    )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
+          N_VINT = MAX(N_VINT,DNE)          
 C----seg 3-4------
           I1 =IRECT(3,I)
           I2 =IRECT(4,I)
           CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
      1                  N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
-     2                  X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR   )
+     2                  X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE    )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
+          N_VINT = MAX(N_VINT,DNE)          
 C----seg 1-4------
           I1 =IRECT(4,I)
           I2 =IRECT(1,I)
           CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
      1                    N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
-     2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR   )
+     2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE    )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
+          N_VINT = MAX(N_VINT,DNE)          
 C
            MVOI(1:N_EI)=0 ! Reset MVOI
 C
+          IF(IDEL_SOLID > 0.AND.IELEM_M(1,I) <= NUMELS.AND.N_VINT > 1) THEN
+             NRTM_S =NRTM_S + 1
+             ITAG_S(I) =NRTM_S
+          ENDIF
         ENDIF
       END DO !I=1,NRTM     
 C
@@ -247,7 +262,7 @@ C-----------------------------------------------------
       IF(IDEL_SOLID > 0) THEN  
         DO I=1,NUMNOD
           ITAG(I)=0
-        ENDDO
+        ENDDO 
         DO I=1,NRTM  
           IF(IELEM_M(1,I) <= NUMELS) THEN
 
@@ -259,6 +274,10 @@ C-----------------------------------------------------
                M= IRECT(4,I)
                ITAG(M)=ITAG(M)+1
             END IF
+            IF(IELEM_M(2,I) /= 0) THEN
+               NRTM_S =NRTM_S + 1
+               ITAG_S(I) =NRTM_S
+            ENDIF
           ENDIF
         END DO
 C        
@@ -272,8 +291,13 @@ C
         ALLOCATE(MVOI(NMAX+10))
         MVOI(1:NMAX+10)=0
 C
-        ALLOCATE(MNEIGH_SOLID(NMAX,4,NRTM))
-        MNEIGH_SOLID(1:NMAX,1:4,1:NRTM) = 0
+        IF(NMAX >0.AND.NRTM_S > 0) THEN
+          ALLOCATE(MNEIGH_SOLID(NMAX,4,NRTM_S))
+          MNEIGH_SOLID(1:NMAX,1:4,1:NRTM_S) = 0
+        ELSE
+          ALLOCATE(MNEIGH_SOLID(0,0,0))
+        ENDIF
+    
         DO I=1,NRTM
           IF(IELEM_M(1,I) <= NUMELS) THEN
 
@@ -293,14 +317,15 @@ C
 C------------- Neighbour Segments --------------       
 C
         DO I=1,NRTM 
-          IF(IELEM_M(1,I) <= NUMELS) THEN
+          IS = ITAG_S(I)
+          IF(IELEM_M(1,I) <= NUMELS.AND.IS>0) THEN
             N_EI=0
 C----seg 1-2------
             I1 =IRECT(1,I)
             I2 =IRECT(2,I)
             CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)         
-            MNEIGH_SOLID(1:N_EI,1,I) = MVOI(1:N_EI)
+            MNEIGH_SOLID(1:N_EI,1,IS) = MVOI(1:N_EI)
             NE0 =N_EI
 C----seg 2-3------
             I1 =IRECT(2,I)
@@ -308,7 +333,7 @@ C----seg 2-3------
             CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)
             DN_EI = N_EI - NE0  
-            MNEIGH_SOLID(1:DN_EI,2,I) = MVOI(NE0+1:N_EI)
+            MNEIGH_SOLID(1:DN_EI,2,IS) = MVOI(NE0+1:N_EI)
             NE0 =N_EI
 C----seg 3-4------
             I1 =IRECT(3,I)
@@ -316,7 +341,7 @@ C----seg 3-4------
             CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)
             DN_EI = N_EI - NE0
-            MNEIGH_SOLID(1:DN_EI,3,I) = MVOI(NE0+1:N_EI)
+            MNEIGH_SOLID(1:DN_EI,3,IS) = MVOI(NE0+1:N_EI)
             NE0 =N_EI
 C----seg 1-4------
             I1 =IRECT(4,I)
@@ -324,7 +349,7 @@ C----seg 1-4------
             CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)
             DN_EI = N_EI - NE0      
-            MNEIGH_SOLID(1:DN_EI,4,I) = MVOI(NE0+1:N_EI)
+            MNEIGH_SOLID(1:DN_EI,4,IS) = MVOI(NE0+1:N_EI)
 C
             MVOI(1:N_EI)=0 ! Reset MVOI    
           ENDIF      
@@ -402,9 +427,11 @@ C
      .                                        itab(jj(1)),itab(jj(2)),itab(jj(3)),itab(jj(4))
           END IF ! IF(MI/=0)THEN
 C
-          IF(IELEM_M(1,I) <= NUMELS.AND.IDEl_SOLID > 0) THEN
+          IF(IDEl_SOLID > 0) THEN
+           IS=ITAG_S(I)
+           IF(IS > 0) THEN
             DO K=1,NMAX
-              MJ = MNEIGH_SOLID(K,IEDG,I)
+              MJ = MNEIGH_SOLID(K,IEDG,IS)
               IF(MJ/=0.AND.MJ/=MI) THEN
 C
                 JJ(1:4)=IRECT(1:4,MJ)
@@ -441,12 +468,13 @@ c           .                                        itab(jj(1)),itab(jj(2)),ita
 c                END IF ! IF(MJ/=0.AND.MJ/=MI)THEN
               ENDIF
             ENDDO
+           ENDIF
           ENDIF
         END DO
 C
       END DO
 C
-      IF(IDEl_SOLID > 0) DEALLOCATE(MNEIGH_SOLID)
+      IF(IDEl_SOLID > 0) DEALLOCATE(MNEIGH_SOLID,ITAG_S)
 C
       DO I=1,NVERTX
         J=I
@@ -561,6 +589,18 @@ C-----------------------------------------------------------------------
          ALLOCATE(LEDGE_TMP3(2,NEDGE_L))
          LEDGE_TMP3(1:2,1:NEDGE_L) =LEDGE(5:6,1:NEDGE_L)
          LEDGE(5:6,1:NEDGE_L) = 0
+         IF(ILEV==2) THEN
+           ALLOCATE(EBINFLG_TMP(NEDGE_L))
+            EBINFLG_TMP(1:NEDGE_L) =EBINFLG(1:NEDGE_L)
+         ENDIF
+         IF(NISUB > 0) THEN
+           ALLOCATE(ADDSUBE_TMP(NEDGE_L+1))
+           ADDSUBE_TMP(1:NEDGE_L+1) =ADDSUBE(1:NEDGE_L+1)
+           ALLOCATE(LISUBE_TMP(NISUBE))
+           LISUBE_TMP(1:NISUBE) =LISUBE(1:NISUBE)
+           ALLOCATE(INFLG_SUBE_TMP(NISUBE))
+           INFLG_SUBE_TMP(1:NISUBE) =INFLG_SUBE(1:NISUBE) 
+         ENDIF
       ENDIF
 C
       DO I=1,NRTM
@@ -874,10 +914,22 @@ C-----1D element edges -----
       IF(NEDGE_L >0) THEN
          LEDGE(5:6,NEDGE+1:NEDGE+NEDGE_L) = LEDGE_TMP3(1:2,1:NEDGE_L)
          LEDGE(7,NEDGE+1:NEDGE+NEDGE_L) = 3
-         IF(ILEV==2)EBINFLG(NEDGE+1:NEDGE+NEDGE_L) =EBINFLG(1:NEDGE_L)
          NEDGE = NEDGE+NEDGE_L
       ENDIF
 
+      ALLOCATE(IIXYZ(NEDGE),LEDGE_TMP(NLEDGE,NEDGE),INDEX2(2*NEDGE))
+       LEDGE_TMP(1:NLEDGE,1:NEDGE)=LEDGE(1:NLEDGE,1:NEDGE)
+      DO I=1,NEDGE
+        N1 = LEDGE(5,I)
+        N2 = LEDGE(6,I)
+        IIXYZ(I)=MIN(N1,N2)
+        INDEX2(I)  =I
+      ENDDO
+       CALL MY_ORDERS(0,WORK,IIXYZ,INDEX2,NEDGE,1)
+      DO I=1,NEDGE
+         K=INDEX2(I)
+         LEDGE(1:NLEDGE,I)=LEDGE_TMP(1:NLEDGE,K)
+      ENDDO
 C
 c      DO I=1,NRTM
 c       print *,'I,MSEGTYP(I)=',I,MSEGTYP(I),itab(irect(1:4,i))
@@ -892,25 +944,29 @@ C     Flag of belonging to the areas a S1/S2
 C-----------------------------------------
       IF(NEDGE/=0 .AND. ILEV==2)THEN
         EBINFLG(1:NEDGE)=0
-        DO I=1,NEDGE - NEDGE_L
-          NE   =LEDGE(1,I)
-          INFLG=MBINFLG(NE)
-          IMS1=BITGET(INFLG,0)
-          IMS2=BITGET(INFLG,1)
-          IF(IMS1/=0) EBINFLG(I)=BITSET(EBINFLG(I),0)
-          IF(IMS2/=0) EBINFLG(I)=BITSET(EBINFLG(I),1)
-          NE=LEDGE(3,I)
-          IF(NE/=0)THEN
+        DO I=1,NEDGE 
+          IF(LEDGE(7,I)==3) THEN
+            EBINFLG(I) =EBINFLG_TMP(INDEX2(I)-(NEDGE-NEDGE_L))
+          ELSE
+            NE   =LEDGE(1,I)
             INFLG=MBINFLG(NE)
             IMS1=BITGET(INFLG,0)
             IMS2=BITGET(INFLG,1)
             IF(IMS1/=0) EBINFLG(I)=BITSET(EBINFLG(I),0)
             IF(IMS2/=0) EBINFLG(I)=BITSET(EBINFLG(I),1)
-          END IF
+            NE=LEDGE(3,I)
+            IF(NE/=0)THEN
+              INFLG=MBINFLG(NE)
+              IMS1=BITGET(INFLG,0)
+              IMS2=BITGET(INFLG,1)
+              IF(IMS1/=0) EBINFLG(I)=BITSET(EBINFLG(I),0)
+              IF(IMS2/=0) EBINFLG(I)=BITSET(EBINFLG(I),1)
+            END IF
+          ENDIF
         END DO
       END IF
 C
-      IF(NEDGE/=0.AND.NISUB/=0)THEN
+      IF(NEDGE/=0.AND.NISUB/=0.AND.NEDGE /=NEDGE_L)THEN
 
         ALLOCATE (MLOC(NUMNOD),KAD(MAX(NMN,NEDGE)),STAT=stat)
         MLOC(1:NUMNOD)=0
@@ -1039,78 +1095,145 @@ C-----------------------------------------
         INFLG_SUBE(1:NISUBE)=0
 C
         DO NE=1,NEDGE
-          I1  =MLOC(LEDGE(5,NE))
-          I2  =MLOC(LEDGE(6,NE))
+          IF(LEDGE(7,NE)/=3) THEN
+            I1  =MLOC(LEDGE(5,NE))
+            I2  =MLOC(LEDGE(6,NE))
 
-          LL  =ADDSUBN(I1)
-          KK  =ADDSUBN(I2)
-          DO WHILE(LL<ADDSUBN(I1+1))
-            JSUB=LISUBN(LL)
-            DO WHILE(KK<ADDSUBN(I2+1))
-              KSUB=LISUBN(KK)   
-              IF(KSUB==JSUB)THEN
-                ADDSUBE(NE)=ADDSUBE(NE)+1
-                KK=KK+1
-              ELSE IF(KSUB<JSUB)THEN
-                KK=KK+1
-              ELSE
-                GO TO 100
-              END IF
+            LL  =ADDSUBN(I1)
+            KK  =ADDSUBN(I2)
+            DO WHILE(LL<ADDSUBN(I1+1))
+              JSUB=LISUBN(LL)
+              DO WHILE(KK<ADDSUBN(I2+1))
+                KSUB=LISUBN(KK)   
+                IF(KSUB==JSUB)THEN
+                  ADDSUBE(NE)=ADDSUBE(NE)+1
+                  KK=KK+1
+                ELSE IF(KSUB<JSUB)THEN
+                  KK=KK+1
+                ELSE
+                  GO TO 100
+                END IF
+              END DO
+ 100        CONTINUE
+            LL=LL+1
             END DO
- 100      CONTINUE
-          LL=LL+1
-          END DO
+          ELSEIF(NEDGE /=NEDGE_L) THEN
+            ADDSUBE(NE)=ADDSUBE(NE)+(ADDSUBE_TMP(INDEX2(NE)-(NEDGE-NEDGE_L)+1)-ADDSUBE_TMP(INDEX2(NE)-(NEDGE-NEDGE_L)))
+          ENDIF
         END DO
 C
         CUR=1
         DO NE=1,NEDGE
-          NEXT       = CUR+ADDSUBE(NE)
-          ADDSUBE(NE)= CUR
-          CUR        = NEXT
+           NEXT       = CUR+ADDSUBE(NE)
+           ADDSUBE(NE)= CUR
+           CUR        = NEXT
         END DO
         ADDSUBE(1+NEDGE)=CUR
 C
 C       Use Kad (1: Nedge) to fill Lisube, inflg_sube
         DO NE=1,NEDGE
-          KAD(NE)=ADDSUBE(NE)
+           KAD(NE)=ADDSUBE(NE)
         END DO
 
         DO NE=1,NEDGE
-          I1  =MLOC(LEDGE(5,NE))
-          I2  =MLOC(LEDGE(6,NE))
 
-          LL  =ADDSUBN(I1)
-          KK  =ADDSUBN(I2)
-          DO WHILE(LL<ADDSUBN(I1+1))
-            JSUB=LISUBN(LL)
-            IMS1 = BITGET(INFLG_SUBN(LL),0)
-            IMS2 = BITGET(INFLG_SUBN(LL),1)
-            DO WHILE(KK<ADDSUBN(I2+1))
-              KSUB=LISUBN(KK)   
-              IMS3 = BITGET(INFLG_SUBN(KK),0)
-              IMS4 = BITGET(INFLG_SUBN(KK),1)
-              IF(KSUB==JSUB)THEN
-                LISUBE(KAD(NE))=JSUB
-                IF(IMS1==1.AND.IMS3==1) ! edge belongs to S1 is I1 and I2 belong to S1
-     .           INFLG_SUBE(KAD(NE))=
-     .                BITSET(INFLG_SUBE(KAD(NE)),0)
-                IF(IMS2==1.AND.IMS4==1) ! edge belongs to S2 is I1 and I2 belong to S2
-     .           INFLG_SUBE(KAD(NE))=
-     .                BITSET(INFLG_SUBE(KAD(NE)),1)
-                KAD(NE)   =KAD(NE)+1
-                KK=KK+1
-              ELSE IF(KSUB<JSUB)THEN
-                KK=KK+1
-              ELSE
-                GO TO 200
-              END IF
+          IF(LEDGE(7,NE)/=3) THEN
+            I1  =MLOC(LEDGE(5,NE))
+            I2  =MLOC(LEDGE(6,NE))
+
+            LL  =ADDSUBN(I1)
+            KK  =ADDSUBN(I2)
+            DO WHILE(LL<ADDSUBN(I1+1))
+              JSUB=LISUBN(LL)
+              IMS1 = BITGET(INFLG_SUBN(LL),0)
+              IMS2 = BITGET(INFLG_SUBN(LL),1)
+              DO WHILE(KK<ADDSUBN(I2+1))
+                KSUB=LISUBN(KK)   
+                IMS3 = BITGET(INFLG_SUBN(KK),0)
+                IMS4 = BITGET(INFLG_SUBN(KK),1)
+                IF(KSUB==JSUB)THEN
+                  LISUBE(KAD(NE))=JSUB
+                  IF(IMS1==1.AND.IMS3==1) ! edge belongs to S1 is I1 and I2 belong to S1
+     .             INFLG_SUBE(KAD(NE))=
+     .                 BITSET(INFLG_SUBE(KAD(NE)),0)
+                  IF(IMS2==1.AND.IMS4==1) ! edge belongs to S2 is I1 and I2 belong to S2
+     .             INFLG_SUBE(KAD(NE))=
+     .                 BITSET(INFLG_SUBE(KAD(NE)),1)
+                  KAD(NE)   =KAD(NE)+1
+                  KK=KK+1
+                ELSE IF(KSUB<JSUB)THEN
+                  KK=KK+1
+                ELSE
+                  GO TO 200
+                END IF
+              END DO
+ 200        CONTINUE
+            LL=LL+1
             END DO
- 200      CONTINUE
-          LL=LL+1
-          END DO
+          ELSEIF(NEDGE /=NEDGE_L) THEN
+            KK  =ADDSUBE(NE)
+            LL = ADDSUBE_TMP(INDEX2(NE)-(NEDGE-NEDGE_L))
+            DO WHILE(KK<ADDSUBE(NE+1))
+              LISUBE(KK)=LISUBE_TMP(LL)
+              INFLG_SUBE(KK)=INFLG_SUBE_TMP(LL)
+              KK = KK +1
+              LL = LL +1
+            ENDDO
+          ENDIF
         END DO
 
         DEALLOCATE (MLOC,KAD,ADDSUBN_TMP,ADDSUBN,LISUBN,INFLG_SUBN,IXSUB)
+        IF(NISUB > 0.AND.NEDGE_L > 0) DEALLOCATE (ADDSUBE_TMP,INFLG_SUBE_TMP,LISUBE_TMP)
+
+C-------------------------------------
+        IF(IPRI>=6) THEN
+          WRITE(IOUT,1000)
+          WRITE(IOUT,1010)NOINT
+          WRITE(IOUT,'(10I10)')
+     .         (NOM_OPT(1,NINTER+LISUB(JSUB)),JSUB=1,NISUB)
+          WRITE(IOUT,1030)
+          DO NE=1,NEDGE
+            JSUB=ADDSUBE(NE)
+            N   =ADDSUBE(NE+1)-ADDSUBE(NE)
+            IF(N>0)THEN
+              WRITE(IOUT,'(3I10)')NE,ITAB(LEDGE(5,NE)),ITAB(LEDGE(6,NE))
+              WRITE(IOUT,'(30X,2I10)')
+     .          (LISUBE(JSUB-1+K),INFLG_SUBE(JSUB-1+K),K=1,N)
+            END IF
+          END DO
+        END IF
+      ELSEIF(NEDGE/=0.AND.NISUB/=0.AND.NEDGE ==NEDGE_L)THEN
+
+        ADDSUBE(1:NEDGE+1)  = 0 
+        LISUBE(1:NISUBE)=0
+        INFLG_SUBE(1:NISUBE)=0
+C-----------------------------------------
+C       Calculation of ADDSUBN, LISUBN, INFLG_SUBN for the main nodes
+C-----------------------------------------
+        ADDSUBE(1:NEDGE+1)=0
+        DO I=1,NEDGE
+           ADDSUBE(I)=ADDSUBE(I)+ADDSUBE_TMP(INDEX2(I)+1)-ADDSUBE_TMP(INDEX2(I))
+        END DO
+C
+        CUR=1
+        DO I=1,NEDGE
+          NEXT    = CUR+ADDSUBE(I)
+          ADDSUBE(I) = CUR
+          CUR     = NEXT
+        END DO
+        ADDSUBE(1+NEDGE)=CUR
+        DO NE=1,NEDGE
+           KK  =ADDSUBE(NE)
+           LL = ADDSUBE_TMP(INDEX2(NE))
+           DO WHILE(KK<ADDSUBE(NE+1))
+             LISUBE(KK)=LISUBE_TMP(LL)
+             INFLG_SUBE(KK)=INFLG_SUBE_TMP(LL)
+             KK = KK +1
+             LL = LL +1
+           ENDDO
+        ENDDO
+        IF(NISUB > 0.AND.NEDGE_L > 0) DEALLOCATE (ADDSUBE_TMP,INFLG_SUBE_TMP,LISUBE_TMP)
+ 
 C-------------------------------------
         IF(IPRI>=6) THEN
           WRITE(IOUT,1000)
@@ -1129,6 +1252,11 @@ C-------------------------------------
           END DO
         END IF
       END IF ! IF(NEDGE/=0.AND.NISUB/=0)THEN
+      IF(ALLOCATED(IIXYZ))DEALLOCATE(IIXYZ)
+      IF(ALLOCATED(INDEX2))DEALLOCATE(INDEX2)
+      IF(ALLOCATED(LEDGE_TMP))DEALLOCATE(LEDGE_TMP)
+      IF(ALLOCATED(LEDGE_TMP3))DEALLOCATE(LEDGE_TMP3)
+      IF(ALLOCATED(EBINFLG_TMP))DEALLOCATE(EBINFLG_TMP)
 C-------------------------------------
  1000 FORMAT(    /1X,'   STRUCTURE OF SUB-INTERFACES OUTPUT TO TH'/
      .            1X,'   ----------------------------------------'// )
@@ -1308,7 +1436,7 @@ C
 !||====================================================================
       SUBROUTINE I25NEIGH_SEG_EN(N1,IED1,N2   ,IED2 ,MVOISIN,
      .                           NE ,ICE,ISELF,I1,I2  ,IRECT,
-     .                           X   ,IE ,NRTM,MSEGTYP,IRR  )
+     .                           X   ,IE ,NRTM,MSEGTYP,IRR ,DNE )
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1321,6 +1449,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER N1,IED1(*),N2,IED2(*),NE,ICE(*),ISELF,IRR, 
      .        I1,I2,IRECT(4,*),IE(*), NRTM, MSEGTYP(*), MVOISIN(4,*)
+      INTEGER , INTENT(INOUT) :: DNE
       my_real
      .   X(3,*)
 C-----------------------------------------------
@@ -1340,10 +1469,11 @@ c  O   IE(NE)            - final (reduced) neighbour segment,array
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,J1,J2,JJ,NEW,K,M,NE0,DNE,IOP
+      INTEGER I,J,J1,J2,JJ,NEW,K,M,NE0,IOP
 C---------------------
        IRR = 0
        NE0=NE
+       DNE = 0
 C
 C      MVOISIN already filled due to symetrization ::
        IF(IE(NE0+1)/=0)  THEN

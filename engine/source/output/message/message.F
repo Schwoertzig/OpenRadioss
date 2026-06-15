@@ -31,7 +31,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    animx                        ../engine/source/output/anim/generate/animx.F
 !||    arret_message                ../engine/source/system/arret_message.F
 !||    arret_message_slid           ../engine/source/system/arret_message.F
-!||    bcs_nrf                      ../engine/source/boundary_conditions/bcs_nrf.F90
 !||    bforc2                       ../engine/source/ale/bimat/bforc2.F
 !||    blero2                       ../engine/source/ale/bimat/blero2.F
 !||    chkv0_cy                     ../engine/source/constraints/general/bcs/bcscyc.F
@@ -434,10 +433,8 @@ C-----------------------------------------------
 C
       CHARACTER(LEN=NCHARLINE100):: TMPLINE,MYFMT,TMPBUF
       CHARACTER(LEN=NCHAROUT) ::  TMPOUT
-      INTEGER ITYPE,ILINE,I,I0,J,J0,SBUFMSG(2),IFILE,IOLD,
-     .        INDXI,INDXR,INDXC,INDXTMPOUT,BUFLEN,
-     .        STMP
-      CHARACTER(LEN=NCHARLINE100):: BUFMSG(2,100),BUFFMT(2,100)
+      INTEGER ITYPE,ILINE,I,IOLD,
+     .        INDXI,INDXR,INDXC,INDXTMPOUT,BUFLEN
 C
       WRITE(ISTDO,'(/A,I10)')'MESSAGE ID : ',MSGID
       IF (IOUT/=0) THEN

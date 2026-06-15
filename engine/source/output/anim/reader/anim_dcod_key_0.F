@@ -64,8 +64,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, IDX,IDX0,IDX1,IDX2, N1, N2, N3, ITYP,IADG, J,NTITLE,IUS,ILAY,IPT
-      my_real X0,Y0,Z0,VNX,VNY,VNZ,V0
+      INTEGER IDX,IDX0,IDX1,IDX2, N1, N2, IADG,ILAY,IPT
       LOGICAL :: LAW51_PHASE1, LAW51_PHASE2, LAW51_PHASE3, LAW51_PHASE4
 C-----------------------------------------------
 C     Output parameter for LAW51 multiphase data
@@ -100,7 +99,6 @@ C--------------------------
           ANIM_V(3) = 1
         ELSEIF(KEY3(1:4)=='CONT' .AND. KEY3(1:5)/='CONT2'.AND.KEY4(1:3)/='MAX')THEN
           ANIM_V(4) = 1
-          ANIMCONT = ANIM_V(4)  
         ELSEIF(KEY3(1:4)=='FINT')THEN
           ANIM_V(5) = 1
         ELSEIF(KEY3(1:4)=='FEXT')THEN
@@ -153,8 +151,7 @@ C         fluid velocities for alebag and /bem/flow
         ELSEIF (KEY3(1:5)=='ZFINT')THEN !inter22
           ANIM_V(25) = 1    
         ELSEIF (KEY3(1:4)=='CONT'.AND.KEY4(1:3)=='MAX')THEN 
-          ANIM_V(26) = 1    
-          ANIMCONT = ANIM_V(4)  
+          ANIM_V(26) = 1
           ANIM_V(4) = 1     
         ELSEIF(KEY3(1:6)=='PCONT2')THEN
          ANIM_V(27) = 1

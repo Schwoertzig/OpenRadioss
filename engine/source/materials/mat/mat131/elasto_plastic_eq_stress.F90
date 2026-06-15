@@ -31,6 +31,9 @@
 !||    nice_solids                    ../engine/source/materials/mat/mat131/return_mapping/nice_solids.F90
 !||====================================================================
       module elasto_plastic_eq_stress_mod
+! \brief Compute elasto-plastic equivalent stress for /MAT/LAW131
+! \details Compute the equivalent stress from the deviatoric stress tensor
+!          for /MAT/LAW131 (elasto-plastic material law).
       contains
 !||====================================================================
 !||    elasto_plastic_eq_stress                    ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
@@ -45,6 +48,7 @@
 !||    elasto_plastic_second_order_numerical       ../engine/source/materials/mat/mat131/elasto_plastic_second_order_numerical.F90
 !||    yield_criterion_barlat1989                  ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
 !||    yield_criterion_barlat2000                  ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat2000.F90
+!||    yield_criterion_bbc2005                     ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_BBC2005.F90
 !||    yield_criterion_hershey                     ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
 !||    yield_criterion_hill                        ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hill.F90
 !||    yield_criterion_vonmises                    ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_vonmises.F90
@@ -55,6 +59,7 @@
 !||    precision_mod                               ../common_source/modules/precision_mod.F90
 !||    yield_criterion_barlat1989_mod              ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
 !||    yield_criterion_barlat2000_mod              ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat2000.F90
+!||    yield_criterion_bbc2005_mod                 ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_BBC2005.F90
 !||    yield_criterion_hershey_mod                 ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
 !||    yield_criterion_hill_mod                    ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hill.F90
 !||    yield_criterion_vonmises_mod                ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_vonmises.F90
@@ -75,7 +80,9 @@
         use yield_criterion_hill_mod
         use yield_criterion_barlat1989_mod
         use yield_criterion_barlat2000_mod
+        use yield_criterion_bbc2005_mod
         use elasto_plastic_second_order_numerical_mod
+
 !----------------------------------------------------------------
 !   I m p l i c i t   T y p e s
 !----------------------------------------------------------------
@@ -105,13 +112,14 @@
 !----------------------------------------------------------------
 !  L o c a l  V a r i a b l e s
 !----------------------------------------------------------------
-        integer :: icrit
+        integer :: icrit,offset
 !===============================================================================
 !
         !=======================================================================
         !< - Select yield criterion model
         !=======================================================================
-        icrit = matparam%iparam(5)
+        icrit  = matparam%iparam(6)
+        offset = matparam%iparam(3)
         select case(icrit)
           !---------------------------------------------------------------------
           !< Von Mises yield criterion
@@ -130,7 +138,7 @@
               matparam ,nel      ,seq      ,iresp    ,eltype   ,               &
               signxx   ,signyy   ,signzz   ,signxy   ,signyz   ,signzx   ,     &
               normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,     &
-              N        ,second_order)  
+              N        ,second_order,offset)  
           !---------------------------------------------------------------------
           !< Hill yield criterion
           !---------------------------------------------------------------------
@@ -139,20 +147,21 @@
               matparam ,nel      ,seq      ,eltype   ,                         &
               signxx   ,signyy   ,signzz   ,signxy   ,signyz   ,signzx   ,     &
               normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,     &
-              N        ,second_order)
+              N        ,second_order,offset)
           !---------------------------------------------------------------------
           !< Barlat 89 yield criterion
           !---------------------------------------------------------------------
           case(4)
             call yield_criterion_barlat1989(                                   &          
               matparam ,nel      ,seq      ,signxx   ,signyy   ,signxy   ,     &
-              normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   )
+              normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,     &
+              offset   )
             if (second_order) then
               call elasto_plastic_second_order_numerical(                      &
                 matparam ,nel      ,eltype   ,icrit    ,                       &
                 signxx   , signyy  ,signzz   ,signxy   ,signyz   ,signzx   ,   &
                 normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,   &
-                N        )
+                N        ,offset   )
             else
               N(1:nel,1:6,1:6) = zero
             endif
@@ -162,16 +171,25 @@
           case(5)
             call yield_criterion_barlat2000(                                   &          
               matparam ,nel      ,seq      ,signxx   ,signyy   ,signxy   ,     &
-              normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   )
+              normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,     &
+              offset   )
             if (second_order) then
               call elasto_plastic_second_order_numerical(                      &
                 matparam ,nel      ,eltype   ,icrit    ,                       &
                 signxx   , signyy  ,signzz   ,signxy   ,signyz   ,signzx   ,   &
                 normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,   &
-                N        )
+                N        ,offset   )
             else
               N(1:nel,1:6,1:6) = zero
             endif
+          !---------------------------------------------------------------------
+          !< BBC2005 yield criterion
+          !---------------------------------------------------------------------
+          case(6)
+                call yield_criterion_bbc2005(                                  &
+                  matparam ,nel      ,seq      ,signxx   ,signyy   ,signxy   , &
+                  normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   , &
+                  offset   )
         end select
 !
       end subroutine elasto_plastic_eq_stress

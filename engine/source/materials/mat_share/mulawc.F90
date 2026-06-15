@@ -1923,9 +1923,9 @@
                   ssp      ,lbuf%off ,lbuf%pla ,dpla     ,lbuf%seq ,       &
                   etse     ,sigy     ,dt1      ,lbuf%epsd,el_temp  ,       &
                   shf      ,thkn     ,thklyl   ,asrate   ,l_sigb   ,       &
-                  lbuf%sigb,epsd_pg  ,nuvar    ,uvar     ,inloc    ,       &
-                  varnl(1,it),ioff_duct,jthe   ,fheat    ,vol_ipt  ,       &
-                  off      )
+                  lbuf%sigb,nuvar    ,uvar     ,inloc    ,varnl(1,it),     &
+                  ioff_duct,jthe     ,fheat    ,vol_ipt  ,off      ,       &
+                  epspxx   ,epspyy   ,epspxy   )
 !       
               elseif (ilaw == 132) then 
                 call sigeps132c( &                     
@@ -2342,14 +2342,13 @@
                     endif
 !
                    case (24)     !    orthotropic strain failure model
-                    call fail_orthstrain_c(&
-                    &nel       ,nupar     ,nvarf     ,uparamf   ,uvarf     ,&
-                    &nfunc_fail    ,ifunc_fail    ,npf       ,tf        ,ngl       ,&
-                    &tt        ,dt1       ,ipg       ,ilayer    ,it        ,&
-                    &epsxx     ,epsyy     ,epsxy     ,dmg_flag  ,dmg_loc_scale ,&
-                    &epspxx    ,epspyy    ,epspxy    ,aldt      ,ismstr    ,&
-                    &signxx    ,signyy    ,signxy    ,lf_dammx  ,&
-                    &off       ,offly     ,foff      ,dfmax     ,tdel      )
+                    call fail_orthstrain_c(fail_param,                            &
+                     nel       ,nvarf     ,uvarf     ,nvartmp   ,vartmp    ,      &
+                     tt        ,dt1       ,ipg       ,ilayer    ,it        ,      &
+                     epsxx     ,epsyy     ,epsxy     ,dmg_flag  ,dmg_loc_scale,   &
+                     epspxx    ,epspyy    ,epspxy    ,aldt      ,ismstr    ,      &
+                     lf_dammx  ,ngl       ,&
+                     off       ,offly     ,foff      ,dfmax     ,tdel      )
 !
                    case (25)     !    nxt failure
                     call fail_nxt_c(&
@@ -2484,15 +2483,15 @@
 !
                    case (39)     !    gene1
 !
-                    call fail_gene1_c(&
-                    &jlt      ,nupar    ,nvarf    ,nfunc_fail,ifunc_fail,&
-                    &npf      ,tf       ,tt       ,dt1c     ,uparamf  ,ipg      ,&
-                    &ngl      ,gbuf%dt  ,epsd     ,uvarf    ,off      ,&
-                    &epsxx    ,epsyy    ,epsxy    ,area     ,thkn     ,&
-                    &signxx   ,signyy   ,signxy   ,signyz   ,signzx   ,&
-                    &el_temp  ,dfmax    ,aldt     ,table    ,tdel     ,&
-                    &thk0     ,ipt      ,foff     ,thklyl   ,ntabl_fail,itabl_fail,&
-                    &lf_dammx ,nipar    ,iparamf  ,dt)
+                    call fail_gene1_c(mat_elem%mat_param(imat)%fail(ifl),          &
+                     jlt      ,nvarf    ,nvartmp  ,uvarf    ,vartmp   ,            &
+                     tt       ,dt1c     ,ipg      ,                                &
+                     ngl      ,gbuf%dt  ,epsd     ,off      ,                      &
+                     epsxx    ,epsyy    ,epsxy    ,area     ,thkn     ,            &
+                     signxx   ,signyy   ,signxy   ,signyz   ,signzx   ,            &
+                     el_temp  ,dfmax    ,aldt     ,table    ,tdel     ,            &
+                     thk0     ,ipt      ,foff     ,thklyl   ,ntabl_fail,itabl_fail,&
+                     lf_dammx ,dt)
 !
                    case (40)     !    rtcl
 !
@@ -2517,7 +2516,7 @@
                    case (42)     !    inievo
 !
                     call fail_inievo_c(&
-                    &jlt      ,nupar    ,nvarf    ,&
+                    &jlt      ,nupar    ,nvarf    ,nvartmp  ,vartmp   ,&
                     &table    ,ntabl_fail,itabl_fail   ,tt       ,uparamf  ,&
                     &ngl      ,el_len   ,dpla     ,epsd     ,uvarf    ,&
                     &signxx   ,signyy   ,signxy   ,signyz   ,signzx   ,&

@@ -361,7 +361,7 @@ C-------------------------------------------------------------------------------
       TYPE(rbe3_) :: rbe3
       TYPE(coupling_type) :: coupling
       TYPE(rwall_) :: rwall
-      TYPE(sfem_)  :: sfem
+      TYPE(global_sfem_)  :: sfem
 C------------------------------------------------------------------
 C to build a IBM PARALLEL version
 C In starter : define install parameter nspmd 
@@ -1059,10 +1059,10 @@ C
      .            SENSORS        ,EBCS_TAB   ,DYNAIN_DATA   ,USER_WINDOWS     ,OUTPUT    ,
      .            INTERFACES     ,LOADS      ,MAT_ELEM      ,PYTHON           ,IFLOW     ,
      .            SKEWS          ,RFLOW      ,LIFLOW        ,LRFLOW           ,IMPL_S0   ,
-     .            FORNEQS       ,UNITAB,
+     .            FORNEQS        ,UNITAB     ,DT            ,DTFAC1           ,
      .            STACK          ,DRAPE_SH4N ,DRAPE_SH3N    ,DRAPEG           ,NDRAPE ,
      .            GLOB_THERM     ,PBLAST     ,ELEMENT       ,NODES            ,RBE3     ,
-     .            RWALL          ,SFEM      )
+     .            RWALL          ,SFEM       )
       ! Close restart file
        CALL CLOSE_C
  
@@ -1447,7 +1447,7 @@ C-----------------------------------------------------
 C-----------------------------------------------------
       MAX_DEPVAR = 0
 #ifdef DNC
-      IF(MDS_AVAIL==1) THEN
+      IF(MDS_AVAIL==1 .and. MDS_NMAT > 0) THEN
         NSPMD_USER = NSPMD
         NTASK_USER = NTHREAD
         ISPMD_USER = ISPMD
@@ -1503,7 +1503,7 @@ C     initializations MDS
 C------------------------------------------------
 
 #ifdef DNC
-      IF (MDS_AVAIL==1) THEN
+      IF (MDS_AVAIL==1 .and. MDS_NMAT > 0) THEN
         CALL MDS_ENGINE_USER_INITIALIZE(NSPMD_USER,NTASK_USER,ISPMD_USER,TSTOP,
      *       MDS_NMAT,MDS_MATID,MDS_FILES,MDS_LABEL,MDS_NDEPSVAR,MAX_DEPVAR,MDS_OUTPUT_TABLE)
       ENDIF

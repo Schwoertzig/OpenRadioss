@@ -43,7 +43,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    defaults_mod           ../starter/source/modules/defaults_mod.F90
 !||    elbuftag_mod           ../starter/share/modules1/elbuftag_mod.F
 !||    message_mod            ../starter/share/message_module/message_mod.F
-!||    reader_old_mod         ../starter/share/modules1/reader_old_mod.F90
 !||    submodel_mod           ../starter/share/modules1/submodel_mod.F
 !||====================================================================
       SUBROUTINE HM_READ_PROP_GENERIC(
@@ -60,7 +59,6 @@ C-----------------------------------------------
       USE SUBMODEL_MOD , ONLY : NSUBMOD, SUBMODEL_DATA
       USE DEFAULTS_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARLINE
-      USE READER_OLD_MOD , ONLY : KLINE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -101,7 +99,6 @@ C-----------------------------------------------
       INTEGER I, NPG, JCVT, NUVAR(2)
       my_real PARGEO(100), STIF
       my_real QA,QB
-      CHARACTER FILNAM*512,CLAW*4
       CHARACTER(LEN=NCHARTITLE) :: TITR
 C=======================================================================
 c------------------------------

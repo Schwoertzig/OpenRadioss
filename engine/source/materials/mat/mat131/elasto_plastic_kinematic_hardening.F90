@@ -31,6 +31,9 @@
 !||    nice_solids                              ../engine/source/materials/mat/mat131/return_mapping/nice_solids.F90
 !||====================================================================
       module elasto_plastic_kinematic_hardening_mod
+! \brief Compute elasto-plastic kinematic hardening for /MAT/LAW131
+! \details Compute the kinematic hardening contribution (backstress update)
+!          for /MAT/LAW131 (elasto-plastic material law).
       contains
 !||====================================================================
 !||    elasto_plastic_kinematic_hardening   ../engine/source/materials/mat/mat131/elasto_plastic_kinematic_hardening.F90
@@ -53,7 +56,7 @@
       subroutine elasto_plastic_kinematic_hardening(                           &
           matparam ,nel      ,l_sigb   ,dsigb_dlam,dsigy_dpla,chard    ,       &
           normxx   ,normyy   ,normzz   ,normxy    ,normyz    ,normzx   ,       &
-          dpla_dlam,sigb     )
+          dpla_dlam,sigb     ,ikine    )
 !----------------------------------------------------------------
 !   M o d u l e s
 !----------------------------------------------------------------
@@ -82,16 +85,17 @@
         real(kind=WP), dimension(nel), intent(in)    :: normzx     !< 1st derivative of equivalent stress wrt stress zx
         real(kind=WP), dimension(nel), intent(in)    :: dpla_dlam  !< Derivative of equivalent plastic strain w.r.t plastic multiplier
         real(kind=WP), dimension(nel,l_sigb),intent(in) :: sigb    !< Backstress components for kinematic hardening
+        integer,                       intent(in)    :: ikine      !< Kinematic hardening type
 !----------------------------------------------------------------
 !  L o c a l  V a r i a b l e s
 !----------------------------------------------------------------
-        integer :: ikine
+        integer :: offset
 !===============================================================================
 !
         !=======================================================================
         !< - Select kinematic hardening model
         !=======================================================================
-        ikine = matparam%iparam(24)
+        offset = matparam%iparam(27) + 1
         select case(ikine)
           !---------------------------------------------------------------------
           !< Prager kinematic hardening model
@@ -107,7 +111,7 @@
             call kinematic_hardening_chaboche(                                 &
               matparam ,nel      ,l_sigb   ,dsigb_dlam,sigb      ,chard    ,   &
               normxx   ,normyy   ,normzz   ,normxy    ,normyz    ,normzx   ,   &
-              dpla_dlam)
+              dpla_dlam,offset   )
         end select
 !
       end subroutine elasto_plastic_kinematic_hardening

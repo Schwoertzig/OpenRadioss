@@ -114,6 +114,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_sphio                         ../starter/source/loads/sph/hm_preread_sphio.F
 !||    hm_rbodies_add_main_node                 ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_activ                            ../starter/source/tools/activ/hm_read_activ.F
+!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_grid                         ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
 !||    hm_read_ale_link                         ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -140,8 +141,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_eig                              ../starter/source/general_controls/computation/hm_read_eig.F
 !||    hm_read_elasticity                       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity.F90
 !||    hm_read_elasticity_anisotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
+!||    hm_read_elasticity_bimod_isotropic       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_bimod_isotropic.F90
 !||    hm_read_elasticity_isotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_temp_isotropic        ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_elasto_plastic                   ../starter/source/materials/mat/mat131/hm_read_elasto_plastic.F90
 !||    hm_read_eos                              ../starter/source/materials/eos/hm_read_eos.F
@@ -347,6 +350,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_yield_criterion                  ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion.F90
 !||    hm_read_yield_criterion_barlat1989       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat1989.F90
 !||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_read_yield_criterion_vonmises         ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_vonmises.F90
@@ -432,6 +436,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    read_sensor_time                         ../starter/source/tools/sensor/read_sensor_time.F
 !||    read_sensor_vel                          ../starter/source/tools/sensor/read_sensor_vel.F
 !||    read_sensor_work                         ../starter/source/tools/sensor/read_sensor_work.F
+!||    rpart_inivel_check                       ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    sboxboxsurf                              ../starter/source/model/box/bigbox.F
 !||    set_admesh                               ../starter/source/model/remesh/set_admesh.F
 !||    setrb2on                                 ../starter/source/constraints/general/rbe2/hm_read_rbe2.F

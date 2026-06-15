@@ -26,6 +26,9 @@
 !||    elasto_plastic_yield_stress    ../engine/source/materials/mat/mat131/elasto_plastic_yield_stress.F90
 !||====================================================================
       module work_hardening_tabulated_mod
+! \brief Compute tabulated work hardening for /MAT/LAW131
+! \details Compute the isotropic work hardening stress using tabulated
+!          stress-strain data for /MAT/LAW131.
       contains
 !||====================================================================
 !||    work_hardening_tabulated      ../engine/source/materials/mat/mat131/work_hardening/work_hardening_tabulated.F90
@@ -40,7 +43,7 @@
 !||====================================================================
       subroutine work_hardening_tabulated(                                     &
         matparam ,nel      ,sigy     ,pla      ,epsd     ,dsigy_dpla,nvartmp  ,&
-        vartmp   )
+        vartmp   ,offset   )
 !----------------------------------------------------------------
 !   M o d u l e s
 !----------------------------------------------------------------
@@ -62,10 +65,11 @@
         real(kind=WP),   dimension(nel), intent(inout) :: dsigy_dpla !< Derivative of eq. stress w.r.t. cumulated plastic strain
         integer,                         intent(in)    :: nvartmp    !< Number of variables used in tabulated hardening
         integer, dimension(nel,nvartmp), intent(inout) :: vartmp     !< Temporary variables for tabulated hardening
+        integer,                         intent(in)    :: offset     !< Offset in the material parameters array for work hardening parameters
 !----------------------------------------------------------------
 !  L o c a l  V a r i a b l e s
 !----------------------------------------------------------------
-        integer :: offset,offset_tab,offset_var
+        integer :: offset_tab,offset_var
         real(kind=WP) :: xvec(nel,2)
         logical :: flag_extrap
 !===============================================================================
@@ -74,7 +78,6 @@
         !< - Tabulated work hardening model
         !=======================================================================
         offset_tab = matparam%iparam(2)
-        offset = matparam%iparam(6)
         offset_var = matparam%iparam(4)
         !< Recover flat extrapolation flag from work hardening parameters
         flag_extrap = (matparam%uparam(offset + 1) == 0)

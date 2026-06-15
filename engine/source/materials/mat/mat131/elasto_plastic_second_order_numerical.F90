@@ -26,6 +26,9 @@
 !||    elasto_plastic_eq_stress                    ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
 !||====================================================================
       module elasto_plastic_second_order_numerical_mod
+! \brief Compute second-order numerical approximation for /MAT/LAW131
+! \details Compute second-order numerical derivatives of the yield function
+!          for /MAT/LAW131 (elasto-plastic material law).
       contains
 !||====================================================================
 !||    elasto_plastic_second_order_numerical   ../engine/source/materials/mat/mat131/elasto_plastic_second_order_numerical.F90
@@ -45,7 +48,7 @@
         matparam ,nel      ,eltype   ,icrit    ,                               &
         signxx   , signyy  ,signzz   ,signxy   ,signyz   ,signzx   ,           &
         normxx   ,normyy   ,normzz   ,normxy   ,normyz   ,normzx   ,           &
-        N        )
+        N        ,offset   )
 !----------------------------------------------------------------
 !   M o d u l e s
 !----------------------------------------------------------------
@@ -78,6 +81,7 @@
         real(kind=WP), dimension(nel),     intent(in)  :: normyz   !< Yield criterion gradient component yz
         real(kind=WP), dimension(nel),     intent(in)  :: normzx   !< Yield criterion gradient component zx
         real(kind=WP), dimension(nel,6,6), intent(out) :: N        !< Second-order derivative of the yield criterion (6x6 matrix)
+        integer,                           intent(in)  :: offset   !< Offset for the yield criterion parameters in the material parameters data structure
 !----------------------------------------------------------------
 !  L o c a l  V a r i a b l e s
 !----------------------------------------------------------------
@@ -154,14 +158,16 @@
             case(4)
               call yield_criterion_barlat1989(                                 &          
                 matparam ,nel      ,seq_p    ,sxx_p    ,syy_p    ,sxy_p    ,   &
-                nxx_p    ,nyy_p    ,nzz_p    ,nxy_p    ,nyz_p    ,nzx_p    ) 
+                nxx_p    ,nyy_p    ,nzz_p    ,nxy_p    ,nyz_p    ,nzx_p    ,   &
+                offset   ) 
             !-------------------------------------------------------------------
             !< Barlat 2000 yield criterion
             !-------------------------------------------------------------------
             case(5)
               call yield_criterion_barlat2000(                                 &          
                 matparam ,nel      ,seq_p    ,sxx_p    ,syy_p    ,sxy_p    ,   &
-                nxx_p    ,nyy_p    ,nzz_p    ,nxy_p    ,nyz_p    ,nzx_p    ) 
+                nxx_p    ,nyy_p    ,nzz_p    ,nxy_p    ,nyz_p    ,nzx_p    ,   &
+                offset   ) 
           end select
 !
           !< Inverse of h*norm for finite differences

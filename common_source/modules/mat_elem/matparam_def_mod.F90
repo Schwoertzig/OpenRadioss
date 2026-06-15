@@ -56,6 +56,12 @@
 !||    eig                                      ../engine/stub/eig.F
 !||    eig1                                     ../engine/stub/eig1.F
 !||    eigp                                     ../engine/stub/eigp.F
+!||    elasticity_anisotropic                   ../engine/source/materials/mat/mat131/elasticity/elasticity_anisotropic.F90
+!||    elasticity_bimod_isotropic               ../engine/source/materials/mat/mat131/elasticity/elasticity_bimod_isotropic.F90
+!||    elasticity_isotropic                     ../engine/source/materials/mat/mat131/elasticity/elasticity_isotropic.F90
+!||    elasticity_orthotropic                   ../engine/source/materials/mat/mat131/elasticity/elasticity_orthotropic.F90
+!||    elasticity_temp_isotropic                ../engine/source/materials/mat/mat131/elasticity/elasticity_temp_isotropic.F90
+!||    elasticity_viscous_isotropic             ../engine/source/materials/mat/mat131/elasticity/elasticity_viscous_isotropic.F90
 !||    elasto_plastic_eq_stress                 ../engine/source/materials/mat/mat131/elasto_plastic_eq_stress.F90
 !||    elasto_plastic_kinematic_hardening       ../engine/source/materials/mat/mat131/elasto_plastic_kinematic_hardening.F90
 !||    elasto_plastic_second_order_numerical    ../engine/source/materials/mat/mat131/elasto_plastic_second_order_numerical.F90
@@ -90,8 +96,10 @@
 !||    hist2                                    ../engine/source/output/th/hist2.F
 !||    hm_read_elasticity                       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity.F90
 !||    hm_read_elasticity_anisotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_anisotropic.F90
+!||    hm_read_elasticity_bimod_isotropic       ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_bimod_isotropic.F90
 !||    hm_read_elasticity_isotropic             ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90
 !||    hm_read_elasticity_orthotropic           ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_orthotropic.F90
+!||    hm_read_elasticity_temp_isotropic        ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_temp_isotropic.F90
 !||    hm_read_elasticity_viscous_isotropic     ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_viscous_isotropic.F90
 !||    hm_read_elasto_plastic                   ../starter/source/materials/mat/mat131/hm_read_elasto_plastic.F90
 !||    hm_read_eos                              ../starter/source/materials/eos/hm_read_eos.F
@@ -163,6 +171,7 @@
 !||    hm_read_mat132                           ../starter/source/materials/mat/mat132/hm_read_mat132.F90
 !||    hm_read_mat133                           ../starter/source/materials/mat/mat133/hm_read_mat133.F90
 !||    hm_read_mat134                           ../starter/source/materials/mat/mat134/hm_read_mat134.F90
+!||    hm_read_mat135                           ../starter/source/materials/mat/mat135/hm_read_mat135.F90
 !||    hm_read_mat14                            ../starter/source/materials/mat/mat014/hm_read_mat14.F
 !||    hm_read_mat15                            ../starter/source/materials/mat/mat015/hm_read_mat15.F
 !||    hm_read_mat151                           ../starter/source/materials/mat/mat151/hm_read_mat151.F
@@ -263,6 +272,7 @@
 !||    hm_read_yield_criterion                  ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion.F90
 !||    hm_read_yield_criterion_barlat1989       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat1989.F90
 !||    hm_read_yield_criterion_barlat2000       ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_read_yield_criterion_bbc2005          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_BBC2005.F90
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_read_yield_criterion_vonmises         ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_vonmises.F90
@@ -356,6 +366,9 @@
 !||    qgrhead                                  ../starter/source/elements/solid_2d/quad/qgrhead.F
 !||    qgrtails                                 ../starter/source/elements/solid_2d/quad/qgrtails.F
 !||    qinit2                                   ../starter/source/elements/solid_2d/quad/qinit2.F
+!||    r23l135def3                              ../engine/source/elements/spring/r23l135def3.F90
+!||    r23law135                                ../engine/source/elements/spring/r23law135.F90
+!||    r2len3law135                             ../engine/source/elements/spring/r2len3law135.F90
 !||    r2r_group                                ../starter/source/coupling/rad2rad/r2r_group.F
 !||    r2r_matparam_copy                        ../starter/source/elements/elbuf_init/r2r_matparam_copy.F
 !||    rate_dependency_parameters               ../engine/source/materials/mat/mat132/rate_dependency_parameters.F90
@@ -432,6 +445,7 @@
 !||    strainrate_dependency_125c               ../engine/source/materials/mat/mat125/strainrate_dependency_125c.F90
 !||    strainrate_dependency_125s               ../engine/source/materials/mat/mat125/strainrate_dependency_125s.F90
 !||    suinit3                                  ../starter/source/elements/elbuf_init/suinit3.F
+!||    szhour3                                  ../engine/source/elements/solid/solidez/szhour3.F
 !||    szhour3_or                               ../engine/source/elements/solid/solidez/szhour3_or.F
 !||    t3grhead                                 ../starter/source/elements/solid_2d/tria/t3grhead.F
 !||    t3grtails                                ../starter/source/elements/solid_2d/tria/t3grtails.F
@@ -453,6 +467,7 @@
 !||    work_hardening_voce                      ../engine/source/materials/mat/mat131/work_hardening/work_hardening_voce.F90
 !||    yield_criterion_barlat1989               ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat1989.F90
 !||    yield_criterion_barlat2000               ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_barlat2000.F90
+!||    yield_criterion_bbc2005                  ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_BBC2005.F90
 !||    yield_criterion_hershey                  ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hershey.F90
 !||    yield_criterion_hill                     ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_hill.F90
 !||    yield_criterion_vonmises                 ../engine/source/materials/mat/mat131/yield_criterion/yield_criterion_vonmises.F90
@@ -468,7 +483,7 @@
 !||    visc_param_mod                           ../common_source/modules/mat_elem/visc_param_mod.F90
 !||====================================================================
       module matparam_def_mod
-!
+        
         use table4d_mod
         use visc_param_mod
         use fail_param_mod
@@ -510,8 +525,10 @@
           integer     :: compressibility      !< "compressible","incompressible","elasto_plastic"
           integer     :: smstr                !< "small_strain", "large_strain"
           integer     :: strain_formulation   !< "total", "incremental"
-          integer     :: ipres                !< "hydrostatic",hydro_eos","hook"
+          integer     :: ipres                !< "hydrostatic","hydro_eos","hook"
+          integer     :: crit_plas            !< "vonmises","hershey","hill", "barlat1989","barlat2000","drucker"
           integer     :: orthotropy           !< "isotropic", "orthotropic", "anisotropic"
+          integer     :: itetra4              !< "tetra4_linear","tetra4_averaged"
           ! ------- compatibility flags - not written in restart file, for starter check only
           integer     :: prop_solid           !< "solid_isotropic","solid_orthotropic","solid_composite","solid_cohesive"   ,"solid_porous","solid_all"
           integer     :: prop_shell           !< "shell_isotropic","shell_orthotropic","shell_composite","shell_anisotropic","shell_all"

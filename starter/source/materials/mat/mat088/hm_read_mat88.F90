@@ -538,6 +538,7 @@
             where (table_mat(2)%y1d >= zero) &
               table_mat(2)%y1d = table_mat(2)%y1d/y_out2(nout)
             !< Normalize the loading curve
+            table_mat(3)%notable = 1
             table_mat(3)%ndim = ndim
             allocate(table_mat(3)%x(ndim))
             npt = size(table_mat(1)%x(1)%values)
@@ -592,6 +593,8 @@
           !<======================================================================
           !< Young modulus
           e = dydx
+          !< Default bulk modulus
+          if (bulk == zero) bulk = e/(three*(one - two*nu))
           !< Shear modulus
           gs = three*bulk*e/(nine*bulk - e)
           if (gs < zero) then

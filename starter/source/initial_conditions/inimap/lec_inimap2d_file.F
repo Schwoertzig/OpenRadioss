@@ -26,7 +26,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_inimap2d       ../starter/source/initial_conditions/inimap/hm_read_inimap2d.F
 !||--- calls      -----------------------------------------------------
 !||    ancmsg                 ../starter/source/output/message/message.F
-!||    usr2sys                ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||    func2d_mod             ../starter/share/modules1/func2d_mod.F
 !||    inimap2d_mod           ../starter/share/modules1/inimap2d_mod.F
@@ -58,20 +57,15 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: ID
       CHARACTER(LEN=NCHARTITLE)::TITLE
 C-----------------------------------------------
-C   E x t e r n a l   F u n c t i o n s
-C-----------------------------------------------
-      INTEGER USR2SYS
-C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      CHARACTER MESS*40,BUFFER*14
-      CHARACTER(LEN=NCHARLINE) :: ROOTNAME
+      CHARACTER MESS*40
       DATA MESS/'INFILE'/
-      INTEGER NUM_CENTROIDS,N_CYCLE,K,ISUBMAT,NBMAT,NUM_NODE_VEL,INPUT_VERSION,NB_COMP
-      my_real X_SCALE,Y_SCALE,X_SHIFT,Y_SHIFT,TT
+      INTEGER NUM_CENTROIDS,K,ISUBMAT,NBMAT,NUM_NODE_VEL
+      my_real TT
       INTEGER :: LEN, LEN_TMP_NAME
       CHARACTER :: TMP_NAME*2048, FILNAM*204
-      INTEGER :: IFILNAM(2048),II, NCYCLE, NCELL_TOT, INIVERS
+      INTEGER :: IFILNAM(2048),II, NCYCLE, INIVERS
       LOGICAL FILE_EXIST
 C-----------------------------------------------
 C   S o u r c e   L i n e s
@@ -191,8 +185,5 @@ C-----------------------------------------------
            
         
         RETURN
-        
- 999    CALL ANCMSG(MSGID = 1885, ANMODE = ANINFO, MSGTYPE = MSGERROR,
-     .              I1 = INIMAP2D%ID, C1 = INIMAP2D%TITLE)
 
       END SUBROUTINE LEC_INIMAP2D_FILE

@@ -133,6 +133,7 @@
 !||    init_bcs_wall                      ../starter/source/boundary_conditions/init_bcs_wall.F90
 !||    init_h3d_engine                    ../engine/source/output/h3d/h3d_build_fortran/init_h3d_engine.F90
 !||    init_monvol                        ../starter/source/airbag/init_monvol.F
+!||    init_rwall_penalty                 ../starter/source/constraints/general/rwall/init_rwall_penalty.F90
 !||    insert_clause_in_set               ../starter/source/model/sets/insert_clause_in_set.F
 !||    intbuf_fric_ini_starter            ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
 !||    intbuf_ini_starter                 ../starter/source/interfaces/intbuf/intbuf_ini_starter.F
@@ -156,6 +157,8 @@
 !||    r2r_split                          ../starter/source/coupling/rad2rad/r2r_split.F
 !||    r2r_void                           ../starter/source/coupling/rad2rad/r2r_void.F
 !||    r2r_void_1d                        ../starter/source/coupling/rad2rad/r2r_void.F
+!||    rbody_part_check                   ../starter/source/constraints/general/rbody/rbody_part_modif.F90
+!||    rbody_part_modif                   ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    rcheckmass                         ../starter/source/elements/spring/rcheckmass.F
 !||    read_box_box                       ../starter/source/model/box/read_box_box.F
 !||    read_eosparam                      ../engine/source/output/restart/read_eosparam.F90
@@ -178,6 +181,7 @@
 !||    rgwal0_pen                         ../engine/source/constraints/general/rwall/rgwall_pen.F90
 !||    ri2_int24p_ini                     ../starter/source/interfaces/inter3d1/i7remnode.F
 !||    rm_cand24                          ../starter/source/interfaces/inter3d1/i7remnode.F
+!||    rpart_inivel_check                 ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    rwall_fpen                         ../engine/source/constraints/general/rwall/rgwall_pen.F90
 !||    sensor_init                        ../engine/source/tools/sensor/sensor_init.F
 !||    set_user_window_nodes              ../starter/source/user_interface/user_windows_tools.F
@@ -418,73 +422,60 @@
 
 !! \brief Check if the allocation was successful and print an error message if it was noti
 !||====================================================================
-!||    check_error_and_write         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
 !||--- called by ------------------------------------------------------
-!||    extend_array_double_1d        ../common_source/tools/memory/extend_array.F90
-!||    extend_array_double_2d        ../common_source/tools/memory/extend_array.F90
-!||    extend_array_double_3d        ../common_source/tools/memory/extend_array.F90
-!||    extend_array_integer_1d       ../common_source/tools/memory/extend_array.F90
-!||    extend_array_integer_2d       ../common_source/tools/memory/extend_array.F90
-!||    extend_array_integer_3d       ../common_source/tools/memory/extend_array.F90
-!||    extend_array_real_1d          ../common_source/tools/memory/extend_array.F90
-!||    extend_array_real_2d          ../common_source/tools/memory/extend_array.F90
-!||    extend_array_real_3d          ../common_source/tools/memory/extend_array.F90
-!||    my_alloc_8_double_1d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_double_2d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_double_3d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_1d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_2d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_3d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_1d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_2d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_3d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_1d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_2d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_3d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_1d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_2d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_3d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_1d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_2d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_3d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_1d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_2d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_3d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_1d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_2d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_3d            ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_1d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_2d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_3d           ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_1d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_2d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_3d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_1d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_2d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_3d          ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_1d             ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_2d             ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_3d             ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_1d              ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_2d              ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_3d              ../common_source/tools/memory/my_alloc.F90
-!||    reallocate_array_integer_1d   ../common_source/tools/memory/extend_array.F90
-!||    shrink_array_double_1d        ../common_source/tools/memory/shrink_array.F90
-!||    shrink_array_integer_1d       ../common_source/tools/memory/shrink_array.F90
-!||    shrink_array_real_1d          ../common_source/tools/memory/shrink_array.F90
+!||    my_alloc_8_double_1d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_double_2d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_double_3d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_integer_1d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_integer_2d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_integer_3d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_logical_1d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_logical_2d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_logical_3d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_pdouble_1d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_pdouble_2d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_pdouble_3d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_pinteger_1d   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_pinteger_2d   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_pinteger_3d   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_plogical_1d   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_plogical_2d   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_plogical_3d   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_preal_1d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_preal_2d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_preal_3d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_real_1d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_real_2d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_real_3d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_double_1d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_double_2d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_double_3d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_integer_1d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_integer_2d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_integer_3d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_logical_1d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_logical_2d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_logical_3d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pdouble_1d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pdouble_2d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pdouble_3d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pinteger_1d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pinteger_2d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pinteger_3d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_plogical_1d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_plogical_2d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_plogical_3d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_preal_1d        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_preal_2d        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_preal_3d        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_real_1d         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_real_2d         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_real_3d         ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    arret                         ../engine/source/system/arret.F
+!||    arret                    ../engine/source/system/arret.F
 !||====================================================================
-        subroutine check_error_and_write(stat,msg)
+        subroutine my_alloc_check(stat,msg)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -501,7 +492,7 @@
             end if
             call arret(2)
           end if
-        end subroutine check_error_and_write
+        end subroutine my_alloc_check
 
 
 ! ======================================================================================================================
@@ -510,9 +501,9 @@
 
 !! \brief Allocate a 1D array of real numbers
 !||====================================================================
-!||    my_alloc_real_1d        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_real_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check     ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_real_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -532,9 +523,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -543,9 +534,9 @@
 
 !! \brief Allocate a 2D array of real numbers
 !||====================================================================
-!||    my_alloc_real_2d        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_real_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check     ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_real_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -566,9 +557,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -576,9 +567,9 @@
         end subroutine my_alloc_real_2d
 
 !||====================================================================
-!||    my_alloc_real_3d        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_real_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check     ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_real_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -601,9 +592,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -615,9 +606,9 @@
 
 !! \brief Allocate a 1D array of double numbers
 !||====================================================================
-!||    my_alloc_double_1d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_double_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_double_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -637,9 +628,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -648,9 +639,9 @@
 
 !! \brief Allocate a 2D array of double numbers
 !||====================================================================
-!||    my_alloc_double_2d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_double_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_double_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -671,9 +662,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -681,9 +672,9 @@
         end subroutine my_alloc_double_2d
 
 !||====================================================================
-!||    my_alloc_double_3d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_double_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_double_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -706,9 +697,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -721,9 +712,9 @@
 ! ======================================================================================================================
         !! \brief Allocate a 1D array of integer numbers
 !||====================================================================
-!||    my_alloc_integer_1d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_integer_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_integer_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -743,9 +734,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -754,9 +745,9 @@
 
 !! \brief Allocate a 2D array of integers
 !||====================================================================
-!||    my_alloc_integer_2d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_integer_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_integer_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -777,9 +768,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -788,9 +779,9 @@
 
 !! \brief Allocate a 3D array of integers
 !||====================================================================
-!||    my_alloc_integer_3d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_integer_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_integer_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -813,9 +804,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -827,9 +818,9 @@
 
 !! \brief Allocate a 1D array of real numbers
 !||====================================================================
-!||    my_alloc_preal_1d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_preal_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check      ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_preal_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -849,9 +840,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -860,9 +851,9 @@
 
 !! \brief Allocate a 2D array of real numbers
 !||====================================================================
-!||    my_alloc_preal_2d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_preal_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check      ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_preal_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -883,9 +874,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -893,9 +884,9 @@
         end subroutine my_alloc_preal_2d
 
 !||====================================================================
-!||    my_alloc_preal_3d       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_preal_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check      ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_preal_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -918,9 +909,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -932,9 +923,9 @@
 
 !! \brief Allocate a 1D array of double numbers
 !||====================================================================
-!||    my_alloc_pdouble_1d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pdouble_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pdouble_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -954,9 +945,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -965,9 +956,9 @@
 
 !! \brief Allocate a 2D array of double numbers
 !||====================================================================
-!||    my_alloc_pdouble_2d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pdouble_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pdouble_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -988,9 +979,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -998,9 +989,9 @@
         end subroutine my_alloc_pdouble_2d
 
 !||====================================================================
-!||    my_alloc_pdouble_3d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pdouble_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pdouble_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1023,9 +1014,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1038,9 +1029,9 @@
 ! ======================================================================================================================
         !! \brief Allocate a 1D array of integer numbers
 !||====================================================================
-!||    my_alloc_pinteger_1d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pinteger_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pinteger_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1060,9 +1051,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1071,9 +1062,9 @@
 
 !! \brief Allocate a 2D array of integers
 !||====================================================================
-!||    my_alloc_pinteger_2d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pinteger_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pinteger_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1094,9 +1085,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1105,9 +1096,9 @@
 
 !! \brief Allocate a 3D array of integers
 !||====================================================================
-!||    my_alloc_pinteger_3d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_pinteger_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pinteger_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1130,9 +1121,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1147,9 +1138,9 @@
 
 !! \brief Allocate a 1D array of real numbers
 !||====================================================================
-!||    my_alloc_8_real_1d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_real_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_real_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1169,9 +1160,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1180,9 +1171,9 @@
 
 !! \brief Allocate a 2D array of real numbers
 !||====================================================================
-!||    my_alloc_8_real_2d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_real_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_real_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1203,9 +1194,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1213,9 +1204,9 @@
         end subroutine my_alloc_8_real_2d
 
 !||====================================================================
-!||    my_alloc_8_real_3d      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_real_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_real_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1238,9 +1229,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1252,9 +1243,9 @@
 
 !! \brief Allocate a 1D array of double numbers
 !||====================================================================
-!||    my_alloc_8_double_1d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_double_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_double_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1274,9 +1265,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1285,9 +1276,9 @@
 
 !! \brief Allocate a 2D array of double numbers
 !||====================================================================
-!||    my_alloc_8_double_2d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_double_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_double_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1308,9 +1299,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1318,9 +1309,9 @@
         end subroutine my_alloc_8_double_2d
 
 !||====================================================================
-!||    my_alloc_8_double_3d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_double_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_double_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1343,9 +1334,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1360,7 +1351,7 @@
 !||====================================================================
 !||    my_alloc_8_integer_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_integer_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1380,9 +1371,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1393,7 +1384,7 @@
 !||====================================================================
 !||    my_alloc_8_integer_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_integer_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1414,9 +1405,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1427,7 +1418,7 @@
 !||====================================================================
 !||    my_alloc_8_integer_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_integer_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1450,9 +1441,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1463,9 +1454,9 @@
 
 !! \brief Allocate a 1D array of real numbers
 !||====================================================================
-!||    my_alloc_8_preal_1d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_preal_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_preal_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1485,9 +1476,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1496,9 +1487,9 @@
 
 !! \brief Allocate a 2D array of real numbers
 !||====================================================================
-!||    my_alloc_8_preal_2d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_preal_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_preal_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1519,9 +1510,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1529,9 +1520,9 @@
         end subroutine my_alloc_8_preal_2d
 
 !||====================================================================
-!||    my_alloc_8_preal_3d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_8_preal_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_preal_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1554,9 +1545,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1570,7 +1561,7 @@
 !||====================================================================
 !||    my_alloc_8_pdouble_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pdouble_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1590,9 +1581,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1603,7 +1594,7 @@
 !||====================================================================
 !||    my_alloc_8_pdouble_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pdouble_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1624,9 +1615,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1636,7 +1627,7 @@
 !||====================================================================
 !||    my_alloc_8_pdouble_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pdouble_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1659,9 +1650,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1676,7 +1667,7 @@
 !||====================================================================
 !||    my_alloc_8_pinteger_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pinteger_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1696,9 +1687,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1709,7 +1700,7 @@
 !||====================================================================
 !||    my_alloc_8_pinteger_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pinteger_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1730,9 +1721,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1743,7 +1734,7 @@
 !||====================================================================
 !||    my_alloc_8_pinteger_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pinteger_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1766,9 +1757,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1779,9 +1770,9 @@
 ! ======================================================================================================================
 !! \brief Allocate a 1D array of logical numbers
 !||====================================================================
-!||    my_alloc_logical_1d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_logical_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_logical_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1801,9 +1792,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1812,9 +1803,9 @@
 
 !! \brief Allocate a 2D array of logical numbers
 !||====================================================================
-!||    my_alloc_logical_2d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_logical_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_logical_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1835,9 +1826,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1845,9 +1836,9 @@
         end subroutine my_alloc_logical_2d
 
 !||====================================================================
-!||    my_alloc_logical_3d     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_logical_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_logical_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1870,9 +1861,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1880,9 +1871,9 @@
         end subroutine my_alloc_logical_3d
 !! \brief Allocate a 1D array of logical numbers
 !||====================================================================
-!||    my_alloc_plogical_1d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_plogical_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_plogical_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1902,9 +1893,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1913,9 +1904,9 @@
 
 !! \brief Allocate a 2D array of logical numbers
 !||====================================================================
-!||    my_alloc_plogical_2d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_plogical_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_plogical_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1936,9 +1927,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1946,9 +1937,9 @@
         end subroutine my_alloc_plogical_2d
 
 !||====================================================================
-!||    my_alloc_plogical_3d    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_plogical_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_plogical_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -1971,9 +1962,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -1986,7 +1977,7 @@
 !||====================================================================
 !||    my_alloc_8_logical_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_logical_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -2006,9 +1997,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -2019,7 +2010,7 @@
 !||====================================================================
 !||    my_alloc_8_logical_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_logical_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -2040,9 +2031,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -2052,7 +2043,7 @@
 !||====================================================================
 !||    my_alloc_8_logical_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_logical_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -2075,9 +2066,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -2087,7 +2078,7 @@
 !||====================================================================
 !||    my_alloc_8_plogical_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_plogical_1d(a, n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -2107,9 +2098,9 @@
           allocate(a(n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -2120,7 +2111,7 @@
 !||====================================================================
 !||    my_alloc_8_plogical_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_plogical_2d(a, n,m, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -2141,9 +2132,9 @@
           allocate(a(n,m), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr
@@ -2153,7 +2144,7 @@
 !||====================================================================
 !||    my_alloc_8_plogical_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_plogical_3d(a,l,m,n, msg, stat)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -2176,9 +2167,9 @@
           allocate(a(l,m,n), stat=ierr)
           if(.not. present(stat)) then
             if(present(msg)) then
-              call check_error_and_write(ierr, msg=msg)
+              call my_alloc_check(ierr, msg=msg)
             else
-              call check_error_and_write(ierr)
+              call my_alloc_check(ierr)
             end if
           end if
           if(present(stat)) stat = ierr

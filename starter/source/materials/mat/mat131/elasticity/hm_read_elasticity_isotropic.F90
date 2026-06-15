@@ -27,6 +27,9 @@
 !||====================================================================
       module hm_read_elasticity_isotropic_mod
         implicit none
+! \brief Read isotropic elasticity input data for /MAT/LAW131
+! \details Read the isotropic elasticity model parameters
+!          for /MAT/LAW131 (elasto-plastic material law).
       contains
 !||====================================================================
 !||    hm_read_elasticity_isotropic   ../starter/source/materials/mat/mat131/elasticity/hm_read_elasticity_isotropic.F90

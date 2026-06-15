@@ -69,6 +69,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_sphio                  ../starter/source/loads/sph/hm_preread_sphio.F
 !||    hm_rbodies_add_main_node          ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_activ                     ../starter/source/tools/activ/hm_read_activ.F
+!||    hm_read_adinertia                 ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                     ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_grid                  ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
 !||    hm_read_ale_link                  ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -237,6 +238,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    read_impvel_fgeo                  ../starter/source/constraints/general/impvel/read_impvel_fgeo.F
 !||    read_impvel_lagmul                ../starter/source/constraints/general/impvel/read_impvel_lagmul.F
 !||    read_monvol                       ../starter/source/airbag/read_monvol.F
+!||    rpart_inivel_check                ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    set_admesh                        ../starter/source/model/remesh/set_admesh.F
 !||    setrb2on                          ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||    setrbyon                          ../starter/source/constraints/general/rbody/hm_read_rbody.F

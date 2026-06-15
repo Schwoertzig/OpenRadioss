@@ -43,15 +43,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    fail_fld_c                   ../engine/source/materials/fail/fld/fail_fld_c.F
 !||    fail_fld_tsh                 ../engine/source/materials/fail/fld/fail_fld_tsh.F
 !||    fail_fld_xfem                ../engine/source/materials/fail/fld/fail_fld_xfem.F
-!||    fail_gene1_b                 ../engine/source/materials/fail/gene1/fail_gene1_b.F90
-!||    fail_gene1_c                 ../engine/source/materials/fail/gene1/fail_gene1_c.F
-!||    fail_gene1_ib                ../engine/source/materials/fail/gene1/fail_gene1_ib.F90
-!||    fail_gene1_s                 ../engine/source/materials/fail/gene1/fail_gene1_s.F
 !||    fail_nxt_c                   ../engine/source/materials/fail/nxt/fail_nxt_c.F
 !||    fail_orthbiquad_c            ../engine/source/materials/fail/orthbiquad/fail_orthbiquad_c.F
 !||    fail_orthbiquad_s            ../engine/source/materials/fail/orthbiquad/fail_orthbiquad_s.F
-!||    fail_orthstrain              ../engine/source/materials/fail/orthstrain/fail_orthstrain_s.F
-!||    fail_orthstrain_c            ../engine/source/materials/fail/orthstrain/fail_orthstrain_c.F
 !||    fail_sahraei_s               ../engine/source/materials/fail/sahraei/fail_sahraei_s.F
 !||    fail_snconnect               ../engine/source/materials/fail/snconnect/fail_snconnect.F
 !||    fail_syazwan_c               ../engine/source/materials/fail/syazwan/fail_syazwan_c.F

@@ -32,7 +32,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_option_read_key       ../starter/source/devtools/hm_reader/hm_option_read_key.F
 !||    hm_option_start          ../starter/source/devtools/hm_reader/hm_option_start.F
 !||    kinset                   ../starter/source/constraints/general/kinset.F
-!||    ngr2usr                  ../starter/source/system/nintrr.F
 !||    usr2sys                  ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
 !||    hm_option_read_mod       ../starter/share/modules1/hm_option_read_mod.F
@@ -74,26 +73,22 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,JJ(12), IC, NC, N, NUSR, IS, IC1, IC2, IC3, IC4,
-     .        NOSYS, J,J10(10),IGR,IGRS,ISU,IBCALE,J6(6),K,
-     .        IC0, IC01, IC02, IC03, IC04, ID ,ILAGM, NBCSLAG,
-     .        FLAG_FMT,FLAG_FMT_TMP,IFIX_TMP,SUB_ID,
+      INTEGER I, IC, IS, IC1, IC2,
+     .        NOSYS, J, J6(6), K,
+     .        ID, FLAG_FMT,
      .        CHKCOD,ISERR,NOD,SUB_INDEX,NNOD
       INTEGER IUN
       CHARACTER MESS*40
-      CHARACTER(LEN=NCHARKEY) :: KEY,KEY2
+      CHARACTER(LEN=NCHARKEY) :: KEY
       CHARACTER :: CODE*7
-      CHARACTER(LEN=NCHARFIELD) :: STRING
       CHARACTER(LEN=NCHARTITLE) ::  TITR
-      CHARACTER :: OPT*8
       LOGICAL IS_AVAILABLE
       INTEGER, DIMENSION(:), ALLOCATABLE :: IKINE1
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER USR2SYS,MY_OR,CHECK_NEW,NGR2USR
+      INTEGER USR2SYS,MY_OR,CHECK_NEW
 !
-      INTEGER, DIMENSION(:), POINTER :: INGR2USR
 C
 C-----------------------------------------------
 C   D a t a

@@ -144,6 +144,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    forcepinch                                   ../engine/source/loads/general/forcepinch.F
 !||    forint                                       ../engine/source/elements/forint.F
 !||    forintc                                      ../engine/source/elements/forintc.F
+!||    forintc_prepare_gpu                          ../engine/source/elements/shell/coque/shell_internal_forces.F90
 !||    forintp                                      ../engine/source/elements/forintp.F
 !||    forints                                      ../engine/source/elements/forints.F
 !||    free_pinch                                   ../common_source/modules/pinchtype_mod.F
@@ -165,6 +166,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    get_ibuf_c                                   ../engine/source/coupling/rad2rad/rad2rad_c.c
 !||    get_neighbour_surface                        ../engine/source/interfaces/interf/get_neighbour_surface.F90
 !||    get_shmbuf_c                                 ../engine/source/coupling/rad2rad/rad2rad_c.c
+!||    gpu_shell_launch_async                       ../engine/source/elements/shell/coque/shell_internal_forces.F90
+!||    gpu_shell_sync_scatter                       ../engine/source/elements/shell/coque/shell_internal_forces.F90
 !||    gravit                                       ../engine/source/loads/general/grav/gravit.F
 !||    gravit_fvm_fem                               ../engine/source/loads/general/grav/gravit_fvm_fem.F
 !||    i14ist                                       ../engine/source/interfaces/int14/i14ist.F
@@ -333,7 +336,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sensor_logical                               ../engine/source/tools/sensor/sensor_logical.F
 !||    sensor_spmd                                  ../engine/source/tools/sensor/sensor_spmd.F
 !||    sensor_temp0                                 ../engine/source/tools/sensor/sensor_temp0.F
-!||    sfem_init                                    ../common_source/modules/elements/sfem_mod.F90
+!||    sfem_init                                    ../engine/source/elements/solid/solide4_sfem/sfem_init.F90
 !||    smp_init                                     ../engine/source/engine/resol_init.F
 !||    sms_build_mat_2                              ../engine/source/ams/sms_build_mat_2.F
 !||    sms_encin_2                                  ../engine/source/ams/sms_encin_2.F
@@ -462,6 +465,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    bcs_nrf_mod                                  ../engine/source/boundary_conditions/bcs_nrf.F90
 !||    check_mod                                    ../common_source/modules/check_mod.F
 !||    cluster_mod                                  ../engine/share/modules/cluster_mod.F
+!||    command_line_args_mod                        ../engine/share/modules/command_line_args.F
 !||    connectivity_mod                             ../common_source/modules/connectivity.F90
 !||    coupling_adapter_mod                         ../engine/source/coupling/coupling_adapter.F90
 !||    crackxfem_mod                                ../engine/share/modules/crackxfem_mod.F
@@ -545,7 +549,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    seatbelt_mod                                 ../common_source/modules/seatbelt_mod.F
 !||    segvar_mod                                   ../engine/share/modules/segvar_mod.F
 !||    sensor_mod                                   ../common_source/modules/sensor_mod.F90
+!||    sfem_init_mod                                ../engine/source/elements/solid/solide4_sfem/sfem_init.F90
 !||    sfem_mod                                     ../common_source/modules/elements/sfem_mod.F90
+!||    shell_gpu_mod                                ../engine/source/elements/shell/coque/shell_gpu_mod.F90
+!||    shell_internal_forces_mod                    ../engine/source/elements/shell/coque/shell_internal_forces.F90
 !||    shooting_node_mod                            ../engine/share/modules/shooting_node_mod.F90
 !||    skew_mod                                     ../common_source/modules/skew_mod.F90
 !||    sms_mod                                      ../engine/share/modules/sms_mod.F
@@ -655,6 +662,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+              USE COMMAND_LINE_ARGS_MOD
               USE SPMD_EXCH_WAVE_MOD
               USE GHOST_SHELLS_MOD
               USE CONNECTIVITY_MOD
@@ -777,6 +785,9 @@ C-----------------------------------------------
               use sfem_mod
               USE ALEMAIN_CUTCELL_MOD , ONLY : ALEMAIN_CUTCELL
               use init_global_boundary_list_mod , only : init_global_boundary_list
+              use sfem_init_mod , only : sfem_init
+              use shell_internal_forces_mod
+              use shell_gpu_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1007,7 +1018,7 @@ c
               type (PBLAST_) ,intent(inout)                      :: PBLAST
               type (rbe3_) ,intent(inout)                        :: RBE3
               type (rwall_) ,intent(inout)                       :: RWALL
-              type (sfem_) ,intent(inout)                        :: SFEM
+              type (global_sfem_) ,intent(inout) :: SFEM
 C
               INTEGER ,INTENT(IN) :: NDAMP_VREL,NDAMP_VREL_RBYG
               INTEGER ,INTENT(IN) :: ID_DAMP_VREL(NDAMP_VREL),FR_DAMP_VREL(NSPMD+2,NDAMP_VREL)
@@ -1371,8 +1382,13 @@ C coupling coupling
               logical :: ongoing
               double precision :: dt2max_coupling
 C-----------------------------------------------------------------------------------
+C GPU
+              type(SHELLS_) :: SHELLS
+              integer :: ipri
+C
+
               call resol_alloc_phase1(rby6,dxancg,nb25_candt,nb25_impct,nb25_dst1,nb25_dst2,igrouc,igrounc,
-     .                                interfaces,int18add,idamp_rdof_tab,icontact_old,
+     .                                interfaces,int18add,idamp_rdof_tab,icontact_old, 
      .                                nrbykin,numnod,parasiz,ngroup,ninter,sicontact,nodes,
      .                                isendto,ircvfrom,intlist,intlist25,niskyfi,niskyfie,
      .                                count_remslv,count_remslve,fr_nbcc,fr_nbcci2,
@@ -2067,7 +2083,11 @@ C Init var parallel SMP
               ENDIF
 
               ! TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS
-              CALL sfem_init(SFEM)
+              !CALL sfem_init(SFEM)
+              l1 = 1+nixs*numels+nsvois*nixs ! address of ixs10
+              call sfem_init(numels,numels10,numels8,numnod,ngroup,
+     .                       nparg,ispmd,nspmd,
+     .                       iparg,ixs,ixs(l1),sfem,nodes)
 
 C========================================================================================
 C                                    NON PARALLEL SECTION (SMP)
@@ -2607,6 +2627,18 @@ C
 C===========================================================================
 C                 BEGINNING OF EXPLICIT ITERATION LOOP
 C===========================================================================
+              IF(GPU == 1) THEN
+               CALL FORINTC_PREPARE_GPU( GPU, SHELLS, NUMELC,
+     .           PM , NPROPM,       GEO, NPROPG,
+     .           NODES, MAT_ELEM  , NSECT, NSLIPRING, NEXMAD,
+     .           IPARG, nparg     ,ELEMENT%SHELL%IXC       , IPART(K3),
+     .           IGROUC    ,NGROUC, NGROUP, NIXC    ,
+     .           ELBUF_TAB, DTFAC1(3),
+     .           NODADT, IDT1SH, IDTMINS, IDTMIN(3),
+     .           HVISC, HELAS, HVLIN )
+              ENDIF
+
+
  100          CONTINUE
 
               NCYCLE_DEBUG = NCYCLE
@@ -2965,14 +2997,12 @@ C----------------------
 C         /BCS/NRF
 C----------------------
                 IF(BCS%NUM_NRF > 0)THEN
-                  CALL BCS_NRF(N2D            , NUMNOD   ,
-     .                         NODES%X        , NODES%V  , NODES%A   ,
-     .                         NIXS           , NIXTG    , NIXQ      ,
-     .                         NUMELS         , NUMELTG  , NUMELQ    ,
-     .                         IXS            , IXTG     , IXQ       ,
-     .                         IPARIT         , LSKY     , ELEMENT%PON%FSKY,
-     .                         OUTPUT%TH%WFEXT, NODA_FEXT, DT1       ,
-     .                         ANIM_V         , OUTP_V   , H3D_DATA  )
+                  CALL BCS_NRF(N2D            , NUMNOD     ,
+     .                         NODES%X        , NODES%V    , NODES%A   ,
+     .                         IPARIT         , LSKY       , ELEMENT%PON%FSKY,
+     .                         OUTPUT%TH%WFEXT, NODA_FEXT  , DT1       ,
+     .                         ANIM_V         , OUTP_V     , H3D_DATA  ,
+     .                         bcs            , NODES%STIFN, NODES%MS)
                 ENDIF
 C----------------------
 
@@ -3128,10 +3158,13 @@ C TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS
 C---------------------------------------------
               IF(SFEM%ISFEM == 1) THEN
                 IF(GLOB_THERM%ITHERM == 0)THEN
+                  if(imon>0) call startime(timers,timer_sfem)
                   L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-                  CALL S4LAGSFEM(IPARG, IXS, NODES%X, NODES%V, ELBUF_TAB, sfem%SFEM_NODVAR, sfem%S_SFEM_NODVAR,
-     .                           NODES%BOUNDARY_ADD, NODES%BOUNDARY, IXS(L1), NODES%XDP, SXDP,
-     .                           NUMNOD, NODES%BOUNDARY_SIZE , NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP)
+                  CALL S4LAGSFEM(IPARG, IXS, NODES%X, NODES%V, ELBUF_TAB, sfem%lag%nodvar, sfem%S_SFEM_NODVAR,
+     .                           IXS(L1), NODES%XDP, nodes%s_xdp,
+     .                           NUMNOD, NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP,
+     .                           0,ispmd,sfem%lag)
+                  if(imon>0) call stoptime(timers,timer_sfem)
                 ENDIF
               ENDIF
 
@@ -3156,6 +3189,9 @@ C----------------------------------------
                 ELSE
                   NATIV_SMS_SIZ = 0
                 ENDIF
+
+C
+
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -3385,6 +3421,18 @@ C-----------------------------------------------
 !$OMP END PARALLEL
 C
               ENDIF
+
+              IF(SFEM%ISFEM == 1) THEN
+                IF(GLOB_THERM%ITHERM == 0)THEN
+                  L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
+                  if(imon>0) call startime(timers,timer_sfem)
+                  CALL S4LAGSFEM(IPARG, IXS, NODES%X, NODES%V, ELBUF_TAB, sfem%lag%nodvar, sfem%S_SFEM_NODVAR,
+     .                           IXS(L1), NODES%XDP, nodes%s_xdp,
+     .                           NUMNOD, NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP,
+     .                           1,ispmd,sfem%lag)
+                  if(imon>0) call stoptime(timers,timer_sfem)
+                ENDIF
+              ENDIF
 C--------------------------------------------------------
 C       ALE flux + forces
 C--------------------------------------------------------
@@ -3442,7 +3490,7 @@ C
      M               IGRBRIC               ,NLOC_DMG ,ID_GLOBAL_VOIS,FACE_VOIS         ,EBCS_TAB           ,ALE_CONNECTIVITY,
      N               MAT_ELEM              ,H3D_DATA ,DT            ,OUTPUT            ,NEED_COMM_INTER18  ,IDTMINS         ,
      O               IDTMIN                ,MAXFUNC  ,IMON_MAT      ,USERL_AVAIL       ,
-     P               impl_s                ,idyna    ,PYTHON        ,MAT_ELEM%MAT_PARAM,GLOB_THERM,SFEM )
+     P               impl_s                ,idyna    ,PYTHON        ,MAT_ELEM%MAT_PARAM,GLOB_THERM,SFEM,nodes%s_xdp )
 
                 IF(INT22 /=0)  call my_barrier !INTER22in input files  - get also IDT_INT22
 #include "lockon.inc"
@@ -3638,6 +3686,16 @@ C----------------------------------------
                   NELTST = NELTSTT
                   ITYPTST= ITYPTSTT
                 ENDIF
+
+             IF(GPU == 1) THEN
+C     GPU SHELL: launch async pipeline BEFORE CPU element work
+C     so that GPU kernels execute while FORINTC + FORINT run on CPU.
+C     Results are collected later by gpu_shell_sync_scatter.
+                CALL STARTIME(TIMERS,TIMER_GPU_SHELL)
+                CALL gpu_shell_launch_async(NODES,SHELLS,DT1)
+                CALL STOPTIME(TIMERS,TIMER_GPU_SHELL)
+              ENDIF
+
 
 
 C=======================================================================================
@@ -4024,7 +4082,6 @@ C     INTERNAL FORCES OF SHELLS, 3-NODE SHELLS
 C-------------------------------
               CALL TRACE_IN(14,0,ZERO)
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_ELEMENT)
-
 C -------------------------------------------------------------------
 C   User Libraries get the possibility to use GET_U_NOD_X & GET_U_NOD_V in user elements properties (Solids & Springs)
               GETUNOD_NOCOM=1
@@ -4056,7 +4113,7 @@ C Init var parallel SMP
 
               NDTSKR=NDTSK ; IF(IRODDL == 0)NDTSKR=1
 
-              CALL FORINTC(TIMERS,
+              CALL FORINTC(TIMERS, GPU,
      1           PM           ,GEO             ,NODES%X               ,NODES%A(1,NDTSK)     ,NODES%AR(1,NDTSK)  ,
      2           NODES%V            ,NODES%VR              ,NODES%MS              ,NODES%IN             ,NLOC_DMG     ,
      3           WA(NWAFTSK)  ,NODES%STIFN(NDTSK)    ,NODES%STIFR(NDTSKR)    ,ELEMENT%PON%FSKY           ,CRKSKY       ,
@@ -4091,6 +4148,7 @@ C Init var parallel SMP
               END IF
 #include "lockoff.inc"
 !$OMP END PARALLEL
+
               CALL PYTHON_END_OPENMP(PYTHON)
               CALL TRACE_OUT(14)
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ELEMENT)
@@ -4177,6 +4235,7 @@ C
      .         DTMIN1         ,IDTMIN        ,IOUT        ,ISTDO   ,IDTMINS,DTFACS,NSVOIS,
      .         IRESP          ,MAXFUNC       ,USERL_AVAIL ,GLOB_THERM,IMON_MAT,DTMINS,SANIN,
      .         NGRTH          ,NELEM         ,SFEM  )
+
 C
 #include "lockon.inc"
               IF(DT2TT<DT2T)THEN
@@ -4188,8 +4247,32 @@ C
 !$OMP END PARALLEL
               CALL PYTHON_END_OPENMP(PYTHON)
               CALL TRACE_OUT(14)
-
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ELEMENT)
+
+              IF(GPU == 1) THEN
+C     Compute print-flag for GPU shell sync: same logic as FORINTC IPRI.
+C     (GPU elements are only offloaded when ISENS_ENERGY==0, so the
+C     SENSOR_ENERGY_PART side-effect is not relevant here.)
+                IPRI = 0
+                IF (MOD(NCYCLE,IABS(NCPRI))==0.OR.TT >= OUTPUT%TH%THIS.OR.
+     .               MDESS /= 0.OR.TT >= OUTPUT%TH%THIS1(1).OR.TT >= OUTPUT%TH%THIS1(2)
+     .               .OR.TT >= OUTPUT%TH%THIS1(3).OR.TT >= OUTPUT%TH%THIS1(4).OR.TT >= OUTPUT%TH%THIS1(5)
+     .               .OR.TT >= OUTPUT%TH%THIS1(6).OR.TT >= OUTPUT%TH%THIS1(7).OR.TT >= OUTPUT%TH%THIS1(8)
+     .               .OR.TT >= OUTPUT%TH%THIS1(9).OR.NTH /= 0.OR.NANIM/=0
+     .               .OR.TT >= TABFIS(1).OR.TT >= TABFIS(2)
+     .               .OR.TT >= TABFIS(3).OR.TT >= TABFIS(4).OR.TT >= TABFIS(5)
+     .               .OR.TT >= TABFIS(6).OR.TT >= TABFIS(7).OR.TT >= TABFIS(8)
+     .               .OR.TT >= TABFIS(9).OR.TT >= TABFIS(10).OR.ISTAT==3) IPRI=1
+C     GPU SHELL: synchronize + scatter results now that FORINTC + FORINT
+C     have completed on the CPU.  By this point the GPU pipeline has had
+C     time to finish, so the sync call should return near-instantly.
+                CALL STARTIME(TIMERS,TIMER_GPU_SHELL)
+                CALL gpu_shell_sync_scatter(
+     .           NODES,SHELLS,DT2T,PARTSAV,NPSAV,NPART,IPRI)
+                CALL STOPTIME(TIMERS,TIMER_GPU_SHELL)
+              ENDIF
+
+
 C-----
               IF(NUMSPHG/=0)THEN
                 IF (IMONM > 0) CALL STARTIME(TIMERS,48)
@@ -6083,7 +6166,7 @@ C--           IF no node/elemt on proc - dt2=10E6 -> dt2 can be equal to zero
               ENDIF
               ! ----------------------
 #ifdef DNC
-              IF(MDS_AVAIL==1) THEN
+              IF(MDS_AVAIL==1 .and. MDS_NMAT > 0) THEN
                 TSTOP_USER = TSTOP
                 TT_USER = TT
                 MSTOP_USER = 0
@@ -6138,13 +6221,11 @@ C processes in charge of the FVMBAGS know NPOLH)
 
 C --------------------------
               IF ( NCYCLE == 0 .AND. FLG_KJ2_RAZ > 0  ) THEN     ! All processes should go in this block
-
                 if (ispmd==0)then
                    write(iout,'(A)') ' '
                    write(iout,'(A/)') ' AUTOMATIC STIFFNESS COMPUTATION FOR JOINTS'
                    write(iout,'(A)') '  JOINT ID      TYPE                KNN                KNR'
                 endif
-                
                 IF (FLG_KJ2 == 1) then                        
                     CALL JOINT_BLOCK_STIFFNESS(NODES%ITAB,NODES%MS,NODES%IN,STK_SN,STK_SR,
      1                    NODES%WEIGHT,IXR,IPART,NODES%X,IPART(K6),
@@ -9411,7 +9492,7 @@ C--- //0 ----------------
                   IF(NVOLU > 0)  CALL FVSTATS(MONVOL)
                   CALL STOPTIME(TIMERS,TIMER_RESOL)
                   IF(IMONM>0) CALL PRINTIME_INTERF(INTERFACES%INTBUF_TAB,IPARI,INTLIST,NBINTC,TIMERS%REALTIME(1)*0.01D0)
-                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT)
+                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT,sfem)
                 ELSE
                   CALL ADD_ELAPSED_TIME_MON_OFF(TIMERS)
                 ENDIF
@@ -9599,7 +9680,7 @@ C
                   IF(NVOLU > 0)  CALL FVSTATS(MONVOL)
                   CALL STOPTIME(TIMERS,TIMER_RESOL)
                   IF(IMONM>0) CALL PRINTIME_INTERF(INTERFACES%INTBUF_TAB,IPARI,INTLIST,NBINTC,TIMERS%REALTIME(1)*0.01D0)
-                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT)
+                  CALL PRINTIME(TIMERS,GLOB_THERM%ITHERM,OUTPUT,sfem)
                 ELSE
                   CALL ADD_ELAPSED_TIME_MON_OFF(TIMERS)
                 ENDIF

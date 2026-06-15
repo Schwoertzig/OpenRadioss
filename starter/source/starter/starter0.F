@@ -21,62 +21,69 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    starter0                          ../starter/source/starter/starter0.F
+!||    starter0                                   ../starter/source/starter/starter0.F
 !||--- called by ------------------------------------------------------
-!||    starter                           ../starter/source/starter/starter.F
+!||    starter                                    ../starter/source/starter/starter.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg                            ../starter/source/output/message/message.F
-!||    anend                             ../starter/source/output/analyse/analyse_arret.F
-!||    aninit                            ../starter/source/output/analyse/analyse.c
-!||    build_msg                         ../starter/source/output/message/build_msg.F
-!||    checksum_check                    ../starter/source/output/checksum/checksum_check.F90
-!||    contrl                            ../starter/source/starter/contrl.F
-!||    execargcheck                      ../starter/source/starter/execargcheck.F
-!||    f_anend                           ../starter/source/output/analyse/analyse_arret.F
-!||    get_file_name_info                ../starter/source/system/get_file_name_info.F
-!||    glob_therm_init                   ../starter/source/constraints/thermic/glob_therm_init.F90
-!||    hm_convert_2d_elements_seatbelt   ../starter/source/devtools/hm_reader/hm_convert_2d_elements_seatbelt.F
-!||    hm_convert_fail_tab               ../starter/source/devtools/hm_reader/hm_convert_fail_tab.F
-!||    hm_convert_inter_type19           ../starter/source/devtools/hm_reader/hm_convert_inter_type19.F
-!||    hm_count_2d_element_seatbelt      ../starter/source/devtools/hm_reader/hm_count_2d_element_seatbelt.F
-!||    hm_get_max_id                     ../starter/source/devtools/hm_reader/hm_get_max_id.F
-!||    hm_messages                       ../starter/source/devtools/hm_reader/hm_messages.F
-!||    hm_rbodies_add_main_node          ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
-!||    hm_read_checksum                  ../starter/source/output/checksum/checksum_option.F90
-!||    hm_read_submodel                  ../starter/source/model/assembling/hm_read_submodel.F
-!||    ini_msg                           ../starter/source/output/message/inimsg.F
-!||    inicod                            ../starter/source/tools/univ/inicod.F
-!||    iniconstant                       ../starter/source/system/iniconstant.F
-!||    initime                           ../starter/source/system/timer.F
-!||    lectur                            ../starter/source/starter/lectur.F
-!||    my_exit                           ../starter/source/output/analyse/analyse.c
-!||    prhelpinfo                        ../starter/source/starter/execargcheck.F
-!||    printcenter                       ../starter/source/starter/radioss_title.F
-!||    printcpu                          ../starter/source/system/printcpu.F
-!||    printime                          ../starter/source/system/timer.F
-!||    r2r_fork                          ../starter/source/coupling/rad2rad/r2r_fork.F
-!||    radioss_title                     ../starter/source/starter/radioss_title.F
-!||    setignorecore                     ../starter/source/system/traceback_handler.c
-!||    st_uaccess_dum                    ../starter/source/user_interface/uaccess.F
-!||    st_utable_dum                     ../starter/source/user_interface/utable.F
-!||    startime                          ../starter/source/system/timer.F
-!||    stoptime                          ../starter/source/system/timer.F
-!||    titre1                            ../starter/source/output/outfile/titre1.F
-!||    trace_in1                         ../starter/source/system/trace_back.F
-!||    trace_out1                        ../starter/source/system/trace_back.F
+!||    ancmsg                                     ../starter/source/output/message/message.F
+!||    anend                                      ../starter/source/output/analyse/analyse_arret.F
+!||    aninit                                     ../starter/source/output/analyse/analyse.c
+!||    build_msg                                  ../starter/source/output/message/build_msg.F
+!||    checksum_check                             ../starter/source/output/checksum/checksum_check.F90
+!||    contrl                                     ../starter/source/starter/contrl.F
+!||    execargcheck                               ../starter/source/starter/execargcheck.F
+!||    f_anend                                    ../starter/source/output/analyse/analyse_arret.F
+!||    get_file_name_info                         ../starter/source/system/get_file_name_info.F
+!||    glob_therm_init                            ../starter/source/constraints/thermic/glob_therm_init.F90
+!||    hm_convert_2d_elements_seatbelt            ../starter/source/devtools/hm_reader/hm_convert_2d_elements_seatbelt.F
+!||    hm_convert_fail_tab                        ../starter/source/devtools/hm_reader/hm_convert_fail_tab.F
+!||    hm_convert_inter_type19                    ../starter/source/devtools/hm_reader/hm_convert_inter_type19.F
+!||    hm_convert_tetra4_to_tetra10               ../starter/source/devtools/hm_reader/hm_convert_tetra4_to_tetra10.F90
+!||    hm_count_2d_element_seatbelt               ../starter/source/devtools/hm_reader/hm_count_2d_element_seatbelt.F
+!||    hm_create_rbodies_from_rigid_parts         ../starter/source/devtools/hm_reader/hm_create_rbodies_from_rigid_parts.F90
+!||    hm_evaluate_rbodies_from_rigid_parts       ../starter/source/devtools/hm_reader/hm_evaluate_rbodies_from_rigid_parts.F90
+!||    hm_get_max_id                              ../starter/source/devtools/hm_reader/hm_get_max_id.F
+!||    hm_messages                                ../starter/source/devtools/hm_reader/hm_messages.F
+!||    hm_option_count                            ../starter/source/devtools/hm_reader/hm_option_count.F
+!||    hm_rbodies_add_main_node                   ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
+!||    hm_read_checksum                           ../starter/source/output/checksum/checksum_option.F90
+!||    hm_read_submodel                           ../starter/source/model/assembling/hm_read_submodel.F
+!||    ini_msg                                    ../starter/source/output/message/inimsg.F
+!||    inicod                                     ../starter/source/tools/univ/inicod.F
+!||    iniconstant                                ../starter/source/system/iniconstant.F
+!||    initime                                    ../starter/source/system/timer.F
+!||    lectur                                     ../starter/source/starter/lectur.F
+!||    my_exit                                    ../starter/source/output/analyse/analyse.c
+!||    prhelpinfo                                 ../starter/source/starter/execargcheck.F
+!||    printcenter                                ../starter/source/starter/radioss_title.F
+!||    printcpu                                   ../starter/source/system/printcpu.F
+!||    printime                                   ../starter/source/system/timer.F
+!||    r2r_fork                                   ../starter/source/coupling/rad2rad/r2r_fork.F
+!||    radioss_title                              ../starter/source/starter/radioss_title.F
+!||    setignorecore                              ../starter/source/system/traceback_handler.c
+!||    st_uaccess_dum                             ../starter/source/user_interface/uaccess.F
+!||    st_utable_dum                              ../starter/source/user_interface/utable.F
+!||    startime                                   ../starter/source/system/timer.F
+!||    stoptime                                   ../starter/source/system/timer.F
+!||    titre1                                     ../starter/source/output/outfile/titre1.F
+!||    trace_in1                                  ../starter/source/system/trace_back.F
+!||    trace_out1                                 ../starter/source/system/trace_back.F
 !||--- uses       -----------------------------------------------------
-!||    analyse_arret_mod                 ../starter/source/output/analyse/analyse_arret.F
-!||    checksum_check_mod                ../starter/source/output/checksum/checksum_check.F90
-!||    checksum_starter_option_mod       ../starter/source/output/checksum/checksum_option.F90
-!||    defaults_mod                      ../starter/source/modules/defaults_mod.F90
-!||    detonators_mod                    ../starter/share/modules1/detonators_mod.F
-!||    glob_therm_init_mod               ../starter/source/constraints/thermic/glob_therm_init.F90
-!||    hm_rbodies_add_main_node_mod      ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
-!||    message_mod                       ../starter/share/message_module/message_mod.F
-!||    submodel_mod                      ../starter/share/modules1/submodel_mod.F
-!||    th_mod                            ../starter/share/modules1/th_mod.F90
-!||    user_interface_mod                ../starter/source/modules/user_interface_mod.F90
-!||    user_sensor_mod                   ../starter/source/modules/user_interface_mod.F90
+!||    analyse_arret_mod                          ../starter/source/output/analyse/analyse_arret.F
+!||    checksum_check_mod                         ../starter/source/output/checksum/checksum_check.F90
+!||    checksum_starter_option_mod                ../starter/source/output/checksum/checksum_option.F90
+!||    defaults_mod                               ../starter/source/modules/defaults_mod.F90
+!||    detonators_mod                             ../starter/share/modules1/detonators_mod.F
+!||    glob_therm_init_mod                        ../starter/source/constraints/thermic/glob_therm_init.F90
+!||    hm_convert_tetra4_to_tetra10_mod           ../starter/source/devtools/hm_reader/hm_convert_tetra4_to_tetra10.F90
+!||    hm_create_rbodies_from_rigid_parts_mod     ../starter/source/devtools/hm_reader/hm_create_rbodies_from_rigid_parts.F90
+!||    hm_evaluate_rbodies_from_rigid_parts_mod   ../starter/source/devtools/hm_reader/hm_evaluate_rbodies_from_rigid_parts.F90
+!||    hm_rbodies_add_main_node_mod               ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
+!||    message_mod                                ../starter/share/message_module/message_mod.F
+!||    submodel_mod                               ../starter/share/modules1/submodel_mod.F
+!||    th_mod                                     ../starter/share/modules1/th_mod.F90
+!||    user_interface_mod                         ../starter/source/modules/user_interface_mod.F90
+!||    user_sensor_mod                            ../starter/source/modules/user_interface_mod.F90
 !||====================================================================
       SUBROUTINE STARTER0   
 C-----------------------------------------------
@@ -107,6 +114,9 @@ C-----------------------------------------------
       use th_mod , only : TH_HAS_NODA_PEXT
       use hm_rbodies_add_main_node_mod
       use analyse_arret_mod
+      use hm_evaluate_rbodies_from_rigid_parts_mod
+      use hm_create_rbodies_from_rigid_parts_mod
+      use hm_convert_tetra4_to_tetra10_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -157,7 +167,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,J,K, STAT,INP,OUT
+      INTEGER I,J,K, STAT,INP,OUT,itetra4
       INTEGER IFILNAM(2148),LEN,IDMAX_INTER,
      .        IDMAX_GRNOD,IDMAX_LINE,IDMAX_TABLE,IDMAX_FAIL,IDMAX_FUNCT,
      .        IDMAX_PART,IDMAX_PROP,IDMAX_MAT,IDMAX_ELEM,IDMAX_TH,
@@ -170,6 +180,9 @@ C-----------------------------------------------
       INTEGER :: RADFLEX_PROCESS_PID
 C
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: SEATBELT_CONVERTED_ELEMENTS
+      INTEGER, dimension(:), ALLOCATABLE :: NBRBODIES_PER_PART
+      INTEGER, DIMENSION(:), ALLOCATABLE :: NEW_RBODY_TO_PART
+      INTEGER, DIMENSION(:), ALLOCATABLE :: NEW_RBODY_ID
 C
       CHARACTER(LEN=2148) :: FILNAM  ! Maximum is SIZE(OUTFILE_CHAR_LEN) + 100
       CHARACTER CHRUN*4,CPUNAM*20,ROOTN*80,CHRUNR*4,ARCHTITLE*66
@@ -184,6 +197,7 @@ C
       CHARACTER(len=2048) :: TMP_NAME
       CHARACTER(len=2048) :: OUT_FILE_NAME
       INTEGER :: NB_DYNA_INCLUDE
+      INTEGER :: NB_NEWRBODIES
 C
       my_real UNITE, RTITR
 C
@@ -560,7 +574,7 @@ C new composite shell pid max nbs 200
       NIMV   = 75 ! array size for Monitored Volumes
       NRBY   = 30
       NRBYLAG= 0
-      NNPBY  = 19 + 1
+      NNPBY  = 19 + 2
       NMGRBY = 7
       NRWLP  = 26
       NIBVEL = 0
@@ -788,9 +802,29 @@ c 2d seatbelt translation
      .  CALL HM_CONVERT_2D_ELEMENTS_SEATBELT(IDMAX_PART,IDMAX_PROP,IDMAX_MAT,IDMAX_ELEM,IDMAX_TH,
      .                                           SEATBELT_CONVERTED_ELEMENTS,NB_SEATBELT_SHELLS,LSUBMODEL)
 C-------------------------------------------------------------------
+C Build RBODY from PART with Irigid
+C------------------------------------------------------------------
+      CALL HM_OPTION_COUNT('/PART', NPART)
+      ALLOCATE(NBRBODIES_PER_PART(NPART))
+      NBRBODIES_PER_PART(1:NPART) = 0
+      CALL hm_evaluate_rbodies_from_rigid_parts(NPART,NBRBODIES_PER_PART)
+	  
+      NB_NEWRBODIES = SUM(NBRBODIES_PER_PART)
+
+      ALLOCATE (NEW_RBODY_TO_PART(NB_NEWRBODIES),NEW_RBODY_ID(NB_NEWRBODIES),STAT=stat)
+        IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
+     .                             MSGTYPE=MSGERROR,
+     .                         C1='RBODY_BY_PART')
+      CALL hm_create_rbodies_from_rigid_parts(NB_NEWRBODIES,NEW_RBODY_TO_PART,NEW_RBODY_ID)
+C-------------------------------------------------------------------
 C Add RBODY master node if not existing in /RBODY cards
 C------------------------------------------------------------------
       CALL hm_rbodies_add_main_node(LSUBMODEL)
+C-------------------------------------------------------------------
+C itetra4=10: convert tetra4 to tretra10 w/ itetra10=2
+C------------------------------------------------------------------
+      itetra4=10
+      CALL hm_convert_tetra4_to_tetra10(itetra4) 
 C------------------------------------------------------------------
       ! Initialisation of glob_therm module
 C------------------------------------------------------------------
@@ -843,7 +877,8 @@ C--------------------------------------------------
         CALL LECTUR(
      .       MULTI_FVM                   ,LSUBMODEL         ,IS_DYNA          ,DETONATORS   ,EBCS_TAB,
      .       SEATBELT_CONVERTED_ELEMENTS ,NB_SEATBELT_SHELLS,NB_DYNA_INCLUDE  ,USER_WINDOWS ,OUTPUT  ,
-     .       MAT_ELEM,NAMES_AND_TITLES,DEFAULTS,glob_therm,PBLAST,SENSOR_USER_STRUCT,CHECK_USED)
+     .       MAT_ELEM,NAMES_AND_TITLES,DEFAULTS,glob_therm,PBLAST,SENSOR_USER_STRUCT,CHECK_USED,
+     .       NB_NEWRBODIES,NEW_RBODY_TO_PART)
 
 c       stop CPU timer for lectur
         CALL STOPTIME(2,1)
@@ -863,6 +898,8 @@ C --------------------------------------------------
       ENDIF
 C
       IF(ALLOCATED(SEATBELT_CONVERTED_ELEMENTS)) DEALLOCATE(SEATBELT_CONVERTED_ELEMENTS)  
+      IF(ALLOCATED(NBRBODIES_PER_PART)) DEALLOCATE(NBRBODIES_PER_PART)  
+      IF(ALLOCATED(NEW_RBODY_ID)) DEALLOCATE(NEW_RBODY_ID)
       CALL USER_WINDOWS_CLEAN(USER_WINDOWS)
       CALL TH_CLEAN(OUTPUT%TH)
 C

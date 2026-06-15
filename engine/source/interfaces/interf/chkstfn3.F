@@ -94,7 +94,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, NSNF, NSNL,ND,SE
 C     REAL
-      INTEGER IK1(4),IK2(4),IE1,IE2,IED,NS1,NS2
+      INTEGER IK1(4),IK2(4),IED,NS1,NS2
       DATA IK1 /1,2,3,4/
       DATA IK2 /2,3,4,1/
 C-----------------------------------------------
@@ -605,7 +605,6 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(nodal_arrays_) :: NODES
       INTEGER 
-     .   LINDIDEL, LBUFIDEL,
      .   IXS(NIXS,*),IXS10(6,*),IXS20(12,*),IXS16(8,*),
      .   IXQ(NIXQ,*),IXC(NIXC,*), IXT(NIXT,*), IXP(NIXP,*),
      .   IXR(NIXR,*), IXTG(NIXTG,*),IXTG1(4,*),ITAG(*),
@@ -629,18 +628,19 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, NG, K, ITY, MLW, NEL, NFT, ISOLNOD, LFT, LLT,
-     .        KAD, NPT, IHBE, JD(50), KD(50), JFI, KFI, NRTM, NRTS,
-     .        NTY, NSN, ISTRA, N, IDEL, NMN,ILEV,
-     .        N1, N2, N3, N4, SIZE, LENR, IDB, IDBS, INC, IDELKEEP,
-     .        IDEB, OFQ, OFC, OFT, OFP, OFR, OFTG, OFUR, ICNOD, IE,
-     .        NLINSA, NLINMA, NSNE, NMNE, IEXPAN, IRSIZE,
-     .        IRECV(NSPMD),SIZ,J,R2R_NUMEL,TAGEL_R2R_ISPMD(NSPMD+1),
+     .        KAD, NPT, IHBE,
+     .        ISTRA, N,
+     .        N1, SIZE, LENR, INC,
+     .        OFQ, OFC, OFT, OFP, OFR, OFTG, OFUR, ICNOD, IE,
+     .        IEXPAN,
+     .        J,R2R_NUMEL,TAGEL_R2R_ISPMD(NSPMD+1),
      .        IPARTR2R,NTAGEL_R2R_RECV,NTAGEL_R2R_SEND,NTAGEL_R2R_SENDG,
-     .        TAGEL_SIZE,LEVEL
+     .        TAGEL_SIZE
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGEL_R2R_RECV,TAGEL_R2R_SENDG
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       INTEGER, DIMENSION(:), ALLOCATABLE :: LOCAL_ELEM_INDEX
       INTEGER :: SHIFT
+      INTEGER :: NTAGEL_WRAP(1)
 C-----------------------------------------------
       ! allocation of local list of deactivated element
       ALLOCATE( LOCAL_ELEM_INDEX(S_ELEM_STATE) )
@@ -1148,8 +1148,9 @@ C       communication partie nodale ITAGq
           CALL SEND_SHMBUF_C(IDEL7NOK,1)
           CALL R2R_EXCH_ITAG(IEXLNK,IGRNOD,ITAG,0)
 C       Tagel Element Party Communication
-          NTAGEL_R2R_SENDG = NTAGEL_R2R_SEND
-          CALL SPMD_ALLGLOB_ISUM9(NTAGEL_R2R_SENDG,1)
+          NTAGEL_WRAP(1) = NTAGEL_R2R_SEND
+          CALL SPMD_ALLGLOB_ISUM9(NTAGEL_WRAP,1)
+          NTAGEL_R2R_SENDG = NTAGEL_WRAP(1)
           IF (NTAGEL_R2R_SENDG > 0) THEN
             IF (NSPMD > 1) THEN
               TAGEL_R2R_ISPMD(:)=0
@@ -1302,7 +1303,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(nodal_arrays_), intent(inout) :: NODES
       INTEGER 
-     .   IPARI(NPARI,*), LINDIDEL, LBUFIDEL,
+     .   IPARI(NPARI,*),
      .   IXS(NIXS,*),IXQ(NIXQ,*),IXC(NIXC,*), IXT(NIXT,*), IXP(NIXP,*),
      .   IXR(NIXR,*), IXTG(NIXTG,*),ITAG(*),
      .   IPARG(NPARG,*), ITASK, NEWFRONT(*),ITAGL (*),
@@ -1318,17 +1319,14 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, NG, K, ITY, MLW, NEL, NFT, ISOLNOD,
-     .        KAD, NPT, IHBE, JD(50), KD(50), JFI, KFI, NRTM, NRTS,
-     .        NTY, NSN, ISTRA, N, IDEL, NMN,ILEV,
-     .        N1, N2, N3, N4, SIZE, LENR, IDB, IDBS, INC, IDELKEEP,
-     .        IDEB, OFQ, OFC, OFT, OFP, OFR, OFTG, OFUR, ICNOD, IE,
-     .        NLINSA, NLINMA, NSNE, NMNE, IEXPAN, IRSIZE,
-     .        IRECV(NSPMD),SIZ,J,R2R_NUMEL,TAGEL_R2R_ISPMD(NSPMD+1),
-     .        IPARTR2R,NTAGEL_R2R_RECV,NTAGEL_R2R_SEND,NTAGEL_R2R_SENDG,
-     .        TAGEL_SIZE,LEVEL
+      INTEGER I, NG,
+     .        NRTM, NRTS,
+     .        NTY, NSN, IDEL, NMN,ILEV,
+     .        N1, IDB, IDBS, INC, IDELKEEP,
+     .        OFQ, OFC, OFT, OFP, OFR, OFTG, OFUR,
+     .        NLINSA, NLINMA, NSNE, NMNE, IRSIZE,
+     .        IRECV(NSPMD),SIZ
       INTEGER, DIMENSION(:),ALLOCATABLE ::IBUFSEGLO_SAV,INDSEGLO_sav
-      TYPE(G_BUFEL_) ,POINTER :: GBUF
 C
       OFQ=NUMELS
       OFC=OFQ+NUMELQ
@@ -1742,8 +1740,8 @@ C
      2      INTBUF_TAB(NG)%IRTLM,ITAG(NUMNOD+1),IXS  ,IXC  ,IXTG      ,
      3      IXQ    ,IPARG       ,ITAGL,MS      ,
      4      IN    ,INTBUF_TAB(NG)%SMAS ,INTBUF_TAB(NG)%SINER,ADM,CNEL      ,
-     5      ADDCNEL  ,OFC         ,OFT  ,OFTG ,OFUR      ,
-     6     TAGEL   ,ILEV     )
+     5      ADDCNEL  ,OFC       ,OFT  ,OFTG ,OFUR      ,
+     6      TAGEL    ,ILEV      ,IRODDL)
          ELSEIF (IDEL == 1) THEN 
            CALL CHK2MSR3NB(
      1      NSN    ,INTBUF_TAB(NG)%NSV ,ITAG  ,ITASK,INTBUF_TAB(NG)%IRECTM,
@@ -1751,9 +1749,8 @@ C
      3      IXQ    ,IPARG       ,ITAGL,MS      ,
      4      IN    ,INTBUF_TAB(NG)%SMAS ,INTBUF_TAB(NG)%SINER,ADM,CNEL      ,
      5      ADDCNEL  ,OFC         ,OFT  ,OFTG ,OFUR      ,
-     6     NINDEX1(NG)  ,IBUFS(IDBS+4) ,IND(IDB),TAGEL,ITAB         ,
-     7     ILEV      )
-
+     6      NINDEX1(NG)  ,IBUFS(IDBS+4) ,IND(IDB),TAGEL,ITAB         ,
+     7      ILEV)
          ENDIF
 C
          IF (NSPMD > 1 .AND. IDEL == 2) THEN
@@ -1873,7 +1870,7 @@ C cote main
         ELSEIF(NTY == 2.AND.IDEL/=0)THEN
          CALL SETMSR2(
      1          NINDEX1(NG)  ,IBUFS(IDB),IND(IDB)     ,INTBUF_TAB(NG)%NSV,MS,
-     2         INTBUF_TAB(NG)%SMAS,IN   ,INTBUF_TAB(NG)%SINER,IDEL)
+     2          INTBUF_TAB(NG)%SMAS,IN   ,INTBUF_TAB(NG)%SINER,IDEL,IRODDL)
          IDB = IDB+NINDEX1(NG)
 C
         ENDIF
@@ -1965,7 +1962,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, N, NIND2, MA_SURF,NIND_SEGLO
+     .        II, IX, K, NIND, N, NIND2, MA_SURF,NIND_SEGLO
       INTEGER,DIMENSION(:),ALLOCATABLE :: NINDL
       INTEGER,DIMENSION(:),ALLOCATABLE :: IND_SEGLO
 C     REAL
@@ -2165,7 +2162,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, NIND2, N, NINDL(NRTM),IND_SEGLO(NRTM*2),NIND_SEGLO
+     .        II, IX, K, NIND, NIND2, N, NINDL(NRTM),IND_SEGLO(NRTM*2),NIND_SEGLO
 C     REAL
 C-----------------------------------------------
       NMNF = 1 + ITASK*NMN / NTHREAD
@@ -2346,7 +2343,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, N, NIND2, N1L, N2L, N3L, N4L,
+     .        II, IX, K, NIND, N, NIND2, N1L, N2L, N3L, N4L,
      .        NINDL(NRTM)
 C     REAL
 C-----------------------------------------------
@@ -2506,7 +2503,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, NIND2, N, N1L, N2L, N3L, N4L,
+     .        II, IX, K, NIND, NIND2, N, N1L, N2L, N3L, N4L,
      .        NINDL(NRTM)
 C     REAL
 C-----------------------------------------------
@@ -2669,8 +2666,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, N, NIND2, NINDL(NRTM)
+      INTEGER I, NMNF, NMNL, NRTF, NRTL,
+     .        NIND
 C     REAL
 C-----------------------------------------------
       NMNF = 1 + ITASK*NMN / NTHREAD
@@ -2743,8 +2740,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, NIND2, N, NINDL(NRTM)
+      INTEGER I, NMNF, NMNL, NRTF, NRTL,
+     .        NIND, NIND2
 C     REAL
 C-----------------------------------------------
       NMNF = 1 + ITASK*NMN / NTHREAD
@@ -2822,7 +2819,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N1L, N2L, 
-     .        NN, II, IX, K, NIND, N, NIND2, NINDL(NRTM)
+     .        II, IX, K, NIND, N, NIND2, NINDL(NRTM)
 C     REAL
 C-----------------------------------------------
       NMNF = 1 + ITASK*NMN / NTHREAD
@@ -3003,7 +3000,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N1L, N2L, 
-     .        NN, II, IX, K, NIND, NIND2, N, NINDL(NRTM)
+     .        II, IX, K, NIND, NIND2, N, NINDL(NRTM)
 C     REAL
 C-----------------------------------------------
       NMNF = 1 + ITASK*NMN / NTHREAD
@@ -3151,7 +3148,7 @@ C
      3    IXQ    ,IPARG,ITAGL,MS   ,
      4    IN     ,SMAS ,SINER,ADM  ,CNEL ,
      5    ADDCNEL,OFC  ,OFT  ,OFTG ,OFUR ,
-     6    TAGEL  ,ILEV )
+     6    TAGEL  ,ILEV ,IRODDL)
       use element_mod , only : nixs,nixq,nixc,nixtg
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -3169,6 +3166,7 @@ C-----------------------------------------------
      .        ITAG2(*), IXS(NIXS,*), IXQ(NIXQ,*), IXC(NIXC,*),
      .        IXTG(NIXTG,*), IPARG(NPARG,*), ITAGL(*), TAGEL(*),
      .        CNEL(0:*), ADDCNEL(0:*), OFC, OFT, OFTG, OFUR,ILEV
+      INTEGER,INTENT(IN) :: IRODDL
 C     REAL
       my_real
      .        MS(*),IN(*),SMAS(*),SINER(*),ADM(*)
@@ -3200,7 +3198,7 @@ C
             NSV(I) = -NSV(I)
             IF (ILEV /= 25 .and. ILEV /= 26) THEN
               MS(IS) = SMAS(I)
-              IN(IS) = SINER(I)
+              IF (IRODDL/=0) IN(IS) = SINER(I)
             ENDIF
 C         CAUTION> = 1 because cumulative node front of tags at 1
           ELSEIF(ITAG2(N1)>=1.AND.ITAG2(N2)>=1.AND.
@@ -3250,7 +3248,7 @@ C
               NSV(I) = -NSV(I)
               IF (ILEV /= 25 .and. ILEV /= 26) THEN
                 MS(IS)  = SMAS(I)
-                IN(IS)  = SINER(I)
+                IF (IRODDL/=0) IN(IS)  = SINER(I)
               ENDIF
               GOTO 400
             END IF
@@ -3333,7 +3331,7 @@ C
             NSV(I) = -NSV(I)
             IF (ILEV /= 25 .and. ILEV /= 26) THEN
               MS(IS) = SMAS(I)
-              IN(IS) = SINER(I)
+              IF(IRODDL/=0) IN(IS) = SINER(I)
             ENDIF
 C         CAUTION> = 1 because cumulative node front of tags at 1
           ELSEIF(ITAG2(N1)>=1.AND.ITAG2(N2)>=1.AND.
@@ -3388,7 +3386,7 @@ C If no active element: Stif A 0 in SMP or Mono
            NSV(I) = -NSV(I)
            IF (ILEV /= 25 .and. ILEV /= 26) THEN
              MS(IS) = SMAS(I)
-             IN(IS) = SINER(I)
+             IF(IRODDL/=0) IN(IS) = SINER(I)
            ENDIF
 C If no active element: COMM in SPMD
         ELSE
@@ -3460,7 +3458,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, NSNF, NSNL, IS, L, N1, N2, N3, N4, 
-     .        NN, II, NINDEX, J
+     .        NINDEX
 C     REAL
 C-----------------------------------------------
       ICOMP = 0
@@ -3563,7 +3561,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, N, NIND2, NINDL(NRTM)
+     .        II, IX, K, NIND, N, NIND2, NINDL(NRTM)
 C     REAL
 C-----------------------------------------------
       NMNF = 1 + ITASK*NMN / NTHREAD
@@ -3713,7 +3711,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, NMNF, NMNL, NRTF, NRTL, N1, N2, N3, N4, 
-     .        NN, II, IX, K, NIND, NIND2, N, NINDL(NRTM)
+     .        II, IX, K, NIND, NIND2, N, NINDL(NRTM)
 C     REAL
 C-----------------------------------------------
       NMNF = 1 + ITASK*NMN / NTHREAD
@@ -3948,7 +3946,7 @@ C
 !||    chkstfn3n   ../engine/source/interfaces/interf/chkstfn3.F
 !||====================================================================
       SUBROUTINE SETMSR2(NINDG, BUFS, NINDEX, NSV, MS,
-     2                   SMAS , IN  , SINER ,IDEL)
+     2                   SMAS , IN  , SINER ,IDEL,IRODDL)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3963,6 +3961,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, IS, NN
+      INTEGER,INTENT(IN) :: IRODDL
 C-----------------------------------------------
       IF(IDEL == 2)THEN
 #include "vectorize.inc"
@@ -3974,7 +3973,7 @@ C-----------------------------------------------
             IF(IS > 0)THEN
               NSV(I)  = -NSV(I)
               MS(IS)  = SMAS(I)
-              IN(IS)  = SINER(I)
+              IF (IRODDL/=0) IN(IS)  = SINER(I)
             ENDIF
           ENDIF
         ENDDO
@@ -3988,7 +3987,7 @@ C-----------------------------------------------
             IF(IS > 0)THEN
               NSV(I)  = -NSV(I)
               MS(IS)  = SMAS(I)
-              IN(IS)  = SINER(I)
+              IF (IRODDL/=0) IN(IS)  = SINER(I)
             ENDIF
           ENDIF
         ENDDO
