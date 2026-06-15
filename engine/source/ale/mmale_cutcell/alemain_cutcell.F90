@@ -207,11 +207,9 @@
                 !debug-end
           call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
           nb_polygon = ALE%solver%multimat%nb
-          call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
+          call initialize_solver_multicutcell(n2d, numelq, numeltg, ixq, ixtg, x, &
           nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid,num_mixed,list_mixed)
           call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
-          call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, &
-          nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid, multi_cutcell, gamma)
           call build_full_states(multi_cutcell%grid, multi_cutcell%phase_rho, &
           multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
           gamma, &

@@ -1166,7 +1166,7 @@ module multicutcell_solver_mod
 
 
   !(y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
-  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, &
+  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, IXQ, IXTG, X, &
                               nb_id_polygon, list_id_polygon, ngrnod, igrnode, grid, num_mixed,list_mixed)
     use grid2D_struct_multicutcell_mod
     use groupdef_mod , only : group_
@@ -1174,7 +1174,7 @@ module multicutcell_solver_mod
     use multi_cutcell_mod, only : multi_cutcell_struct
 
     implicit none
-    integer, intent(in) :: N2D, NUMELQ, NUMELTG, NUMNOD
+    integer, intent(in) :: N2D, NUMELQ, NUMELTG
     integer, intent(in), dimension(:,:) :: IXQ, IXTG
     real(kind=wp), intent(in), dimension(:,:) :: X
     integer(kind=8), intent(in) :: nb_id_polygon
@@ -1182,6 +1182,7 @@ module multicutcell_solver_mod
     integer,intent(in) :: ngrnod                                  !< number of group of nodes(array size for igrnod)
     type(group_), dimension(ngrnod), intent(in)  :: igrnode
     type(grid2D_struct_multicutcell), dimension(:, :), allocatable, intent(out) :: grid
+    !type(multi_cutcell_struct), intent(inout) :: multi_cutcell        !< element buffer (storage for output files : pressure, density, velocity, ...)
     integer,intent(in) :: num_mixed,list_mixed(num_mixed)
     
     !DUMMY ARGUMENTS
@@ -1270,10 +1271,10 @@ module multicutcell_solver_mod
       call nb_pts_clipped_fortran(nb_pts_poly)
     end do
     
-    write(*,*) "Computing lambdas for the first time: this may take a while..."
-    call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt,&
-                                      multi_cutcell%phase_rho, multi_cutcell%phase_vely,&
-                                      multi_cutcell%phase_velz, multi_cutcell%phase_pres, gamma) !initialize lambda fields, close_cell and is_narrowband in grid
+    !write(*,*) "Computing lambdas for the first time: this may take a while..."
+    !call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt,&
+    !                                  multi_cutcell%phase_rho, multi_cutcell%phase_vely,&
+    !                                  multi_cutcell%phase_velz, multi_cutcell%phase_pres, gamma) !initialize lambda fields, close_cell and is_narrowband in grid
 
     deallocate(vec_move_clippedy)
     deallocate(vec_move_clippedz)

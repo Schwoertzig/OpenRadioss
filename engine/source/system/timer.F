@@ -31,7 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    timer_mod       ../engine/source/system/timer_mod.F90
 !||====================================================================
       SUBROUTINE PRINT_SUMMARY(FLAG,NTIMAX,TABTIME,TITLES,OUT_ID,ITHERM,sfem)
-        use timer_mod
+        use timer_mod, only : timer_ale_elm, timer_sfem
         use sfem_mod , only : global_sfem_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
