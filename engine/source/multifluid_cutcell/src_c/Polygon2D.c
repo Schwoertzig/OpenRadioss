@@ -574,7 +574,7 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
     for (i=0; i<nb_faces; i++){
         infogrb = GrB_extract(fj, GrB_NULL, GrB_NULL, *(p->faces), GrB_ALL, 1, i, GrB_NULL); //Get indices of edges composing face i
         infogrb = GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL);
-        infogrb = GrB_Vector_size(&size_edge_indices, edge_indices);
+        infogrb = GrB_Vector_nvals(&size_edge_indices, edge_indices);
         ind_kept_pts->size = 0;
 
         for(j_f=0; j_f<size_edge_indices; j_f++){

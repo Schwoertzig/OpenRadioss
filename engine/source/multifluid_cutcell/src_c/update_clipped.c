@@ -417,14 +417,15 @@ static void split_edge(Polygon2D* p, uint64_t i_e, const Point2D *new_pt){
 static void fuse_points(Polygon2D *p, int64_t ind_e0_fused, int64_t ind_e1_fused, int64_t ind_face){
     GrB_Info infogrb;
     GrB_Vector ej, extr_vals_ej, inds_pts_edge0, inds_pts_edge1;
-    GrB_Index i_e0_pt0, i_e0_pt1, i_e1_pt0, i_e1_pt1;
+    GrB_Index i_e0_pt0, i_e0_pt1, i_e1_pt0, i_e1_pt1, nb_edges;
     uint64_t ind_pt_del, ind_pt1, ind_pt2;
     int8_t val;
 
-    infogrb = GrB_Vector_new(&ej, GrB_INT8, 2);
-    infogrb = GrB_Vector_new(&extr_vals_ej, GrB_INT8, 2);
-    infogrb = GrB_Vector_new(&inds_pts_edge0, GrB_UINT64, 2);
-    infogrb = GrB_Vector_new(&inds_pts_edge1, GrB_UINT64, 2);
+    infogrb = GrB_Matrix_ncols(&nb_edges, *(p->edges));
+    infogrb = GrB_Vector_new(&ej, GrB_INT8, nb_edges);
+    infogrb = GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_edges);
+    infogrb = GrB_Vector_new(&inds_pts_edge0, GrB_UINT64, nb_edges);
+    infogrb = GrB_Vector_new(&inds_pts_edge1, GrB_UINT64, nb_edges);
 
     if (ind_e1_fused != ind_e0_fused) { //one edge to suppress, the other one is modified.
         infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, ind_e0_fused, GrB_NULL);
@@ -1352,6 +1353,12 @@ static void refine_interface(Polygon2D *p, my_real_c maximal_length){
 static void coarsen_interface(Polygon2D *p, Array_int *list_changed_edges){
     uint64_t i;
     int64_t ind_e1_fused, ind_e2_fused, ind_f;
+    GrB_Index nb_pts, nb_faces;
+    GrB_Matrix ef_m;
+
+    nb_pts = p->vertices->size;
+    GrB_Matrix_ncols(&nb_faces, *(p->faces));
+    GrB_Matrix_new(&ef_m, GrB_FP64, nb_pts, nb_faces);
 
     for (i=0; i<p->vertices->size; i++){
         ind_e1_fused = *get_ijth_elem_arr_int(list_changed_edges, i, 0);
@@ -1361,6 +1368,8 @@ static void coarsen_interface(Polygon2D *p, Array_int *list_changed_edges){
             fuse_points(p, ind_e1_fused, ind_e2_fused, ind_f);
         }
     }
+
+    GrB_free(&ef_m);
 }
 
 /// @brief Using a polygon `solid` defined at time t^n and a set of vectors `vs` defining the translation of each point of `solid` at time t^{n+1} = t^n+`dt`,
@@ -1564,6 +1573,10 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
 
     //Clean the result if some points were suppressed
     clean_Polygon2D(solid_new, solid);
+    GrB_Matrix_ncols(&nb_edges, *(solid_new->edges));
+    GrB_Matrix_nrows(&nb_edges, *(solid_new->faces));
+    GrB_Matrix_ncols(&nb_edges, *((*solid)->edges));
+    GrB_Matrix_nrows(&nb_edges, *((*solid)->faces));
 
     dealloc_vec_pts2D(vertices_tnp1); free(vertices_tnp1);
     dealloc_vec_pts2D(IntersecList); free(IntersecList);
