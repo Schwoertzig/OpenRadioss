@@ -73,6 +73,7 @@
           use file_descriptor_mod
           use constant_mod
           use precision_mod, only: WP
+          use ale_mod , only : ale
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -143,6 +144,8 @@
 
           if (multi_fvm%is_used)then
             nbsubmat = multi_fvm%nbmat
+          elseif(ALE%solver%multimat%is_defined_mmale3 /= 0)then
+            nbsubmat = 2
           else
             nbsubmat = 4
           end if
