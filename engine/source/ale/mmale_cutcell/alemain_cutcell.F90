@@ -31,7 +31,7 @@
         subroutine  alemain_cutcell(nixtg, nixq, numeltg, numelq, ixtg, ixq, numnod, x, ale_connect, ncycle, &
           ityptstt, neltstt, t1s, tt, &
           ngrnod, igrnod, dt_scale, dt1, dt2t, multi_cutcell, &
-          ngroup, elbuf, nparg, iparg, ebcs_tab, n2d)
+          ngroup, elbuf, nparg, iparg, ebcs_tab, n2d, ngrquad, igrquad)
           ! ----------------------------------------------------------------------------------------------------------------------
           !                                                   Modules
           ! ----------------------------------------------------------------------------------------------------------------------
@@ -89,6 +89,9 @@
           integer,intent(in) :: nparg  !< size IPARG
           integer,intent(in) :: ngroup !< number of group
           integer,intent(in) :: iparg(nparg,ngroup)
+
+          INTEGER,INTENT(IN) :: ngrquad
+          TYPE(GROUP_),INTENT(IN),DIMENSION(NGRQUAD) :: IGRQUAD
           ! ----------------------------------------------------------------------------------------------------------------------
           !                                                   Local variables
           ! ----------------------------------------------------------------------------------------------------------------------
@@ -111,6 +114,11 @@
           integer(kind=8) :: i_print
           integer :: num_mixed !< number of mixed cells (identified as cells intersected by the interface, and consequently requiring a cut-cell treatment)
           integer, allocatable :: list_mixed(:) !< list of mixed cells internal ids
+          ! initial velocity
+          integer :: ninivel
+          integer :: grquad_id !< inivel quad group id (used to retrieve cells with initial velocity)
+          integer :: isubmat !< inivel quad submat id
+          real(kind=wp) :: vy0, vz0 !< inivel quad initial velocity
           ! ----------------------------------------------------------------------------------------------------------------------
           !                                                   Precondition
           ! ----------------------------------------------------------------------------------------------------------------------
@@ -155,6 +163,23 @@
             
             ! node coordinates
             print *, "node iid=3, x,y,z=", X(1:3, 3), "uid=", ITAB_DEBUG(3)
+
+            ! initial velocity
+            NINIVEL = ALE%CUTCELL%NINIVEL_CUT_CELL
+            DO II=1,NINIVEL
+                GRQUAD_ID = ALE%CUTCELL%FVM_VEL(II)%grquadid
+                ISUBMAT = ALE%CUTCELL%FVM_VEL(II)%isubmat
+                VY0 = ALE%CUTCELL%FVM_VEL(II)%vy
+                VZ0 = ALE%CUTCELL%FVM_VEL(II)%vz
+                print *, "initial velocity : grquad_id=", GRQUAD_ID, "isubmat=", ISUBMAT, "vy0=", VY0, "vz0=", VZ0
+                NEL = IGRQUAD(GRQUAD_ID)%nentity
+                DO JJ=1,NEL
+                    ELEM_IID = IGRQUAD(GRQUAD_ID)%entity(JJ)
+                        print *, "internal elem id=", ELEM_IID, " user elem id=", IXQ(7,ELEM_IID),  &
+                        " init with vy0=", VY0, "vz0=", VZ0, " and SUBMAT_id=", ISUBMAT
+                END DO
+            END DO
+
             
           end if ! ncycle == 0
           
@@ -200,10 +225,11 @@
             ! internal ids : 'list_mixed(1:num_mixed)'
             ! user ids : ixq(7, internal id)
                 !debug --- tcl script for HyperMesh
-                do ii=1,num_mixed
-                  print *, '*createmark elements 1 ', ixq(7, list_mixed(ii))
-                  print *, '*movemark elements 1 "component1"'
-                end do
+                ! PRINT LIST OF MIXED CELLS RECIEVED FROM STARTER. THIS ALLOW TO VISUALIZE THE MIXED CELLS IN HYPERMESH (VERIFICATION PURPOSE)
+                ! do ii=1,num_mixed
+                !   print *, '*createmark elements 1 ', ixq(7, list_mixed(ii))
+                !   print *, '*movemark elements 1 "component1"'
+                ! end do
                 !debug-end
           call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
           nb_polygon = ALE%solver%multimat%nb

@@ -659,7 +659,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER,DIMENSION(:,:),ALLOCATABLE:: DD_RBYM2
       INTEGER,DIMENSION(:,:),ALLOCATABLE:: DD_RBY2
-      INTEGER I, IR_, IM,IFILNAM(2148),IFILNAM2(2148),
+      INTEGER I, IR_, IM,IFILNAM(2148),IFILNAM2(2148),NN,
      .        NUMELS_L,NUMELS8_L,NUMELS10_L,NUMELS20_L,NUMELS16_L,
      .        NUMELQ_L ,NUMELC_L, NCONLD_L,NSKYLL_L,
      .        NUMELT_L,NUMELP_L,NUMELR_L,NUMELTG_L,
@@ -3302,6 +3302,22 @@ C--------------------------------------
       INGR2USR => IGRNOD(1:NGRNOD)%ID
       ALE%SOLVER%MULTIMAT%LIST(1)%surf_id = NGR2USR(ALE%SOLVER%MULTIMAT%LIST(1)%surf_id,INGR2USR,NGRNOD)
       CALL ALE%SOLVER%MULTIMAT%WRITE_TO_RESTART()
+C--------------------------------------
+C MULTIMAT CUT-CELL
+C--------------------------------------
+      IF(ALE%solver%multimat%is_defined_mmale3 == 1)then
+        NN = ALE%cutcell%NINIVEL_CUT_CELL
+        CALL WRITE_I_C(NN,1)
+        if(nn>0)then
+          CALL WRITE_I_C(ALE%cutcell%FVM_VEL(1:NN)%ISUBMAT,NN)
+          CALL WRITE_I_C(ALE%cutcell%FVM_VEL(1:NN)%GRQUADID,NN)
+          CALL WRITE_DB(ALE%cutcell%FVM_VEL(1:NN)%VY,NN)
+          CALL WRITE_DB(ALE%cutcell%FVM_VEL(1:NN)%VZ,NN)
+          len_ia = len_ia + 1 + 2*NN
+          len_am = len_am + 0 + 2*NN
+          if(allocated(ale%cutcell%fvm_vel)) deallocate (ale%cutcell%fvm_vel)
+        endif
+      ENDIF
 C-----------------------------------------------
 C FXBODY
 C-----------------------------------------------

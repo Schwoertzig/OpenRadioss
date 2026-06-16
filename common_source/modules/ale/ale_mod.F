@@ -154,6 +154,7 @@ C-----------------------------------------------
       MODULE ALE_MOD
 
         USE multimat_method_mod , only : multimat_method_struct
+        USE MULTI_FVM_MOD
 
         IMPLICIT NONE
 #include      "my_real.inc"
@@ -273,6 +274,13 @@ C-----------------------------------------------
           type(phi_data_), dimension(:), allocatable :: phi_51_data !< convection variable data for mtn=51
         end type conv_
 
+        type cutcell_data_
+          !my_real, ALLOCATABLE, DIMENSION(:,:,:) :: CUT_CELL_VEL  !y,z ; 1,2 ; 1:nquad
+          TYPE(FVM_INIVEL_STRUCT),DIMENSION(:),ALLOCATABLE :: FVM_VEL
+          INTEGER :: NINIVEL, NINIVEL_CUT_CELL
+        END  TYPE cutcell_data_
+
+
         ! GENERAL DATA STRUCTURE USED IN SOURCE CODE
         TYPE ALE_
           TYPE(ALE_GRID_)   :: GRID
@@ -281,7 +289,8 @@ C-----------------------------------------------
           TYPE(ALE_SUB_)    :: SUB
           TYPE(ALE_REZON_)  :: REZON
           TYPE(ALE_SOLVER_) :: SOLVER
-          type(conv_) :: conv !< convective data structure
+          TYPE(CONV_) :: CONV !< CONVECTIVE DATA STRUCTURE
+          TYPE(CUTCELL_DATA_) :: CUTCELL !< CUT CELL DATA STRUCTURE
         contains
           procedure, pass :: init
         END TYPE ALE_

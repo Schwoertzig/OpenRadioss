@@ -245,6 +245,7 @@ C-----------------------------------------------
       use ush_init_mod , only : ush_init
       use ini_guided_cable_mod, ONLY : ini_guided_cable 
       use rini135_rb_mod
+      use ale_mod , only : ale
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1867,8 +1868,10 @@ C---------------------------------
 C---------------------------------
 C Initialization of FVM velocities
 C---------------------------------
-      IF (MULTI_FVM%IS_USED .AND. NINVEL > 0) THEN
-        CALL INI_FVMINIVEL(FVM_INIVEL ,MULTI_FVM ,IGRBRIC ,IGRQUAD ,IGRSH3N)
+      IF (NINVEL > 0) THEN
+        IF(MULTI_FVM%IS_USED .OR. ALE%solver%multimat%is_defined_mmale3 == 1) THEN
+          CALL INI_FVMINIVEL(FVM_INIVEL ,MULTI_FVM ,IGRBRIC ,IGRQUAD ,IGRSH3N)
+        ENDIF
       ENDIF
 C------------------------------------------------------------------
 C SMS : Initialization of GBUF%ISMS and automatic element selection

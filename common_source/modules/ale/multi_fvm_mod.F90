@@ -351,6 +351,7 @@
 
         type fvm_inivel_struct
           logical :: flag
+          integer :: isubmat
           integer :: grbricid, grquadid, grsh3nid
           real(kind=WP) :: vx, vy, vz
         end type fvm_inivel_struct

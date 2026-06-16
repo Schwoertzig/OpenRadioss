@@ -73,7 +73,8 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
       USE SENSOR_MOD
-      USE INIVEL_MOD 
+      USE INIVEL_MOD
+      USE ALE_MOD , ONLY : ALE
 C----------------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -115,6 +116,7 @@ C-----------------------------------------------
       INTEGER :: IFRA,IFM,IUN,K1,K2,K3,INOD,NB_NODES, ID_NODE,IOK
       INTEGER :: NINIVEL_FVM,NINIVEL_TOTAL
       INTEGER :: FVM_GRBRIC_USER_ID(NINVEL), FVM_GRQUAD_USER_ID(NINVEL), FVM_GRTRIA_USER_ID(NINVEL) ! printout only
+      INTEGER :: NQUADS
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGNO_RBY
       my_real :: V1, V2, V3, V4, V5, V6, VL1, VL2, VL3,VRA, OX, OY, OZ, NIXJ(6),VR1,VR2,VR3,BID
       CHARACTER MESS*40
@@ -317,7 +319,7 @@ C--------------------------------------------------
           CALL HM_GET_INTV('grqd_ID', IDGRQUAD, IS_AVAILABLE, LSUBMODEL)
           CALL HM_GET_INTV('grtria_ID', IDGRTRIA, IS_AVAILABLE, LSUBMODEL)
           CALL HM_GET_INTV('skew_ID', ISK, IS_AVAILABLE, LSUBMODEL)
-          CALL HM_GET_INTV('submat_id', ISUBMAT, IS_AVAILABLE, LSUBMODEL)
+          CALL HM_GET_INTV('submat_ID', ISUBMAT, IS_AVAILABLE, LSUBMODEL)
           IF(N2D /= 0 .AND. ISK == 0)THEN
             IF(VL1 /= 0)THEN
               !2D plane strain warning about X-velocity
@@ -460,8 +462,8 @@ C
         IDGRTRIA_LOC  = -1
 
         IF (ITYPE == 5) THEN
-           IF (.NOT. MULTI_FVM%IS_USED) THEN
-              CALL ANCMSG(MSGID=1554,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1='IN /INIVEL OPTION')
+           IF (.NOT. MULTI_FVM%IS_USED .AND. ALE%solver%multimat%is_defined_mmale3 == 0) THEN
+              CALL ANCMSG(MSGID=1557,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1='IN /INIVEL OPTION')
            ELSE
               IDGRBRICK_LOC = -1
               IDGRQUAD_LOC  = -1
@@ -473,24 +475,30 @@ C
                     DO J = 1,NGRBRIC
                        IF (IDGRBRICK == IGRBRIC(J)%ID) IDGRBRICK_LOC = J
                     ENDDO
-                    IF (IDGRBRICK_LOC == -1) THEN
+                    IF (IDGRBRICK_LOC == -1 .OR. ALE%solver%multimat%is_defined_mmale3 == 1) THEN
                        CALL ANCMSG(MSGID=1554, MSGTYPE=MSGERROR,ANMODE=ANINFO,C1='IN /INIVEL OPTION',I1=IDGRBRICK)
                     ENDIF
                  ENDIF
                  IF (IDGRQUAD /= 0) THEN
                     DO J = 1,NGRQUAD
                        IF (IDGRQUAD == IGRQUAD(J)%ID) IDGRQUAD_LOC = J
-                    ENDDO    
+                    ENDDO
                     IF (IDGRQUAD_LOC == -1) THEN
-                       CALL ANCMSG(MSGID=1554,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1='IN /INIVEL OPTION',I1=IDGRQUAD)
+                       CALL ANCMSG(MSGID=1555,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1='IN /INIVEL OPTION',I1=IDGRQUAD)
+                    ELSE
+                      IF(ALE%solver%multimat%is_defined_mmale3 == 1)THEN
+                        IF (ISUBMAT == 0)THEN
+                          ISUBMAT = 1
+                        ENDIF
+                      ENDIF
                     ENDIF
                  ENDIF
                  IF (IDGRTRIA /= 0) THEN
                     DO J = 1,NGRSH3N
                        IF (IDGRTRIA == IGRSH3N(J)%ID) IDGRTRIA_LOC = J
-                    ENDDO      
+                    ENDDO
                     IF (IDGRTRIA_LOC == -1) THEN
-                       CALL ANCMSG(MSGID=1554,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1='IN /INIVEL OPTION',I1=IDGRTRIA)
+                       CALL ANCMSG(MSGID=1556,MSGTYPE=MSGERROR,ANMODE=ANINFO,C1='IN /INIVEL OPTION',I1=IDGRTRIA)
                     ENDIF
                  ENDIF
               ENDIF
@@ -504,6 +512,7 @@ C
                 FVM_INIVEL(I)%VX = V1
                 FVM_INIVEL(I)%VY = V2
                 FVM_INIVEL(I)%VZ = V3
+                FVM_INIVEL(I)%ISUBMAT = ISUBMAT
                 FVM_GRBRIC_USER_ID(I) = IDGRBRICK
                 FVM_GRQUAD_USER_ID(I) = IDGRQUAD
                 FVM_GRTRIA_USER_ID(I) = IDGRTRIA

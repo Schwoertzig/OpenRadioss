@@ -3549,7 +3549,7 @@ C===============================================================================
                 CALL ALEMAIN_CUTCELL(NIXTG,NIXQ,NUMELTG,NUMELQ,IXTG,IXQ,NUMNOD,NODES%X,ALE_CONNECTIVITY,NCYCLE,
      .                               ITYPTSTT, NELTSTT, T1S, TT,
      .                               NGRNOD,IGRNOD,DTFAC1(102),DT1,DT2TT,MULTI_CUTCELL,
-     .                               ngroup, elbuf_tab, nparg, iparg, ebcs_tab, n2d)
+     .                               ngroup, elbuf_tab, nparg, iparg, ebcs_tab, n2d, NGRQUAD, IGRQUAD)
                 IF(DT2TT < DT2T)THEN
                    DT2T   = DT2TT
                    ITYPTST= ITYPTSTT
@@ -9585,6 +9585,7 @@ C
                 IF(ALE%solver%multimat%is_defined_mmale3 /= 0) THEN
                   call deallocate_multi_cutcell_type(multi_cutcell)
                   call deallocate_solver_multicutcell()
+                  if(allocated(ale%cutcell%fvm_vel)) deallocate (ale%cutcell%fvm_vel)
                 END IF
 
                 !ALEFVM
