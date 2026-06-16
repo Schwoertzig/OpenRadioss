@@ -1210,12 +1210,14 @@ module multicutcell_solver_mod
     do i=1,nb_cell
       do k=1,nb_regions
         grid(i,k) = makegrid(NUMELQ, NUMELTG, IXQ, IXTG, X, i )
-        do j=1,num_mixed
-            if (i == list_mixed(j)) then
-              grid(i,k)%is_narrowband = .true.
-              grid(i,k)%close_cells = .true.
-            end if
-        end do
+      end do
+    end do
+    
+    do j=1,num_mixed
+      i = list_mixed(j)
+      do k=1,nb_regions
+        grid(i,k)%is_narrowband = .true.
+        grid(i,k)%close_cells = .true.
       end do
     end do
 
