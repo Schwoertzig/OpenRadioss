@@ -33,6 +33,65 @@ module multicutcell_solver_mod
     end if
   end function max_nb_points_in_cell
 
+  subroutine compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
+    use polygon_cutcell_mod
+    use grid2D_struct_multicutcell_mod
+  
+    IMPLICIT NONE
+  
+    ! INPUT argument
+    integer, intent(in) :: NUMELQ, NUMELTG, NUMNOD
+    integer, dimension(:,:), intent(in) :: IXQ, IXTG
+    ! IN/OUTPUT argument
+    type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
+
+    !Local variables
+    logical, dimension(NUMNOD) :: is_narrowband_pt
+    integer :: nb_cell, nb_regions, nb_pts_in_cell, i, k
+
+    nb_cell = size(grid, 1)
+    nb_regions = size(grid, 2)
+    if (NUMELQ>0) then
+      nb_pts_in_cell = 4
+    elseif (NUMELTG>0) then
+      nb_pts_in_cell = 3
+    end if
+    !First : all points in contact with a cell in a narrowband are marked as true.
+    is_narrowband_pt(:) = .false.
+    if (NUMELQ>0) then
+      do i = 1,nb_cell
+        do k=2,2+nb_pts_in_cell-1
+          is_narrowband_pt(IXQ(k, i)) = (is_narrowband_pt(IXQ(k, i)) .or. grid(i, 1)%is_narrowband)
+        end do
+      end do
+    elseif (NUMELTG>0) then
+      do i = 1,nb_cell
+        do k=2,2+nb_pts_in_cell-1
+          is_narrowband_pt(IXTG(k, i)) = (is_narrowband_pt(IXTG(k, i)) .or. grid(i, 1)%is_narrowband)
+        end do
+      end do
+    end if
+
+    !Second : all cells that have at least one point marked true are close cells
+    grid(:,:)%close_cells = .false.
+    if (NUMELQ>0) then
+      do i = 1,nb_cell
+        do k=2,2+nb_pts_in_cell-1
+          grid(i,1)%close_cells = (grid(i,1)%close_cells .or. is_narrowband_pt(IXQ(k, i)))
+          grid(i,2:nb_regions)%close_cells = grid(i,1)%close_cells
+        end do
+      end do
+    elseif (NUMELTG>0) then
+      do i = 1,nb_cell
+        do k=2,2+nb_pts_in_cell-1
+          grid(i,1)%close_cells = (grid(i,1)%close_cells .or. is_narrowband_pt(IXTG(k, i)))
+          grid(i,2:nb_regions)%close_cells = grid(i,1)%close_cells
+        end do
+      end do
+    end if
+  end subroutine compute_close_cells
+
+
   subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt, rho, vely, velz, p, gamma)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
@@ -199,65 +258,6 @@ module multicutcell_solver_mod
     deallocate(pressure_face)
 
     call compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
-
-    contains 
-    subroutine compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
-      use polygon_cutcell_mod
-      use grid2D_struct_multicutcell_mod
-  
-      IMPLICIT NONE
-  
-      ! INPUT argument
-      integer, intent(in) :: NUMELQ, NUMELTG, NUMNOD
-      integer, dimension(:,:), intent(in) :: IXQ, IXTG
-      ! IN/OUTPUT argument
-      type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
-
-      !Local variables
-      logical, dimension(NUMNOD) :: is_narrowband_pt
-      integer :: nb_cell, nb_regions, nb_pts_in_cell, i, k
-
-      nb_cell = size(grid, 1)
-      nb_regions = size(grid, 2)
-      if (NUMELQ>0) then
-        nb_pts_in_cell = 4
-      elseif (NUMELTG>0) then
-        nb_pts_in_cell = 3
-      end if
-      !First : all points in contact with a cell in a narrowband are marked as true.
-      is_narrowband_pt(:) = .false.
-      if (NUMELQ>0) then
-        do i = 1,nb_cell
-          do k=2,2+nb_pts_in_cell-1
-            is_narrowband_pt(IXQ(k, i)) = (is_narrowband_pt(IXQ(k, i)) .or. grid(i, 1)%is_narrowband)
-          end do
-        end do
-      elseif (NUMELTG>0) then
-        do i = 1,nb_cell
-          do k=2,2+nb_pts_in_cell-1
-            is_narrowband_pt(IXTG(k, i)) = (is_narrowband_pt(IXTG(k, i)) .or. grid(i, 1)%is_narrowband)
-          end do
-        end do
-      end if
-
-      !Second : all cells that have at least one point marked true are close cells
-      grid(:,:)%close_cells = .false.
-      if (NUMELQ>0) then
-        do i = 1,nb_cell
-          do k=2,2+nb_pts_in_cell-1
-            grid(i,1)%close_cells = (grid(i,1)%close_cells .or. is_narrowband_pt(IXQ(k, i)))
-            grid(i,2:nb_regions)%close_cells = grid(i,1)%close_cells
-          end do
-        end do
-      elseif (NUMELTG>0) then
-        do i = 1,nb_cell
-          do k=2,2+nb_pts_in_cell-1
-            grid(i,1)%close_cells = (grid(i,1)%close_cells .or. is_narrowband_pt(IXTG(k, i)))
-            grid(i,2:nb_regions)%close_cells = grid(i,1)%close_cells
-          end do
-        end do
-      end if
-    end subroutine compute_close_cells
 
   end subroutine multicutcell_compute_lambdas
 
@@ -517,9 +517,9 @@ module multicutcell_solver_mod
         pressure_mean_normal = grid(i, 1)%p_normal_intern_face_space
         pressure_mean_normal_time = grid(i, 1)%p_normal_intern_face_time
 
-        dW(ind_targ, k)%rhovy = dW(ind_targ, k)%rhovy + odd_k*pressure_mean_normal%y
-        dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz + odd_k*pressure_mean_normal%z
-        dW(ind_targ, k)%rhoE  = dW(ind_targ, k)%rhoE  - odd_k*pressure_mean_normal_time
+        dW(ind_targ, k)%rhovy = dW(ind_targ, k)%rhovy - odd_k*pressure_mean_normal%y
+        dW(ind_targ, k)%rhovz = dW(ind_targ, k)%rhovz - odd_k*pressure_mean_normal%z
+        dW(ind_targ, k)%rhoE  = dW(ind_targ, k)%rhoE  + odd_k*pressure_mean_normal_time
 
         !Update size of fluid part
         grid(ind_targ, k)%lambdanp1_per_cell_target = grid(ind_targ, k)%lambdanp1_per_cell_target + grid(i, k)%lambdanp1_per_cell
@@ -901,8 +901,6 @@ module multicutcell_solver_mod
             fx(i, k)%rhovy(j) = 0.
             fx(i, k)%rhovz(j) = 0.
             fx(i, k)%rhoE(j) = 0.
-            !normalVector = grid.λ_per_edge[e, r]
-            !norm_vec = norm(normalVector)
             if (other_face > 0) then
               call FV_flux_hllc_Euler(gamma(k), rho(fused_i(k), k), rho(other_face, k), &
                                   vely(fused_i(k), k), vely(other_face, k), velz(fused_i(k), k), velz(other_face, k), &
@@ -1028,9 +1026,11 @@ module multicutcell_solver_mod
 
                 jj = twf%ielem(ielem)
                 rhojj = rho(jj, k)
-                velyjj = vely(jj, k)
-                velzjj = velz(jj, k)
                 pjj = p(jj, k)
+                velyjj = -(vely(jj, k)*normal%y + velz(jj, k)*normal%z)*normal%y &
+                         - (-vely(jj, k)*normal%z + velz(jj, k)*normal%y)*normal%z
+                velzjj = -(vely(jj, k)*normal%y + velz(jj, k)*normal%z)*normal%z &
+                         + (-vely(jj, k)*normal%z + velz(jj, k)*normal%y)*normal%y
 
                 call FV_flux_hllc_Euler(gammaii, rhoii, rhojj, &
                                     velyii, velyjj, velzii, velzjj, pii, pjj, normal, &
@@ -1166,27 +1166,34 @@ module multicutcell_solver_mod
 
 
   !(y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
-  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, IXQ, IXTG, X, &
-                              nb_id_polygon, list_id_polygon, ngrnod, igrnode, grid, num_mixed,list_mixed)
+  subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, ngroup, nparg, iparg, X, elbuf, & !gamma, &
+                              nb_id_polygon, list_id_polygon, ngrnod, igrnode, & !multi_cutcell, 
+                              grid, num_mixed,list_mixed)
     use grid2D_struct_multicutcell_mod
     use groupdef_mod , only : group_
     use polygon_cutcell_mod, only : Point3D
     use multi_cutcell_mod, only : multi_cutcell_struct
+    use elbufdef_mod
 
     implicit none
-    integer, intent(in) :: N2D, NUMELQ, NUMELTG
+    integer, intent(in) :: N2D, NUMELQ, NUMELTG, NUMNOD
     integer, intent(in), dimension(:,:) :: IXQ, IXTG
+    integer,intent(in) :: nparg  !< size IPARG
+    integer,intent(in) :: ngroup !< number of group
+    integer,intent(in) :: iparg(nparg,ngroup)
     real(kind=wp), intent(in), dimension(:,:) :: X
+    type(elbuf_struct_),dimension(:) :: elbuf
+    !real(kind=wp), dimension(:), intent(in) :: gamma
     integer(kind=8), intent(in) :: nb_id_polygon
     integer, intent(in) :: list_id_polygon(nb_id_polygon)
     integer,intent(in) :: ngrnod                                  !< number of group of nodes(array size for igrnod)
     type(group_), dimension(ngrnod), intent(in)  :: igrnode
-    type(grid2D_struct_multicutcell), dimension(:, :), allocatable, intent(out) :: grid
     !type(multi_cutcell_struct), intent(inout) :: multi_cutcell        !< element buffer (storage for output files : pressure, density, velocity, ...)
+    type(grid2D_struct_multicutcell), dimension(:, :), allocatable :: grid 
     integer,intent(in) :: num_mixed,list_mixed(num_mixed)
     
     !DUMMY ARGUMENTS
-    integer nb_cell, nb_regions
+    integer nb_cell, nb_regions, nb_edges
     integer(kind=8) i, k, j, nb_pts_poly, old_nb_pts_poly
     real(kind=wp), dimension(:), allocatable :: vec_move_clippedy, vec_move_clippedz
     real(kind=wp) :: dt, dx, minimal_length, minimal_angle, maximal_length
@@ -1194,10 +1201,18 @@ module multicutcell_solver_mod
     integer(kind=8) :: limits_polygon(nb_id_polygon + 1)
     integer :: polyg_id, nb_pts
     integer, dimension(:), allocatable :: entities
-
+    real(kind=wp) :: x_pt1, x_pt2, y_pt1, y_pt2
+    integer :: ng, nel, nft, elem_iid
+    
     if (N2D < 0) then
       print *, "Error: no 2D?"
       !stop
+    end if
+
+    if (NUMELQ>0) then
+      nb_edges = 4
+    else
+      nb_edges = 3
     end if
 
     dt = 1.0
@@ -1210,6 +1225,36 @@ module multicutcell_solver_mod
     do i=1,nb_cell
       do k=1,nb_regions
         grid(i,k) = makegrid(NUMELQ, NUMELTG, IXQ, IXTG, X, i )
+      end do
+    end do
+
+    do ng=1,ngroup
+      nel = iparg(2,ng)
+      nft = iparg(3,ng) ! shift
+      do i=1,nel
+        elem_iid = i+nft
+        do k=1,nb_regions
+          grid(elem_iid,k)%lambdan_per_cell = elbuf(ng)%bufly(k)%lbuf(1,1,1)%vol(i)
+          grid(elem_iid,k)%lambdanp1_per_cell = elbuf(ng)%bufly(k)%lbuf(1,1,1)%vol(i)
+
+          if (grid(elem_iid,k)%lambdan_per_cell > 0.0) then 
+            do j=1,nb_edges-1
+              x_pt1 = X(2, IXQ(2+j-1, elem_iid))
+              x_pt2 = X(2, IXQ(2+j, elem_iid))
+              y_pt1 = X(3, IXQ(2+j-1, elem_iid))
+              y_pt2 = X(3, IXQ(2+j, elem_iid))
+              grid(elem_iid,k)%lambda_per_edge(j) = sqrt((x_pt2-x_pt1)*(x_pt2-x_pt1) + (y_pt2-y_pt1)*(y_pt2-y_pt1))
+            end do
+            j=nb_edges
+            x_pt1 = X(2, IXQ(2+j-1, elem_iid))
+            x_pt2 = X(2, IXQ(2, elem_iid))
+            y_pt1 = X(3, IXQ(2+j-1, elem_iid))
+            y_pt2 = X(3, IXQ(2, elem_iid))
+            grid(elem_iid,k)%lambda_per_edge(j) = sqrt((x_pt2-x_pt1)*(x_pt2-x_pt1) + (y_pt2-y_pt1)*(y_pt2-y_pt1))
+          else
+            grid(elem_iid,k)%lambda_per_edge(:) = 0.0
+          end if
+        end do
       end do
     end do
     
@@ -1277,6 +1322,7 @@ module multicutcell_solver_mod
     !call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt,&
     !                                  multi_cutcell%phase_rho, multi_cutcell%phase_vely,&
     !                                  multi_cutcell%phase_velz, multi_cutcell%phase_pres, gamma) !initialize lambda fields, close_cell and is_narrowband in grid
+    call compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
 
     deallocate(vec_move_clippedy)
     deallocate(vec_move_clippedz)
@@ -1319,15 +1365,18 @@ module multicutcell_solver_mod
   end subroutine output_clipped
 
    !initial state
-  subroutine multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
+  subroutine multicutcell_initial_state(ngroup, elbuf, nparg, iparg, IGRQUAD, multi_cutcell)
     use elbufdef_mod
     use multi_cutcell_mod, only : multi_cutcell_struct
+    use ale_mod , only : ALE
+    use groupdef_mod , only : GROUP_
 
     implicit none
 
     !DUMMY ARGUMENTS
     integer, intent(in) :: ngroup,nparg,iparg(nparg,ngroup)
     type(elbuf_struct_),dimension(ngroup) :: elbuf
+    TYPE(GROUP_),INTENT(IN),DIMENSION(:) :: IGRQUAD
     type(multi_cutcell_struct), intent(inout) :: multi_cutcell        !< element buffer (storage for output files : pressure, density, velocity, ...)
 
     !LOCAL VARIABLE
@@ -1343,11 +1392,21 @@ module multicutcell_solver_mod
         do imat=1,2
           multi_cutcell%phase_rho(elem_iid,imat) = elbuf(ng)%BUFLY(imat)%LBUF(1,1,1)%rho(ii)
           multi_cutcell%phase_pres(elem_iid,imat) = -elbuf(ng)%BUFLY(imat)%LBUF(1,1,1)%sig(ii)
-          multi_cutcell%phase_vely(elem_iid,imat) = 0.0
-          multi_cutcell%phase_velz(elem_iid,imat) = 0.0
         end do
       end do
     enddo
+
+    mlw = ALE%CUTCELL%NINIVEL_CUT_CELL
+    DO ii=1,mlw
+      nft = ALE%CUTCELL%FVM_VEL(ii)%grquadid
+      imat = ALE%CUTCELL%FVM_VEL(ii)%isubmat
+      nel = IGRQUAD(nft)%nentity
+      DO ng=1,nel
+        elem_iid = IGRQUAD(nft)%entity(ng)
+        multi_cutcell%phase_vely(elem_iid, imat) = ALE%CUTCELL%FVM_VEL(ii)%vy
+        multi_cutcell%phase_velz(elem_iid, imat) = ALE%CUTCELL%FVM_VEL(ii)%vz
+      END DO
+    END DO
 
   end subroutine multicutcell_initial_state
 

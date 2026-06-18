@@ -14,44 +14,13 @@ static void build_clipped_in_partial(Polyhedron3D* p, Point3D *n_face, Point3D *
     faces_in = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     volumes_in = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
 
-    //printf("mark_edge = %ld, sign_taken = %d\n", mark_edge, sign_taken);
-    //if (mark_edge == 4){
-        //printf("p = ");
-        //print_vec_pt3D(*(p->vertices));
-        //GrB_set (*(p->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*(p->edges), GrB_MATERIALIZE);
-        //GxB_print(*(p->edges), GxB_COMPLETE);
-        //GrB_wait(*(p->faces), GrB_MATERIALIZE);
-        //GxB_print(*(p->faces), GxB_COMPLETE);
-        //printf("status_face = ");
-        //print_vec_int(p->status_face);
-    //}
     cut_edges3D(p, n_face, pt_face, sign_taken, pts_copy, edges_in);
-    //if (mark_edge == 4){
-        //GrB_set (*edges_in, GrB_ROWMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        //GrB_wait(*edges_in, GrB_MATERIALIZE);
-        //GxB_print(*edges_in, GxB_COMPLETE);
-    //}
 
-    //printf("Before close cells\n");
     close_cells(edges_in, p->faces, NULL, -1, faces_in);
-    //printf("After close cells\n");
 
     copy_vec_int(p->status_face, status_face);
     close_cells(faces_in, p->volumes, status_face, mark_edge, volumes_in);
 
-    //if (mark_edge == 4){
-    //    printf("pts_copy = ");
-    //    print_vec_pt3D(*pts_copy);
-    //    GrB_set (*edges_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-    //    GrB_wait(*edges_in, GrB_MATERIALIZE);
-    //    GxB_print(*edges_in, GxB_COMPLETE);
-    //    GrB_set (*faces_in, GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-    //    GrB_wait(*faces_in, GrB_MATERIALIZE);
-    //    GxB_print(*faces_in, GxB_COMPLETE);
-    //    printf("status_face (of size %ld) = ", status_face->size);
-    //    print_vec_int(status_face);
-    //}
     //Copy new polyhedron in p.
     copy_vec_pts3D(pts_copy, p->vertices);
     dealloc_vec_pts3D(pts_copy); free(pts_copy);
@@ -112,16 +81,12 @@ static Point3D* first_point_of_ith_face(const Polyhedron3D *p, GrB_Index i){
 /// @return The result of the clipping (a polyhedron)
 Polyhedron3D* clip3D(const Polyhedron3D *clipper, const Polyhedron3D *clipped){
     Polyhedron3D* clipped_in = new_Polyhedron3D();
-    Vector_points3D* normal_vectors = points3D_from_matrix(surfaces_poly3D(clipper));
+    GrB_Vector normals_grb = surfaces_poly3D(clipper);
+    Vector_points3D* normal_vectors = points3D_from_matrix(normals_grb);
     GrB_Index i;//, size_nv;
     Point3D *n_face, *pt_face;
     long int *stf_i;
     int8_t vol_i;
-
-    char filename[1024];
-    int length_i;
-    char* i_string;
-
 
     copy_Polyhedron3D(clipped, clipped_in);
     //for i in eachindex(normal_vectors)
@@ -142,6 +107,7 @@ Polyhedron3D* clip3D(const Polyhedron3D *clipper, const Polyhedron3D *clipped){
     }
 
     dealloc_vec_pts3D(normal_vectors); free(normal_vectors);
+    GrB_free(&normals_grb);
 
     return clipped_in;
 }

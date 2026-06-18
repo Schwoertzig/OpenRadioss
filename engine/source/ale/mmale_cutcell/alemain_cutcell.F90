@@ -147,43 +147,49 @@
           ! EXAMPLE OF USAGE
           if(ncycle == 0)then
             ! elem connecvitivy
-            print *, "elem iid=1 : uid,n1,n2,n3,n4 =,", 1, ixq(7, 1), ixq(2:5, 1)   !iid : internal id, uid : user id
-            print *, "elem iid=1  uid(n1),uid(n2),uid(n3),uid(n4) =,", ITAB_DEBUG(ixq(2:5, 1))   !iid : internal id, uid : user id
+            !print *, "elem iid=1 : uid,n1,n2,n3,n4 =,", 1, ixq(7, 1), ixq(2:5, 1)   !iid : internal id, uid : user id
+            !print *, "elem iid=1  uid(n1),uid(n2),uid(n3),uid(n4) =,", ITAB_DEBUG(ixq(2:5, 1))   !iid : internal id, uid : user id
             
-            ! polygon
-            print *, "user polygon internal identifier : ", polyg_id
-            print *, "     number of nodes : ", igrnod(polyg_id)%nentity
-            print *, "     list of nodes   : ", igrnod(polyg_id)%entity (1:igrnod(polyg_id)%nentity)
+            !! polygon
+            !print *, "user polygon internal identifier : ", polyg_id
+            !print *, "     number of nodes : ", igrnod(polyg_id)%nentity
+            !print *, "     list of nodes   : ", igrnod(polyg_id)%entity (1:igrnod(polyg_id)%nentity)
             
-            !ale_connectivity (elem-elem)
-            ELEM_IID=1
-            IAD2 = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID)
-            LGTH = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID+1) - IAD2
-            DO JJ=1,LGTH
-              IADJ = ALE_CONNECT%ee_connect%connected(IAD2 + JJ - 1)
-              IF(IADJ > 0)THEN
-                !there is an adjacent elem on face J, its elem_iid is IADJ
-              END IF
-            ENDDO
+            !!ale_connectivity (elem-elem)
+            !ELEM_IID=1
+            !IAD2 = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID)
+            !LGTH = ALE_CONNECT%ee_connect%iad_connect(ELEM_IID+1) - IAD2
+            !DO JJ=1,LGTH
+            !  IADJ = ALE_CONNECT%ee_connect%connected(IAD2 + JJ - 1)
+            !  IF(IADJ > 0)THEN
+            !    !there is an adjacent elem on face J, its elem_iid is IADJ
+            !  END IF
+            !ENDDO
             
-            ! node coordinates
-            print *, "node iid=3, x,y,z=", X(1:3, 3), "uid=", ITAB_DEBUG(3)
+            !! node coordinates
+            !print *, "node iid=3, x,y,z=", X(1:3, 3), "uid=", ITAB_DEBUG(3)
 
-            ! initial velocity
-            NINIVEL = ALE%CUTCELL%NINIVEL_CUT_CELL
-            DO II=1,NINIVEL
-                GRQUAD_ID = ALE%CUTCELL%FVM_VEL(II)%grquadid
-                ISUBMAT = ALE%CUTCELL%FVM_VEL(II)%isubmat
-                VY0 = ALE%CUTCELL%FVM_VEL(II)%vy
-                VZ0 = ALE%CUTCELL%FVM_VEL(II)%vz
-                print *, "initial velocity : grquad_id=", GRQUAD_ID, "isubmat=", ISUBMAT, "vy0=", VY0, "vz0=", VZ0
-                NEL = IGRQUAD(GRQUAD_ID)%nentity
-                DO JJ=1,NEL
-                    ELEM_IID = IGRQUAD(GRQUAD_ID)%entity(JJ)
-                        print *, "internal elem id=", ELEM_IID, " user elem id=", IXQ(7,ELEM_IID),  &
-                        " init with vy0=", VY0, "vz0=", VZ0, " and SUBMAT_id=", ISUBMAT
-                END DO
-            END DO
+            !print *, "volumes phase 1="
+            !write(*,*) elbuf(1)%bufly(1)%lbuf(1,1,1)%vol
+            !print *, "volumes phase 2="
+            !write(*,*) elbuf(1)%bufly(2)%lbuf(1,1,1)%vol
+
+            !! initial velocity
+            !NINIVEL = ALE%CUTCELL%NINIVEL_CUT_CELL
+            !DO II=1,NINIVEL
+            !    GRQUAD_ID = ALE%CUTCELL%FVM_VEL(II)%grquadid
+            !    ISUBMAT = ALE%CUTCELL%FVM_VEL(II)%isubmat
+            !    VY0 = ALE%CUTCELL%FVM_VEL(II)%vy
+            !    VZ0 = ALE%CUTCELL%FVM_VEL(II)%vz
+            !    print *, "initial velocity : grquad_id=", GRQUAD_ID, "isubmat=", ISUBMAT, "vy0=", VY0, "vz0=", VZ0
+            !    NEL = IGRQUAD(GRQUAD_ID)%nentity
+            !    DO JJ=1,NEL
+            !        ELEM_IID = IGRQUAD(GRQUAD_ID)%entity(JJ)
+            !            print *, "internal elem id=", ELEM_IID, " user elem id=", IXQ(7,ELEM_IID),  &
+            !            " init with vy0=", VY0, "vz0=", VZ0, " and SUBMAT_id=", ISUBMAT
+            !    END DO
+            !END DO
+            !IBC = IGRQUAD(1)%NENTITY
 
             
           end if ! ncycle == 0
@@ -238,9 +244,12 @@
                 !debug-end
           call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
           nb_polygon = ALE%solver%multimat%nb
-          call initialize_solver_multicutcell(n2d, numelq, numeltg, ixq, ixtg, x, &
-          nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, multi_cutcell%grid,num_mixed,list_mixed)
-          call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, multi_cutcell)
+          call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, IGRQUAD, multi_cutcell)
+          call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, &
+              ngroup, nparg, iparg, x, elbuf, & !gamma, &
+              nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, &
+              !multi_cutcell,
+              multi_cutcell%grid,num_mixed,list_mixed)
           call build_full_states(multi_cutcell%grid, multi_cutcell%phase_rho, &
           multi_cutcell%phase_vely, multi_cutcell%phase_velz, multi_cutcell%phase_pres, &
           gamma, &
@@ -317,6 +326,20 @@
             !volume fraction
             ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 1)%lambdanp1_per_cell
             ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%VOL(II) =  multi_cutcell%grid(elem_iid, 2)%lambdanp1_per_cell
+            !if (multi_cutcell%grid(elem_iid, 1)%is_narrowband) then
+            !  ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%ssp(II) =  1.0
+            !  ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%ssp(II) =  1.0
+            !else
+            !  ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%ssp(II) =  0.0
+            !  ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%ssp(II) =  0.0
+            !endif
+            !if (multi_cutcell%grid(elem_iid, 1)%close_cells) then
+            !  ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%ssp(II) = 1.0
+            !  ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%ssp(II) = 1.0
+            !else
+            !  ELBUF(NG)%BUFLY(1)%LBUF(1,1,1)%ssp(II) = 0.0
+            !  ELBUF(NG)%BUFLY(2)%LBUF(1,1,1)%ssp(II) = 0.0
+            !end if
             
             !velocity-phase1
             elbuf(ng)%BUFLY(1)%LBUF(1,1,1)%vel(ii)     = multi_cutcell%phase_vely(elem_iid,1)
