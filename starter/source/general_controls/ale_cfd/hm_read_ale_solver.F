@@ -53,6 +53,7 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include "implicit_f.inc"
+#include "units_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -67,7 +68,7 @@ C-----------------------------------------------
       INTEGER :: NALESOLVER_FINT
       INTEGER :: NALESOLVER_MULTIMAT
       INTEGER :: IAD, NFIX, NB, OPT_ID
-      INTEGER :: IFORM, PART_ID, SURF_ID, SURF_ID2, SURF_ID3, SURF_ID4, SURF_ID5
+      INTEGER :: IFORM, SURF_ID, SURF_ID2, SURF_ID3, SURF_ID4, SURF_ID5
       INTEGER :: II
       LOGICAL :: IS_AVAILABLE
 
@@ -105,7 +106,6 @@ C-----------------------------------------------
             CALL HM_OPTION_START('/ALE/SOLVER/MULTIMAT')
             CALL HM_OPTION_NEXT()
             CALL HM_GET_INTV('ALE_SOLVER_MMALE', IFORM  , IS_AVAILABLE, LSUBMODEL)
-            CALL HM_GET_INTV('ALE_PART_SET_ID' , PART_ID, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('ALE_SURF_SETID'  , SURF_ID, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('ALE_SURF_SETID2' , SURF_ID2, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('ALE_SURF_SETID3' , SURF_ID3, IS_AVAILABLE, LSUBMODEL)
@@ -129,17 +129,26 @@ C-----------------------------------------------
             IF(SURF_ID3 < 0)SURF_ID3 = 0
             IF(SURF_ID4 < 0)SURF_ID4 = 0
             IF(SURF_ID5 < 0)SURF_ID5 = 0
-            IF(PART_ID < 0)PART_ID = 0
             ALE%SOLVER%MULTIMAT%LIST(II)%mmale = IFORM
-            ALE%SOLVER%MULTIMAT%LIST(II)%part_id = PART_ID
             ALE%SOLVER%MULTIMAT%LIST(II)%surf_id  = SURF_ID
             ALE%SOLVER%MULTIMAT%LIST(II)%surf_id2 = SURF_ID2
             ALE%SOLVER%MULTIMAT%LIST(II)%surf_id3 = SURF_ID3
             ALE%SOLVER%MULTIMAT%LIST(II)%surf_id4 = SURF_ID4
             ALE%SOLVER%MULTIMAT%LIST(II)%surf_id5 = SURF_ID5
+            write(iout,100) iform,SURF_ID,SURF_ID2,SURF_ID3,SURF_ID4,SURF_ID5
           ENDDO
 
       ENDIF
 
-      END 
+      RETURN
 
+100   FORMAT(/"ALE BI-MATERIAL CUT-CELL ",/,
+     .       5X,/,
+     .       5X,"FORMULATION FLAG . . . . . . . . . . . . . .=",I10/,
+     .       5X,"POLYGON ID_1 . . . . . . . . . . . . . . . .=",I10/,
+     .       5X,"POLYGON ID_2 (OPTIONAL)  . . . . . . . . . .=",I10/,
+     .       5X,"POLYGON ID_3 (OPTIONAL)  . . . . . . . . . .=",I10/,
+     .       5X,"POLYGON ID_4 (OPTIONAL)  . . . . . . . . . .=",I10/,
+     .       5X,"POLYGON ID_5 (OPTIONAL)  . . . . . . . . . .=",I10/)
+
+      END SUBROUTINE HM_READ_ALE_SOLVER
