@@ -28,6 +28,10 @@
            integer mmale
            integer part_id
            integer surf_id
+           integer surf_id2
+           integer surf_id3
+           integer surf_id4
+           integer surf_id5
          end type
   
          type multimat_method_struct
@@ -71,7 +75,7 @@
           integer :: iad
           integer,dimension(:), allocatable :: IBUF
           real(kind=WP) :: RBUF(21)
-          NFIX = 4+3*this%nb
+          NFIX = 4+7*this%nb
           ALLOCATE (IBUF(NFIX))
           IAD = 1
           IBUF(IAD) = this%is_defined_mmale1
@@ -85,8 +89,12 @@
           do i=1,this%nb
             IBUF(IAD+0) = this%list(i)%mmale
             IBUF(IAD+1) = this%list(i)%part_id
-            IBUF(IAD+2) = this%list(i)%surf_id  
-            IAD=IAD+3                      
+            IBUF(IAD+2) = this%list(i)%surf_id
+            IBUF(IAD+3) = this%list(i)%surf_id2
+            IBUF(IAD+4) = this%list(i)%surf_id3
+            IBUF(IAD+5) = this%list(i)%surf_id4
+            IBUF(IAD+6) = this%list(i)%surf_id5
+            IAD=IAD+7
           enddo
           CALL WRITE_I_C(IBUF,NFIX)
           DEALLOCATE(IBUF)
@@ -109,15 +117,15 @@
           this%is_defined_mmale2 = ILEN4(2)
           this%is_defined_mmale3 = ILEN4(3)
           this%nb = ILEN4(4)
-          ALLOCATE(ILEN(3*this%nb))
-          call read_i_c(ILEN, 3*this%nb)
+          ALLOCATE(ILEN(7*this%nb))
+          call read_i_c(ILEN, 7*this%nb)
           IAD = 1
           allocate(this%list(this%nb))
           do i=1,this%nb
             this%list(i)%mmale   = ILEN(IAD)
             this%list(i)%part_id = ILEN(IAD+1)
             this%list(i)%surf_id = ILEN(IAD+2)
-            IAD = IAD + 3                       
+            IAD = IAD + 7
           enddo
           deallocate(ILEN)
           CALL READ_DB(RBUF,21)

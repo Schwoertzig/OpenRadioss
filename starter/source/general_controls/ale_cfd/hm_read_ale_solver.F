@@ -67,7 +67,7 @@ C-----------------------------------------------
       INTEGER :: NALESOLVER_FINT
       INTEGER :: NALESOLVER_MULTIMAT
       INTEGER :: IAD, NFIX, NB, OPT_ID
-      INTEGER :: IFORM, PART_ID, SURF_ID
+      INTEGER :: IFORM, PART_ID, SURF_ID, SURF_ID2, SURF_ID3, SURF_ID4, SURF_ID5
       INTEGER :: II
       LOGICAL :: IS_AVAILABLE
 
@@ -107,18 +107,36 @@ C-----------------------------------------------
             CALL HM_GET_INTV('ALE_SOLVER_MMALE', IFORM  , IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('ALE_PART_SET_ID' , PART_ID, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('ALE_SURF_SETID'  , SURF_ID, IS_AVAILABLE, LSUBMODEL)
+            CALL HM_GET_INTV('ALE_SURF_SETID2' , SURF_ID2, IS_AVAILABLE, LSUBMODEL)
+            CALL HM_GET_INTV('ALE_SURF_SETID3' , SURF_ID3, IS_AVAILABLE, LSUBMODEL)
+            CALL HM_GET_INTV('ALE_SURF_SETID4' , SURF_ID4, IS_AVAILABLE, LSUBMODEL)
+            CALL HM_GET_INTV('ALE_SURF_SETID5' , SURF_ID5, IS_AVAILABLE, LSUBMODEL)
+
             IF (IFORM < 0 .OR. IFORM > 4)THEN
               CALL ANCMSG(MSGID=1138, MSGTYPE=MSGERROR, ANMODE=ANINFO, C1='ALE/SOLVER/MULTIMAT,IFORM=', I1=IFORM)
+              IFORM = 0
+            ENDIF
+            IF (SURF_ID <= 0)THEN
+              CALL ANCMSG(MSGID=1138, MSGTYPE=MSGERROR, ANMODE=ANINFO,
+     .        C1='ALE/SOLVER/MULTIMAT,POLYGON NOT PROVIDED : polyg_id=', I1=IFORM)
               IFORM = 0
             ENDIF
             IF(IFORM == 1)ALE%SOLVER%MULTIMAT%is_defined_mmale1 = 1
             IF(IFORM == 2)ALE%SOLVER%MULTIMAT%is_defined_mmale2 = 1
             IF(IFORM == 3)ALE%SOLVER%MULTIMAT%is_defined_mmale3 = 1
-            IF(SURF_ID < 0)SURF_ID = 0
+            IF(SURF_ID  < 0)SURF_ID  = 0
+            IF(SURF_ID2 < 0)SURF_ID2 = 0
+            IF(SURF_ID3 < 0)SURF_ID3 = 0
+            IF(SURF_ID4 < 0)SURF_ID4 = 0
+            IF(SURF_ID5 < 0)SURF_ID5 = 0
             IF(PART_ID < 0)PART_ID = 0
             ALE%SOLVER%MULTIMAT%LIST(II)%mmale = IFORM
             ALE%SOLVER%MULTIMAT%LIST(II)%part_id = PART_ID
-            ALE%SOLVER%MULTIMAT%LIST(II)%surf_id = SURF_ID
+            ALE%SOLVER%MULTIMAT%LIST(II)%surf_id  = SURF_ID
+            ALE%SOLVER%MULTIMAT%LIST(II)%surf_id2 = SURF_ID2
+            ALE%SOLVER%MULTIMAT%LIST(II)%surf_id3 = SURF_ID3
+            ALE%SOLVER%MULTIMAT%LIST(II)%surf_id4 = SURF_ID4
+            ALE%SOLVER%MULTIMAT%LIST(II)%surf_id5 = SURF_ID5
           ENDDO
 
       ENDIF

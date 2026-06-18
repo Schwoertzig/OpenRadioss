@@ -95,7 +95,7 @@
           ! ----------------------------------------------------------------------------------------------------------------------
           !                                                   Local variables
           ! ----------------------------------------------------------------------------------------------------------------------
-          integer :: part_id, polyg_id !< user parameters
+          integer :: part_id, polyg_id,polyg_id2,polyg_id3,polyg_id4,polyg_id5, npoly !< user parameters
           integer :: nel      !< number of element in the group
           integer :: nft      !< shift (group partitionning nel<=128)
           integer :: ng       !< loop on groups
@@ -136,7 +136,13 @@
           ! -----------------------------------------------
           !user input
           part_id = ALE%solver%multimat%list(1)%part_id ! by default we can take into account all elem and ignore part_id
+          npoly = 1
           polyg_id = ALE%solver%multimat%list(1)%surf_id
+          polyg_id2 = ALE%solver%multimat%list(1)%surf_id2 ; if(polyg_id2 > 0) npoly=npoly+1
+          polyg_id3 = ALE%solver%multimat%list(1)%surf_id3 ; if(polyg_id2 > 0) npoly=npoly+1
+          polyg_id4 = ALE%solver%multimat%list(1)%surf_id4 ; if(polyg_id2 > 0) npoly=npoly+1
+          polyg_id5 = ALE%solver%multimat%list(1)%surf_id5 ; if(polyg_id2 > 0) npoly=npoly+1
+          print *, "Number of provided polygons : ", npoly
           nb_phase = 2 !currently 2, possible further extension to nb_phase > 2
           
           ! EXAMPLE OF USAGE
