@@ -538,7 +538,8 @@ static GrB_Vector surfaces_poly2D_pef(const Vector_points2D* points, const GrB_M
                         //for (i=0; i<tf.n; i++)
                         //    GrB_Vector_setElement(newcol, 0.5*sign*tf.v[i], i);
                         //GrB_Col_assign(surfaces, GrB_NULL, GrB_PLUS_FP64, newcol, GrB_ALL, 3, j, GrB_NULL);//surfaces[:,j] += 0.5* nz_faces[k] * tf.v
-                        CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&newval, surfaces, j));
+                        newval = 0.0;
+                        infogrb = GrB_Vector_extractElement(&newval, surfaces, j); //if surfaces[j] is empty, newval still is 0.0
                         newval += 0.5*sign*tf.v[0];
                         CHECK_GB_CALL(infogrb, GrB_Vector_setElement(surfaces, newval, j));
                         //free(tf.v);

@@ -92,7 +92,8 @@ module multicutcell_solver_mod
   end subroutine compute_close_cells
 
 
-  subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt, rho, vely, velz, p, gamma)
+  subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt, &
+                                          rho, vely, velz, p, gamma, nb_edges_clipped)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
     use riemann_solver_mod
@@ -109,26 +110,28 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:,:), intent(in) :: velz
     real(kind=wp), dimension(:,:), intent(in) :: p
     real(kind=wp), dimension(:), intent(in) :: gamma
+    integer(kind=8), intent(in) :: nb_edges_clipped
     ! IN/OUTPUT argument
     type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
 
     !Local variables
+    integer(kind=8), parameter:: max_length_array=1000 !I hope 1000 is enough... But it is reasonable.
     integer(kind=8) :: nb_cell, nb_regions, nb_edges
     integer(kind=8) :: i, j, k
     real(kind=wp), dimension(:), allocatable :: ptr_lambdas_arr
     real(kind=wp), dimension(:), allocatable :: ptr_big_lambda_n, ptr_big_lambda_np1
-    real(kind=wp), dimension(100) :: normals_y !I hope 100 is enough... But it is reasonable.
-    real(kind=wp), dimension(100) :: normals_z
-    real(kind=wp), dimension(100) :: normals_t
+    real(kind=wp), dimension(max_length_array) :: normals_y 
+    real(kind=wp), dimension(max_length_array) :: normals_z
+    real(kind=wp), dimension(max_length_array) :: normals_t
     integer(kind=8) :: nb_normals
     real(kind=wp), dimension(:), allocatable :: mean_area 
     real(kind=wp), dimension(:), allocatable :: pressure_face
-    integer(kind=8) :: is_narrowband, nb_edges_clipped
+    integer(kind=8) :: is_narrowband
     real(kind=wp), dimension(4) :: ys, zs
     integer(kind=8), dimension(4) :: pt_indices
     integer :: print_nb_cell
     real(kind=wp) :: us, vsL, vsR, ps, ny, nz, norm
-    integer(kind=8), dimension(100) :: local_index_edge
+    integer(kind=8), dimension(max_length_array) :: local_index_edge
     integer(kind=8), dimension(:,:), allocatable :: index_edge
     type(Point3D), dimension(:,:), allocatable :: normals_clipped
     real(kind=wp) :: mean_pressure, mean_A
@@ -136,7 +139,6 @@ module multicutcell_solver_mod
 
     nb_cell = size(grid, 1)
     nb_regions = size(grid, 2)
-    call nb_edge_clipped_fortran(nb_edges_clipped)
     if (NUMELQ>0) then
       nb_edges = 4
     else
@@ -146,8 +148,8 @@ module multicutcell_solver_mod
     allocate(ptr_lambdas_arr(4*nb_regions))
     allocate(ptr_big_lambda_n(nb_regions))
     allocate(ptr_big_lambda_np1(nb_regions))
-    allocate(index_edge(nb_cell, 100))
-    allocate(normals_clipped(nb_cell, 100))
+    allocate(index_edge(nb_cell, max_length_array))
+    allocate(normals_clipped(nb_cell, max_length_array))
     allocate(mean_area(nb_edges_clipped))
     allocate(pressure_face(nb_edges_clipped))
 
@@ -172,9 +174,10 @@ module multicutcell_solver_mod
         zs(1:nb_edges) = X(3, pt_indices)
         call build_grid_from_points_fortran(ys, zs, pt_indices, nb_edges) 
         call compute_lambdas2d_fortran(dt, ptr_lambdas_arr, ptr_big_lambda_n, ptr_big_lambda_np1, &
-                                      normals_y, normals_z, normals_t, local_index_edge, nb_normals,&
+                                      normals_y, normals_z, normals_t, local_index_edge, max_length_array, nb_normals,&
                                       is_narrowband)
 
+        nb_normals = min(nb_normals, 200) !if there is more than 200 normals, we only keep the first 200 of them...
         do j=1,nb_normals
           k = local_index_edge(j)
           index_edge(i,j) = k 
@@ -413,7 +416,7 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:), allocatable :: vec_move_clippedy
     real(kind=wp), dimension(:), allocatable :: vec_move_clippedz
     integer(kind=8) :: nb_pts_clipped
-    integer(kind=8) :: nb_edge_clipped
+    integer(kind=8) :: nb_edge_clipped, new_nb_edges
     real(kind=wp) :: dx
     real(kind=wp) :: pressure_mean_normal_time
     type(Point2D) :: mean_normal
@@ -468,12 +471,14 @@ module multicutcell_solver_mod
                                 vec_move_clippedy, vec_move_clippedz)
   
     call smooth_vel_clipped_fortran(vec_move_clippedy, vec_move_clippedz, min_pos_Se, dt)
-    call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, &
+    call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, new_nb_edges, &
                                 minimal_length, maximal_length, minimal_angle)
+                                
+    nb_edge_clipped = max(nb_edge_clipped, new_nb_edges)
     call print_clipped_fortran(i_print)
   
     call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt,&
-                                        rho, vely, velz, p, gamma) 
+                                        rho, vely, velz, p, gamma, nb_edge_clipped) 
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
 
@@ -1153,7 +1158,6 @@ module multicutcell_solver_mod
         
           vec_move_clippedy(k) = us * normalVecy(k) - 0.5 * (vsL + vsR) * normalVecz(k) !Choice of the mean of left and right tangential velocities, another choice could be made!
           vec_move_clippedz(k) = us * normalVecz(k) + 0.5 * (vsL + vsR) * normalVecy(k) !Choice of the mean of left and right tangential velocities, another choice could be made!
-        !Transfer phi to fluid flux: TODO !
         else
             vec_move_clippedy(k) = 0.0
             vec_move_clippedz(k) = 0.0
@@ -1194,7 +1198,7 @@ module multicutcell_solver_mod
     
     !DUMMY ARGUMENTS
     integer nb_cell, nb_regions, nb_edges
-    integer(kind=8) i, k, j, nb_pts_poly, old_nb_pts_poly
+    integer(kind=8) i, k, j, nb_pts_poly, old_nb_pts_poly, nb_edges_poly
     real(kind=wp), dimension(:), allocatable :: vec_move_clippedy, vec_move_clippedz
     real(kind=wp) :: dt, dx, minimal_length, minimal_angle, maximal_length
     real(kind=wp), dimension(:), allocatable :: y_polygon, z_polygon
@@ -1221,6 +1225,7 @@ module multicutcell_solver_mod
     nb_regions = 2
     allocate(grid(nb_cell, nb_regions))
 
+    !Create grid, initialize volume fraction and identify cut cells
     call launch_grb() !C call
     do i=1,nb_cell
       do k=1,nb_regions
@@ -1266,6 +1271,7 @@ module multicutcell_solver_mod
       end do
     end do
 
+    !Create polygon
     if (nb_id_polygon > 0) then
       nb_pts_poly = 0
       do i=1,nb_id_polygon
@@ -1289,7 +1295,9 @@ module multicutcell_solver_mod
     end if
 
     call build_clipped_from_pts_fortran(y_polygon, z_polygon, limits_polygon, nb_id_polygon)
+    i = 0
     
+    !Update polygon to meet length criteria
     allocate(vec_move_clippedy(nb_pts_poly))
     allocate(vec_move_clippedz(nb_pts_poly))
     vec_move_clippedy(:) = 0.
@@ -1300,10 +1308,12 @@ module multicutcell_solver_mod
     minimal_angle = -1._wp
     maximal_length = dx
 
+    call print_clipped_fortran(i)
     call nb_pts_clipped_fortran(old_nb_pts_poly)
-    call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, &
+    call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, nb_edges_poly, &
                                 minimal_length, maximal_length, minimal_angle) !initialize clipped3D in C.
     call nb_pts_clipped_fortran(nb_pts_poly)
+    call print_clipped_fortran(i)
     do while (nb_pts_poly /= old_nb_pts_poly)
       old_nb_pts_poly = nb_pts_poly
       deallocate(vec_move_clippedy)
@@ -1313,16 +1323,18 @@ module multicutcell_solver_mod
       vec_move_clippedy(:) = 0.
       vec_move_clippedz(:) = 0.
 
-      call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, &
+      call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, nb_edges_poly, &
                                   minimal_length, maximal_length, minimal_angle)
       call nb_pts_clipped_fortran(nb_pts_poly)
     end do
+    call print_clipped_fortran(i)
     
+    !Identify cells close to the interface
+    call compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
     !write(*,*) "Computing lambdas for the first time: this may take a while..."
     !call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt,&
     !                                  multi_cutcell%phase_rho, multi_cutcell%phase_vely,&
     !                                  multi_cutcell%phase_velz, multi_cutcell%phase_pres, gamma) !initialize lambda fields, close_cell and is_narrowband in grid
-    call compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
 
     deallocate(vec_move_clippedy)
     deallocate(vec_move_clippedz)

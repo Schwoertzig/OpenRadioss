@@ -1,5 +1,6 @@
 #include "Polygon2D.h"
 #include <stdio.h>
+#include "macro_check_gb_call.h"
 
 Polygon2D* new_Polygon2D(){
     GrB_Info infogrb;
@@ -105,15 +106,15 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
 
             set_ith_elem_vec_pts2D(vertices, ind_pt_SW, &ptSW);
 
-            infogrb = GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W);
-            infogrb = GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W);
-            infogrb = GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_S);
-            infogrb = GrB_Matrix_setElement(*edges,  1, ind_pt_SE, ind_e_S);
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W))
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W))
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_S))
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges,  1, ind_pt_SE, ind_e_S))
 
-            infogrb = GrB_Matrix_setElement(*faces,  1, ind_e_S, curr_face);
-            infogrb = GrB_Matrix_setElement(*faces,  1, ind_e_E, curr_face);
-            infogrb = GrB_Matrix_setElement(*faces, -1, ind_e_N, curr_face);
-            infogrb = GrB_Matrix_setElement(*faces, -1, ind_e_W, curr_face);
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces,  1, ind_e_S, curr_face))
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces,  1, ind_e_E, curr_face))
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces, -1, ind_e_N, curr_face))
+            CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces, -1, ind_e_W, curr_face))
         
             curr_pt += 1;
             curr_edge += 2;
@@ -128,8 +129,8 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
 
         set_ith_elem_vec_pts2D(vertices, ind_pt_SW, &ptSW);
 
-        infogrb = GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W);
-        infogrb = GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W);
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W))
 
         curr_pt += 1;
         curr_edge += 1;
@@ -153,15 +154,15 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
         ptSW = (Point2D){xW,yS};
         set_ith_elem_vec_pts2D(vertices, ind_pt_SW, &ptSW);
 
-        infogrb = GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W);
-        infogrb = GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W);
-        infogrb = GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_S);
-        infogrb = GrB_Matrix_setElement(*edges,  1, ind_pt_SE, ind_e_S);
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_S))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges,  1, ind_pt_SE, ind_e_S))
 
-        infogrb = GrB_Matrix_setElement(*faces,  1, ind_e_S, curr_face);
-        infogrb = GrB_Matrix_setElement(*faces,  1, ind_e_E, curr_face);
-        infogrb = GrB_Matrix_setElement(*faces, -1, ind_e_N, curr_face);
-        infogrb = GrB_Matrix_setElement(*faces, -1, ind_e_W, curr_face);
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces,  1, ind_e_S, curr_face))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces,  1, ind_e_E, curr_face))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces, -1, ind_e_N, curr_face))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces, -1, ind_e_W, curr_face))
 
         curr_pt += 1;
         curr_edge += 2;
@@ -176,8 +177,8 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
 
     set_ith_elem_vec_pts2D(vertices, ind_pt_SW, &ptSW);
 
-    infogrb = GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W);
-    infogrb = GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W);
+    CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_W))
+    CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges,  1, ind_pt_NW, ind_e_W))
 
     curr_pt += 1;
     curr_edge += 1;
@@ -196,8 +197,8 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
 
         set_ith_elem_vec_pts2D(vertices, ind_pt_SW, &ptSW);
 
-        infogrb = GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_S);
-        infogrb = GrB_Matrix_setElement(*edges,  1, ind_pt_SE, ind_e_S);
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, ind_pt_SW, ind_e_S))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges,  1, ind_pt_SE, ind_e_S))
 
         curr_pt += 1;
         curr_edge += 1;
@@ -263,14 +264,14 @@ Polygon2D* polygon_from_consecutive_points(const my_real_c *x_v, const my_real_c
     }
 
     for(i=0; i<(nb_edges-1); i++){
-        infogrb = GrB_Matrix_setElement(*edges, -1, i, i);
-        infogrb = GrB_Matrix_setElement(*edges, 1, i+1, i);
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, -1, i, i))
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*edges, 1, i+1, i))
     }
     infogrb = GrB_Matrix_setElement(*edges, -1, nb_pts-1, nb_pts-1);
     infogrb = GrB_Matrix_setElement(*edges, 1, 0, nb_pts-1);
 
     for(i=0; i<nb_edges; i++)
-        infogrb = GrB_Matrix_setElement(*faces, 1, i, 0);
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(*faces, 1, i, 0))
 
     
     res_p = new_Polygon2D_vefsp(vertices, edges, faces, status_edge, phase_face);
@@ -364,17 +365,19 @@ void retrieve_ith_edge2D(Vector_points2D *vertices, GrB_Matrix* edges, int i, Po
     GrB_Index i_pt0, i_pt1;
     GrB_Index nb_pts;
 
+    *e_ext0 = NULL;
+    *e_ext1 = NULL;
     GrB_Matrix_nrows(&nb_pts, *edges);
-    infogrb = GrB_Vector_new(&ei, GrB_INT8, nb_pts);
-    infogrb = GrB_Vector_new(&nz_ei, GrB_UINT64, nb_pts);
-    infogrb = GrB_Vector_new(&extr_vals_ei, GrB_INT8, nb_pts);
+    CHECK_GB_CALL(infogrb, GrB_Vector_new(&ei, GrB_INT8, nb_pts))
+    CHECK_GB_CALL(infogrb, GrB_Vector_new(&nz_ei, GrB_UINT64, nb_pts))
+    CHECK_GB_CALL(infogrb, GrB_Vector_new(&extr_vals_ei, GrB_INT8, nb_pts))
     
-    infogrb = GrB_extract(ei, GrB_NULL, GrB_NULL, *edges, GrB_ALL, 1, i, GrB_NULL); //Get indices of points composing edge i
-    infogrb = GxB_Vector_extractTuples_Vector(nz_ei, extr_vals_ei, ei, GrB_NULL);
-    infogrb = GrB_Vector_size(&size_nz_ei, nz_ei);
+    CHECK_GB_CALL(infogrb, GrB_extract(ei, GrB_NULL, GrB_NULL, *edges, GrB_ALL, 1, i, GrB_NULL)) //Get indices of points composing edge i
+    CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(nz_ei, extr_vals_ei, ei, GrB_NULL))
+    CHECK_GB_CALL(infogrb, GrB_Vector_size(&size_nz_ei, nz_ei))
     if (size_nz_ei>0){
-        infogrb = GrB_Vector_extractElement(&i_pt0, nz_ei, 0);
-        infogrb = GrB_Vector_extractElement(&i_pt1, nz_ei, 1);
+        CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&i_pt0, nz_ei, 0))
+        CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&i_pt1, nz_ei, 1))
         *e_ext0 = get_ith_elem_vec_pts2D(vertices, i_pt0);
         *e_ext1 = get_ith_elem_vec_pts2D(vertices, i_pt1);
     }
@@ -390,6 +393,7 @@ void dropzeros(GrB_Matrix* M){
 }
 
 Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
+    GrB_Info infogrb;
     Vector_points2D* fused_vertices;
     GrB_Matrix *fused_edges = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     GrB_Matrix *fused_faces = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
@@ -409,7 +413,7 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     GrB_Matrix_new(&zeros1, GrB_INT8, nrows1, ncols2);
     GrB_Matrix_new(&zeros2, GrB_INT8, nrows2, ncols1);
     GrB_Matrix_new(fused_edges, GrB_INT8, nrows1+nrows2, ncols1+ncols2);
-    GxB_Matrix_concat(*fused_edges, (GrB_Matrix[]){*(p1->edges), zeros1, zeros2, *(p2->edges)}, 2, 2, GrB_NULL);
+    CHECK_GB_CALL(infogrb, GxB_Matrix_concat(*fused_edges, (GrB_Matrix[]){*(p1->edges), zeros1, zeros2, *(p2->edges)}, 2, 2, GrB_NULL))
     //fused_edges = [[p1.edges spzeros(Int8, size(p1.edges, 1), size(p2.edges, 2))];
     //                [spzeros(Int8, size(p2.edges, 1), size(p1.edges, 2)) p2.edges]];
 
@@ -417,10 +421,10 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     GrB_Matrix_ncols(&ncols1, *(p1->faces));
     GrB_Matrix_nrows(&nrows2, *(p2->faces));
     GrB_Matrix_ncols(&ncols2, *(p2->faces));
-    GrB_Matrix_resize(zeros1, nrows1, ncols2);
-    GrB_Matrix_resize(zeros2, nrows2, ncols1);
+    CHECK_GB_CALL(infogrb, GrB_Matrix_resize(zeros1, nrows1, ncols2))
+    CHECK_GB_CALL(infogrb, GrB_Matrix_resize(zeros2, nrows2, ncols1))
     GrB_Matrix_new(fused_faces, GrB_INT8, nrows1+nrows2, ncols1+ncols2);
-    GxB_Matrix_concat(*fused_faces, (GrB_Matrix[]){*(p1->faces), zeros1, zeros2, *(p2->faces)}, 2, 2, GrB_NULL);
+    CHECK_GB_CALL(infogrb, GxB_Matrix_concat(*fused_faces, (GrB_Matrix[]){*(p1->faces), zeros1, zeros2, *(p2->faces)}, 2, 2, GrB_NULL))
     //fused_faces = [[p1.faces  spzeros(Int8, size(p1.faces, 1), size(p2.faces, 2))];
     //                [spzeros(Int8, size(p2.faces, 1), size(p1.faces, 2)) p2.faces]];
 
@@ -452,9 +456,9 @@ void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vec
     GrB_Matrix_nrows(&nb_pts, *(p->edges));
     GrB_Matrix_ncols(&nb_edges, *(p->edges));
 
-    infogrb = GrB_Vector_new(&ej, GrB_INT8, nb_pts);
-    infogrb = GrB_Vector_new(&nz_ej, GrB_UINT64, nb_pts);
-    infogrb = GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_edges);
+    CHECK_GB_CALL(infogrb, GrB_Vector_new(&ej, GrB_INT8, nb_pts))
+    CHECK_GB_CALL(infogrb, GrB_Vector_new(&nz_ej, GrB_UINT64, nb_pts))
+    CHECK_GB_CALL(infogrb, GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_edges))
 
     if (min_lgth_nom_edg){
         #if (my_real_c == double)
@@ -478,18 +482,18 @@ void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vec
     }
 
     for (j=0; j<nb_edges; j++){
-        infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, j, GrB_NULL); 
-        infogrb = GxB_Vector_extractTuples_Vector(nz_ej, extr_vals_ej, ej, GrB_NULL);
-        infogrb = GrB_Vector_size(&size_nz_ej, nz_ej);
+        CHECK_GB_CALL(infogrb, GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, j, GrB_NULL)) 
+        CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(nz_ej, extr_vals_ej, ej, GrB_NULL))
+        CHECK_GB_CALL(infogrb, GrB_Vector_size(&size_nz_ej, nz_ej))
 
         if (size_nz_ej > 1){
-            infogrb = GrB_Vector_extractElement(&pt_index1, nz_ej, 0); 
-            infogrb = GrB_Vector_extractElement(&pt_index2, nz_ej, 1); 
+            CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&pt_index1, nz_ej, 0)) 
+            CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&pt_index2, nz_ej, 1)) 
             pt1 = get_ith_elem_vec_pts2D(p->vertices, pt_index1);
             pt2 = get_ith_elem_vec_pts2D(p->vertices, pt_index2);
 
             //Choice of normal: take the normal to the "edge" containing the point, sum of the adjacent edges
-            GrB_Matrix_extractElement(&sign, *(p->edges), pt_index1, j);
+            CHECK_GB_CALL(infogrb, GrB_Matrix_extractElement(&sign, *(p->edges), pt_index1, j))
             if (normals_pts){
                 pt = get_ith_elem_vec_pts2D(normals_pts, pt_index1);
                 pt->x -= sign * pt1->y;
@@ -504,7 +508,7 @@ void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vec
                 pt->y += sign * pt1->x;
             }
 
-            GrB_Matrix_extractElement(&sign, *(p->edges), pt_index2, j);
+            CHECK_GB_CALL(infogrb, GrB_Matrix_extractElement(&sign, *(p->edges), pt_index2, j))
             if (normals_pts){
                 pt = get_ith_elem_vec_pts2D(normals_pts, pt_index1);
                 pt->x -= sign * pt2->y;
@@ -572,21 +576,21 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
     new_phase_face = alloc_with_capacity_vec_int(1);
 
     for (i=0; i<nb_faces; i++){
-        infogrb = GrB_extract(fj, GrB_NULL, GrB_NULL, *(p->faces), GrB_ALL, 1, i, GrB_NULL); //Get indices of edges composing face i
-        infogrb = GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL);
-        infogrb = GrB_Vector_nvals(&size_edge_indices, edge_indices);
+        CHECK_GB_CALL(infogrb, GrB_extract(fj, GrB_NULL, GrB_NULL, *(p->faces), GrB_ALL, 1, i, GrB_NULL)) //Get indices of edges composing face i
+        CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL))
+        CHECK_GB_CALL(infogrb, GrB_Vector_nvals(&size_edge_indices, edge_indices))
         ind_kept_pts->size = 0;
 
         for(j_f=0; j_f<size_edge_indices; j_f++){
-            infogrb = GrB_Vector_extractElement(&j, edge_indices, j_f);
-            infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
-            infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
-            infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
+            CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&j, edge_indices, j_f))
+            CHECK_GB_CALL(infogrb, GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, j, GrB_NULL)) //Get indices of points composing edge j
+            CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL))
+            CHECK_GB_CALL(infogrb, GrB_Vector_size(&size_pt_indices, pt_indices))
             if(size_pt_indices>0){
-                infogrb = GrB_Vector_extractElement(&val, pt_indices, 0);
+                CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&val, pt_indices, 0))
                 push_back_unique_vec_uint(&ind_kept_pts, &val);
                 
-                infogrb = GrB_Vector_extractElement(&val, pt_indices, 1);
+                CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&val, pt_indices, 1))
                 push_back_unique_vec_uint(&ind_kept_pts, &val);
             }
         }
@@ -604,18 +608,18 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
             ncols_new_edges = size_edge_indices;
             //Rebuild matrix of edges in face i only
             nrows_new_edges = ind_kept_pts->size;
-            GrB_Vector_resize(grb_ind_kept_pts, ind_kept_pts->size);
+            CHECK_GB_CALL(infogrb, GrB_Vector_resize(grb_ind_kept_pts, ind_kept_pts->size))
             for(ell=0; ell<ind_kept_pts->size; ell++){
-                GrB_Vector_setElement(grb_ind_kept_pts, *get_ith_elem_vec_uint(ind_kept_pts, ell), ell);
+                CHECK_GB_CALL(infogrb, GrB_Vector_setElement(grb_ind_kept_pts, *get_ith_elem_vec_uint(ind_kept_pts, ell), ell))
             }
-            GrB_Matrix_resize(new_edges, nrows_new_edges, ncols_new_edges);
-            infogrb = GrB_extract(new_edges, GrB_NULL, GrB_NULL, *(p->edges), grb_ind_kept_pts, edge_indices, GrB_NULL);
+            CHECK_GB_CALL(infogrb, GrB_Matrix_resize(new_edges, nrows_new_edges, ncols_new_edges))
+            CHECK_GB_CALL(infogrb, GrB_extract(new_edges, GrB_NULL, GrB_NULL, *(p->edges), grb_ind_kept_pts, edge_indices, GrB_NULL))
 
             //Rebuild matrix for face i only
             //new_faces = p.faces[edge_indices, i]
-            GrB_Matrix_resize(new_faces, nrows_new_edges, 1);
-            GrB_Vector_setElement(justone, i, 0);
-            infogrb = GrB_extract(new_faces, GrB_NULL, GrB_NULL, *(p->faces), edge_indices, justone, GrB_NULL);
+            CHECK_GB_CALL(infogrb, GrB_Matrix_resize(new_faces, nrows_new_edges, 1))
+            CHECK_GB_CALL(infogrb, GrB_Vector_setElement(justone, i, 0))
+            CHECK_GB_CALL(infogrb, GrB_extract(new_faces, GrB_NULL, GrB_NULL, *(p->faces), edge_indices, justone, GrB_NULL))
 
             //new_status_edge = zeros(nrows_new_edges)
             //if(new_status_edge->size <= nrows_new_edges){
@@ -630,7 +634,7 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
             }
             new_status_edge = alloc_with_capacity_vec_int(ncols_new_edges);
             for(j_f = 0; j_f < ncols_new_edges; j_f++){
-                GrB_Vector_extractElement(&j, edge_indices, j_f);
+                CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&j, edge_indices, j_f))
                 set_ith_elem_vec_int(new_status_edge, j_f, get_ith_elem_vec_int(p->status_edge, j));
             }
             set_ith_elem_vec_int(new_phase_face, 0, get_ith_elem_vec_int(p->phase_face, i));
@@ -700,16 +704,16 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
     new_edges = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
     
     //First, extract new face.
-    GrB_Matrix_new(intermediate_faces, GrB_INT8, nrows_faces, 1);
-    //GrB_Matrix_extract(*intermediate_faces, GrB_NULL, GrB_NULL, *(p->faces), I_, nrows_faces, (GrB_Index[]){extr_index}, 1, GrB_NULL);
-    GrB_Matrix_extract(*intermediate_faces, GrB_NULL, GrB_NULL, *(p->faces), GrB_ALL, 1, (GrB_Index[]){extr_index}, 1, GrB_NULL);
+    CHECK_GB_CALL(infogrb, GrB_Matrix_new(intermediate_faces, GrB_INT8, nrows_faces, 1))
+    //CHECK_GB_CALL(infogrb, GrB_Matrix_extract(*intermediate_faces, GrB_NULL, GrB_NULL, *(p->faces), I_, nrows_faces, (GrB_Index[]){extr_index}, 1, GrB_NULL))
+    CHECK_GB_CALL(infogrb, GrB_Matrix_extract(*intermediate_faces, GrB_NULL, GrB_NULL, *(p->faces), GrB_ALL, 1, (GrB_Index[]){extr_index}, 1, GrB_NULL))
 
     //Second, take all edge indices in the extracted face.
     GrB_Matrix_nvals(&length_edge_ind, *intermediate_faces);
     edge_indices = (GrB_Index*) calloc(length_edge_ind, sizeof(GrB_Index));
     nm = (uint8_t*) malloc(length_edge_ind*sizeof(uint8_t));
     I_ = (GrB_Index*)malloc(length_edge_ind*sizeof(GrB_Index));
-    GrB_Matrix_extractTuples(edge_indices, I_, nm, &length_edge_ind, *intermediate_faces);
+    CHECK_GB_CALL(infogrb, GrB_Matrix_extractTuples(edge_indices, I_, nm, &length_edge_ind, *intermediate_faces))
 
     //Third, build a unique list of indices of points involved in kept edges
     GrB_Vector_new(&pt_indices, GrB_UINT64, 2);
@@ -718,10 +722,10 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
     pts_kept_inds = alloc_empty_vec_uint();
     for (i=0; i<length_edge_ind; i++){
         e_i = edge_indices[i];
-        GrB_extract(J_vect, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, e_i, GrB_NULL);
-        GrB_Vector_extractTuples(pt_indices, val_extr, J_vect, GrB_NULL);
-        GrB_Vector_extractElement(&indpt1, pt_indices, 0);
-        GrB_Vector_extractElement(&indpt2, pt_indices, 1);
+        CHECK_GB_CALL(infogrb, GrB_extract(J_vect, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, e_i, GrB_NULL))
+        CHECK_GB_CALL(infogrb, GrB_Vector_extractTuples(pt_indices, val_extr, J_vect, GrB_NULL))
+        CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&indpt1, pt_indices, 0))
+        CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&indpt2, pt_indices, 1))
 
         push_back_unique_vec_uint(&pts_kept_inds, &indpt1);
         push_back_unique_vec_uint(&pts_kept_inds, &indpt2);
@@ -745,11 +749,15 @@ Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
 
     //Build the new array describing the edges
     GrB_Matrix_new(new_edges, GrB_INT8, pts_kept_inds->size, length_edge_ind);
-    GrB_Matrix_extract(*new_edges, GrB_NULL, GrB_NULL, *(p->edges), pts_kept_inds->data, pts_kept_inds->size, edge_indices, length_edge_ind, GrB_NULL);
+    CHECK_GB_CALL(infogrb, \
+        GrB_Matrix_extract(*new_edges, GrB_NULL, GrB_NULL, *(p->edges), \
+        pts_kept_inds->data, pts_kept_inds->size, edge_indices, length_edge_ind, GrB_NULL))
 
     //Re-extract new_faces in order to get rid of un-necessary zeros
     GrB_Matrix_new(new_faces, GrB_INT8, length_edge_ind, 1);
-    infogrb = GrB_Matrix_extract(*new_faces, GrB_NULL, GrB_NULL, *intermediate_faces, edge_indices, length_edge_ind, (GrB_Index[]){0}, 1, GrB_NULL);
+    CHECK_GB_CALL(infogrb, \
+        GrB_Matrix_extract(*new_faces, GrB_NULL, GrB_NULL, \
+            *intermediate_faces, edge_indices, length_edge_ind, (GrB_Index[]){0}, 1, GrB_NULL))
   
     res_p = new_Polygon2D_vefsp(new_vertices, new_edges, new_faces, new_status_edge, new_phase_face);
 
@@ -825,26 +833,26 @@ void print_polygon2D(const Polygon2D* src, const char* file){
     //#Output solid points
     for (i=0; i<src->vertices->size; i++){
         pt = get_ith_elem_vec_pts2D(src->vertices, i);
-        fprintf(output, "0 %lf %lf\n", pt->x, pt->y);
+        fprintf(output, "0 % lf % lf\n", pt->x, pt->y);
     }
 
     //#Output solid edges
     fprintf(output, "CELLS %ld %ld\n", nb_edges, 3*nb_edges);
     for (i=0; i<nb_faces; i++){
-        infogrb = GrB_extract(fj, GrB_NULL, GrB_NULL, *(src->faces), GrB_ALL, 1, i, GrB_NULL); //Get indices of edges composing face i
-        infogrb = GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL);
-        infogrb = GrB_Vector_size(&size_edge_indices, edge_indices);
+        CHECK_GB_CALL(infogrb, GrB_extract(fj, GrB_NULL, GrB_NULL, *(src->faces), GrB_ALL, 1, i, GrB_NULL)) //Get indices of edges composing face i
+        CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(edge_indices, extr_vals_fj, fj, GrB_NULL))
+        CHECK_GB_CALL(infogrb, GrB_Vector_size(&size_edge_indices, edge_indices))
 
         for(j_f=0; j_f<size_edge_indices; j_f++){
-            infogrb = GrB_Vector_extractElement(&j, edge_indices, j_f);
-            infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(src->edges), GrB_ALL, 1, j, GrB_NULL); //Get indices of points composing edge j
-            infogrb = GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL);
-            infogrb = GrB_Vector_size(&size_pt_indices, pt_indices);
+            CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&j, edge_indices, j_f))
+            CHECK_GB_CALL(infogrb, GrB_extract(ej, GrB_NULL, GrB_NULL, *(src->edges), GrB_ALL, 1, j, GrB_NULL)) //Get indices of points composing edge j
+            CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(pt_indices, extr_vals_ej, ej, GrB_NULL))
+            CHECK_GB_CALL(infogrb, GrB_Vector_size(&size_pt_indices, pt_indices))
             if(size_pt_indices>0){
-                infogrb = GrB_Vector_extractElement(&val, pt_indices, 0);
+                CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&val, pt_indices, 0))
                 fprintf(output, "2 %ld ", val);
                 
-                infogrb = GrB_Vector_extractElement(&val, pt_indices, 1);
+                CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&val, pt_indices, 1))
                 fprintf(output, "%ld\n", val);
             }
         }

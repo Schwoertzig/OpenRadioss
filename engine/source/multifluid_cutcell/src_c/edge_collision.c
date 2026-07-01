@@ -8,6 +8,7 @@
 #include "stdbool.h"
 #include "vector_indices_intersection.h"
 #include <math.h>
+#include "macro_check_gb_call.h"
 
 #define SIGN(x) ((x)>0 ? 1 : -1)
 
@@ -56,7 +57,7 @@ static Point2D intersection_edges(Edge2D e1, Edge2D e2, bool all_inclusive){// a
     d2 = compute_distance2D(pt2_e2, n, pt1_e1);
 
     //If both distances have the same sign : no intersection possible.
-    if ((d1>0 && d2>0) || (d1<0 && d2<0)){
+    if ((d1>0.0 && d2>0.0) || (d1<0.0 && d2<0.0) || ((d1==0.0) && (d2==0.0))){
         pt.x = nan("");
         pt.y = nan("");
         return pt;
@@ -106,7 +107,7 @@ static Point2D intersection_edges(Edge2D e1, Edge2D e2, bool all_inclusive){// a
 }
 
 
-//It supposes that one edges can only be part of only one face => hard to ensure for more than two fluids..?
+//It supposes that one edge can only be part of only one face => hard to ensure for more than two phases..?
 //IntersecList, edge_intersect1 and edge_intersect2 must be allocated (but they can be empty)
 void find_all_self_intersection(Polygon2D *p, Vector_points2D* IntersecList, Vector_uint *edge_intersect1, Vector_uint *edge_intersect2){
     GrB_Index nb_edges, nb_pts, i, j;
@@ -116,6 +117,7 @@ void find_all_self_intersection(Polygon2D *p, Vector_points2D* IntersecList, Vec
     uint64_t indpermi, indpermj;
     Point2D *ext1, *ext2, pt;
     Edge2D e1, e2;
+    my_real_c norm_e;
 
     GrB_Matrix_ncols(&nb_edges, *(p->edges));
     GrB_Matrix_nrows(&nb_pts, *(p->edges));
@@ -144,19 +146,29 @@ void find_all_self_intersection(Polygon2D *p, Vector_points2D* IntersecList, Vec
     for (i = 0; i<nb_edges-1; i++){
         e1 = list_edges[i].e;
         indpermi = list_edges[i].i;
-        for (j = i+1; j<nb_edges; j++){
-            e2 = list_edges[j].e;
-            indpermj = list_edges[j].i;
-            //if e2.ext1<e1.ext2 
-            if ((e2.ext1.x < e1.ext2.x) || ((e2.ext1.x == e1.ext2.x) && (e2.ext1.y < e1.ext2.y))){//at least, they have common x-range.
-                pt = intersection_edges(e1, e2, false);
-                if (!isnan(pt.x)) {
-                    push_back_vec_pts2D(&IntersecList, &pt);
-                    push_back_vec_uint(&edge_intersect1, &indpermi);
-                    push_back_vec_uint(&edge_intersect2, &indpermj);
+        pt.x = e1.ext2.x-e1.ext1.x;
+        pt.y = e1.ext2.y-e1.ext1.y;
+        norm_e = sqrt(pt.x*pt.x+pt.y*pt.y);
+        if (norm_e>0){
+            for (j = i+1; j<nb_edges; j++){
+                e2 = list_edges[j].e;
+                indpermj = list_edges[j].i;
+                //if e2.ext1<e1.ext2 
+                pt.x = e2.ext2.x-e2.ext1.x;
+                pt.y = e2.ext2.y-e2.ext1.y;
+                norm_e = sqrt(pt.x*pt.x+pt.y*pt.y);
+                if (norm_e>0){
+                    if ((e2.ext1.x < e1.ext2.x) || ((e2.ext1.x == e1.ext2.x) && (e2.ext1.y < e1.ext2.y))){//at least, they have common x-range.
+                        pt = intersection_edges(e1, e2, false);
+                        if (!isnan(pt.x)) {
+                            push_back_vec_pts2D(&IntersecList, &pt);
+                            push_back_vec_uint(&edge_intersect1, &indpermi);
+                            push_back_vec_uint(&edge_intersect2, &indpermj);
+                        }
+                    } else {
+                        break;
+                    }
                 }
-            } else {
-                break;
             }
         }
     }
@@ -531,17 +543,17 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
                 i_e_inters2 = i_inters.i_e;//Now global!
             }
 
-            GrB_extract(f_k, GrB_NULL, GrB_NULL, *(p->faces), &i, 1, GrB_ALL, 1, GrB_NULL); //Get indices of faces using edge i
-            GxB_Matrix_extractTuples_Vector(I_vec_f_k, i_faces, extr_vals_f_k, f_k, GrB_NULL);
-            GrB_Vector_extractElement(&curr_face, i_faces, 0);
+            CHECK_GB_CALL(infogrb, GrB_extract(f_k, GrB_NULL, GrB_NULL, *(p->faces), &i, 1, GrB_ALL, 1, GrB_NULL)) //Get indices of faces using edge i
+            CHECK_GB_CALL(infogrb, GxB_Matrix_extractTuples_Vector(I_vec_f_k, i_faces, extr_vals_f_k, f_k, GrB_NULL))
+            CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&curr_face, i_faces, 0))
 
-            GrB_extract(f_k, GrB_NULL, GrB_NULL, *(p->faces), &i_e_inters1, 1, GrB_ALL, 1, GrB_NULL); //Get indices of faces using edge i_e_inters1
-            GxB_Matrix_extractTuples_Vector(I_vec_f_k, i_faces, extr_vals_f_k, f_k, GrB_NULL);
-            GrB_Vector_extractElement(&i_face1, i_faces, 0);
+            CHECK_GB_CALL(infogrb, GrB_extract(f_k, GrB_NULL, GrB_NULL, *(p->faces), &i_e_inters1, 1, GrB_ALL, 1, GrB_NULL)) //Get indices of faces using edge i_e_inters1
+            CHECK_GB_CALL(infogrb, GxB_Matrix_extractTuples_Vector(I_vec_f_k, i_faces, extr_vals_f_k, f_k, GrB_NULL))
+            CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&i_face1, i_faces, 0))
 
-            GrB_extract(f_k, GrB_NULL, GrB_NULL, *(p->faces), &i_e_inters2, 1, GrB_ALL, 1, GrB_NULL); //Get indices of faces using edge i_e_inters2
-            GxB_Matrix_extractTuples_Vector(I_vec_f_k, i_faces, extr_vals_f_k, f_k, GrB_NULL);
-            GrB_Vector_extractElement(&i_face2, i_faces, 0);
+            CHECK_GB_CALL(infogrb, GrB_extract(f_k, GrB_NULL, GrB_NULL, *(p->faces), &i_e_inters2, 1, GrB_ALL, 1, GrB_NULL)) //Get indices of faces using edge i_e_inters2
+            CHECK_GB_CALL(infogrb, GxB_Matrix_extractTuples_Vector(I_vec_f_k, i_faces, extr_vals_f_k, f_k, GrB_NULL))
+            CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&i_face2, i_faces, 0))
             
             if ((curr_face == i_face1) && (curr_face == i_face2)){ //Only one face in contact: we must split it!
                 //for ind in i_inters_mix
@@ -558,16 +570,16 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
                 if (pt_in_or_out_split[i_pt1] == 0){
                     nb_intersect = ray_tracing_intersect(p, i_pt1, normal_vectors, curr_face);
                     if (nb_intersect%2 == 0)
-                        pt_in_or_out_split[i_pt1] = (int8_t)(-SIGN(phase));
-                    else
                         pt_in_or_out_split[i_pt1] = (int8_t)(SIGN(phase));
+                    else
+                        pt_in_or_out_split[i_pt1] = (int8_t)(-SIGN(phase));
                 }
                 if (pt_in_or_out_split[i_pt2] == 0) {
                     nb_intersect = ray_tracing_intersect(p, i_pt2, normal_vectors, curr_face);
                     if (nb_intersect%2 == 0)
-                        pt_in_or_out_split[i_pt2] = (int8_t)(-SIGN(phase));
-                    else
                         pt_in_or_out_split[i_pt2] = (int8_t)(SIGN(phase));
+                    else
+                        pt_in_or_out_split[i_pt2] = (int8_t)(-SIGN(phase));
                 }
             } else { //At least two faces in contact: we must fuse them!
                 for (j=0; j<s->size; j++){
@@ -583,24 +595,24 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
                 phase1 = *get_ith_elem_vec_int(p->phase_face, i_face1);
                 phase2 = *get_ith_elem_vec_int(p->phase_face, i_face2);
 
-                infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, i_e_inters1, GrB_NULL); 
-                infogrb = GxB_Vector_extractTuples_Vector(nz_ej, extr_vals_ej, ej, GrB_NULL);
-                infogrb = GrB_Vector_extractElement(&i_pt_inters, nz_ej, 0);
+                CHECK_GB_CALL(infogrb, GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, i_e_inters1, GrB_NULL)) //We get the points of the first edge intersecting with edge i (i.e. edge i_e_inters1)
+                CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(nz_ej, extr_vals_ej, ej, GrB_NULL))
+                CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&i_pt_inters, nz_ej, 0))
                 pt_inters = get_ith_elem_vec_pts2D(p->vertices, i_pt_inters);
                 GrB_Matrix_extractElement(&sign, *(p->faces), i_e_inters1, i_face1);
                 normalVector_inters = *get_ith_elem_vec_pts2D(normal_vectors, i_e_inters1);
                 normalVector_inters.x = sign * normalVector_inters.x;
                 normalVector_inters.y = sign * normalVector_inters.y;
-                dpte = compute_distance2D(*pt1, normalVector_inters, *pt_inters);
+                dpte = compute_distance2D(*pt1, normalVector_inters, *pt_inters);//We compute the signed distance of pt1 to the line passing through pt_inters and having the given normal vector normalVector_inters
                 if ((phase > 0) && (phase1 > 0) && (phase2 > 0)){
-                    pt_in_or_out_fuse[i_pt1] = -(int8_t)(SIGN(dpte));
-                } else {
                     pt_in_or_out_fuse[i_pt1] = (int8_t)(SIGN(dpte));
+                } else {
+                    pt_in_or_out_fuse[i_pt1] = -(int8_t)(SIGN(dpte));
                 }
 
-                infogrb = GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, i_e_inters2, GrB_NULL); 
-                infogrb = GxB_Vector_extractTuples_Vector(nz_ej, extr_vals_ej, ej, GrB_NULL);
-                infogrb = GrB_Vector_extractElement(&i_pt_inters, nz_ej, 1);
+                CHECK_GB_CALL(infogrb, GrB_extract(ej, GrB_NULL, GrB_NULL, *(p->edges), GrB_ALL, 1, i_e_inters2, GrB_NULL)) //We get the points of the second edge intersecting with edge i (i.e. edge i_e_inters2) -- could be the same as i_e_intersec1!
+                CHECK_GB_CALL(infogrb, GxB_Vector_extractTuples_Vector(nz_ej, extr_vals_ej, ej, GrB_NULL))
+                CHECK_GB_CALL(infogrb, GrB_Vector_extractElement(&i_pt_inters, nz_ej, 1))
                 pt_inters = get_ith_elem_vec_pts2D(p->vertices, i_pt_inters);
                 GrB_Matrix_extractElement(&sign, *(p->faces), i_e_inters2, i_face1);
                 normalVector_inters = *get_ith_elem_vec_pts2D(normal_vectors, i_e_inters2);
@@ -608,11 +620,11 @@ void in_or_out_intersection(const Polygon2D* p, const Vector_points2D* normal_ve
                 normalVector_inters.y = sign * normalVector_inters.y;
                 dpte = compute_distance2D(*pt2, normalVector_inters, *pt_inters);
                 if ((phase > 0) && (phase1 > 0) && (phase2 > 0)){
-                    pt_in_or_out_fuse[i_pt2] = -(int8_t)(SIGN(dpte));
-                } else {
                     pt_in_or_out_fuse[i_pt2] = (int8_t)(SIGN(dpte));
+                } else {
+                    pt_in_or_out_fuse[i_pt2] = -(int8_t)(SIGN(dpte));
                 }
-        }
+            }
         }
     }
 

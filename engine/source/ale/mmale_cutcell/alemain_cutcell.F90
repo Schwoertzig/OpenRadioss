@@ -95,7 +95,8 @@
           ! ----------------------------------------------------------------------------------------------------------------------
           !                                                   Local variables
           ! ----------------------------------------------------------------------------------------------------------------------
-          integer :: polyg_id,polyg_id2,polyg_id3,polyg_id4,polyg_id5, npoly !< user parameters
+          !integer :: part_id, polyg_id, polyg_id2, polyg_id3, polyg_id4, polyg_id5  !< user parameters
+          integer :: polyg_id, polyg_id2, polyg_id3, polyg_id4, polyg_id5  !< user parameters
           integer :: nel      !< number of element in the group
           integer :: nft      !< shift (group partitionning nel<=128)
           integer :: ng       !< loop on groups
@@ -135,13 +136,6 @@
           ! ---------------------------DO PRE-TRETMENT HERE
           ! -----------------------------------------------
           !user input
-          npoly = 1
-          polyg_id = ALE%solver%multimat%list(1)%surf_id
-          polyg_id2 = ALE%solver%multimat%list(1)%surf_id2 ; if(polyg_id2 > 0) npoly=npoly+1
-          polyg_id3 = ALE%solver%multimat%list(1)%surf_id3 ; if(polyg_id3 > 0) npoly=npoly+1
-          polyg_id4 = ALE%solver%multimat%list(1)%surf_id4 ; if(polyg_id4 > 0) npoly=npoly+1
-          polyg_id5 = ALE%solver%multimat%list(1)%surf_id5 ; if(polyg_id5 > 0) npoly=npoly+1
-          print *, "Number of provided polygons : ", npoly
           nb_phase = 2 !currently 2, possible further extension to nb_phase > 2
           
           ! EXAMPLE OF USAGE
@@ -243,11 +237,20 @@
                 ! end do
                 !debug-end
           call allocate_multi_cutcell_type(nb_phase, numelq + numeltg, multi_cutcell)
-          nb_polygon = ALE%solver%multimat%nb
+
+          !part_id = ALE%solver%multimat%list(1)%part_id ! by default we can take into account all elem and ignore part_id
+          nb_polygon = 0
+          polyg_id  = ALE%solver%multimat%list(1)%surf_id  ; if(polyg_id  > 0) nb_polygon=nb_polygon+1
+          polyg_id2 = ALE%solver%multimat%list(1)%surf_id2 ; if(polyg_id2 > 0) nb_polygon=nb_polygon+1
+          polyg_id3 = ALE%solver%multimat%list(1)%surf_id3 ; if(polyg_id3 > 0) nb_polygon=nb_polygon+1
+          polyg_id4 = ALE%solver%multimat%list(1)%surf_id4 ; if(polyg_id4 > 0) nb_polygon=nb_polygon+1
+          polyg_id5 = ALE%solver%multimat%list(1)%surf_id5 ; if(polyg_id5 > 0) nb_polygon=nb_polygon+1
+          print *, "Number of provided polygons : ", nb_polygon
+
           call multicutcell_initial_state(ngroup, elbuf, nparg, iparg, IGRQUAD, multi_cutcell)
           call initialize_solver_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, &
               ngroup, nparg, iparg, x, elbuf, & !gamma, &
-              nb_polygon, ALE%solver%multimat%list(:)%surf_id, ngrnod, igrnod, &
+              nb_polygon, [polyg_id, polyg_id2, polyg_id3, polyg_id4, polyg_id5], ngrnod, igrnod, &
               !multi_cutcell,
               multi_cutcell%grid,num_mixed,list_mixed)
           call build_full_states(multi_cutcell%grid, multi_cutcell%phase_rho, &

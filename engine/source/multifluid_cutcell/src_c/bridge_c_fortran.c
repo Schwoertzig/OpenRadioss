@@ -161,7 +161,7 @@ void compute_lambdas2d_fortran_(const my_real_c *dt, \
                         my_real_c *ptr_big_lambda_n,  \
                         my_real_c *ptr_big_lambda_np1,\
                         my_real_c *normals_x, my_real_c *normals_y, my_real_c *normals_t, \
-                        long long* edge_indices, long long* nb_normals, \
+                        long long* edge_indices, long long* max_length_array, long long* nb_normals, \
                         long long int *is_narrowband_ptr)
 {
     Array_double *lambdas;
@@ -170,15 +170,17 @@ void compute_lambdas2d_fortran_(const my_real_c *dt, \
     bool is_narrowband;
     Vector_int64 *edge_vector = NULL;
     Vector_points3D* normals = NULL;    
-    uint64_t i;
+    uint64_t i, max_i;
  
     compute_lambdas2D(grid, clipped3D, *dt, &lambdas, &Lambda_n, &Lambda_np1, &normals, &edge_vector, &is_narrowband);
+    max_i = normals->size < *max_length_array ? normals->size : *max_length_array;
     for(i=0; i<normals->size; i++){
         normals_x[i] = normals->points[i].x;
         normals_y[i] = normals->points[i].y;
         normals_t[i] = normals->points[i].t;
     }
     *nb_normals = (long long) normals->size;
+    max_i = edge_vector->size < *max_length_array ? edge_vector->size : *max_length_array;
     for(i=0; i<edge_vector->size; i++){
         edge_indices[i] = edge_vector->data[i];
     }
@@ -236,8 +238,8 @@ void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVe
 
     for(i=0; i<normals_pts->size; i++){
         norm = sqrt(normals_pts->points[i].x*normals_pts->points[i].x + normals_pts->points[i].y*normals_pts->points[i].y);
-        normalVecx[i] = normals_pts->points[i].x/norm;
-        normalVecy[i] = normals_pts->points[i].y/norm;
+        normalVecx[i] = -normals_pts->points[i].x/norm;
+        normalVecy[i] = -normals_pts->points[i].y/norm;
     }
 
     dealloc_vec_pts2D(normals_pts); free(normals_pts);
@@ -306,10 +308,12 @@ void get_clipped_edges_ith_vertex_fortran_(long long *k_signed, long long *signe
 }                              
                                
 void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, \
+                            long long* new_nb_edges, \
                             my_real_c *minimal_length, my_real_c *maximal_length, my_real_c *minimal_angle){
 
     update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, \
                     *minimal_length, *maximal_length, *minimal_angle);
+    GrB_Matrix_ncols(new_nb_edges, *(clipped->edges));
 }                              
 
 void output_clipped_fortran_(my_real_c* x_v_clipped, my_real_c* y_v_clipped, long long* limits_polygons){ 
