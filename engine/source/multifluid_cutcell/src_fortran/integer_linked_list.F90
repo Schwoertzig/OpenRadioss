@@ -25,7 +25,7 @@ module integer_LL_mod
     implicit none
 
     type(integer_LL_), pointer :: list
-    integer(kind=8), intent(in) :: valAllocate and initialize
+    integer(kind=8), intent(in) :: val
     type(integer_LL_), pointer :: new_elem
 
     allocate(new_elem)

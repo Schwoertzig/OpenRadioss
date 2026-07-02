@@ -176,14 +176,14 @@ void compute_lambdas2d_fortran_(const my_real_c *dt, \
  
     compute_lambdas2D(grid, clipped3D, *dt, &lambdas, &Lambda_n, &Lambda_np1, &normals, &edge_vector, &is_narrowband);
     max_i = normals->size < *max_length_array ? normals->size : *max_length_array;
-    for(i=0; i<normals->size; i++){
+    for(i=0; i<max_i; i++){
         normals_x[i] = normals->points[i].x;
         normals_y[i] = normals->points[i].y;
         normals_t[i] = normals->points[i].t;
     }
     *nb_normals = (long long) normals->size;
     max_i = edge_vector->size < *max_length_array ? edge_vector->size : *max_length_array;
-    for(i=0; i<edge_vector->size; i++){
+    for(i=0; i<max_i; i++){
         edge_indices[i] = edge_vector->data[i];
     }
     if (is_narrowband) {
@@ -331,9 +331,24 @@ void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c
                             long long* new_nb_edges, \
                             my_real_c *minimal_length, my_real_c *maximal_length, my_real_c *minimal_angle){
 
+    uint64_t i;
+    int64_t val; 
+
     update_solid(&clipped, &clipped3D, vec_move_clippedy, vec_move_clippedz, *dt, \
                     *minimal_length, *maximal_length, *minimal_angle);
-    GrB_Matrix_ncols(new_nb_edges, *(clipped->edges));
+    *new_nb_edges = 0;
+    //Search for max in clipped3D->status_edge => maximal number of edges used in the polygonal interface
+    if (clipped3D){
+        if(clipped3D->status_face->size > 0){
+            for(i=0; i<clipped3D->status_face->size; i++){
+                val = *get_ith_elem_vec_int(clipped3D->status_face, i);
+                val = -(val+2) + 1;
+                if (val > *new_nb_edges){
+                    *new_nb_edges = val;
+                }
+            }
+        }
+    }
 }                              
 
 void output_clipped_fortran_(my_real_c* x_v_clipped, my_real_c* y_v_clipped, long long* limits_polygons){ 

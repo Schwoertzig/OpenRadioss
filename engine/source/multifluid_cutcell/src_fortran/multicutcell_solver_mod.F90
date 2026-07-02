@@ -178,7 +178,7 @@ module multicutcell_solver_mod
                                       normals_y, normals_z, normals_t, local_index_edge, max_length_array, nb_normals,&
                                       is_narrowband)
 
-        nb_normals = min(nb_normals, 200) !if there is more than 200 normals, we only keep the first 200 of them...
+        nb_normals = min(nb_normals, max_length_array) !if there is more than max_length_array normals, we only keep the first max_length_array of them...
         do j=1,nb_normals
           k = local_index_edge(j)
           index_edge(i,j) = k 
@@ -220,7 +220,7 @@ module multicutcell_solver_mod
         mean_normal%y = 0.0_wp
         mean_normal%z = 0.0_wp
         mean_normal%t = 0.0_wp
-        do j=1,100
+        do j=1,max_length_array
           k = index_edge(i,j)
           if (k<0) then 
             exit   !break inner j loop
@@ -1331,12 +1331,10 @@ module multicutcell_solver_mod
     minimal_angle = -1._wp
     maximal_length = dx
 
-    call print_clipped_fortran(i)
     call nb_pts_clipped_fortran(old_nb_pts_poly)
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, nb_edges_poly, &
                                 minimal_length, maximal_length, minimal_angle) !initialize clipped3D in C.
     call nb_pts_clipped_fortran(nb_pts_poly)
-    call print_clipped_fortran(i)
     do while (nb_pts_poly /= old_nb_pts_poly)
       old_nb_pts_poly = nb_pts_poly
       deallocate(vec_move_clippedy)

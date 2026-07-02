@@ -214,7 +214,7 @@
         sign = 1 !not used for now
         
         if (dt1>0) then
-          i_print = ncycle + 1
+          i_print = ncycle !+ 1
           call update_fluid_multicutcell(n2d, numelq, numeltg, numnod, ixq, ixtg, x, ALE_CONNECT, &
           multi_cutcell%grid, multi_cutcell%phase_vely, multi_cutcell%phase_velz, &
           multi_cutcell%phase_rho, multi_cutcell%phase_pres, &
