@@ -1,5 +1,6 @@
 #include "Polyhedron3D.h"
 
+/// @brief Polyhedron3D constructor
 Polyhedron3D* new_Polyhedron3D(){
     GrB_Info infogrb;
     Polyhedron3D* p = (Polyhedron3D*) malloc(sizeof(Polyhedron3D));
@@ -16,6 +17,7 @@ Polyhedron3D* new_Polyhedron3D(){
     return p;
 }
 
+/// @brief Polyhedron3D constructor
 Polyhedron3D* new_Polyhedron3D_vefs(const Vector_points3D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces, const Vector_int* status_face){
     GrB_Info infogrb;
     GrB_Index nb_rows;
@@ -38,6 +40,7 @@ Polyhedron3D* new_Polyhedron3D_vefs(const Vector_points3D* vertices, const GrB_M
     return p;
 }
 
+/// @brief Polyhedron3D constructor
 Polyhedron3D* new_Polyhedron3D_vefvs(const Vector_points3D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces, const GrB_Matrix* volumes, const Vector_int* status_face){
     Polyhedron3D* p = (Polyhedron3D*) malloc(sizeof(Polyhedron3D));
 
@@ -55,6 +58,7 @@ Polyhedron3D* new_Polyhedron3D_vefvs(const Vector_points3D* vertices, const GrB_
     return p;
 }
 
+/// @brief Polyhedron3D constructor using points forming a grid
 Polyhedron3D* Polyhedron3D_from_vertices(const my_real_c* x_v, unsigned long int n_x, const my_real_c* y_v, unsigned long int n_y, const my_real_c* z_v, unsigned long int n_z){
     GrB_Info infogrb;
     GrB_Index nb_pts, nb_edges, nb_faces, nb_volumes;
@@ -797,6 +801,7 @@ void dealloc_Polyhedron3D(Polyhedron3D* p){
     }
 }
 
+/// @brief Fuse two Polyhedron3D into a single structure
 Polyhedron3D* fuse_polyhedrons(const Polyhedron3D* p1, const Polyhedron3D* p2){
     Vector_points3D* fused_vertices;
     GrB_Matrix *fused_edges = (GrB_Matrix*)malloc(sizeof(GrB_Matrix));
@@ -854,6 +859,7 @@ Polyhedron3D* fuse_polyhedrons(const Polyhedron3D* p1, const Polyhedron3D* p2){
     return res_p;
 }
 
+/// @brief Deletes all empty volumes, faces and edges.
 void clean_Polyhedron3D(const Polyhedron3D* p, Polyhedron3D** res_p){
     GrB_Index k, i_v, i, j, j_f;
     GrB_Vector vj, extr_vals_vj, face_indices;

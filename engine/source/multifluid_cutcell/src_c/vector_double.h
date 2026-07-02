@@ -5,6 +5,9 @@
 #include "my_real_c.inc"
 #include "vector_int.h"
 
+/*
+Structure of dynamical 1D array of double (mimic std::Vector<double>).
+*/
 typedef struct {
     my_real_c* data;
     uint64_t size, capacity;

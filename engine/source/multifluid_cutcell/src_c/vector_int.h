@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+/*
+Structure of dynamical 1D array of int8 (mimic std::Vector<int8>).
+*/
 typedef struct {
     int8_t* data;
     uint64_t size, capacity;
@@ -20,6 +23,9 @@ void copy_vec_int8(const Vector_int8* src, Vector_int8* dest);
 void print_vec_int8(const Vector_int8* v);
 Vector_int8* cat_vec_int8(const Vector_int8* v1, const Vector_int8* v2);
 
+/*
+Structure of dynamical 1D array of long int (mimic std::Vector<long int>).
+*/
 typedef struct {
     long int* data;
     uint64_t size, capacity;
@@ -38,6 +44,9 @@ void print_vec_int(const Vector_int* v);
 Vector_int* cat_vec_int(const Vector_int* v1, const Vector_int* v2);
 
 
+/*
+Structure of dynamical 1D array of uint64 (mimic std::Vector<uint64>).
+*/
 typedef struct {
     uint64_t* data;
     uint64_t size, capacity;
@@ -58,6 +67,9 @@ Vector_uint* cat_vec_uint(const Vector_uint* v1, const Vector_uint* v2);
 void sort_vec_uint(Vector_uint* v);
 int8_t is_in_vec_uint(const Vector_uint* v, const uint64_t* point);
 
+/*
+Structure of dynamical 1D array of int64 (mimic std::Vector<int64>).
+*/
 typedef struct {
     int64_t* data;
     uint64_t size, capacity;

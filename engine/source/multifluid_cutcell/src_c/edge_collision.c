@@ -22,6 +22,7 @@ typedef struct {
     uint64_t i;
 } Indexed_Edge2D;
 
+// Defines an ordering of two edges
 static int compare_edges(const void *a, const void *b){
     Indexed_Edge2D* e1 = (Indexed_Edge2D*) a;
     Indexed_Edge2D* e2 = (Indexed_Edge2D*) b;
@@ -37,6 +38,7 @@ static int compare_edges(const void *a, const void *b){
     }
 }
 
+// Find if e1 and e2 intersects
 static Point2D intersection_edges(Edge2D e1, Edge2D e2, bool all_inclusive){// all_inclusive = false
     Point2D n, pt;    
     my_real_c d1, d2;

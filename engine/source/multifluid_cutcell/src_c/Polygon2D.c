@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "macro_check_gb_call.h"
 
+// Polygon2D constructor
 Polygon2D* new_Polygon2D(){
     GrB_Info infogrb;
     Polygon2D* p = (Polygon2D*) malloc(sizeof(Polygon2D));
@@ -17,6 +18,7 @@ Polygon2D* new_Polygon2D(){
     return p;
 }
 
+// Polygon2D constructor
 Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix* edges, const Vector_int* status_edge, const Vector_int* phase_face){
     GrB_Info infogrb;
     GrB_Index nb_rows;
@@ -40,6 +42,7 @@ Polygon2D* new_Polygon2D_vesp(const Vector_points2D* vertices, const GrB_Matrix*
     return p;
 }
 
+// Polygon2D constructor
 Polygon2D* new_Polygon2D_vefsp(const Vector_points2D* vertices, const GrB_Matrix* edges, const GrB_Matrix* faces,\
                                  const Vector_int* status_edge, const Vector_int* phase_face){
     //GrB_Index nb_rows;
@@ -59,6 +62,7 @@ Polygon2D* new_Polygon2D_vefsp(const Vector_points2D* vertices, const GrB_Matrix
     return p;
 }
 
+/// @brief Builds polygons based on a list of vertices (x_v, y_v) defining a grid
 Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, const my_real_c* y_v, unsigned long int n_y){
     GrB_Info infogrb;
     GrB_Index nb_pts, nb_edges, nb_faces;
@@ -229,6 +233,7 @@ Polygon2D* polygon2D_from_vertices(const my_real_c* x_v, unsigned long int n_x, 
     return res_p;
 }
 
+/// @brief Builds 1 polygon based on a list of vertices (x_v, y_v) one after the other
 Polygon2D* polygon_from_consecutive_points(const my_real_c *x_v, const my_real_c* y_v, unsigned long int nb_pts){
     GrB_Info infogrb;
     unsigned long int nb_edges, nb_faces;
@@ -387,11 +392,13 @@ void retrieve_ith_edge2D(Vector_points2D *vertices, GrB_Matrix* edges, int i, Po
     GrB_free(&extr_vals_ei);
 }
 
+/// @brief Removes all zeros from sparse matrix M.
 void dropzeros(GrB_Matrix* M){
     //GrB_assign(*M, *M, GrB_NULL, *M, GrB_ALL, 0, GrB_ALL, 0, GrB_DESC_R); //In case GxB_select gets changed in the future, this line will always work
     GxB_select(*M, NULL, NULL, GxB_NONZERO, *M, NULL, NULL) ;
 }
 
+/// @brief Fuse all faces of each polygon into a single structure.
 Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     GrB_Info infogrb;
     Vector_points2D* fused_vertices;
@@ -441,6 +448,11 @@ Polygon2D* fuse_polygons(Polygon2D* p1, Polygon2D* p2){
     return res_p;
 }
 
+/// @brief Compute all normals to the edges of p and a vector in the normal cone at each point
+/// @param p Polygon
+/// @param normals_pts Vector in normal cone at each point
+/// @param normals_edges Normal vector to each edge
+/// @param min_lgth_nom_edg Minimal length of the edges in p.
 void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vector_points2D *normals_edges, my_real_c* min_lgth_nom_edg){
     GrB_Index j;
     GrB_Info infogrb;
@@ -541,6 +553,7 @@ void compute_all_normals2D(const Polygon2D* p, Vector_points2D *normals_pts, Vec
 
 }
 
+/// @brief Delete all empty faces and edges.
 void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
     GrB_Index i, j, j_f;
     GrB_Vector fj, extr_vals_fj, edge_indices;
@@ -671,7 +684,7 @@ void clean_Polygon2D(const Polygon2D* p, Polygon2D** res_p){
     GrB_free(&pt_indices);
 }
 
-//Returns a polygon consisting in only the extracted face.
+/// @brief Returns a polygon consisting in only the extracted face.
 Polygon2D* extract_ith_face2D(const Polygon2D *p, uint64_t extr_index){
     GrB_Matrix *new_faces, *intermediate_faces, *new_edges;
     Vector_points2D *new_vertices;

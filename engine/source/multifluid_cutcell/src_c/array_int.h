@@ -2,6 +2,9 @@
 #define ARRAY_INT_H
 
 #include <stdint.h>
+/*
+Module defining dynamic 2D array of unsigned 64bits integers
+*/
 
 typedef struct {
     int64_t* data;

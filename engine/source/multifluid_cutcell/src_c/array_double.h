@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "my_real_c.inc"
 
+/*
+Module defining dynamic 2D array of doubles
+*/
+
 typedef struct {
     my_real_c* data;
     uint64_t ncols, nrows, capacity;

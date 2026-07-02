@@ -4,6 +4,9 @@
 #include "Point.h"
 #include <stdint.h>
 
+/*
+Structure of dynamical 1D array of Point2D (mimic std::Vector<Point2D>).
+*/
 typedef struct {
     Point2D* points;
     uint64_t size, capacity;

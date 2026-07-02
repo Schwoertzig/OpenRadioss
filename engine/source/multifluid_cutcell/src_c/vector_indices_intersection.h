@@ -3,6 +3,10 @@
 
 #include "stdint.h"
 
+/*
+Structure used for edges intersection (index of edge intersecting and point associated).
+Also, mimic of std::Vector<Indices_intersection> defined hereafter.
+*/
 typedef struct {
     uint64_t i_e;
     uint64_t i_pt;

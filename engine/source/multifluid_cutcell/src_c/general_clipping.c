@@ -8,6 +8,8 @@ if (infogrb != GrB_SUCCESS){                                                    
 #include "my_real_c.inc"
 #include <math.h>
 
+/// @brief Cut all edges in p in a clipping algorithm according to a line supported by point "pt" and normal vector "normal".
+/// @param new_edges_in Result of clipping algorithm with cut edges
 void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt, int8_t sign_taken, Vector_points3D* pts_copy, GrB_Matrix* new_edges_in){
     GrB_Index i;
     Point3D *v, *x1, *x2, newPoint;
@@ -126,11 +128,7 @@ void cut_edges3D(const Polyhedron3D* p, const Point3D* normal, const Point3D* pt
     GrB_free(&vals_be);
 }
 
-//[INOUT] cells_in 
-//[IN] supercells
-//[INOUT] status_cell
-//[IN] mark_cells
-//[OUT] supercells_in
+/// @brief Close cells after they have been cut
 void close_cells(GrB_Matrix *cells_in, const GrB_Matrix *supercells, Vector_int *status_cell, long int mark_cells, GrB_Matrix *supercells_in){
         GrB_Info infogrb;
         GrB_Matrix temp_tab, in_m_ones;
@@ -347,6 +345,7 @@ static form_struct fourform4D(Point4D p, form_struct V){
     }
 }
 
+//Turn a vector of 2D points into a GrB_Matrix
 static GrB_Matrix vector_pt2D_to_matrix(const Vector_points2D* vertices){
     GrB_Matrix mat_vert;
     unsigned int i;
@@ -362,6 +361,7 @@ static GrB_Matrix vector_pt2D_to_matrix(const Vector_points2D* vertices){
     return mat_vert;
 }
 
+//Turn a vector of 3D points into a GrB_Matrix
 static GrB_Matrix vector_pt3D_to_matrix(const Vector_points3D* vertices){
     GrB_Matrix mat_vert;
     unsigned int i;
@@ -379,6 +379,7 @@ static GrB_Matrix vector_pt3D_to_matrix(const Vector_points3D* vertices){
     return mat_vert;
 }
 
+//Turn a GrB_Matrix into a vector of 2D points 
 Vector_points2D* points2D_from_matrix(const GrB_Matrix m_pts){
     GrB_Index d, ncols, j;
     GrB_Vector m_pt;
@@ -405,6 +406,7 @@ Vector_points2D* points2D_from_matrix(const GrB_Matrix m_pts){
     return res;
 }
 
+//Turn a GrB_Matrix into a vector of 3D points 
 Vector_points3D* points3D_from_matrix(const GrB_Matrix m_pts){
     GrB_Index d, ncols, j;
     GrB_Vector m_pt;
@@ -464,6 +466,7 @@ Vector_points4D* points4D_from_matrix(const GrB_Matrix m_pts){
     return res;
 }
 
+//Compute length of all edges
 static Vector_points2D* compute_length_edges2D(const GrB_Matrix* edges, const Vector_points2D* vertices){
     GrB_Matrix mat_vert = vector_pt2D_to_matrix(vertices);
     GrB_Matrix length_edges;

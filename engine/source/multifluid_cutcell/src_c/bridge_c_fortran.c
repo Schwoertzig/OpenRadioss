@@ -156,6 +156,8 @@ void build_clipped_from_pts_fortran_(const my_real_c* x_v, const my_real_c* y_v,
     dealloc_Polygon2D(copy_clipped); free(copy_clipped);
 }
 
+/// @brief Compute cell occupancy of each phase.
+/// @param 
 void compute_lambdas2d_fortran_(const my_real_c *dt, \
                         my_real_c *ptr_lambdas_arr,   \
                         my_real_c *ptr_big_lambda_n,  \
@@ -218,6 +220,7 @@ void nb_face_clipped_fortran_(long long int* signed_nb_faces_solid){
     *signed_nb_faces_solid = ((long long) nb);
 }
 
+/// \brief Compute normals to the the polygonal interface.
 void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVecy, \
                                         my_real_c* min_pos_Se){
 
@@ -246,6 +249,11 @@ void compute_normals_clipped_fortran_(my_real_c* normalVecx, my_real_c* normalVe
     dealloc_vec_pts2D(normals_edges); free(normals_edges);
 }
 
+/// @brief Apply a laplacian filter to the velocity to stabilize polygonal displacement.
+/// @param vec_move_clippedx [IN] Unsmoothed velocity / [OUT] Smoothed velocity
+/// @param vec_move_clippedy [IN] Unsmoothed velocity / [OUT] Smoothed velocity
+/// @param min_pos_Se minimal edge length
+/// @param dt time step
 void smooth_vel_clipped_fortran_(my_real_c* vec_move_clippedx, my_real_c* vec_move_clippedy, my_real_c* min_pos_Se, my_real_c *dt){
     my_real_c eps;
     GrB_Matrix smoothing_op, id;
@@ -274,6 +282,10 @@ void get_clipped_ith_vertex_fortran_(long long *signed_k, Point2D *pt){
     *pt = *get_ith_elem_vec_pts2D(clipped->vertices, k); 
 }
 
+/// @brief Return the edges connected to point k.
+/// @param k_signed Index of point
+/// @param signed_eR First edge connected
+/// @param signed_eL Second edge connected
 void get_clipped_edges_ith_vertex_fortran_(long long *k_signed, long long *signed_eR, long long *signed_eL){
     uint64_t eR, eL;
     GrB_Matrix e_k;
@@ -306,7 +318,15 @@ void get_clipped_edges_ith_vertex_fortran_(long long *k_signed, long long *signe
     GrB_free(&extr_vals_e_k);  
     GrB_free(&I_vec_e_k);      
 }                              
-                               
+                     
+/// @brief Advects the polygonal interface, solves possible intersection, modify edge length.
+/// @param vec_move_clippedy 
+/// @param vec_move_clippedz 
+/// @param dt 
+/// @param new_nb_edges New number of edges after the update
+/// @param minimal_length minimal length of edge of polygonal interface
+/// @param maximal_length maximal length of edge of polygonal interface
+/// @param minimal_angle minimal angle formed by two edges.
 void update_clipped_fortran_(const my_real_c* vec_move_clippedy, const my_real_c* vec_move_clippedz, const my_real_c* dt, \
                             long long* new_nb_edges, \
                             my_real_c *minimal_length, my_real_c *maximal_length, my_real_c *minimal_angle){
@@ -433,6 +453,8 @@ void output_clipped_fortran_(my_real_c* x_v_clipped, my_real_c* y_v_clipped, lon
     GrB_free(&extr_vals_e_k);
 }
 
+/// @brief Print in vtk format the polygonal interface
+/// @param i_print 
 void print_clipped_fortran_(long long* i_print){
     char filename[1024];
     int length_i = snprintf(NULL, 0,"%lld", *i_print);
@@ -450,39 +472,3 @@ void print_clipped_fortran_(long long* i_print){
     free(i_string);
 }
 
-
-//void run_simple_test_(){
-//    my_real_c x_grid[4] = {0.0, 1.0, 1.0, 0.0};
-//    my_real_c y_grid[4] = {0.0, 0.0, 1.0, 1.0};
-//    long long int pt_indices[4] = {0, 1, 2, 3};
-//    long long int nb_pts = 4;
-//    my_real_c x_v[14] = {-2.0, 0.1, 1.1, 2.0, 2.0,  2.0,  1.1, 0.8, 0.3, -0.5, -0.8, -1.0, -1.8, -2.2};
-//    my_real_c y_v[14] = { 3.2, 3.2, 3.2, 2.4, 1.7,  1.1,  0.2, 0.2, 0.2,  0.2,  1.4,  0.2,  1.4,  2.0};
-//    my_real_c vec_move_x[14] = { 0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1,  0.1};
-//    my_real_c vec_move_y[14] = {-1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2, -1.2};
-//    my_real_c dt = 1.0;
-//    unsigned long nb_edges;
-//    Array_double *lambdas;
-//    Vector_double *Lambda_n;
-//    Vector_double *Lambda_np1;
-//    bool is_narrowband;
-//    Point3D mean_normal, pressure_face;
-//
-//    build_grid_from_points_fortran_(x_grid, y_grid, pt_indices, &nb_pts);
-//    clipped = polygon_from_consecutive_points(x_v, y_v, 14);
-//
-//    GrB_Matrix_ncols(&nb_edges, *(clipped->edges));
-//
-//    update_solid(&clipped, &clipped3D, vec_move_x, vec_move_y, dt, \
-//                    -100.0, 100000.0, -100.0);
-// 
-//    print_polyhedron3D(clipped3D, "clipped3D.dat");
-//    compute_lambdas2D(grid, clipped3D, dt, &lambdas, &Lambda_n, &Lambda_np1, &mean_normal, &pressure_face, &is_narrowband);
-//
-//    printf("Lambda_n = ");
-//    print_vec_double(Lambda_n);
-//    printf("Lambda_np1 = ");
-//    print_vec_double(Lambda_np1);
-//    printf("lambdas = \n");
-//    print_arr_double(lambdas);
-//}

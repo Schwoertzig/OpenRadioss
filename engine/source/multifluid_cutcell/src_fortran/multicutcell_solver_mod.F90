@@ -33,6 +33,7 @@ module multicutcell_solver_mod
     end if
   end function max_nb_points_in_cell
 
+!! \brief Flags, in grid, the cells close to the interface.
   subroutine compute_close_cells(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, grid)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
@@ -91,7 +92,7 @@ module multicutcell_solver_mod
     end if
   end subroutine compute_close_cells
 
-
+!! \brief Compute cell occupancies for each phase in grid.
   subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt, &
                                           rho, vely, velz, p, gamma, nb_edges_clipped)
     use polygon_cutcell_mod
@@ -264,6 +265,7 @@ module multicutcell_solver_mod
 
   end subroutine multicutcell_compute_lambdas
 
+!! \brief Compute normals to the cell boundary.
   subroutine multicutcell_compute_normals(NUMELQ, NUMELTG, IXQ, IXTG, X, i_cell, normals, nb_normals)
     use polygon_cutcell_mod
 
@@ -363,6 +365,18 @@ module multicutcell_solver_mod
 
   end subroutine build_full_states
  
+!! \brief Updates state of fluid in each phase.
+!! \details Update the velocity, density and pressure of each phase of the fluid, and compute the average of each quantity
+!!          given the occupancy of each cell.
+!! \param grid information on each cell (occupancy for each phase in the cell and on its boundary, ... See grid2D_struct_multicutcell)
+!! \param vel* 2D array of velocity for each phase
+!! \param rho 2D array of density for each phase
+!! \param p 2D array of pressure for each phase
+!! \param full_vel 2D array of velocity averaged by cell occupancy
+!! \param full_rho 1D array of density averaged by cell occupancy
+!! \param full_p 1D array of pressure averaged by cell occupancy
+!! \param dt_next time step of next time integration
+!! \param i_print integer used for printing a vtk for reading the polygonal interface.
   subroutine update_fluid_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, ALE_CONNECT, &
                           grid, vely, velz, rho, p, gamma, dt, threshold, sign, ebcs_tab, &
                           full_rho, full_pres, full_vel, full_etot, dt_next, sound_speed, i_print)
@@ -592,6 +606,7 @@ module multicutcell_solver_mod
     deallocate(id_pt_cell)
   
     contains   
+    !! Goes from primal variable to conservative variables
     subroutine primal_to_conservative(gamma, vely, velz, rho, p, W)
       use grid2D_struct_multicutcell_mod
   
@@ -606,6 +621,7 @@ module multicutcell_solver_mod
       W%rhoE = 0.5*rho*(vely*vely + velz*velz) + p/(gamma-1)
     end subroutine primal_to_conservative
 
+    !! Goes from conservative variable to primal variables
     subroutine conservative_to_primal(gamma, vely, velz, rho, p, W)
       use grid2D_struct_multicutcell_mod
   
@@ -620,6 +636,7 @@ module multicutcell_solver_mod
       p =  (gamma - 1) * (W%rhoE - 0.5*(W%rhovy*W%rhovy + W%rhovz*W%rhovz)/W%rho)
     end subroutine conservative_to_primal
   
+    !! For cell i_cell and local edge j_edge, finds the neighbouring other_cell and its local index for the edge (other_edge)
     subroutine adjacency_edge(ALE_CONNECT, i_cell, j_edge, other_cell, other_edge)
       use ALE_CONNECTIVITY_MOD
 
@@ -647,6 +664,9 @@ module multicutcell_solver_mod
       end if
     end subroutine adjacency_edge
 
+    !! Identify all cut cells that are too small and makes a correspondance array (final_target_cells)
+    !! with which every small cell will be fused 
+    !! (all quantities of the small cell will be transfered for this time step in the target cell).
     subroutine fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, final_target_cells, cell_type)
       use grid2D_struct_multicutcell_mod
       use integer_LL_mod
@@ -856,6 +876,7 @@ module multicutcell_solver_mod
       call integer_LL_destroy(cells_to_be_merged)
     end subroutine fuse_cells
 
+    !! Compute flux between two adjacent cells
     subroutine multicutcell_compute_fluxes(NUMELQ, NUMELTG, IXQ, IXTG, X, ALE_CONNECT, grid, target_cells, gamma, &
                                             rho, vely, velz, p, fx)
       use grid2D_struct_multicutcell_mod
@@ -924,6 +945,7 @@ module multicutcell_solver_mod
       end do
     end subroutine multicutcell_compute_fluxes
   
+    !! Correction on fluxed on the boundary
     subroutine multicutcell_compute_fluxes_boundary(NUMELQ, NUMELTG, IXQ, IXTG, X, &
                                                     gamma, rho, vely, velz, p, ebcs_tab, fx)
       use grid2D_struct_multicutcell_mod
@@ -1048,7 +1070,7 @@ module multicutcell_solver_mod
       ENDDO
     end subroutine multicutcell_compute_fluxes_boundary
   
-
+    !! Identify in which cell is each point of the polygonal interface.
     subroutine compute_all_id_pt_cell(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
       use grid2D_struct_multicutcell_mod
       use polygon_cutcell_mod
@@ -1111,6 +1133,7 @@ module multicutcell_solver_mod
 
     end subroutine compute_all_id_pt_cell
 
+    !! Compute the advection velocity field for each point of the polygonal interface.
     subroutine compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell,&
                                       normalVecy, normalVecz, &
                                       vec_move_clippedy, vec_move_clippedz)
@@ -1168,8 +1191,8 @@ module multicutcell_solver_mod
     end subroutine compute_vec_move_clipped
  end subroutine update_fluid_multicutcell
 
-
-  !(y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
+!! \brief Allocate and initialize structures used for multiphase simulation.
+!! \details (y_polygon, z_polygon) are the coordinates of successive points forming the polygonal interface.
   subroutine initialize_solver_multicutcell(N2D, NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, ngroup, nparg, iparg, X, elbuf, & !gamma, &
                               nb_id_polygon, list_id_polygon, ngrnod, igrnode, & !multi_cutcell, 
                               grid, num_mixed,list_mixed)
@@ -1342,6 +1365,7 @@ module multicutcell_solver_mod
     deallocate(z_polygon)
   end subroutine initialize_solver_multicutcell
 
+!! \brief Deallocate some C structures used for multiphase simulation.
   subroutine deallocate_solver_multicutcell()
     call end_grb() !C call
   end subroutine deallocate_solver_multicutcell

@@ -4,6 +4,10 @@
 #include "Point.h"
 #include <stdint.h>
 
+/*
+Module defining dynamic 2D array of Point2D structure
+*/
+
 typedef struct {
     Point2D* points;
     uint64_t ncols, nrows, capacity;

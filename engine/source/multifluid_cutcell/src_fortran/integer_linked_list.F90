@@ -1,3 +1,4 @@
+!!\brief module of linked list of integers
 module integer_LL_mod
   type integer_LL_
     integer(kind=8) :: val
@@ -24,7 +25,7 @@ module integer_LL_mod
     implicit none
 
     type(integer_LL_), pointer :: list
-    integer(kind=8), intent(in) :: val
+    integer(kind=8), intent(in) :: valAllocate and initialize
     type(integer_LL_), pointer :: new_elem
 
     allocate(new_elem)
