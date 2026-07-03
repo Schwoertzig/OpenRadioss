@@ -31,11 +31,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .       , DIMENSION(:,:,:), ALLOCATABLE :: WNOD_NORMAL
       END MODULE MOD_I25NORM
 !||====================================================================
-!||    i25norm       ../starter/source/interfaces/inter3d1/i25norm3.F
+!||    i25norm          ../starter/source/interfaces/inter3d1/i25norm3.F
 !||--- called by ------------------------------------------------------
-!||    inint3        ../starter/source/interfaces/inter3d1/inint3.F
+!||    inint3           ../starter/source/interfaces/inter3d1/inint3.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    mod_i25norm   ../starter/source/interfaces/inter3d1/i25norm3.F
+!||    mod_i25norm      ../starter/source/interfaces/inter3d1/i25norm3.F
 !||====================================================================
       SUBROUTINE I25NORM(NRTM,IRECTM,NUMNOD,X     ,NOD_NORMAL,
      .                  NMN  ,MSR   ,ITAB  ,NRTM0 ,MSEGTYP   ,
@@ -49,6 +50,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -467,7 +470,7 @@ C         LBOUND(IS2)=1
         ENDIF
       END DO
 C------------------------------------
-      ALLOCATE(WNOD_NORMAL(3,4,NRTM))
+      call my_alloc(WNOD_NORMAL, 3, 4, NRTM, "WNOD_NORMAL")
 C------------------------------------
       DO IRM=1,NRTM
          IF(IELEM_M(2,IRM) ==0)THEN
@@ -522,7 +525,7 @@ C------------------------------------
        ENDIF
 C------------------------------------
 
-      DEALLOCATE(WNOD_NORMAL)
+      call my_dealloc(WNOD_NORMAL)
 
       RETURN
       END

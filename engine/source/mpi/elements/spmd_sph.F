@@ -1913,16 +1913,18 @@ C
       END
 C
 !||====================================================================
-!||    spmd_sphgetd   ../engine/source/mpi/elements/spmd_sph.F
+!||    spmd_sphgetd     ../engine/source/mpi/elements/spmd_sph.F
 !||--- called by ------------------------------------------------------
-!||    sponfv         ../engine/source/elements/sph/sponfv.F
+!||    sponfv           ../engine/source/elements/sph/sponfv.F
 !||--- calls      -----------------------------------------------------
-!||    spmd_wait      ../engine/source/mpi/spmd_wait.F90
-!||    weight0        ../engine/source/elements/sph/weight.F
-!||    weight1        ../engine/source/elements/sph/weight.F
+!||    spmd_wait        ../engine/source/mpi/spmd_wait.F90
+!||    weight0          ../engine/source/elements/sph/weight.F
+!||    weight1          ../engine/source/elements/sph/weight.F
 !||--- uses       -----------------------------------------------------
-!||    sphbox         ../engine/share/modules/sphbox.F
-!||    spmd_mod       ../engine/source/mpi/spmd_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    sphbox           ../engine/share/modules/sphbox.F
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE SPMD_SPHGETD(KXSP,IXSP,ISPHIO,X,WASPACT,NOD2SP,
      .                        SPBUF,V,A,ASPHR,DSPHR)
@@ -1934,6 +1936,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -2004,9 +2008,14 @@ C-----------------------------------------------
 c get DX* and V* values, store in DSPHR
 c use in sponfv
 
-      ALLOCATE(TMP_IPPV(3,NSPHR),CPT_TMP(NSPMD))
-      ALLOCATE(MYPSPHS(NSPMD+1),MYPSPHS2(NSPMD+1),MYPSPHR(NSPMD+1))
-      ALLOCATE(SEND_IPPV(NSPHR),SEND_IPPV2(NSPHR),REC_IPPV(NSPHS))
+      call my_alloc(TMP_IPPV, 3, NSPHR, "TMP_IPPV")
+      call my_alloc(CPT_TMP, NSPMD, "CPT_TMP")
+      call my_alloc(MYPSPHS, NSPMD+1, "MYPSPHS")
+      call my_alloc(MYPSPHS2, NSPMD+1, "MYPSPHS2")
+      call my_alloc(MYPSPHR, NSPMD+1, "MYPSPHR")
+      call my_alloc(SEND_IPPV, NSPHR, "SEND_IPPV")
+      call my_alloc(SEND_IPPV2, NSPHR, "SEND_IPPV2")
+      call my_alloc(REC_IPPV, NSPHS, "REC_IPPV")
 
       TMP_IPPV(1:3,1:NSPHR) = 0
       MYPSPHS(1:NSPMD+1)=0 
@@ -2403,8 +2412,14 @@ C
 C  
 c      ENDIF !ENDIF IPPVR > 0
       
-      DEALLOCATE(TMP_IPPV,MYPSPHS,MYPSPHS2,MYPSPHR)
-      DEALLOCATE(SEND_IPPV,SEND_IPPV2,REC_IPPV,CPT_TMP)
+      call my_dealloc(TMP_IPPV)
+      call my_dealloc(MYPSPHS)
+      call my_dealloc(MYPSPHS2)
+      call my_dealloc(MYPSPHR)
+      call my_dealloc(SEND_IPPV)
+      call my_dealloc(SEND_IPPV2)
+      call my_dealloc(REC_IPPV)
+      call my_dealloc(CPT_TMP)
 
 #endif
       RETURN

@@ -24,9 +24,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_i25_prepare   ../engine/source/interfaces/int25/i25_prepare.F
 !||--- called by ------------------------------------------------------
 !||    resol              ../engine/source/engine/resol.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod      ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    message_mod        ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    tri7box            ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_I25_PREPARE(MODE,IPARI, INTBUF_TAB,
@@ -41,6 +44,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "assert.inc"
 C-----------------------------------------------
@@ -66,7 +71,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C part 1, calculation of the sizes of fr_i25
 C-----------------------------------------------
-      ALLOCATE(ITAG(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
       ITAG(1:NUMNOD)=0
       IF (MODE==1)THEN
 
@@ -148,7 +153,7 @@ C Flush ITAG to zero again for next CPU
       ENDIF
       
 
-      DEALLOCATE(ITAG)
+      call my_dealloc(ITAG)
       RETURN
 C-----------------------------------------------
       END

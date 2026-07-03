@@ -22,15 +22,18 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    w_inloc     ../starter/source/restart/ddsplit/w_inloc.F
+!||    w_inloc          ../starter/source/restart/ddsplit/w_inloc.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_INLOC(ITAB,NODGLOB,NUMNOD_L,LEN_IA)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -44,7 +47,7 @@ C-----------------------------------------------
 C
 ! --------------------------
 !     allocate 1d array
-      ALLOCATE( ITMP(NUMNOD_L) )
+      call my_alloc(ITMP, NUMNOD_L, "ITMP")
 ! --------------------------
       DO I = 1, NUMNOD_L
         ITMP(I) = ITAB(NODGLOB(I))
@@ -55,7 +58,7 @@ C
 C
 ! --------------------------
 !     deallocate 1d array
-      DEALLOCATE( ITMP )
+      call my_dealloc(ITMP)
 ! --------------------------
       RETURN
       END

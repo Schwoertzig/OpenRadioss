@@ -24,6 +24,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inigrav_part_list   ../starter/source/initial_conditions/inigrav/inigrav_part_list.F
 !||--- called by ------------------------------------------------------
 !||    inigrav_load        ../starter/source/initial_conditions/inigrav/inigrav_load.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    inigrav             ../starter/share/modules1/inigrav_mod.F
 !||    message_mod         ../starter/share/message_module/message_mod.F
@@ -41,6 +42,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE GROUPDEF_MOD
       USE EBCS_MOD      
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -85,9 +87,9 @@ C-----------------------------------------------
 
       !-- allocations
       INIGRAV_PARTS%IS_ALLOCATED = .FALSE.
-      ALLOCATE(INIGRAV_PARTS%TAGPART(NPART))
-      ALLOCATE(INIGRAV_PARTS%GRAV0(NPART))
-      ALLOCATE(INIGRAV_PARTS%NG(3,NPART))      
+      call my_alloc(INIGRAV_PARTS%TAGPART, NPART, "INIGRAV_PARTS%TAGPART")
+      call my_alloc(INIGRAV_PARTS%GRAV0, NPART, "INIGRAV_PARTS%GRAV0")
+      call my_alloc(INIGRAV_PARTS%NG, 3, NPART, "INIGRAV_PARTS%NG")
       INIGRAV_PARTS%IS_ALLOCATED = .TRUE.
                   
       !-- list of PARTs

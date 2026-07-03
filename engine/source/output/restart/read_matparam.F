@@ -37,6 +37,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    mat_elem_mod                  ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    message_mod                   ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod                  ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                ../common_source/tools/memory/my_dealloc.F90
 !||    names_and_titles_mod          ../common_source/modules/names_and_titles_mod.F
 !||    read_ale_rezoning_param_mod   ../engine/source/output/restart/read_ale_rezoning_param.F90
 !||    read_eosparam_mod             ../engine/source/output/restart/read_eosparam.F90
@@ -55,6 +57,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -80,7 +84,7 @@ c     read MATPARAM data
       ENDDO
 
       LEN = NFIX*NUMMAT
-      ALLOCATE (IBUF(LEN) )
+      call my_alloc(IBUF, LEN, "IBUF")
       CALL READ_I_C(IBUF, LEN)
 
       ! write integer parameters and flags
@@ -113,12 +117,12 @@ c     read MATPARAM data
         MAT_ELEM%MAT_PARAM(IMAT)%CRIT_PLAS          = IBUF(IAD+25)
         IAD = IAD + NFIX
       END DO
-      DEALLOCATE( IBUF )
+      call my_dealloc(IBUF)
 
       ! read real parameters
       NFIXR = 9
       LENR  = NFIXR*NUMMAT
-      ALLOCATE (RBUF(LENR) )
+      call my_alloc(RBUF, LENR, "RBUF")
       CALL READ_DB (RBUF ,LENR)
       IAD   = 0
       DO IMAT = 1,NUMMAT
@@ -133,7 +137,7 @@ c     read MATPARAM data
         MAT_ELEM%MAT_PARAM(IMAT)%STIFF_TSTEP   = RBUF(IAD + 9)
         IAD = IAD + NFIXR
       END DO
-      DEALLOCATE (RBUF)
+      call my_dealloc(RBUF)
 
       ! read material title
       DO IMAT = 1,NUMMAT      
@@ -223,8 +227,8 @@ c
       END DO
 
       ! Read multimaterial buffer
-      ALLOCATE (IBUF(21) ) !< mex is 21 submaterials
-      ALLOCATE (RBUF(21) )
+      call my_alloc(IBUF, 21, "IBUF") !< mex is 21 submaterials
+      call my_alloc(RBUF, 21, "RBUF")
       DO IMAT = 1,NUMMAT
         CALL READ_I_C(IBUF, 2)
         NBSUBMAT = IBUF(1)
@@ -257,8 +261,8 @@ c
           ENDIF
         ENDIF
       ENDDO
-      DEALLOCATE(IBUF)
-      DEALLOCATE(RBUF)
+      call my_dealloc(IBUF)
+      call my_dealloc(RBUF)
 
 
 

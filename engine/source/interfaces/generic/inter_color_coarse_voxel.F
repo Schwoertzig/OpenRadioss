@@ -29,6 +29,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod              ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    inter_sorting_mod          ../engine/share/modules/inter_sorting_mod.F
+!||    my_alloc_mod               ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod             ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         SUBROUTINE INTER_COLOR_COARSE_VOXEL(ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,INTBUF_TAB,
      .                                      X,SORT_COMM)
@@ -49,6 +51,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -83,7 +87,7 @@ C-----------------------------------------------
         ! ------------------
         ! allocation of global omp array 
         IF(ITASK==0) THEN
-            ALLOCATE(CELL_BOOL(NB_BOX_COARSE_GRID,NB_BOX_COARSE_GRID,NB_BOX_COARSE_GRID))
+            call my_alloc(CELL_BOOL, NB_BOX_COARSE_GRID, NB_BOX_COARSE_GRID, NB_BOX_COARSE_GRID, "CELL_BOOL")
             CELL_BOOL(1:NB_BOX_COARSE_GRID,1:NB_BOX_COARSE_GRID,1:NB_BOX_COARSE_GRID) = .FALSE.
         ENDIF
         CALL MY_BARRIER()
@@ -151,7 +155,7 @@ C-----------------------------------------------
 
         CALL MY_BARRIER()
         IF(ITASK==0) THEN
-            DEALLOCATE(CELL_BOOL)
+            call my_dealloc(CELL_BOOL)
         ENDIF
         !   ------------------
         RETURN

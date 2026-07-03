@@ -45,6 +45,8 @@ C  |         I10XSAVE                        /intsort/i10xsave.F
 !||    check_sorting_criteria_mod   ../engine/source/interfaces/intsort/check_sorting_criteria.F90
 !||    intbufdef_mod                ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    message_mod                  ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod                 ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod               ../common_source/tools/memory/my_dealloc.F90
 !||    timer_mod                    ../engine/source/system/timer_mod.F90
 !||    tri7box                      ../engine/share/modules/tri7box.F
 !||====================================================================
@@ -66,6 +68,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -163,8 +167,8 @@ C
       IF (ITASK == 0) THEN
         IF(IFORM == 2)THEN
           IF(SIZE(INTBUF_TAB%ADCCM) < NRTM) THEN
-            DEALLOCATE(INTBUF_TAB%ADCCM)
-            ALLOCATE (INTBUF_TAB%ADCCM(NRTM))
+            call my_dealloc(INTBUF_TAB%ADCCM)
+            call my_alloc(INTBUF_TAB%ADCCM, NRTM, "INTBUF_TAB%ADCCM")
           ENDIF
           DO I=1,NRTM
             INTBUF_TAB%ADCCM(I) = 0
@@ -298,10 +302,11 @@ C -------------------------------------------------------------
 
       IF(ITASK==0)THEN
         IF(IFORM == 2) THEN
-          IF (ALLOCATED(OLDINBUF1)) DEALLOCATE(OLDINBUF1)
-          IF (ALLOCATED(OLDINBUF2)) DEALLOCATE(OLDINBUF2)
+          IF (ALLOCATED(OLDINBUF1)) call my_dealloc(OLDINBUF1)
+          IF (ALLOCATED(OLDINBUF2)) call my_dealloc(OLDINBUF2)
 
-          ALLOCATE(OLDINBUF1(NRTM), OLDINBUF2(2*NCONTACT))
+          call my_alloc(OLDINBUF1, NRTM, "OLDINBUF1")
+          call my_alloc(OLDINBUF2, 2*NCONTACT, "OLDINBUF2")
 
           OLDINBUF1(1:NRTM) = 0
           OLDINBUF2(1:2*NCONTACT) = 0
@@ -361,7 +366,8 @@ C New barrier needed for Dynamic MultiMP
             DO I=1,2*NCONTACT
               INTBUF_TAB%CHAIN(I)= OLDINBUF2(I)
             ENDDO
-            DEALLOCATE(OLDINBUF1,OLDINBUF2)
+            call my_dealloc(OLDINBUF1)
+            call my_dealloc(OLDINBUF2)
           ENDIF
 c         /---------------/
           CALL MY_BARRIER
@@ -431,8 +437,8 @@ C
 !$OMP END SINGLE
       ENDIF
 
-      IF (ALLOCATED(OLDINBUF1)) DEALLOCATE(OLDINBUF1)
-      IF (ALLOCATED(OLDINBUF2)) DEALLOCATE(OLDINBUF2)
+      IF (ALLOCATED(OLDINBUF1)) call my_dealloc(OLDINBUF1)
+      IF (ALLOCATED(OLDINBUF2)) call my_dealloc(OLDINBUF2)
 C
       RETURN
       END

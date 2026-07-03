@@ -31,6 +31,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    damping_vref_compute_dampa_mod   ../engine/source/assembly/damping_vref_compute_dampa.F90
 !||    groupdef_mod                     ../common_source/modules/groupdef_mod.F
+!||    my_alloc_mod                     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE DAMPING51(
      1  DIM    ,V      ,
@@ -46,6 +48,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -82,9 +86,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C     C = a M + b K
 C======================================================================|
-      ALLOCATE(VSKW(3,NUMNOD))
-      ALLOCATE(ASKW(3,NUMNOD))
-      ALLOCATE(DAMPSKW(3,NUMNOD))
+      call my_alloc(VSKW, 3, NUMNOD, "VSKW")
+      call my_alloc(ASKW, 3, NUMNOD, "ASKW")
+      call my_alloc(DAMPSKW, 3, NUMNOD, "DAMPSKW")
 
       IF(IDTMINS==2.OR.IDTMINS_INT/=0)GOTO 1000
 C      
@@ -555,6 +559,9 @@ C
 #include "lockon.inc"
       WFEXT = WFEXT + DW
 #include "lockoff.inc"
+      call my_dealloc(VSKW)
+      call my_dealloc(ASKW)
+      call my_dealloc(DAMPSKW)
       RETURN
 C-----------------------------------------------
 C     AMS
@@ -771,9 +778,9 @@ C
 #include "lockon.inc"
          WFEXT = WFEXT + DW
 #include "lockoff.inc"
-      DEALLOCATE(VSKW)
-      DEALLOCATE(ASKW)
-      DEALLOCATE(DAMPSKW)
+      call my_dealloc(VSKW)
+      call my_dealloc(ASKW)
+      call my_dealloc(DAMPSKW)
 
 C
       RETURN

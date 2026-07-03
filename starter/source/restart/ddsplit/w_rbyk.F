@@ -21,11 +21,12 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    w_rbyk      ../starter/source/restart/ddsplit/w_rbyk.F
+!||    w_rbyk         ../starter/source/restart/ddsplit/w_rbyk.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
-!||    nlocal      ../starter/source/spmd/node/ddtools.F
+!||    nlocal         ../starter/source/spmd/node/ddtools.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_RBYK(NPBY,LPBY,NODLOCAL,PROC,NSLARB_L,LEN_IA)
 C-----------------------------------------------
@@ -35,6 +36,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -62,7 +64,7 @@ C-----------------------------------------------
 C
 ! -------------------------
 !     allocate 1d array
-      ALLOCATE( LPBY_L(NSLARB_L) )
+      call my_alloc(LPBY_L, NSLARB_L, "LPBY_L")
 !     allocate 2d array
       ALLOCATE( NPBY_L(NNPBY,NRBYKIN) )
 ! -------------------------
@@ -122,7 +124,7 @@ C write RBY LAG
         LEN_IA = LEN_IA + NNPBY*NRBYLAG + SLPBYL
       END IF
 C
-      DEALLOCATE( LPBY_L )
+      CALL MY_DEALLOC(LPBY_L)
       DEALLOCATE( NPBY_L )
       RETURN
       END

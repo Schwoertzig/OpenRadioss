@@ -38,6 +38,7 @@
 !||--- called by ------------------------------------------------------
 !||    init_nodal_state                       ../engine/source/interfaces/interf/init_nodal_state.F
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod                           ../common_source/tools/memory/my_alloc.F90
 !||    shooting_node_mod                      ../engine/share/modules/shooting_node_mod.F90
 !||====================================================================
         subroutine init_hashtable_for_neighbour_segment( npari,ninter,ipari,shoot_struct )
@@ -48,6 +49,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   arguments

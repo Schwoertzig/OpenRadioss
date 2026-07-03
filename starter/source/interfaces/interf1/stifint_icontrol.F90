@@ -27,7 +27,7 @@
 !||====================================================================
       module stifint_icontrol_mod
 
-      implicit none
+        implicit none
 
       contains
 !=======================================================================================================================
@@ -37,6 +37,7 @@
 !||    stifint_icontrol   ../starter/source/interfaces/interf1/stifint_icontrol.F90
 !||--- called by ------------------------------------------------------
 !||    lectur             ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
         subroutine stifint_icontrol(                                           &
@@ -51,6 +52,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           use constant_mod,             only: zero,em20,one
           use intbufdef_mod
+          use MY_ALLOC_MOD,             only : my_alloc
+          use my_dealloc_mod, only : my_dealloc
           use precision_mod, only : WP
 ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
@@ -93,7 +96,7 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
           sfac_max = one
-          allocate(itag(numnod))
+          call my_alloc(itag,numnod,"itag")
           sfac = -HUGE(sfac)
           itag = 0
           do i = 1, numels8
@@ -199,7 +202,7 @@
             end if
           end do
 !
-          deallocate(itag)
+          call my_dealloc(itag)
 !
         end subroutine stifint_icontrol
 !

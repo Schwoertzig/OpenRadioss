@@ -21,15 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i25trivox      ../engine/source/interfaces/intsort/i25trivox.F
+!||    i25trivox        ../engine/source/interfaces/intsort/i25trivox.F
 !||--- called by ------------------------------------------------------
-!||    i25buce        ../engine/source/interfaces/intsort/i25buce.F
+!||    i25buce          ../engine/source/interfaces/intsort/i25buce.F
 !||--- calls      -----------------------------------------------------
-!||    i25sto         ../engine/source/interfaces/intsort/i25sto.F
-!||    my_barrier     ../engine/source/system/machine.F
+!||    i25sto           ../engine/source/interfaces/intsort/i25sto.F
+!||    my_barrier       ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
-!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
-!||    tri7box        ../engine/share/modules/tri7box.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE I25TRIVOX(
      1      NSN    ,NSNR    ,ISZNSNR ,I_MEM   ,VMAXDT   ,
@@ -51,6 +52,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -142,17 +144,17 @@ c
       integer, dimension(:), allocatable, save :: local_nb_cand
       integer, dimension(:), allocatable :: local_cand
 C-----------------------------------------------
-      CALL MY_ALLOC(TAG,NUMNOD)
+      call my_alloc(TAG, NUMNOD, "TAG")
       
       IF(ITASK == 0)THEN
-        ALLOCATE(NEXT_NOD(NSN+NSNR))
-        ALLOCATE(IIX(NSN+NSNR))
-        ALLOCATE(IIY(NSN+NSNR))
-        ALLOCATE(IIZ(NSN+NSNR))
-        allocate(local_nb_cand(nthread))
-        allocate(last_nod(nsn+nsnr))
+        call my_alloc(NEXT_NOD, NSN+NSNR, "NEXT_NOD")
+        call my_alloc(IIX, NSN+NSNR, "IIX")
+        call my_alloc(IIY, NSN+NSNR, "IIY")
+        call my_alloc(IIZ, NSN+NSNR, "IIZ")
+        call my_alloc(local_nb_cand, nthread, "local_nb_cand")
+        call my_alloc(last_nod, nsn+nsnr, "last_nod")
       END IF
-      allocate(local_cand(nsn))
+      call my_alloc(local_cand, nsn, "local_cand")
 C Barrier to wait init voxel and allocation NEX_NOD
       CALL MY_BARRIER
 C initial construction phase of bpe and bpn moved from i7buce => i7tri
@@ -677,15 +679,15 @@ C=======================================================================
 C
       CALL MY_BARRIER()
       IF(ITASK == 0)THEN
-        DEALLOCATE(NEXT_NOD)
-        DEALLOCATE(IIX)
-        DEALLOCATE(IIY)
-        DEALLOCATE(IIZ)
-        deallocate(local_nb_cand)
-        deallocate(last_nod)
+        call my_dealloc(NEXT_NOD)
+        call my_dealloc(IIX)
+        call my_dealloc(IIY)
+        call my_dealloc(IIZ)
+        call my_dealloc(local_nb_cand)
+        call my_dealloc(last_nod)
       ENDIF
 
-      DEALLOCATE(TAG)
+      call my_dealloc(TAG)
       RETURN
       END
 

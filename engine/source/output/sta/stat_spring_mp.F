@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod      ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE STAT_SPRING_MP(ITAB   ,IPART     ,IXR   ,IPARTR   ,IPART_STATE,
      .                          NODTAG ,STAT_INDXR,IPARG ,ELBUF_TAB,IDEL       )
@@ -42,6 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -72,8 +74,8 @@ C
 C-----------------------------------------------
 C     SPRING
 C-----------------------------------------------
-      CALL MY_ALLOC(NP,6*NUMELR)
-      CALL MY_ALLOC(CLEF,2,NUMELR)
+      call my_alloc(NP, 6*NUMELR, "NP")
+      call my_alloc(CLEF, 2, NUMELR, "CLEF")
 C-----------------------------------------------
       JJ = 0
       II = 0
@@ -147,8 +149,8 @@ C----
       ENDDO ! DO N=1,STAT_NUMELR
 C----
 C-----------------------------------------------
-      DEALLOCATE(NP)
-      DEALLOCATE(CLEF)
+      call my_dealloc(NP)
+      call my_dealloc(CLEF)
 C-----------------------------------------------
       RETURN
       END

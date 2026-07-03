@@ -21,14 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    admfor0        ../engine/source/model/remesh/admfor0.F
+!||    admfor0          ../engine/source/model/remesh/admfor0.F
 !||--- called by ------------------------------------------------------
-!||    resol          ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
-!||    remesh_mod     ../engine/share/modules/remesh_mod.F
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    remesh_mod       ../engine/share/modules/remesh_mod.F
 !||====================================================================
       SUBROUTINE ADMFOR0(IXC ,IPARTC,IXTG  ,IPARTTG,IPART ,
      .                 A     ,STIFN ,AR     ,STIFR ,X     ,
@@ -43,6 +44,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -81,11 +83,11 @@ C-----------------------------------------------
       my_real, DIMENSION(:), ALLOCATABLE :: RNOD
       my_real, DIMENSION(:), ALLOCATABLE :: SNOD
 C-----------------------------------------------
-      CALL MY_ALLOC(LNOD,NUMNOD)
-      CALL MY_ALLOC(NELT,2*(4**LEVELMAX))
-      CALL MY_ALLOC(LKINNOD,NUMNOD)
-      CALL MY_ALLOC(RNOD,NUMNOD)
-      CALL MY_ALLOC(SNOD,NUMNOD)
+      call my_alloc(LNOD, NUMNOD, "LNOD")
+      call my_alloc(NELT, 2*(4**LEVELMAX), "NELT")
+      call my_alloc(LKINNOD, NUMNOD, "LKINNOD")
+      call my_alloc(RNOD, NUMNOD, "RNOD")
+      call my_alloc(SNOD, NUMNOD, "SNOD")
 C-----------------------------------------------
       LKINNOD=0
       DO LEVEL=LEVELMAX-1,0,-1
@@ -765,10 +767,10 @@ C-------
       END DO
 C
 C-----      
-      DEALLOCATE(LNOD)
-      DEALLOCATE(NELT)
-      DEALLOCATE(LKINNOD)
-      DEALLOCATE(RNOD)
-      DEALLOCATE(SNOD)
+      call my_dealloc(LNOD)
+      call my_dealloc(NELT)
+      call my_dealloc(LKINNOD)
+      call my_dealloc(RNOD)
+      call my_dealloc(SNOD)
       RETURN
       END     

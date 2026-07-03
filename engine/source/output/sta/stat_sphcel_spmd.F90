@@ -26,7 +26,7 @@
 !||    genstat                ../engine/source/output/sta/genstat.F
 !||====================================================================
       module stat_sphcel_spmd_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   PROCEDURES
@@ -42,6 +42,7 @@
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod          ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine stat_sphcel_spmd(numnod          ,numsph      ,numsphg      ,nisp          ,npart           ,  &
           ngroup          ,nparg       ,lipart1      ,stat_numelsph ,stat_numelsph_g ,  &
@@ -56,6 +57,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
@@ -99,10 +101,10 @@
           integer,dimension(:),allocatable :: npglob
           integer,dimension(:),allocatable :: np
 ! ----------------------------------------------------------------------------------------------------------------------
-          call my_alloc(clef,2,numsphg)
-          call my_alloc(npglob,4*lengsph)
-          call my_alloc(iadg,nspmd,npart)
-          call my_alloc(np,4*numsph)
+          call my_alloc(clef, 2, numsphg, "clef")
+          call my_alloc(npglob, 4*lengsph, "npglob")
+          call my_alloc(iadg, nspmd, npart, "iadg")
+          call my_alloc(np, 4*numsph, "np")
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -166,10 +168,10 @@
             end do ! do n=1,stat_numelsph_g
           end if !if (ispmd)
 
-          deallocate(clef)
-          deallocate(npglob)
-          deallocate(iadg)
-          deallocate(np)
+          call my_dealloc(clef)
+          call my_dealloc(npglob)
+          call my_dealloc(iadg)
+          call my_dealloc(np)
           return
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine stat_sphcel_spmd

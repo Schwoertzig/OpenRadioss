@@ -21,11 +21,11 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    c_iebcs       ../starter/source/restart/ddsplit/c_iebcs.F
+!||    c_iebcs        ../starter/source/restart/ddsplit/c_iebcs.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit       ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
-!||    iface         ../starter/source/ale/ale3d/iface.F
+!||    iface          ../starter/source/ale/ale3d/iface.F
 !||--- uses       -----------------------------------------------------
 !||====================================================================
        SUBROUTINE C_IEBCS(IXS, IXQ, IXTG, 
@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .     MULTI_FVM_IS_USED,FLAG,EBCS_TAB)
        USE EBCS_MOD
        use element_mod , only : nixs,nixq,nixtg
+       use my_alloc_mod
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -69,7 +70,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------   
-      ALLOCATE(LOCALID(NUMEL))
+      call my_alloc(LOCALID, NUMEL, "LOCALID")
       IF (N2D == 0) THEN
          IX => IXS(1:NIXS, 1:NUMELS)
       ELSEIF(NUMELQ /= 0) THEN
@@ -124,6 +125,6 @@ C-----------------------------------------------
       ENDDO ! I = 1, NEBCS
       ! ----------------------------
 
-      DEALLOCATE(LOCALID)
+      CALL MY_DEALLOC(LOCALID)
       RETURN
       END SUBROUTINE C_IEBCS

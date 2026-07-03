@@ -24,6 +24,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sensor_user_alloc   ../starter/source/tools/sensor/sensor_user_alloc.F
 !||--- called by ------------------------------------------------------
 !||    read_sensor_user    ../starter/source/tools/sensor/read_sensor_user.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
         SUBROUTINE SENSOR_USER_ALLOC(ALREADY_DONE,SENSOR_USER_STRUCT)
@@ -37,6 +38,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------  
       USE SENSOR_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -60,14 +62,14 @@ C-----------------------------------------------
         SENSOR_USER_STRUCT%IS_USED = .TRUE.
 
         SIZE_LOCAL = NUMNOD
-        ALLOCATE( SENSOR_USER_STRUCT%NODE_LIST(SIZE_LOCAL) )
-        ALLOCATE( SENSOR_USER_STRUCT%NODE_PER_PART_LIST(SIZE_LOCAL) )
+        call my_alloc(SENSOR_USER_STRUCT%NODE_LIST, SIZE_LOCAL, "SENSOR_USER_STRUCT%NODE_LIST")
+        call my_alloc(SENSOR_USER_STRUCT%NODE_PER_PART_LIST, SIZE_LOCAL, "SENSOR_USER_STRUCT%NODE_PER_PART_LIST")
 
         SENSOR_USER_STRUCT%NUMBER_NODE = SIZE_LOCAL
         SENSOR_USER_STRUCT%NUMBER_NODE_PER_PART = SIZE_LOCAL
 
         SIZE_LOCAL = NPART
-        ALLOCATE( SENSOR_USER_STRUCT%PART_LIST(SIZE_LOCAL) )
+        call my_alloc(SENSOR_USER_STRUCT%PART_LIST, SIZE_LOCAL, "SENSOR_USER_STRUCT%PART_LIST")
         SENSOR_USER_STRUCT%NUMBER_PART = SIZE_LOCAL
 
 

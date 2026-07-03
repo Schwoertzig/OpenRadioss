@@ -60,6 +60,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_spmd                   ../starter/source/general_controls/computation/hm_read_spmd.F
 !||    hm_read_unit                   ../starter/source/general_controls/computation/hm_read_unit.F
 !||    hm_read_upwind                 ../starter/source/general_controls/computation/hm_read_upwind.F
+!||    hm_s_ale                       ../starter/source/devtools/hm_reader/hm_s_ale.F90
 !||    init_def_elem                  ../starter/source/modules/defaults_mod.F90
 !||    init_def_zero                  ../starter/source/modules/defaults_mod.F90
 !||    istr                           ../starter/source/tools/univ/istr.F
@@ -67,25 +68,27 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    nbadmesh                       ../starter/source/model/remesh/nbadmesh.F
 !||    nbsph                          ../starter/source/elements/sph/nbsph.F
 !||--- uses       -----------------------------------------------------
-!||    adinertia_mod                  ../starter/share/modules1/adinertia_mod.F90
 !||    ascii_encoding_mu_letter_mod   ../starter/source/starter/ascii_encoding_mu_letter.F90
 !||    defaults_mod                   ../starter/source/modules/defaults_mod.F90
 !||    detonators_mod                 ../starter/share/modules1/detonators_mod.F
 !||    format_mod                     ../starter/share/modules1/format_mod.F90
 !||    grp_size_mod                   ../starter/share/modules1/grp_size_mod.F
 !||    hm_option_read_mod             ../starter/share/modules1/hm_option_read_mod.F
+!||    hm_s_ale_mod                   ../starter/source/devtools/hm_reader/hm_s_ale.F90
 !||    inivol_def_mod                 ../starter/share/modules1/inivol_mod.F
+!||    input_modification_mod         ../starter/source/starter/input_modification.F90
 !||    message_mod                    ../starter/share/message_module/message_mod.F
 !||    refsta_mod                     ../starter/share/modules1/refsta_mod.F
 !||    restmod                        ../starter/share/modules1/restart_mod.F
 !||    submodel_mod                   ../starter/share/modules1/submodel_mod.F
 !||====================================================================
       SUBROUTINE CONTRL(MULTI_FVM,LSUBMODEL,IS_DYNA,DETONATORS,USER_WINDOWS,MAT_ELEM,
-     .           NAMES_AND_TITLES,LIPART1,DEFAULTS,GLOB_THERM,PBLAST,OUTPUT)
+     .           NAMES_AND_TITLES,LIPART1,DEFAULTS,GLOB_THERM,PBLAST,OUTPUT,input_modification)
 C----------------------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE MY_ALLOC_MOD
       USE MULTI_FVM_MOD 
       USE SUBMODEL_MOD
       USE PINCHTYPE_MOD
@@ -116,7 +119,8 @@ C-----------------------------------------------
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
       use element_mod , only : nixs
       use SEATBELT_MOD, only : NGUIDED_CABLE
-      use adinertia_mod, only : NBADDINER
+      use hm_s_ale_mod , only : hm_s_ale
+      use input_modification_mod, only : input_modif_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -181,6 +185,7 @@ C-----------------------------------------------
       type (glob_therm_) ,intent(inout)   :: glob_therm
       TYPE(PBLAST_), INTENT(INOUT)        :: PBLAST               !< PBLAST load type
       TYPE(OUTPUT_),INTENT(INOUT) :: OUTPUT
+      type(input_modif_), intent(inout) :: input_modification !< input modification data structure
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -254,7 +259,7 @@ C-----------------------------------------------
 
 C=======================================================================
 C     Read title
-C=======================================================================
+C=======================================================================    
       CALL HM_OPTION_COUNT('/TITLE', NUMTITLE)
       IF (NUMTITLE > 0) THEN
          CALL HM_OPTION_START('/TITLE')
@@ -433,6 +438,12 @@ C     READING OF /STAMPING
 C-------------------------------------------------------------------
       CALL HM_OPTION_COUNT('/STAMPING',ISTAMPING)
       IF(ISTAMPING > 0 ) ISTAMPING = 1
+
+      ! ----------------------
+      ! S-ALE option : reading and adding new elements & nodes if necessary
+      call hm_s_ale(nsubmod,lsubmodel,input_modification) 
+      ! ----------------------
+
 C-------------------------------------------------------------------
       ICRASH = 0
 C-------------------------------------------------------------------
@@ -725,8 +736,6 @@ C-----
       CALL HM_OPTION_COUNT('/ACTIV', NACTIV)
 C-----
       CALL HM_OPTION_COUNT('/ADMAS',NODMAS)
-C-----
-      CALL HM_OPTION_COUNT('/ADINERTIA',NBADDINER)
 C-----
       CALL HM_OPTION_COUNT('/CLUSTER',NCLUSTER)
 C-----
@@ -1076,24 +1085,24 @@ C--------------------------------------------
 C     PRE-READ OF Prop IDS for triangles SH3N6 & solid rotations 
 C     PRE-READ OF Prop IDS , PARTS & SOLIDSfor sol to SPH
 C--------------------------------------------
-      ALLOCATE(IGEO(NPROPGI*NUMGEO),STAT=stat)
+      call my_alloc(IGEO, NPROPGI*NUMGEO, "IGEO", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='IGEO')
       IGEO=0
       NUMELTG6 = 0
       NSPHSOL  = 0
-      ALLOCATE(NSUB (NUMGEO + NUMSTACK) ,STAT=stat)
-      ALLOCATE(NISUB(NUMGEO + NUMSTACK) ,STAT=stat)
-      ALLOCATE(NPLY (NUMGEO + NUMSTACK) ,STAT=stat)
+      call my_alloc(NSUB, NUMGEO + NUMSTACK, "NSUB", stat=stat)
+      call my_alloc(NISUB, NUMGEO + NUMSTACK, "NISUB", stat=stat)
+      call my_alloc(NPLY, NUMGEO + NUMSTACK, "NPLY", stat=stat)
 c      
       CALL HM_PREREAD_PROPERTIES(IGEO,NSPHSOL,NPLY,NSUB,NISUB,LSUBMODEL,DEFAULTS)
 
       IF(NSPHSOL/=0.AND.NUMELS8/=0)THEN
-        ALLOCATE(IPART(LIPART1*NPART),STAT=stat)
+        call my_alloc(IPART, LIPART1*NPART, "IPART", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='IPART')
         IPART=0
         CALL HM_PREREAD_PART(IPART,IGEO,LSUBMODEL)
 C
-        ALLOCATE(IXS(NIXS*NUMELS8),STAT=stat)
+        call my_alloc(IXS, NIXS*NUMELS8, "IXS", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='IPART')
         CALL HM_PRELCE16S(IPART,IGEO,IXS,NSPHSOL,LSUBMODEL,IS_DYNA)
 C
@@ -1320,7 +1329,7 @@ C=======================================================================
      .      TITRE(150)(1:57),NODMAS,TITRE(183)(1:57),NIMPDISP,
      .      TITRE(184)(1:57),NIMPVEL,TITRE(185)(1:57),NIMPACC,
      .      TITRE(152)(1:57),NRIVET,TITRE(153)(1:57),NSECT,
-     .      TITRE(155)(1:57),NJOINT,TITRE(192)(1:57),NBADDINER
+     .      TITRE(155)(1:57),NJOINT
 C
       IF(NINTERFRIC > 0) WRITE (IOUT,'(A,I10)') TITRE(190)(1:57),NINTERFRIC
       IF(NALELK>0)WRITE(IOUT,'(A,I10)')
@@ -1506,9 +1515,9 @@ C
 C--------------------------------------------------------------------
 C     DEALLOCATE
 C--------------------------------------------------------------------
-      IF(ALLOCATED(IXS))  DEALLOCATE(IXS)
-      IF(ALLOCATED(IGEO)) DEALLOCATE(IGEO)
-      IF(ALLOCATED(IPART))DEALLOCATE(IPART)
+      IF(ALLOCATED(IXS))  CALL MY_DEALLOC(IXS)
+      IF(ALLOCATED(IGEO)) CALL MY_DEALLOC(IGEO)
+      IF(ALLOCATED(IPART))CALL MY_DEALLOC(IPART)
 C--------------------------------------------------------------------
  1000 FORMAT(//
      & 4X,'SPEED PARAMETERS  '/
@@ -1815,6 +1824,7 @@ C-----------------------------------------------
       USE INOUTFILE_MOD
       USE OUTMAX_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARLINE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1845,9 +1855,10 @@ C-----------------------------------------------
       INTEGER :: TMAX_IPART(NPART),NKPART(NPART+1,NKEYMAX+1)
       CHARACTER(LEN=NCHARLINE) :: CARTE
 C-----------------------------------------------
-      IF (ALLOCATED(IKEYMAX)) DEALLOCATE(IKEYMAX)
-      IF (ALLOCATED(IPART_OK)) DEALLOCATE(IPART_OK)
-      ALLOCATE(IKEYMAX(NKEYMAX),IPART_OK(NGROUP,NKEYMAX))
+      IF (ALLOCATED(IKEYMAX)) CALL MY_DEALLOC(IKEYMAX)
+      IF (ALLOCATED(IPART_OK)) CALL MY_DEALLOC(IPART_OK)
+      call my_alloc(IKEYMAX, NKEYMAX, "IKEYMAX")
+      call my_alloc(IPART_OK, NGROUP, NKEYMAX, "IPART_OK")
       IKEYMAX =0
       IPART_OK = 0
       LMAX_DIS = 0

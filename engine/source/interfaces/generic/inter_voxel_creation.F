@@ -24,9 +24,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inter_voxel_creation   ../engine/source/interfaces/generic/inter_voxel_creation.F
 !||--- called by ------------------------------------------------------
 !||    inter_prepare_sort     ../engine/source/interfaces/generic/inter_prepare_sort.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod          ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    inter_sorting_mod      ../engine/share/modules/inter_sorting_mod.F
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         SUBROUTINE INTER_VOXEL_CREATION(IPARI,INTBUF_TAB,X,NIN,SORT_COMM)
 !$COMMENT
@@ -42,6 +44,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -80,13 +83,13 @@ C-----------------------------------------------
         IF(NSN==0) RETURN
         !   ------------------
         !   allocation
-        IF( ALLOCATED( SORT_COMM(NIN)%NEXT_NOD ) ) DEALLOCATE(SORT_COMM(NIN)%NEXT_NOD)
-        IF( ALLOCATED( SORT_COMM(NIN)%LAST_NOD ) ) DEALLOCATE(SORT_COMM(NIN)%LAST_NOD)
+        IF( ALLOCATED( SORT_COMM(NIN)%NEXT_NOD ) ) call my_dealloc(SORT_COMM(NIN)%NEXT_NOD)
+        IF( ALLOCATED( SORT_COMM(NIN)%LAST_NOD ) ) call my_dealloc(SORT_COMM(NIN)%LAST_NOD)
 
-        IF( ALLOCATED( SORT_COMM(NIN)%IIX ) ) DEALLOCATE(SORT_COMM(NIN)%IIX)
-        IF( ALLOCATED( SORT_COMM(NIN)%IIY ) ) DEALLOCATE(SORT_COMM(NIN)%IIY)
-        IF( ALLOCATED( SORT_COMM(NIN)%IIZ ) ) DEALLOCATE(SORT_COMM(NIN)%IIZ)
-        IF( ALLOCATED( SORT_COMM(NIN)%VOXEL ) ) DEALLOCATE(SORT_COMM(NIN)%VOXEL)
+        IF( ALLOCATED( SORT_COMM(NIN)%IIX ) ) call my_dealloc(SORT_COMM(NIN)%IIX)
+        IF( ALLOCATED( SORT_COMM(NIN)%IIY ) ) call my_dealloc(SORT_COMM(NIN)%IIY)
+        IF( ALLOCATED( SORT_COMM(NIN)%IIZ ) ) call my_dealloc(SORT_COMM(NIN)%IIZ)
+        IF( ALLOCATED( SORT_COMM(NIN)%VOXEL ) ) call my_dealloc(SORT_COMM(NIN)%VOXEL)
 
         ALLOCATE(SORT_COMM(NIN)%NEXT_NOD(NSN))
         ALLOCATE(SORT_COMM(NIN)%LAST_NOD(NSN))

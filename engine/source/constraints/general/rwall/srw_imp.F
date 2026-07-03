@@ -21,13 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    fv_rwl       ../engine/source/constraints/general/rwall/srw_imp.F
+!||    fv_rwl           ../engine/source/constraints/general/rwall/srw_imp.F
 !||--- called by ------------------------------------------------------
-!||    rgwal0_imp   ../engine/source/constraints/general/rwall/rgwal0.F
+!||    rgwal0_imp       ../engine/source/constraints/general/rwall/rgwal0.F
 !||--- calls      -----------------------------------------------------
-!||    l_dir0       ../engine/source/constraints/general/bcs/bc_imp0.F
+!||    l_dir0           ../engine/source/constraints/general/bcs/bc_imp0.F
 !||--- uses       -----------------------------------------------------
-!||    imp_rwl      ../engine/share/modules/impbufdef_mod.F
+!||    imp_rwl          ../engine/share/modules/impbufdef_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE FV_RWL(IDDL   ,IKC   ,NDOF  ,UD    ,V    ,A    )
 C-----------------------------------------------
@@ -37,6 +39,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -65,10 +69,10 @@ C-----------------------------------------------
       ENDDO
       IF (N_RWL==0) RETURN
 C--------allocation------ 
-      IF(ALLOCATED(IN_RWL)) DEALLOCATE(IN_RWL)
-      ALLOCATE(IN_RWL(N_RWL),STAT=IERR1)
-      IF(ALLOCATED(NOR_RWL)) DEALLOCATE(NOR_RWL)
-      ALLOCATE(NOR_RWL(3,N_RWL),STAT=IERR2)
+      IF(ALLOCATED(IN_RWL)) call my_dealloc(IN_RWL)
+      call my_alloc(IN_RWL, N_RWL, "IN_RWL", stat=IERR1)
+      IF(ALLOCATED(NOR_RWL)) call my_dealloc(NOR_RWL)
+      call my_alloc(NOR_RWL, 3, N_RWL, "NOR_RWL", stat=IERR2)
       NL = 0
       DO I = 1,NUMNOD
        IF (NDOF(I)>0) THEN

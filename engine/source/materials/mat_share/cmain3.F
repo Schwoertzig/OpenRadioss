@@ -48,6 +48,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    failwave_mod     ../common_source/modules/failwave_mod.F
 !||    mat_elem_mod     ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    mulawc_mod       ../engine/source/materials/mat_share/mulawc.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||    nlocal_reg_mod   ../common_source/modules/nlocal_reg_mod.F
 !||    sensor_mod       ../common_source/modules/sensor_mod.F90
 !||    stack_mod        ../engine/share/modules/stack_mod.F
@@ -102,6 +104,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -252,12 +256,14 @@ c
         ENDDO  
       ENDIF
       NLAY_MAX   = MAX(NLAY,NPT,IXLAY, ELBUF_STR%NLAY)
-      ALLOCATE(MATLY(MVSIZ*NLAY_MAX), THKLY(MVSIZ*NLAY_MAX*LAYNPT_MAX),
-     .         POSLY(MVSIZ,NLAY_MAX*LAYNPT_MAX),THK_LY(NEL,NLAY_MAX*LAYNPT_MAX))
+      call my_alloc(MATLY, MVSIZ*NLAY_MAX, "MATLY")
+      call my_alloc(THKLY, MVSIZ*NLAY_MAX*LAYNPT_MAX, "THKLY")
+      call my_alloc(POSLY, MVSIZ, NLAY_MAX*LAYNPT_MAX, "POSLY")
+      call my_alloc(THK_LY, NEL, NLAY_MAX*LAYNPT_MAX, "THK_LY")
 c
 c----------------------------
       IF (NPT == 0) THEN
-          ! Radioss laws 1,2,22,36,43,56,60,86 with global integration
+          ! Radioss laws 1,2,22,36,43,56,60,86,136 with global integration
 c----------------------------
         ILAY = 1
         IT   = 1
@@ -395,7 +401,10 @@ C---------------------------------------------------------
         IF (MTN /=78)  ETIMP(JFT:JLT) = ZCFAC(JFT:JLT,1)
         CALL PUT_ETFAC(NEL ,ETIMP ,MTN)
       END IF
-      DEALLOCATE(MATLY, THKLY, POSLY, THK_LY)
+      call my_dealloc(MATLY)
+      call my_dealloc(THKLY)
+      call my_dealloc(POSLY)
+      call my_dealloc(THK_LY)
 c-----------
       RETURN
       END SUBROUTINE CMAIN3

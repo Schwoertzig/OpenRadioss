@@ -199,6 +199,15 @@ void c_h3d_create_solid_tensor_datatype_(int *cpt_data, char *name1, int *size1,
              LAYERPOOL = strcat(LAYERPOOL,LAYER_STRING);
 #endif
         }
+        else if(*ir < 0 && *is > 0 && *it < 0)
+        {
+             sprintf(LAYER_STRING, "IS %d " ,*is);
+#ifdef _WIN64
+             strcat_s(LAYERPOOL,100,LAYER_STRING);
+#else
+             LAYERPOOL = strcat(LAYERPOOL,LAYER_STRING);
+#endif
+        }
     }
     else if(*layer < -1 )
     {
@@ -252,7 +261,7 @@ void c_h3d_create_solid_tensor_datatype_(int *cpt_data, char *name1, int *size1,
 #endif
 
         rc = Hyper3DDatatypeWrite(h3d_file, edata_type, *cpt_data , H3D_DS_TENSOR3D, 
-                                    H3D_DS_ELEM, pool_count);
+                                    H3D_DS_ELEM, H3D_NF_REAL, pool_count);
         if( !rc ) throw rc;
 
         if (strlen(ccomment) != 0) 

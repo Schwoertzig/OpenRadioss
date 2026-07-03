@@ -21,20 +21,21 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    s4alesfem      ../engine/source/elements/solid/solide4_sfem/s4alesfem.F
+!||    s4alesfem        ../engine/source/elements/solid/solide4_sfem/s4alesfem.F
 !||--- called by ------------------------------------------------------
-!||    alemain        ../engine/source/ale/alemain.F
+!||    alemain          ../engine/source/ale/alemain.F
 !||--- calls      -----------------------------------------------------
-!||    initbuf        ../engine/share/resol/initbuf.F
-!||    s4volnod3      ../engine/source/elements/solid/solide4_sfem/s4volnod3.F
-!||    spmd_waitall   ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitany   ../engine/source/mpi/spmd_wait.F90
+!||    initbuf          ../engine/share/resol/initbuf.F
+!||    s4volnod3        ../engine/source/elements/solid/solide4_sfem/s4volnod3.F
+!||    spmd_waitall     ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitany     ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    initbuf_mod    ../engine/share/resol/initbuf.F
-!||    sfem_mod       ../common_source/modules/elements/sfem_mod.F90
-!||    spmd_mod       ../engine/source/mpi/spmd_mod.F90
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    initbuf_mod      ../engine/share/resol/initbuf.F
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    sfem_mod         ../common_source/modules/elements/sfem_mod.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE S4ALESFEM(IPARG,IXS,X,ELBUF_TAB,SFEM_NODVAR, S_SFEM_NODVAR,PM,
      .                     ispmd,sfem,s_xdp)
@@ -49,6 +50,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -176,7 +178,7 @@ C----------------------------------------------------
               sfem%tetra_fsky(my_address,j) = sfem%spmd(proc_id)%r_buffer(k,j) ! save the received Fsky value into the right place
             enddo
           enddo
-          deallocate(sfem%spmd(proc_id)%r_buffer)
+          call my_dealloc(sfem%spmd(proc_id)%r_buffer)
         enddo
         
         sfem_nodvar(1:2*numnod) = zero
@@ -207,12 +209,12 @@ C----------------------------------------------------
         call spmd_waitall(sfem%s_request_nb,sfem%s_request)
 
         do i=1,nspmd
-          if(allocated(sfem%spmd(i)%s_buffer)) deallocate(sfem%spmd(i)%s_buffer)
+          if(allocated(sfem%spmd(i)%s_buffer)) call my_dealloc(sfem%spmd(i)%s_buffer)
         enddo
-        if(allocated(sfem%r_request)) deallocate(sfem%r_request)
-        if(allocated(sfem%s_request)) deallocate(sfem%s_request)
-        if(allocated(sfem%r_index)) deallocate(sfem%r_index)
-        if(allocated(sfem%s_index)) deallocate(sfem%s_index)      
+        if(allocated(sfem%r_request)) call my_dealloc(sfem%r_request)
+        if(allocated(sfem%s_request)) call my_dealloc(sfem%s_request)
+        if(allocated(sfem%r_index)) call my_dealloc(sfem%r_index)
+        if(allocated(sfem%s_index)) call my_dealloc(sfem%s_index)
 
       RETURN
       END

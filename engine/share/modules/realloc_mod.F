@@ -33,17 +33,21 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       CONTAINS
         
 !||====================================================================
-!||    ireallocate     ../engine/share/modules/realloc_mod.F
+!||    ireallocate      ../engine/share/modules/realloc_mod.F
 !||--- called by ------------------------------------------------------
-!||    i11trivox       ../engine/source/interfaces/intsort/i11trivox.F
-!||    i22trivox       ../engine/source/interfaces/intsort/i22trivox.F
-!||    i25trivox_edg   ../engine/source/interfaces/intsort/i25trivox_edg.F
+!||    i11trivox        ../engine/source/interfaces/intsort/i11trivox.F
+!||    i22trivox        ../engine/source/interfaces/intsort/i22trivox.F
+!||    i25trivox_edg    ../engine/source/interfaces/intsort/i25trivox_edg.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       FUNCTION IREALLOCATE(ptr, new_size)
 !reallocate INTEGER ARRAY
 C-----------------------------------------------
 C   I n c l u d e s
 C-----------------------------------------------      
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"      
 C-----------------------------------------------
 C   D u m m y  a r g u m e n t s 
@@ -62,11 +66,12 @@ C-----------------------------------------------
       
       !There remains enough memory
       ALLOCATE(IREALLOCATE(1:new_size), STAT=ierr)
+! TODO: non-default lower bound, convert manually
       IF(ierr /= 0) STOP "memory allocation error"
 C-----------------------------------------------                                            
        old_size = MIN(SIZE(ptr), new_size)
        IREALLOCATE(1:old_size) = ptr(1:old_size)                       
-       DEALLOCATE(ptr) ! Do not forget    
+       call my_dealloc(ptr) ! Do not forget
             
       END FUNCTION IREALLOCATE
 C-----------------------------------------------
@@ -75,13 +80,17 @@ C-----------------------------------------------
 
 
 !||====================================================================
-!||    jreallocate   ../engine/share/modules/realloc_mod.F
+!||    jreallocate      ../engine/share/modules/realloc_mod.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       FUNCTION JREALLOCATE(ptr, new_size)
 !reallocate MY_REAL ARRAY
 C-----------------------------------------------
 C   I n c l u d e s
 C-----------------------------------------------      
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"      
 C-----------------------------------------------
 C   D u m m y  a r g u m e n t s 
@@ -101,11 +110,12 @@ C-----------------------------------------------
       
       !There remains enough memory
       ALLOCATE(JREALLOCATE(1:new_size), STAT=ierr)
+! TODO: non-default lower bound, convert manually
       IF(ierr /= 0) STOP "memory allocation error"
 C-----------------------------------------------                                            
        old_size = MIN(SIZE(ptr), new_size)
        JREALLOCATE(1:old_size) = ptr(1:old_size)                       
-       DEALLOCATE(ptr) ! Do not forget    
+       call my_dealloc(ptr) ! Do not forget
             
       END FUNCTION JREALLOCATE
 C-----------------------------------------------

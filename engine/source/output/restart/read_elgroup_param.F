@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    read_db              ../common_source/tools/input_output/read_db.F
 !||--- uses       -----------------------------------------------------
 !||    mat_elem_mod         ../common_source/modules/mat_elem/mat_elem_mod.F90
+!||    my_alloc_mod         ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod       ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE READ_ELGROUP_PARAM(MAT_ELEM)
 C-----------------------------------------------
@@ -37,6 +39,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -53,7 +57,7 @@ c     allocation of element group parameters
       ALLOCATE (MAT_ELEM%GROUP_PARAM(NGROUP) )
 
       LEN = 2
-      ALLOCATE(RBUF(NGROUP,LEN))
+      call my_alloc(RBUF, NGROUP, LEN, "RBUF")
       CALL READ_DB(RBUF, LEN*NGROUP)
 c
       DO NG = 1, NGROUP
@@ -61,7 +65,7 @@ c
         MAT_ELEM%GROUP_PARAM(NG)%VISC_DN = RBUF(NG,2)
       ENDDO
 c
-      DEALLOCATE( RBUF )
+      call my_dealloc(RBUF)
 c-----------
       RETURN
       END

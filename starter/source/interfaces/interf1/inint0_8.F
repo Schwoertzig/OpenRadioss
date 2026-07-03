@@ -22,9 +22,11 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    inint0_8   ../starter/source/interfaces/interf1/inint0_8.F
+!||    inint0_8       ../starter/source/interfaces/interf1/inint0_8.F
 !||--- called by ------------------------------------------------------
-!||    inint3     ../starter/source/interfaces/inter3d1/inint3.F
+!||    inint3         ../starter/source/interfaces/inter3d1/inint3.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE ININT0_8(X      ,IRECT  ,NSEG   ,LCSEG  ,NSV   ,
      1                    MSR    ,ILOC   ,NMN    ,NSN    ,NRT   , NUMNOD )
@@ -35,6 +37,7 @@ C=======================================================================
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -129,7 +132,7 @@ C
 C=======================================================================
 C 1   placing of nodes in boxes
 C=======================================================================
-      ALLOCATE(VOXEL(NBX,NBY,NBZ))
+      call my_alloc(VOXEL, NBX, NBY, NBZ, "VOXEL")
       VOXEL=0
       DO I=1,NSN
         IIX(I)=0
@@ -286,12 +289,12 @@ C         Save current bounds before expanding
           ENDDO
         ENDDO
       ENDDO
-      DEALLOCATE(VOXEL)
+      CALL MY_DEALLOC(VOXEL)
 C-----------------------------------------------
 c 3 Build inverse connectivity for segments
 C-----------------------------------------------
-      ALLOCATE(KNOD2SEG(NUMNOD+1))
-      ALLOCATE(NOD2SEG(4*NRT))
+      call my_alloc(KNOD2SEG, NUMNOD+1, "KNOD2SEG")
+      call my_alloc(NOD2SEG, 4*NRT, "NOD2SEG")
       NOD2SEG(1:4*NRT) = 0
       KNOD2SEG(1:NUMNOD+1) = 0
       DO I=1,NRT
@@ -340,7 +343,7 @@ C----------------------------------------------------------------
         ENDDO
       ENDDO
 C
-      DEALLOCATE(KNOD2SEG)
-      DEALLOCATE(NOD2SEG)
+      CALL MY_DEALLOC(KNOD2SEG)
+      CALL MY_DEALLOC(NOD2SEG)
       RETURN
       END

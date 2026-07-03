@@ -46,28 +46,34 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_exch_wave_init   ../engine/source/mpi/nodes/spmd_exch_wave.F
 !||--- called by ------------------------------------------------------
 !||    resol                 ../engine/source/engine/resol.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         SUBROUTINE SPMD_EXCH_WAVE_INIT(FR_WAVE_BUF, SIZ, LENR, NSPMD)
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
           implicit none
           TYPE(FR_WAVE_), INTENT(INOUT) :: FR_WAVE_BUF
           INTEGER, INTENT(IN) :: SIZ, LENR, NSPMD
 
           !deallocate if size changed
           IF(ALLOCATED(FR_WAVE_BUF%RBUF) .AND. size(FR_WAVE_BUF%RBUF)<SIZ*LENR) THEN
-            DEALLOCATE(FR_WAVE_BUF%RBUF)
-            DEALLOCATE(FR_WAVE_BUF%SBUF)
+            call my_dealloc(FR_WAVE_BUF%RBUF)
+            call my_dealloc(FR_WAVE_BUF%SBUF)
           END IF
 
           IF(.NOT.ALLOCATED(FR_WAVE_BUF%RBUF)) THEN
-            ALLOCATE(FR_WAVE_BUF%RBUF(SIZ*LENR))
-            ALLOCATE(FR_WAVE_BUF%SBUF(SIZ*LENR))
+            call my_alloc(FR_WAVE_BUF%RBUF, SIZ*LENR, "FR_WAVE_BUF%RBUF")
+            call my_alloc(FR_WAVE_BUF%SBUF, SIZ*LENR, "FR_WAVE_BUF%SBUF")
           END IF
 
           IF(.NOT.ALLOCATED(FR_WAVE_BUF%IAD_SEND)) THEN
-            ALLOCATE(FR_WAVE_BUF%IAD_SEND(NSPMD+1))
-            ALLOCATE(FR_WAVE_BUF%IAD_RECV(NSPMD+1))
-            ALLOCATE(FR_WAVE_BUF%REQ_R(NSPMD))
-            ALLOCATE(FR_WAVE_BUF%REQ_S(NSPMD))
+            call my_alloc(FR_WAVE_BUF%IAD_SEND, NSPMD+1, "FR_WAVE_BUF%IAD_SEND")
+            call my_alloc(FR_WAVE_BUF%IAD_RECV, NSPMD+1, "FR_WAVE_BUF%IAD_RECV")
+            call my_alloc(FR_WAVE_BUF%REQ_R, NSPMD, "FR_WAVE_BUF%REQ_R")
+            call my_alloc(FR_WAVE_BUF%REQ_S, NSPMD, "FR_WAVE_BUF%REQ_S")
           END IF
           FR_WAVE_BUF%SIZE = SIZ
           FR_WAVE_BUF%LENR = LENR

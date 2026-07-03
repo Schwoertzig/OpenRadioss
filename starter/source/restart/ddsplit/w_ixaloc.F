@@ -22,16 +22,19 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    w_ixaloc    ../starter/source/restart/ddsplit/w_ixaloc.F
+!||    w_ixaloc         ../starter/source/restart/ddsplit/w_ixaloc.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_IXALOC(IXA,NNOD,CEP,P,
      +                   NUMEL,NUMEL_L,NODLOCAL,LEN_IA)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -46,7 +49,7 @@ C-----------------------------------------------
 C
 ! --------------------------
 !     allocate 2d array
-      ALLOCATE( IXTMP(NNOD,NUMEL_L) )
+      call my_alloc(IXTMP, NNOD, NUMEL_L, "IXTMP")
 ! --------------------------
 
       EL = 0
@@ -69,7 +72,7 @@ C
 C
 ! --------------------------
 !     deallocate 2d array
-      DEALLOCATE( IXTMP )
+      call my_dealloc(IXTMP)
 ! --------------------------
       RETURN
       END

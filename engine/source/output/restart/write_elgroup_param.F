@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_db              ../common_source/tools/input_output/write_db.F
 !||--- uses       -----------------------------------------------------
 !||    group_param_mod       ../common_source/modules/mat_elem/group_param_mod.F90
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE WRITE_ELGROUP_PARAM(GROUP_PARAM_TAB,NGROUP)
 C-----------------------------------------------
@@ -37,6 +39,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -50,7 +54,7 @@ C-----------------------------------------------
       my_real, DIMENSION(:,:), ALLOCATABLE :: RBUF
 C=======================================================================
       LEN = 2
-      ALLOCATE(RBUF(NGROUP,LEN))
+      call my_alloc(RBUF, NGROUP, LEN, "RBUF")
 c
       DO NG = 1, NGROUP
         RBUF(NG,1) = GROUP_PARAM_TAB(NG)%VISC_DM
@@ -58,7 +62,7 @@ c
       ENDDO
 C
       CALL WRITE_DB(RBUF,LEN*NGROUP)
-      DEALLOCATE( RBUF )
+      call my_dealloc(RBUF)
 c-----------
       RETURN
       END

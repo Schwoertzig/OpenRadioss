@@ -38,6 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||    stack_mod           ../engine/share/modules/stack_mod.F
 !||====================================================================
       SUBROUTINE STAT_C_STRAFG(ELBUF_TAB,
@@ -56,6 +57,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -115,8 +117,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C     4-NODE SHELLS
 C-----------------------------------------------
-      CALL MY_ALLOC(PTWA,MAX(STAT_NUMELC ,STAT_NUMELTG))
+      call my_alloc(PTWA, MAX(STAT_NUMELC ,STAT_NUMELTG), "PTWA")
       ALLOCATE(PTWA_P0(0:MAX(1,STAT_NUMELC_G,STAT_NUMELTG_G)))
+! TODO: non-default lower bound, convert manually
 C-----------------------------------------------
       JJ = 0
       IF(STAT_NUMELC==0) GOTO 200
@@ -172,8 +175,10 @@ C-----------------------------------------------
            ENDDO  
          ENDIF
          NLAY_MAX   = MAX(NLAY,NPT,  ELBUF_TAB(NG)%NLAY)
-         ALLOCATE(MATLY(MVSIZ*NLAY_MAX), THKLY(MVSIZ*NLAY_MAX*LAYNPT_MAX),
-     .         POSLY(MVSIZ,NLAY_MAX*LAYNPT_MAX),THK_LY(NEL,NLAY_MAX*LAYNPT_MAX))
+         call my_alloc(MATLY, MVSIZ*NLAY_MAX, "MATLY")
+         call my_alloc(THKLY, MVSIZ*NLAY_MAX*LAYNPT_MAX, "THKLY")
+         call my_alloc(POSLY, MVSIZ, NLAY_MAX*LAYNPT_MAX, "POSLY")
+         call my_alloc(THK_LY, NEL, NLAY_MAX*LAYNPT_MAX, "THK_LY")
          MATLY  = 0
          THKLY  = ZERO
          POSLY  = ZERO
@@ -303,7 +308,10 @@ C         end-of-zone pointer in wa
           PTWA(IE)=JJ
 c
          ENDDO  ! I=LFT,LLT
-         DEALLOCATE(MATLY, THKLY, POSLY, THK_LY) 
+         call my_dealloc(MATLY)
+         call my_dealloc(THKLY)
+         call my_dealloc(POSLY)
+         call my_dealloc(THK_LY)
        END IF   ! ITY==3
       ENDDO     ! NG=1,NGROUP
 
@@ -483,8 +491,10 @@ C-----------------------------------------------
           ENDDO  
          ENDIF
          NLAY_MAX   = MAX(NLAY,NPT,  ELBUF_TAB(NG)%NLAY)
-         ALLOCATE(MATLY(MVSIZ*NLAY_MAX), THKLY(MVSIZ*NLAY_MAX*LAYNPT_MAX),
-     .         POSLY(MVSIZ,NLAY_MAX*LAYNPT_MAX),THK_LY(NEL,NLAY_MAX*LAYNPT_MAX))
+         call my_alloc(MATLY, MVSIZ*NLAY_MAX, "MATLY")
+         call my_alloc(THKLY, MVSIZ*NLAY_MAX*LAYNPT_MAX, "THKLY")
+         call my_alloc(POSLY, MVSIZ, NLAY_MAX*LAYNPT_MAX, "POSLY")
+         call my_alloc(THK_LY, NEL, NLAY_MAX*LAYNPT_MAX, "THK_LY")
          MATLY  = 0
          THKLY  = ZERO
          POSLY  = ZERO
@@ -616,7 +626,10 @@ C         end-of-zone pointer
           PTWA(IE)=JJ
 c
          ENDDO  ! I=LFT,LLT
-         DEALLOCATE(MATLY, THKLY, POSLY, THK_LY) 
+         call my_dealloc(MATLY)
+         call my_dealloc(THKLY)
+         call my_dealloc(POSLY)
+         call my_dealloc(THK_LY)
        END IF   ! ITY==7
       ENDDO     ! NG=1,NGROUP
 
@@ -744,8 +757,8 @@ C----- 2nd point
       ENDIF
 
 c----------
-      DEALLOCATE(PTWA)
-      DEALLOCATE(PTWA_P0)
+      call my_dealloc(PTWA)
+      call my_dealloc(PTWA_P0)
 c-----------
       RETURN
       END

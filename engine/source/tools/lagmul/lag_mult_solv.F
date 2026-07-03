@@ -789,6 +789,8 @@ C
 !||    spmd_mumps_deal   ../engine/source/mpi/implicit/imp_spmd.F
 !||    spmd_mumps_exec   ../engine/source/mpi/implicit/imp_spmd.F
 !||    spmd_mumps_ini    ../engine/source/mpi/implicit/imp_spmd.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod      ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE LAG_MULT_SDP(
      1                    NH    ,NC      ,NCR   ,A     ,V     ,
@@ -802,6 +804,7 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1045,9 +1048,9 @@ C flag output
       IF(ISPMD==0) THEN ! storage structure on p0
         MUMPS_PAR%N         = NC               ! valid only on proc0
         MUMPS_PAR%NZ        = NC+IADH(NC+1)-1     ! valid only on proc0
-        ALLOCATE(MUMPS_PAR%A(MUMPS_PAR%NZ))
-        ALLOCATE(MUMPS_PAR%IRN(MUMPS_PAR%NZ))
-        ALLOCATE(MUMPS_PAR%JCN(MUMPS_PAR%NZ))
+        call my_alloc(MUMPS_PAR%A, MUMPS_PAR%NZ, "MUMPS_PAR%A")
+        call my_alloc(MUMPS_PAR%IRN, MUMPS_PAR%NZ, "MUMPS_PAR%IRN")
+        call my_alloc(MUMPS_PAR%JCN, MUMPS_PAR%NZ, "MUMPS_PAR%JCN")
         DO IC = 1, NC
           MUMPS_PAR%A(IC) = DIAG_H(IC)
           MUMPS_PAR%IRN(IC)=IC
@@ -1078,7 +1081,7 @@ C
             ENDIF
           ENDDO
         ENDDO
-        ALLOCATE(MUMPS_PAR%RHS(MUMPS_PAR%N))
+        call my_alloc(MUMPS_PAR%RHS, MUMPS_PAR%N, "MUMPS_PAR%RHS")
         DO IC=1,NC
           MUMPS_PAR%RHS(IC) = R(IC)
         ENDDO

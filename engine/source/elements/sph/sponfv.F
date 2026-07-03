@@ -21,17 +21,19 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    sponfv         ../engine/source/elements/sph/sponfv.F
+!||    sponfv           ../engine/source/elements/sph/sponfv.F
 !||--- called by ------------------------------------------------------
-!||    resol          ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    spmd_sphgeta   ../engine/source/mpi/elements/spmd_sph.F
-!||    spmd_sphgetd   ../engine/source/mpi/elements/spmd_sph.F
-!||    weight0        ../engine/source/elements/sph/weight.F
-!||    weight1        ../engine/source/elements/sph/weight.F
+!||    spmd_sphgeta     ../engine/source/mpi/elements/spmd_sph.F
+!||    spmd_sphgetd     ../engine/source/mpi/elements/spmd_sph.F
+!||    weight0          ../engine/source/elements/sph/weight.F
+!||    weight1          ../engine/source/elements/sph/weight.F
 !||--- uses       -----------------------------------------------------
-!||    sph_work_mod   ../common_source/modules/mat_elem/sph_work.F90
-!||    sphbox         ../engine/share/modules/sphbox.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    sph_work_mod     ../common_source/modules/mat_elem/sph_work.F90
+!||    sphbox           ../engine/share/modules/sphbox.F
 !||====================================================================
       SUBROUTINE SPONFV(X ,V        ,A       ,D       ,MS      ,
      2             SPBUF   ,ITAB    ,KXSP    ,IXSP    ,NOD2SP  ,
@@ -46,6 +48,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -166,8 +170,8 @@ C-----------------------------------------------
 C Comm D and A on remote cells
 C-----------------------------------------------
       IF(NSPMD>1)THEN
-          ALLOCATE(SPH_WORK%ASPHR(3,NSPHR))
-          ALLOCATE(DSPHR(12,NSPHR))
+          call my_alloc(SPH_WORK%ASPHR, 3, NSPHR, "SPH_WORK%ASPHR")
+          call my_alloc(DSPHR, 12, NSPHR, "DSPHR")
           CALL SPMD_SPHGETA(KXSP,SPBUF,A,SPH_WORK%ASPHR)
           CALL SPMD_SPHGETD(KXSP,IXSP,ISPHIO,X,WASPACT,NOD2SP,
      .                      SPBUF,V,A,SPH_WORK%ASPHR,DSPHR)
@@ -450,7 +454,8 @@ C-------------------------------------------
        WFEXT=WFEXT+WFEXTT
 C-------------------------------------------
       IF(NSPMD>1)THEN
-          DEALLOCATE(SPH_WORK%ASPHR,DSPHR)
+          call my_dealloc(SPH_WORK%ASPHR)
+          call my_dealloc(DSPHR)
       END IF
 C-------------------------------------------
       RETURN

@@ -35,6 +35,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    i22edge_mod                  ../common_source/modules/interfaces/cut-cell-buffer_mod.F
 !||    i22tri_mod                   ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    initbuf_mod                  ../engine/share/resol/initbuf.F
+!||    my_alloc_mod                 ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod               ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE NODALD(IFUNC    , WA4      , WA4_FVM, IFLOW  , RFLOW,  
      .                  IPARG    , ELBUF_TAB, IX     , NIX    , NUMEL, 
@@ -65,6 +67,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -118,7 +122,7 @@ C        DEFAULT - ALL ELEMS (HEXA,PENTA, SHELL, QUAD, ..)
 C           expand elem pressure to elem nodes
 C------------------------------------------------------------------      
          IF(INT22==0)THEN
-           ALLOCATE(COUNT_VOL(NUMNOD))                 
+           call my_alloc(COUNT_VOL, NUMNOD, "COUNT_VOL")
            COUNT_VOL(:) = 0                           
            DO NG = 1, NGROUP
              NEL   =IPARG(2,NG)
@@ -152,13 +156,13 @@ C------------------------------------------------------------------
                WA4(I)=WA4(I)/COUNT_VOL(I)
              ENDIF
            ENDDO                 
-           DEALLOCATE(COUNT_VOL)             
+           call my_dealloc(COUNT_VOL)
          
 C------------------------------------------------------------------
 C        CUT CELLS (INTER TYPE 22)
 C------------------------------------------------------------------      
          ELSEIF(INT22>0)THEN 
-           ALLOCATE(COUNT_VOL(NUMNOD))      
+           call my_alloc(COUNT_VOL, NUMNOD, "COUNT_VOL")
            COUNT_VOL = 0
            !---1. TAG FOR INTERSECTED BRICKS---!
            !NBF = 1+ITASK*NB/NTHREAD
@@ -244,7 +248,7 @@ c                   endif
                WA4(I)=WA4(I)/COUNT_VOL(I)
              ENDIF
            ENDDO
-           DEALLOCATE(COUNT_VOL)                  
+           call my_dealloc(COUNT_VOL)
          ENDIF
                   
 

@@ -31,7 +31,7 @@
 !||    write_matparam                 ../engine/source/output/restart/write_matparam.F
 !||====================================================================
       module write_ale_rezoning_param_mod
-      implicit none
+        implicit none
       contains
 
 !||====================================================================
@@ -42,6 +42,8 @@
 !||    write_i_c                  ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    ale_mod                    ../common_source/modules/ale/ale_mod.F
+!||    my_alloc_mod               ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod             ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine write_ale_rezoning_param(rezon)
 ! --------------------------------------------------------------------------------------------------
@@ -51,6 +53,8 @@
 ! --------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! --------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! --------------------------------------------------------------------------------------------------
 !                                                   Included files
@@ -69,7 +73,7 @@
 ! --------------------------------------------------------------------------------------------------
           ! write integer parameters
           ifix = 2
-          allocate (ibuf(ifix))
+          call my_alloc(ibuf, ifix, "ibuf")
 !
           iad = 1
           ibuf(iad) = rezon%num_nuvar_mat
@@ -77,7 +81,7 @@
           ibuf(iad) = rezon%num_nuvar_eos
 !
           call write_i_c(ibuf,ifix)
-          deallocate(ibuf)
+          call my_dealloc(ibuf)
 
 !-----------
           return

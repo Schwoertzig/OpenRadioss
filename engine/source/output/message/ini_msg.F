@@ -26,6 +26,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    radioss2               ../engine/source/engine/radioss2.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod            ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||====================================================================
       SUBROUTINE INI_MSG()
@@ -37,6 +38,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -50,7 +52,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #include "engine_message_description.inc"
-      ALLOCATE(MESSAGESFILE(SMESSAGESFILE))  
+      ALLOCATE(MESSAGESFILE(SMESSAGESFILE))
       DO I=1,SMESSAGESFILE  
         MESSAGESFILE(I)=MESSAGESDATA(I)
       END DO

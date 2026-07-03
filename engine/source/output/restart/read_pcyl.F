@@ -21,14 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    read_pcyl   ../engine/source/output/restart/read_pcyl.F
+!||    read_pcyl        ../engine/source/output/restart/read_pcyl.F
 !||--- called by ------------------------------------------------------
-!||    rdresb      ../engine/source/output/restart/rdresb.F
+!||    rdresb           ../engine/source/output/restart/rdresb.F
 !||--- calls      -----------------------------------------------------
-!||    read_db     ../common_source/tools/input_output/read_db.F
-!||    read_i_c    ../common_source/tools/input_output/write_routines.c
+!||    read_db          ../common_source/tools/input_output/read_db.F
+!||    read_i_c         ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
-!||    loads_mod   ../common_source/modules/loads/loads_mod.F90
+!||    loads_mod        ../common_source/modules/loads/loads_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE READ_PCYL(LOADS)
 C-----------------------------------------------
@@ -38,6 +40,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -75,7 +79,7 @@ c
         CALL READ_I_C(NSEG_ARR,1)
         NSEG = NSEG_ARR(1)
         LLINT = 4 + NSEG*4
-        ALLOCATE (ITMP(LLINT))
+        call my_alloc(ITMP, LLINT, "ITMP")
         CALL READ_I_C(ITMP,LLINT)
         
         LOADS%LOAD_CYL(I)%ID       = ITMP(1)
@@ -106,7 +110,7 @@ c
         CALL READ_I_C(LOADS%LOAD_CYL(I)%SEGMENT_ADRESS,4*MY_SIZE)
         ! ---------------
 c        
-        DEALLOCATE(ITMP)
+        call my_dealloc(ITMP)
       ENDDO
 c-----------
       RETURN

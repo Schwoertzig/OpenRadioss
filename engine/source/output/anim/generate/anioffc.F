@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    my_alloc_mod      ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod    ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE ANIOFFC(ELBUF_TAB,IPARG ,IOFF   ,EL2FA,NBF    ,
      .                   IADD ,NBF_L ,NBPART ,IADG ,NODGLOB,
@@ -42,6 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -73,7 +75,7 @@ C     REAL
       INTEGER,DIMENSION(:),ALLOCATABLE :: IOFFBUF
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
-      CALL MY_ALLOC(IOFFBUF,NBF_L)
+      call my_alloc(IOFFBUF, NBF_L, "IOFFBUF")
       NN1 = 1
       NN2 = 1
       NN3 = 1
@@ -187,6 +189,6 @@ C-----------------------------------------------
         END IF
       ENDIF
 C-----------
-      DEALLOCATE(IOFFBUF)
+      call my_dealloc(IOFFBUF)
       RETURN
       END

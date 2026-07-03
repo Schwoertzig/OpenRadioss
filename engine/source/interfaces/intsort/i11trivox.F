@@ -21,17 +21,19 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i11trivox     ../engine/source/interfaces/intsort/i11trivox.F
+!||    i11trivox        ../engine/source/interfaces/intsort/i11trivox.F
 !||--- called by ------------------------------------------------------
-!||    i11buce_vox   ../engine/source/interfaces/intsort/i11buce.F
+!||    i11buce_vox      ../engine/source/interfaces/intsort/i11buce.F
 !||--- calls      -----------------------------------------------------
-!||    i11sto_vox    ../engine/source/interfaces/intsort/i11sto.F
-!||    ireallocate   ../engine/share/modules/realloc_mod.F
-!||    my_barrier    ../engine/source/system/machine.F
+!||    i11sto_vox       ../engine/source/interfaces/intsort/i11sto.F
+!||    ireallocate      ../engine/share/modules/realloc_mod.F
+!||    my_barrier       ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
-!||    realloc_mod   ../engine/share/modules/realloc_mod.F
-!||    tri11         ../engine/share/modules/tri11_mod.F
-!||    tri7box       ../engine/share/modules/tri7box.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    realloc_mod      ../engine/share/modules/realloc_mod.F
+!||    tri11            ../engine/share/modules/tri11_mod.F
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE I11TRIVOX(
      1      IRECTS, IRECTM , X      , NRTM      ,NRTSR ,
@@ -52,6 +54,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -158,7 +162,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C
       IF(FLAGREMNODE==2) THEN
-        ALLOCATE(TAGREMLINE(NRTS))
+        call my_alloc(TAGREMLINE, NRTS, "TAGREMLINE")
         TAGREMLINE(1:NRTS) = 0
       ENDIF
 C  
@@ -177,8 +181,11 @@ C
       IF(ITASK == 0)THEN
         MAX_ADD = max(1,4*(NRTS+NRTSR))
         ALLOCATE(LCHAIN_ELEM(1:MAX_ADD))
+! TODO: non-default lower bound, convert manually
         ALLOCATE(LCHAIN_NEXT(1:MAX_ADD))
+! TODO: non-default lower bound, convert manually
         ALLOCATE(LCHAIN_LAST(1:MAX_ADD))
+! TODO: non-default lower bound, convert manually
       END IF   
       
             CALL MY_BARRIER      !all threads wait for allocation       
@@ -684,10 +691,10 @@ C=======================================================================
           END DO
         END DO   
         !CHAINED LIST DEALLOCATION
-        DEALLOCATE(LCHAIN_NEXT)
-        DEALLOCATE(LCHAIN_ELEM)
-        DEALLOCATE(LCHAIN_LAST)
-        IF(FLAGREMNODE==2) DEALLOCATE(TAGREMLINE)          
+        call my_dealloc(LCHAIN_NEXT)
+        call my_dealloc(LCHAIN_ELEM)
+        call my_dealloc(LCHAIN_LAST)
+        IF(FLAGREMNODE==2) call my_dealloc(TAGREMLINE)
       END IF    
   
 C___________________________________________________________________________________________________________

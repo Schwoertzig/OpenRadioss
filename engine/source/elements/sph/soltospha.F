@@ -21,20 +21,22 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    soltospha      ../engine/source/elements/sph/soltospha.F
+!||    soltospha        ../engine/source/elements/sph/soltospha.F
 !||--- called by ------------------------------------------------------
-!||    resol          ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg         ../engine/source/output/message/message.F
-!||    arret          ../engine/source/system/arret.F
-!||    my_barrier     ../engine/source/system/machine.F
-!||    startimeg      ../engine/source/system/timer.F
-!||    stoptimeg      ../engine/source/system/timer.F
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    my_barrier       ../engine/source/system/machine.F
+!||    startimeg        ../engine/source/system/timer.F
+!||    stoptimeg        ../engine/source/system/timer.F
 !||--- uses       -----------------------------------------------------
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    message_mod    ../engine/share/message_module/message_mod.F
-!||    soltosph_mod   ../engine/share/modules/soltosph_mod.F
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    soltosph_mod     ../engine/share/modules/soltosph_mod.F
 !||====================================================================
       SUBROUTINE SOLTOSPHA(
      1   ITASK   ,V       ,A        ,MS      ,PM      ,
@@ -49,6 +51,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -155,7 +159,7 @@ C-----------------------------------------------
      9 0.650000000000000,0.750000000000000,0.850000000000000/
 C-----------------------------------------------
       IF(ITASK==0)THEN
-        ALLOCATE(WPARTSAV(NTHREAD,NPSAV,NPART),STAT=IERROR)
+        call my_alloc(WPARTSAV, NTHREAD, NPSAV, NPART, "WPARTSAV", stat=IERROR)
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .                C1='(SOLIDS to SPH)')
@@ -432,7 +436,7 @@ C
 C
       CALL MY_BARRIER
 C
-      IF(ITASK==0) DEALLOCATE(WPARTSAV)
+      IF(ITASK==0) call my_dealloc(WPARTSAV)
 C-----------------------------------------------
       RETURN
       END SUBROUTINE SOLTOSPHA

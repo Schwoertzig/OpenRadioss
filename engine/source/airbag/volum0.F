@@ -27,6 +27,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sum_6_float         ../engine/source/system/parit.F
 !||--- uses       -----------------------------------------------------
 !||    monvol_struct_mod   ../engine/share/modules/monvol_struct_mod.F
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE VOLUM0(IVOLU   ,RVOLU ,VOL  ,X  ,SURF_NODES,
      2                  N       ,NN    ,SURF_ELTYP,SURF_ELEM,
@@ -38,6 +39,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -68,7 +70,8 @@ C PORO(*) : PORO=0 no node in contact
 C           Poro = 1 All the nodes in contact ...
 C--------------------------------------------------------------
 
-      ALLOCATE(F1(NN + T_MONVOLN%NB_FILL_TRI), F2(NN + T_MONVOLN%NB_FILL_TRI))
+      call my_alloc(F1, NN + T_MONVOLN%NB_FILL_TRI, "F1")
+      call my_alloc(F2, NN + T_MONVOLN%NB_FILL_TRI, "F2")
       IF(INTBAG==0)THEN
         DO I=1,NN
           II=SURF_ELEM(I)

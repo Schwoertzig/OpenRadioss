@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod         ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    message_mod           ../engine/share/message_module/message_mod.F
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||    output_mod            ../common_source/modules/output/output_mod.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||    tri25ebox             ../engine/share/modules/tri25ebox.F
@@ -52,6 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "assert.inc"
 C-----------------------------------------------
@@ -296,7 +298,7 @@ C
         ENDDO
 C Deallocation R
         IF(IALLOCR>0) THEN
-          DEALLOCATE(BBUFR)
+          call my_dealloc(BBUFR)
         END IF
 C
 C Attente ISEND
@@ -308,7 +310,7 @@ C
         ENDDO
 C Deallocation S
         IF(IALLOCS>0) THEN
-          DEALLOCATE(BBUFS)
+          call my_dealloc(BBUFS)
         END IF
 C
 #endif

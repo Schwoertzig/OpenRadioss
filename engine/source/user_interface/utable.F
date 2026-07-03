@@ -101,6 +101,8 @@ C
 !||    table_interp          ../engine/source/tools/curve/table_tools.F
 !||--- uses       -----------------------------------------------------
 !||    interface_table_mod   ../engine/share/modules/table_mod.F
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||    table_glob_mod        ../engine/share/modules/table_glob_mod.F
 !||====================================================================
       SUBROUTINE GET_TABLE_VALUE(ITABLE,XX,XXDIM,YY) 
@@ -109,6 +111,8 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -120,12 +124,12 @@ C-----------------------------------------------
      .       YY
        my_real, DIMENSION(:),ALLOCATABLE :: XX2
 
-      ALLOCATE (XX2(XXDIM))
+      call my_alloc(XX2, XXDIM, "XX2")
       XX2(1:XXDIM)=XX(1:XXDIM)
 C
       CALL TABLE_INTERP(TABLE(ITABLE),XX2,YY)
       
-      DEALLOCATE(XX2)
+      call my_dealloc(XX2)
       RETURN
       END
 !||====================================================================
@@ -135,6 +139,8 @@ C
 !||    table_interp_dydx      ../engine/source/tools/curve/table_tools.F
 !||--- uses       -----------------------------------------------------
 !||    interface_table_mod    ../engine/share/modules/table_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    table_glob_mod         ../engine/share/modules/table_glob_mod.F
 !||====================================================================
       SUBROUTINE GET_TABLE_VALUE_DYDX(ITABLE,XX,XXDIM,YY,DYDX) 
@@ -143,6 +149,8 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -154,13 +162,13 @@ C-----------------------------------------------
      .       YY,DYDX
        my_real, DIMENSION(:),ALLOCATABLE :: XX2
 
-      ALLOCATE (XX2(XXDIM))
+      call my_alloc(XX2, XXDIM, "XX2")
       XX2(1:XXDIM)=XX(1:XXDIM)
 C
       call my_flush(6)
       CALL TABLE_INTERP_DYDX(TABLE(ITABLE),XX2,XXDIM,YY,DYDX)
       
-      DEALLOCATE(XX2)
+      call my_dealloc(XX2)
       RETURN
       END
 !||====================================================================
@@ -201,6 +209,8 @@ C
 !||    table_vinterp         ../engine/source/tools/curve/table_tools.F
 !||--- uses       -----------------------------------------------------
 !||    interface_table_mod   ../engine/share/modules/table_mod.F
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||    table_glob_mod        ../engine/share/modules/table_glob_mod.F
 !||====================================================================
       SUBROUTINE GET_VTABLE_VALUE(ITABLE,NEL0,IPOS,XX,XXDIM,YY,DYDX1) 
@@ -209,6 +219,8 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -225,16 +237,16 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 C
-      ALLOCATE (XX2(NEL0,XXDIM))
-      ALLOCATE (IPOS2(NEL0,XXDIM))
+      call my_alloc(XX2, NEL0, XXDIM, "XX2")
+      call my_alloc(IPOS2, NEL0, XXDIM, "IPOS2")
 
       IPOS2(1:NEL0,1:XXDIM) = IPOS(1:NEL0,1:XXDIM)
       XX2(1:NEL0,1:XXDIM) = XX(1:NEL0,1:XXDIM)
 
       CALL TABLE_VINTERP(TABLE(ITABLE),NEL0,NEL0,IPOS2,XX2,YY,DYDX1)
 
-      DEALLOCATE(XX2)
-      DEALLOCATE(IPOS2)
+      call my_dealloc(XX2)
+      call my_dealloc(IPOS2)
 
       RETURN
       END

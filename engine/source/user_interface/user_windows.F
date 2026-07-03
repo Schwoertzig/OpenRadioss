@@ -30,6 +30,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_exch_userwi       ../engine/source/mpi/user_interface/spmd_exch_userwi.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod            ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    user_windows_mod       ../common_source/modules/user_windows_mod.F
 !||====================================================================
        SUBROUTINE USER_WINDOWS_ROUTINE( ISPMD        ,NSPMD         ,USERL_AVAIL   ,
@@ -48,6 +50,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -81,17 +85,17 @@ C-----------------------------------------------
             DTU = EP30
             NUVARI = USER_WINDOWS%NUVARI - 100
            
-            ALLOCATE(USER_ITAB(USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_D( 3*USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_X( 3*USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_V( 3*USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_VR(3*USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_MS(USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_IN(USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_STIFN(USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_STIFR(USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_A(3*USER_WINDOWS%N_USERNODS))
-            ALLOCATE(USER_AR(3*USER_WINDOWS%N_USERNODS))
+            call my_alloc(USER_ITAB, USER_WINDOWS%N_USERNODS, "USER_ITAB")
+            call my_alloc(USER_D, 3*USER_WINDOWS%N_USERNODS, "USER_D")
+            call my_alloc(USER_X, 3*USER_WINDOWS%N_USERNODS, "USER_X")
+            call my_alloc(USER_V, 3*USER_WINDOWS%N_USERNODS, "USER_V")
+            call my_alloc(USER_VR, 3*USER_WINDOWS%N_USERNODS, "USER_VR")
+            call my_alloc(USER_MS, USER_WINDOWS%N_USERNODS, "USER_MS")
+            call my_alloc(USER_IN, USER_WINDOWS%N_USERNODS, "USER_IN")
+            call my_alloc(USER_STIFN, USER_WINDOWS%N_USERNODS, "USER_STIFN")
+            call my_alloc(USER_STIFR, USER_WINDOWS%N_USERNODS, "USER_STIFR")
+            call my_alloc(USER_A, 3*USER_WINDOWS%N_USERNODS, "USER_A")
+            call my_alloc(USER_AR, 3*USER_WINDOWS%N_USERNODS, "USER_AR")
 
             ! -----------------------------------------------------
             !  User Windows will only receive the nodes it defined
@@ -152,17 +156,17 @@ C-----------------------------------------------
                AR(3*(ND-1)+3) = USER_AR(3*(I-1)+3)
             ENDDO
 
-            DEALLOCATE(USER_ITAB)
-            DEALLOCATE(USER_D)
-            DEALLOCATE(USER_X)
-            DEALLOCATE(USER_V)
-            DEALLOCATE(USER_VR)
-            DEALLOCATE(USER_MS)
-            DEALLOCATE(USER_IN)
-            DEALLOCATE(USER_STIFN)
-            DEALLOCATE(USER_STIFR)
-            DEALLOCATE(USER_A)
-            DEALLOCATE(USER_AR)
+            call my_dealloc(USER_ITAB)
+            call my_dealloc(USER_D)
+            call my_dealloc(USER_X)
+            call my_dealloc(USER_V)
+            call my_dealloc(USER_VR)
+            call my_dealloc(USER_MS)
+            call my_dealloc(USER_IN)
+            call my_dealloc(USER_STIFN)
+            call my_dealloc(USER_STIFR)
+            call my_dealloc(USER_A)
+            call my_dealloc(USER_AR)
 
 
             DT2 = MIN(DT2,DTU)

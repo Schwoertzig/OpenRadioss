@@ -30,6 +30,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c              ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    groupdef_mod           ../common_source/modules/groupdef_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||====================================================================
       SUBROUTINE W_GR_ENTITY(IGR,NGR,LENIGR)
@@ -41,6 +43,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -69,7 +73,7 @@ C-----------------------------------------------
       ENDDO ! DO IGU=1,NGR
 !
       ERR = 0
-      ALLOCATE (IGROUP(LENIGR), STAT=ERR)
+      call my_alloc(IGROUP, LENIGR, "IGROUP", stat=ERR)
       IGROUP(1:LENIGR) = 0  
       L_GROUP = 0
 !
@@ -112,7 +116,7 @@ C-----------------------------------------------
 !---------
       CALL WRITE_I_C(IGROUP,L_GROUP)
 !---------
-      DEALLOCATE (IGROUP)
+      call my_dealloc(IGROUP)
 !---------
       RETURN
       END

@@ -113,13 +113,14 @@ C-----------------------------------------------
 C-----------------------------------------------
       DATA MESS/'RIGID BODY MERGE DEFINITION             '/
 C-----------------------------------------------
-      ALLOCATE(ITAG(NUMNOD),WORK(NUMNOD))
-      CALL MY_ALLOC(TABRB,NRBYKIN,2)
-      CALL MY_ALLOC(NB_MAIN,NRBYKIN)
-      CALL MY_ALLOC(NSECONDARY,NRBYKIN)
-      CALL MY_ALLOC(TAG1,NRBYKIN)
-      CALL MY_ALLOC(TAG2,NRBYKIN)
-      CALL MY_ALLOC(TABBOUCLE,NRBYKIN+1)
+      call my_alloc(ITAG, NUMNOD, "ITAG")
+      call my_alloc(WORK, NUMNOD, "WORK")
+      CALL MY_ALLOC(TABRB,NRBYKIN,2,"TABRB")
+      CALL MY_ALLOC(NB_MAIN,NRBYKIN,"NB_MAIN")
+      CALL MY_ALLOC(NSECONDARY,NRBYKIN,"NSECONDARY")
+      CALL MY_ALLOC(TAG1,NRBYKIN,"TAG1")
+      CALL MY_ALLOC(TAG2,NRBYKIN,"TAG2")
+      CALL MY_ALLOC(TABBOUCLE,NRBYKIN+1,"TABBOUCLE")
       J = 0
       N = 0
       NOPT = 0
@@ -168,12 +169,12 @@ C
         ENDDO
       ENDDO
 C
-      ALLOCATE (RBMERGE(NRBYKIN))
+      allocate(RBMERGE(NRBYKIN))
       DO I=1,NRBYKIN
-        ALLOCATE (RBMERGE(I)%IDSECONDARY(NRBYKIN))
+        call my_alloc(RBMERGE(I)%IDSECONDARY, NRBYKIN, "RBMERGE(I)%IDSECONDARY")
         RBMERGE(I)%NBSECONDARY=0
-        ALLOCATE (RBMERGE(I)%NODE(NXTRA_NODE))
-        ALLOCATE (RBMERGE(I)%FLAG_NODE(NXTRA_NODE))
+        call my_alloc(RBMERGE(I)%NODE, NXTRA_NODE, "RBMERGE(I)%NODE")
+        call my_alloc(RBMERGE(I)%FLAG_NODE, NXTRA_NODE, "RBMERGE(I)%FLAG_NODE")
         RBMERGE(I)%NNODE=0
         RBMERGE(I)%LEVEL=0
         RBMERGE(I)%FLAG_MAIN = 0
@@ -228,7 +229,7 @@ C------------------------------------
               ENDIF 
             ENDDO
           END IF  ! (M_TYPE == 4) THEN
-          IF (IRBM == 0)THEN  !  l'ID du rbody n'existe pas    
+          IF (IRBM == 0)THEN  
             CALL ANCMSG(MSGID=1636,
      .                  MSGTYPE=MSGERROR,
      .                  ANMODE=ANINFO,
@@ -255,7 +256,7 @@ C------------------------------------
               ENDIF                                                     
             ENDDO
           END IF  ! (S_TYPE == 4) THEN
-          IF (IRBS == 0)THEN  !  l'ID du rbody n'existe pas    
+          IF (IRBS == 0)THEN  
             CALL ANCMSG(MSGID=1636,
      .                  MSGTYPE=MSGERROR,
      .                  ANMODE=ANINFO,
@@ -321,14 +322,14 @@ c
         ENDIF ! S_TYPE == 1
       ENDDO
 C
-      DO I=1,SMGRBY ! 2ERE PASSE POUR LES MERGE RBODY/NODE & SET OF NODES
+      DO I=1,SMGRBY ! 2nd PASS For the MERGE RBODY/NODE & SET OF NODES
         IMAIN = MGRBY(1,I)
         M_TYPE = MGRBY(2,I)
         ISECONDARY = MGRBY(3,I)
         S_TYPE = MGRBY(4,I)
         FLAGG_OPT = MGRBY(5,I)
         ID_OPT = MGRBY(6,I)
-        IF((S_TYPE == 2).OR.(S_TYPE == 3)) THEN
+        IF((S_TYPE == 2).OR.(S_TYPE == 3).OR.(S_TYPE == 5)) THEN !5 will be done like 2
 c
         CALL FRETITL2(TITR,NOM_OPT(LNOPT1-LTITR+1,PTR_NOPT_RBMERGE+MGRBY(7,I)),LTITR) 
 c
@@ -357,7 +358,7 @@ C------------------------------------
               ENDIF 
             ENDDO
           END IF  ! (M_TYPE == 4) THEN
-          IF (IRBM == 0)THEN  !  l'ID du rbody n'existe pas    
+          IF (IRBM == 0)THEN  
             CALL ANCMSG(MSGID=1636,
      .                  MSGTYPE=MSGERROR,
      .                  ANMODE=ANINFO,
@@ -365,6 +366,25 @@ C------------------------------------
      .                  C1=TITR,
      .                  I2=IMAIN)                           
           ENDIF 
+          IF (S_TYPE == 5) THEN
+            IRBS=0                                  
+            DO K=1,NRBYKIN  
+              PART_ID = NPBY(21,K)
+              IF (PART_ID==0) CYCLE
+              IF (ISECONDARY == IPART(4,PART_ID)) THEN
+                IRBS=K                     
+                EXIT
+              ENDIF                                                     
+            ENDDO 
+            IF (IRBS == 0)THEN   
+              CALL ANCMSG(MSGID=1636,
+     .                    MSGTYPE=MSGERROR,
+     .                    ANMODE=ANINFO,
+     .                    I1=ID_OPT,
+     .                    C1=TITR,
+     .                    I2=ISECONDARY)                              
+            ENDIF 
+          END IF  ! (S_TYPE == 5) THEN
          
           IDNODE=0
           NN=0
@@ -372,29 +392,34 @@ C------------------------------------
             IDNODE = USR2SYS(MGRBY(3,I),ITABM1,MESS,ID)
           ELSEIF(S_TYPE == 3) THEN ! SECONDARY IS A GRNOD
             NN = NODGRNR5(MGRBY(3,I),IGS,WORK,IGRNOD,ITABM1,MESS) 
+          ELSEIF(S_TYPE == 5) THEN ! SECONDARY IS A MAIN NODE
+            IDNODE = NPBY(1,IRBS)
           ENDIF    
 
 
           IF((IRBM /= 0).AND.(IDNODE /= 0)) THEN ! SECONDARY IS A NODE
  
-            WRITE(IOUT,1300) IMAIN, ISECONDARY, FLAGG_OPT
-            MESS2 ='SECONDARY NODE '
-
-            IF(ITAG(IDNODE) == 0) THEN
-              ITAG(IDNODE) = IRBM
-            ELSEIF(ITAG(IDNODE) == IRBM) THEN
-              FLAG_DOUBLON  = 1
-              CALL ANCMSG(MSGID=1027,
-     .                    MSGTYPE=MSGWARNING,
-     .                    ANMODE=ANINFO_BLIND_1,
-     .                    I1=ID_OPT,
-     .                    C1=TITR,
-     .                    I2=IMAIN,
-     .                    C2=MESS2,
-     .                    I3=ISECONDARY,
-     .                    I4=FLAGG_OPT)
-            ENDIF
-
+             IF(S_TYPE == 2) THEN ! SECONDARY IS A NODE
+              WRITE(IOUT,1300) IMAIN, ISECONDARY, FLAGG_OPT
+              MESS2 ='SECONDARY NODE '
+             
+              IF(ITAG(IDNODE) == 0) THEN
+                ITAG(IDNODE) = IRBM
+              ELSEIF(ITAG(IDNODE) == IRBM) THEN
+                FLAG_DOUBLON  = 1
+                CALL ANCMSG(MSGID=1027,
+     .                      MSGTYPE=MSGWARNING,
+     .                      ANMODE=ANINFO_BLIND_1,
+     .                      I1=ID_OPT,
+     .                      C1=TITR,
+     .                      I2=IMAIN,
+     .                      C2=MESS2,
+     .                      I3=ISECONDARY,
+     .                      I4=FLAGG_OPT)
+              ENDIF
+             ELSEIF(S_TYPE == 5) THEN ! SECONDARY IS A MAIN NODE Hierarchy
+               WRITE(IOUT,1310) IMAIN, NPBY(6,IRBS),ITAB(IDNODE), FLAGG_OPT
+             END IF
             IF(FLAG_DOUBLON == 0) THEN
               RBMERGE(IRBM)%ID = IMAIN
               RBMERGE(IRBM)%NNODE = RBMERGE(IRBM)%NNODE+1
@@ -457,9 +482,9 @@ C SORTING OF XTRA_NODES BY INCREASING FLAGS
 C------------------------------------
       DO I=1,NRBYKIN
         IF(RBMERGE(I)%NNODE > 0) THEN
-          ALLOCATE(INDEX(2*RBMERGE(I)%NNODE))
+          call my_alloc(INDEX, 2*RBMERGE(I)%NNODE, "INDEX")
           INDEX(1:2*RBMERGE(I)%NNODE) = 0
-          ALLOCATE(INUM(RBMERGE(I)%NNODE,2))
+          call my_alloc(INUM, RBMERGE(I)%NNODE, 2, "INUM")
           DO J=1,RBMERGE(I)%NNODE
             INDEX(J) = J
             INUM(J,1) = RBMERGE(I)%FLAG_NODE(J)
@@ -470,8 +495,8 @@ C------------------------------------
             RBMERGE(I)%FLAG_NODE(J) = INUM(INDEX(J),1)
             RBMERGE(I)%NODE(J) = INUM(INDEX(J),2)
           ENDDO
-          DEALLOCATE(INDEX)
-          DEALLOCATE(INUM)       
+          CALL MY_DEALLOC(INDEX)
+          CALL MY_DEALLOC(INUM)
         ENDIF
       ENDDO
 C------------------------------------
@@ -534,13 +559,15 @@ C------------------------------------
      .                  RBY    ,NOM_OPT, ITAB,IBGR,IGRV)
       ENDIF
 c
-      DEALLOCATE(RBMERGE,WORK,ITAG)
-      DEALLOCATE(TABRB)
-      DEALLOCATE(NB_MAIN)
-      DEALLOCATE(NSECONDARY)
-      DEALLOCATE(TAG1)
-      DEALLOCATE(TAG2)
-      DEALLOCATE(TABBOUCLE)
+      CALL MY_DEALLOC(WORK)
+      CALL MY_DEALLOC(ITAG)
+      DEALLOCATE(RBMERGE)
+      CALL MY_DEALLOC(TABRB)
+      CALL MY_DEALLOC(NB_MAIN)
+      CALL MY_DEALLOC(NSECONDARY)
+      CALL MY_DEALLOC(TAG1)
+      CALL MY_DEALLOC(TAG2)
+      CALL MY_DEALLOC(TABBOUCLE)
 cC-----------
       RETURN
 C
@@ -554,6 +581,11 @@ C
 1300  FORMAT(/10X,'MAIN RIGID BODY ID                    ',I10
      .       /10X,'SECONDARY NODE ID                           ',I10
      .       /10X,'IFLAG                                   ',I10)
+1310  FORMAT(/10X,'MAIN RIGID BODY ID                    ',I10
+     .       /10X,'SECONDARY RIGID BODY ID               ',I10
+     .       /10X,'MERGE BY HIERARCHY:                   ',
+     .       /10X,'MAIN NODE OF SECONDARY RBODY ADDED AS SECONDARY NODE   ',I10
+     .       /10X,'IFLAG                                 ',I10)
 1400  FORMAT(/10X,'MAIN RIGID BODY ID                    ',I10
      .       /10X,'SECONDARY SET OF NODE ID                    ',I10
      .       /10X,'IFLAG                                   ',I10
@@ -785,14 +817,14 @@ C-----------------------------------------------
 !   RBMERGE(IRBM)%FLAG_MAIN   :: Flag relating the rigid option merge to the MAIN
 !   RBMERGE(IRBM)%IDSECONDARY(J) :: SECONDARY rigid bodys attached to the MAIN
 C-----------------------------------------------
-      CALL MY_ALLOC(PILE,NRBYKIN)
-      CALL MY_ALLOC(NPBY_TMP,NNPBY,NRBYKIN)
-      CALL MY_ALLOC(INDEX,NRBYKIN)
-      CALL MY_ALLOC(LPBY_TMP,SLRBODY)
-      CALL MY_ALLOC(NOM_OPT_TMP,LNOPT1,NRBYKIN)
-      CALL MY_ALLOC(RBY_TMP,NRBY,NRBYKIN)
+      CALL MY_ALLOC(PILE,NRBYKIN,"PILE")
+      CALL MY_ALLOC(NPBY_TMP,NNPBY,NRBYKIN,"NPBY_TMP")
+      CALL MY_ALLOC(INDEX,NRBYKIN,"INDEX")
+      CALL MY_ALLOC(LPBY_TMP,SLRBODY,"LPBY_TMP")
+      CALL MY_ALLOC(NOM_OPT_TMP,LNOPT1,NRBYKIN,"NOM_OPT_TMP")
+      CALL MY_ALLOC(RBY_TMP,NRBY,NRBYKIN,"RBY_TMP")
 
-      ALLOCATE(ITAG(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
       INDEX(1:NRBYKIN) = 0
       OFFSET = 0
       OFFSETID = 0
@@ -999,13 +1031,13 @@ C-------------------------------------
 
       ENDDO
 C
-      DEALLOCATE(ITAG)
-      DEALLOCATE(PILE)
-      DEALLOCATE(NPBY_TMP)
-      DEALLOCATE(INDEX)
-      DEALLOCATE(LPBY_TMP)
-      DEALLOCATE(NOM_OPT_TMP)
-      DEALLOCATE(RBY_TMP)
+      CALL MY_DEALLOC(ITAG)
+      CALL MY_DEALLOC(PILE)
+      CALL MY_DEALLOC(NPBY_TMP)
+      CALL MY_DEALLOC(INDEX)
+      CALL MY_DEALLOC(LPBY_TMP)
+      CALL MY_DEALLOC(NOM_OPT_TMP)
+      CALL MY_DEALLOC(RBY_TMP)
       RETURN
 C
 1000  FORMAT(/5X,'MAIN RIGID BODY ID ',I10)
@@ -1107,10 +1139,10 @@ C-----------------------------------------------
       INTEGER,DIMENSION(:,:),ALLOCATABLE :: NOM_OPT_TMP
       my_real,DIMENSION(:,:),ALLOCATABLE ::  RBY_TMP
 C-----------------------------------------------
-      CALL MY_ALLOC(NPBY_TMP,NNPBY,NRBYKIN+NRBYLAG)
-      CALL MY_ALLOC(NOM_OPT_TMP,LNOPT1,NRBYKIN+NRBYLAG)
-      CALL MY_ALLOC(INDEX,NRBYKIN+NRBYLAG)
-      CALL MY_ALLOC(RBY_TMP,NRBY,NRBYKIN+NRBYLAG)
+      CALL MY_ALLOC(NPBY_TMP,NNPBY,NRBYKIN+NRBYLAG,"NPBY_TMP")
+      CALL MY_ALLOC(NOM_OPT_TMP,LNOPT1,NRBYKIN+NRBYLAG,"NOM_OPT_TMP")
+      CALL MY_ALLOC(INDEX,NRBYKIN+NRBYLAG,"INDEX")
+      CALL MY_ALLOC(RBY_TMP,NRBY,NRBYKIN+NRBYLAG,"RBY_TMP")
 C
       NEW_SIZE = 0       
       DO I=1,NRBYKIN+NRBYLAG
@@ -1145,10 +1177,10 @@ C--  SECONDARY RBODY - put at the end of the list
       ENDDO
 C
       NRBYKIN=NEW_SIZE-NRBYLAG
-      DEALLOCATE(NPBY_TMP)
-      DEALLOCATE(NOM_OPT_TMP)
-      DEALLOCATE(INDEX)
-      DEALLOCATE(RBY_TMP)
+      CALL MY_DEALLOC(NPBY_TMP)
+      CALL MY_DEALLOC(NOM_OPT_TMP)
+      CALL MY_DEALLOC(INDEX)
+      CALL MY_DEALLOC(RBY_TMP)
 
 C
       RETURN

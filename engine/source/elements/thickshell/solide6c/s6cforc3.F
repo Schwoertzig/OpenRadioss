@@ -69,6 +69,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    glob_therm_mod         ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    mmain_mod              ../engine/source/materials/mat_share/mmain.F90
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
 !||    nlocal_reg_mod         ../common_source/modules/nlocal_reg_mod.F
 !||    output_mod             ../common_source/modules/output/output_mod.F90
 !||    s6cdlenmax_sm_mod      ../engine/source/elements/thickshell/solide6c/s6cdlenmax_sm.F90
@@ -123,6 +124,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -371,7 +373,7 @@ C=======================================================================
       IS = 1
       IT = 1
       INLOC = IPARG(78,NG)
-      ALLOCATE(VAR_REG(NEL,NLAY))
+      call my_alloc(VAR_REG, NEL, NLAY, "VAR_REG")
       SZ_R1_FREE=MVSIZ
       SZ_IX=NUMELQ+NUMELS+NSVOIS
 C-----------

@@ -1593,6 +1593,8 @@ C
 !||    intstamp_glob_mod   ../engine/share/modules/intstamp_glob_mod.F
 !||    intstamp_mod        ../engine/share/modules/intstamp_mod.F
 !||    message_mod         ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||    sensor_mod          ../common_source/modules/sensor_mod.F90
 !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
@@ -1611,6 +1613,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1700,12 +1704,12 @@ C First COMM : COMM number of main remote node
 C------------------------------------------------------------------------------
         IF(NIACTIF /= 0) THEN
 C alloc comm structure
-          ALLOCATE(IBUFS(NIACTIF*NSPMD),STAT=IERROR)
+          call my_alloc(IBUFS, NIACTIF*NSPMD, "IBUFS", stat=IERROR)
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
           ENDIF
-          ALLOCATE(IBUFR(NIACTIF*NSPMD),STAT=IERROR)
+          call my_alloc(IBUFR, NIACTIF*NSPMD, "IBUFR", stat=IERROR)
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
@@ -1768,25 +1772,25 @@ C------------------------------------------------------------------------------
 C alloc comm structure
           DO NI = 1, NIACTIF
             NIN = INTERACTIF(NI)
-            IF(ASSOCIATED( NMVSI(NIN)%P )) DEALLOCATE(NMVSI(NIN)%P)
+            IF(ASSOCIATED( NMVSI(NIN)%P )) call my_dealloc(NMVSI(NIN)%P)
             ALLOCATE(NMVSI(NIN)%P(NODSI(NI)),STAT=IERROR1)
 
-            IF(ASSOCIATED( TEMPNOD(NIN)%P )) DEALLOCATE(TEMPNOD(NIN)%P)
+            IF(ASSOCIATED( TEMPNOD(NIN)%P )) call my_dealloc(TEMPNOD(NIN)%P)
             ALLOCATE(TEMPNOD(NIN)%P(NODSI(NI)),STAT=IERROR1)
 
           ENDDO
 
-          IF(ALLOCATED(IBUFS)) DEALLOCATE(IBUFS)
+          IF(ALLOCATED(IBUFS)) call my_dealloc(IBUFS)
 
-          ALLOCATE(IBUFS(NSPMD*NODFITOTS),STAT=IERROR)
+          call my_alloc(IBUFS, NSPMD*NODFITOTS, "IBUFS", stat=IERROR)
 
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
           ENDIF
 
-          IF(ALLOCATED(IBUFR)) DEALLOCATE(IBUFR)
-          ALLOCATE(IBUFR(NSPMD*NODFITOTR),STAT=IERROR)
+          IF(ALLOCATED(IBUFR)) call my_dealloc(IBUFR)
+          call my_alloc(IBUFR, NSPMD*NODFITOTR, "IBUFR", stat=IERROR)
 
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -1868,8 +1872,8 @@ C WAITING for receiving msg
             ENDIF
           ENDDO
 
-          IF(ALLOCATED(IBUFS)) DEALLOCATE(IBUFS)
-          IF(ALLOCATED(IBUFR)) DEALLOCATE(IBUFR)
+          IF(ALLOCATED(IBUFS)) call my_dealloc(IBUFS)
+          IF(ALLOCATED(IBUFR)) call my_dealloc(IBUFR)
 C-------------------------------------------------------------------------------
 C THIRD COMM : COMM main temperature
 C------------------------------------------------------------------------------
@@ -1880,18 +1884,18 @@ C alloc comm structure
             DO NI = 1, NIACTIF
               NIN = INTERACTIF(NI)
 
-              IF(ASSOCIATED( NMTEMP(NIN)%P )) DEALLOCATE(NMTEMP(NIN)%P)
+              IF(ASSOCIATED( NMTEMP(NIN)%P )) call my_dealloc(NMTEMP(NIN)%P)
               ALLOCATE(NMTEMP(NIN)%P(NODFI(NI)),STAT=IERROR1)
 
             ENDDO
 
-            ALLOCATE(RBUFS(NSPMD*NODFITOTR),STAT=IERROR)
+            call my_alloc(RBUFS, NSPMD*NODFITOTR, "RBUFS", stat=IERROR)
             IF(IERROR/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
             ENDIF
 
-            ALLOCATE(RBUFR(NSPMD*NODFITOTS),STAT=IERROR)
+            call my_alloc(RBUFR, NSPMD*NODFITOTS, "RBUFR", stat=IERROR)
             IF(IERROR/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
@@ -1959,8 +1963,8 @@ C WAITING for receiving msg
               ENDIF
             ENDDO
 
-            IF(ALLOCATED(RBUFS)) DEALLOCATE(RBUFS)
-            IF(ALLOCATED(RBUFR)) DEALLOCATE(RBUFR)
+            IF(ALLOCATED(RBUFS)) call my_dealloc(RBUFS)
+            IF(ALLOCATED(RBUFR)) call my_dealloc(RBUFR)
 
           ENDIF
 
@@ -1984,6 +1988,8 @@ C
 !||    intstamp_glob_mod   ../engine/share/modules/intstamp_glob_mod.F
 !||    intstamp_mod        ../engine/share/modules/intstamp_mod.F
 !||    message_mod         ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||    sensor_mod          ../common_source/modules/sensor_mod.F90
 !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
@@ -2000,6 +2006,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2080,13 +2088,13 @@ C
 
         IF(NIACTIF /= 0 ) THEN
 C alloc comm structure
-          ALLOCATE(RBUFS(NSPMD*NODSITOT),STAT=IERROR)
+          call my_alloc(RBUFS, NSPMD*NODSITOT, "RBUFS", stat=IERROR)
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
           ENDIF
 
-          ALLOCATE(RBUFR(NSPMD*NODFITOT),STAT=IERROR)
+          call my_alloc(RBUFR, NSPMD*NODFITOT, "RBUFR", stat=IERROR)
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
@@ -2159,8 +2167,8 @@ C WAITING for receiving msg
               CALL SPMD_WAIT(REQ_S(P))
             ENDIF
           ENDDO
-          IF(ALLOCATED(RBUFS)) DEALLOCATE(RBUFS)
-          IF(ALLOCATED(RBUFR)) DEALLOCATE(RBUFR)
+          IF(ALLOCATED(RBUFS)) call my_dealloc(RBUFS)
+          IF(ALLOCATED(RBUFR)) call my_dealloc(RBUFR)
         ENDIF
 C
 #endif
@@ -2182,6 +2190,8 @@ C
 !||    intstamp_glob_mod   ../engine/share/modules/intstamp_glob_mod.F
 !||    intstamp_mod        ../engine/share/modules/intstamp_mod.F
 !||    message_mod         ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||    sensor_mod          ../common_source/modules/sensor_mod.F90
 !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
 !||    tri7box             ../engine/share/modules/tri7box.F
@@ -2202,6 +2212,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2294,13 +2306,13 @@ C
           ENDDO
           IF(NIACTIF /= 0 ) THEN
 C alloc comm structure
-            ALLOCATE(RBUFS(2*NSPMD*NODFITOT),STAT=IERROR)
+            call my_alloc(RBUFS, 2*NSPMD*NODFITOT, "RBUFS", stat=IERROR)
             IF(IERROR/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
             ENDIF
 
-            ALLOCATE(RBUFR(2*NSPMD*NODSITOT),STAT=IERROR)
+            call my_alloc(RBUFR, 2*NSPMD*NODSITOT, "RBUFR", stat=IERROR)
             IF(IERROR/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
@@ -2377,8 +2389,8 @@ C WAITING for receiving msg
                 CALL SPMD_WAIT(REQ_S(P))
               ENDIF
             ENDDO
-            IF(ALLOCATED(RBUFS)) DEALLOCATE(RBUFS)
-            IF(ALLOCATED(RBUFR)) DEALLOCATE(RBUFR)
+            IF(ALLOCATED(RBUFS)) call my_dealloc(RBUFS)
+            IF(ALLOCATED(RBUFR)) call my_dealloc(RBUFR)
           ENDIF
 C
         ELSE    ! PARTITH
@@ -2445,13 +2457,13 @@ C
             IF(NIF>0) THEN
               INTTH = IPARI(47,NIN)
 
-              ALLOCATE(INDEX(NIF),STAT=IERROR)
+              call my_alloc(INDEX, NIF, "INDEX", stat=IERROR)
               IF(IERROR/=0) THEN
                 CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
                 CALL ARRET(2)
               END IF
 
-              ALLOCATE( TEMPO(NIF),STAT=IERROR)
+              call my_alloc(TEMPO, NIF, "TEMPO", stat=IERROR)
 
               IF(IERROR/=0) THEN
                 CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -2474,7 +2486,8 @@ C precomputation of the number of contacts per processor + total nsnfi calculati
      +        NIF,ISKYFI(NIN)%P(1),NMNFI(NIN)%P(1),ISIZENV,LENR2,2)
 
               IF (NIF > 0 ) THEN
-                DEALLOCATE(TEMPO,INDEX)
+                call my_dealloc(TEMPO)
+                call my_dealloc(INDEX)
               ENDIF
             ENDIF
 
@@ -2630,8 +2643,8 @@ C WAITING for receiving msg
                 END IF
               END IF
             END DO
-            IF(ALLOCATED(RBUFS)) DEALLOCATE(RBUFS)
-            IF(ALLOCATED(RBUFR)) DEALLOCATE(RBUFR)
+            IF(ALLOCATED(RBUFS)) call my_dealloc(RBUFS)
+            IF(ALLOCATED(RBUFR)) call my_dealloc(RBUFR)
           ENDIF
 C
         ENDIF
@@ -2650,6 +2663,8 @@ C
 !||    spmd_wait        ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
 !||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
 !||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
@@ -2663,6 +2678,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2699,9 +2716,9 @@ C
         LENSR = MAX(LENS,LENR)
         IF(LENSR>0)THEN
           IERROR=0
-          ALLOCATE(BUFS(LENSR),STAT=IERROR)
+          call my_alloc(BUFS, LENSR, "BUFS", stat=IERROR)
           IERROR1=0
-          ALLOCATE(BUFR(LENSR),STAT=IERROR1)
+          call my_alloc(BUFR, LENSR, "BUFR", stat=IERROR1)
           IF(IERROR+IERROR1/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
@@ -2807,8 +2824,8 @@ C
         END DO
 C
         IF(LENSR>0)THEN
-          DEALLOCATE(BUFR)
-          DEALLOCATE(BUFS)
+          call my_dealloc(BUFR)
+          call my_dealloc(BUFS)
         END IF
 C
 #endif
@@ -2825,6 +2842,8 @@ C
 !||    spmd_wait          ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
 !||    message_mod        ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    spmd_mod           ../engine/source/mpi/spmd_mod.F90
 !||    tri7box            ../engine/share/modules/tri7box.F
 !||====================================================================
@@ -2838,6 +2857,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2876,9 +2897,9 @@ C
         LENSR = MAX(LENS,LENR)
         IF(LENSR>0)THEN
           IERROR=0
-          ALLOCATE(BUFS(LENSR),STAT=IERROR)
+          call my_alloc(BUFS, LENSR, "BUFS", stat=IERROR)
           IERROR1=0
-          ALLOCATE(BUFR(LENSR),STAT=IERROR1)
+          call my_alloc(BUFR, LENSR, "BUFR", stat=IERROR1)
           IF(IERROR+IERROR1/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
@@ -3047,8 +3068,8 @@ C
         END DO
 C
         IF(LENSR>0)THEN
-          DEALLOCATE(BUFR)
-          DEALLOCATE(BUFS)
+          call my_dealloc(BUFR)
+          call my_dealloc(BUFS)
         END IF
 C
 #endif

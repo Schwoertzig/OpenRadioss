@@ -45,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod      ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod    ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
 !||    stack_mod      ../engine/share/modules/stack_mod.F
 !||====================================================================
        SUBROUTINE CZKE3 (
@@ -66,6 +67,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G L O B A L   P A R A M E T E R S
@@ -192,8 +194,8 @@ C
       NLAY  = ELBUF_STR%NLAY
       L_DIRA = ELBUF_STR%BUFLY(1)%LY_DIRA
       L_DIRB = ELBUF_STR%BUFLY(1)%LY_DIRB
-      ALLOCATE(DIRA(NLAY*NEL*L_DIRA))
-      ALLOCATE(DIRB(NLAY*NEL*L_DIRB))
+      call my_alloc(DIRA, NLAY*NEL*L_DIRA, "DIRA")
+      call my_alloc(DIRB, NLAY*NEL*L_DIRB, "DIRB")
       DIRA = ZERO
       DIRB = ZERO
       DIR_A => DIRA(1:NLAY*NEL*L_DIRA)

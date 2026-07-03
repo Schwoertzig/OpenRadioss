@@ -21,16 +21,21 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    daaacc        ../engine/source/fluid/daaacc.F
+!||    daaacc           ../engine/source/fluid/daaacc.F
 !||--- called by ------------------------------------------------------
-!||    flow1         ../engine/source/fluid/flow1.F
+!||    flow1            ../engine/source/fluid/flow1.F
 !||--- calls      -----------------------------------------------------
-!||    spmd_fl_sum   ../engine/source/mpi/generic/spmd_fl_sum.F
+!||    spmd_fl_sum      ../engine/source/mpi/generic/spmd_fl_sum.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE DAAACC(NDIM, NNO, NEL, IFLOW, IBUF, ELEM, IBUFL, CNP, A, NORMAL, ACCF)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -62,7 +67,8 @@ C Local SPMD accelerations
       ELSE
          NNO_L = IFLOW(16)
          LENBUF=3*NNO
-         ALLOCATE(SBUF(LENBUF), RBUF(LENBUF))
+         call my_alloc(SBUF, LENBUF, "SBUF")
+         call my_alloc(RBUF, LENBUF, "RBUF")
          SBUF(1:LENBUF)=ZERO
          RBUF(1:LENBUF)=ZERO
          DO I=1,NNO_L
@@ -82,7 +88,8 @@ C Local SPMD accelerations
             AL(2,I)=RBUF(K+2)
             AL(3,I)=RBUF(K+3)
          ENDDO
-         DEALLOCATE(SBUF, RBUF)
+         call my_dealloc(SBUF)
+         call my_dealloc(RBUF)
       ENDIF
 
       IF(JFORM == 1) THEN

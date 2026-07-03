@@ -21,15 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    stat_beam_mp   ../engine/source/output/sta/stat_beam_mp.F
+!||    stat_beam_mp     ../engine/source/output/sta/stat_beam_mp.F
 !||--- called by ------------------------------------------------------
-!||    genstat        ../engine/source/output/sta/genstat.F
+!||    genstat          ../engine/source/output/sta/genstat.F
 !||--- calls      -----------------------------------------------------
-!||    my_orders      ../common_source/tools/sort/my_orders.c
+!||    my_orders        ../common_source/tools/sort/my_orders.c
 !||--- uses       -----------------------------------------------------
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE STAT_BEAM_MP(ITAB   ,IPART     ,IXP   ,IPARTP   ,IPART_STATE,
      .                        NODTAG ,STAT_INDXP,IPARG ,ELBUF_TAB,IDEL       )
@@ -42,6 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -72,8 +74,8 @@ C
 C-----------------------------------------------
 C     BEAM
 C-----------------------------------------------
-      CALL MY_ALLOC(NP,6*NUMELP)
-      CALL MY_ALLOC(CLEF,2,NUMELP)
+      call my_alloc(NP, 6*NUMELP, "NP")
+      call my_alloc(CLEF, 2, NUMELP, "CLEF")
 C-----------------------------------------------
       JJ = 0
       II = 0
@@ -140,8 +142,8 @@ C----
       ENDDO ! DO N=1,STAT_NUMELP
 C----
 C-----------------------------------------------
-      DEALLOCATE(NP)
-      DEALLOCATE(CLEF)
+      call my_dealloc(NP)
+      call my_dealloc(CLEF)
 C-----------------------------------------------
       RETURN
       END

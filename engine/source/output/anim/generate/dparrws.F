@@ -29,6 +29,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c        ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE DPARRWS(NESBW,NSTRF,IXC   ,
      2                  IXTG ,X ,NODCUT,RWBUF,NPRW,
@@ -37,6 +39,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -266,10 +270,10 @@ C brick, shell16, brick20
 !               ----------------------
 !               Allocate the sended buffer
 !               ----------------------
-                ALLOCATE( BUFFER_S(SIZE_BUFFER_S) )
+                call my_alloc(BUFFER_S, SIZE_BUFFER_S, "BUFFER_S")
                 MODE = 0
 
-                ALLOCATE( BUFFER00_R(0) )
+                call my_alloc(BUFFER00_R, 0, "BUFFER00_R")
 
                 IF(NSPMD>1) THEN
                         CALL SPMD_GATHER_WA(MODE,SIZE_BUFFER_S,SIZE_BUFFER00_R,SINDEX,RINDEX_PROC,
@@ -282,8 +286,8 @@ C brick, shell16, brick20
                 ENDIF    
 
                 IF(ISPMD==0) THEN                
-                        DEALLOCATE( BUFFER00_R )
-                        ALLOCATE( BUFFER00_R(SIZE_BUFFER00_R) )
+                        call my_dealloc(BUFFER00_R)
+                        call my_alloc(BUFFER00_R, SIZE_BUFFER00_R, "BUFFER00_R")
                 ENDIF
 
 !               ----------------------
@@ -507,7 +511,7 @@ C brick, shell16, brick20
                 ELSE
                         BUFFER00_R(1:SIZE_BUFFER00_R) = BUFFER_S(1:SIZE_BUFFER_S)
                 ENDIF
-                DEALLOCATE( BUFFER_S )
+                call my_dealloc(BUFFER_S)
         ENDIF
         
 !               ----------------------
@@ -635,7 +639,7 @@ C brick, shell16, brick20
                 ENDDO
         ENDIF
 
-        IF(ALLOCATED(BUFFER00_R)) DEALLOCATE( BUFFER00_R )
+        IF(ALLOCATED(BUFFER00_R)) call my_dealloc(BUFFER00_R)
 
         RETURN
         END SUBROUTINE DPARRWS

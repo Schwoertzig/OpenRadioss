@@ -30,6 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    element_mod       ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod      ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod    ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE DELNUMBF(IPARG  ,IXT   ,IXP      ,IXR  ,EL2FA ,
      .                    NBF    ,INUM  ,DD_IAD   ,IADD ,NBPART,
@@ -40,6 +41,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -64,7 +66,7 @@ C-----------------------------------------------
      .        NBF2
       INTEGER,DIMENSION(:),ALLOCATABLE:: WA
 C-----------------------------------------------
-      CALL my_alloc(WA, NBF+NANIM1D_L)
+      call my_alloc(WA, NBF+NANIM1D_L, "WA")
 C
       NN1 = 1
       NN2 = 1
@@ -135,6 +137,6 @@ C-----------------------------------------------
       ENDIF
 C-----------------------------------------------
 C
-      DEALLOCATE(WA)
+      call my_dealloc(WA)
       RETURN
       END

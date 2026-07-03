@@ -31,6 +31,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_fxb_for_pon   ../engine/source/mpi/kinematic_conditions/spmd_fxb_for_pon.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    output_mod         ../common_source/modules/output/output_mod.F90
 !||    python_funct_mod   ../common_source/modules/python_mod.F90
 !||    sensor_mod         ../common_source/modules/sensor_mod.F90
@@ -55,6 +57,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -117,14 +121,14 @@ C=======================================================================
             IAD(NFX)=NSNT
             NSNT=NSNT+NSN
          ENDDO
-         ALLOCATE(FSKYFXB(NSNT,1+NMMAX))
+         call my_alloc(FSKYFXB, NSNT, 1+NMMAX, "FSKYFXB")
          DO I=1,NSNT
             DO J=1,NMMAX
                FSKYFXB(I,J)=ZERO
             ENDDO
          ENDDO
       ELSE
-         ALLOCATE(FSKYFXB(0,0))
+         call my_alloc(FSKYFXB, 0, 0, "FSKYFXB")
       ENDIF
       DO NFX=1,NFXBODY
          NMOD=FXBIPM(4,NFX)
@@ -152,7 +156,7 @@ C
       ELSE
          CALL SPMD_FXB_FOR_PON(FXBIPM, MFEXTP, FSKYFXB, NSNT, IAD)
       ENDIF
-      DEALLOCATE(FSKYFXB)
+      call my_dealloc(FSKYFXB)
 C
       DO NFX=1,NFXBODY
          NN2=N2+NFX

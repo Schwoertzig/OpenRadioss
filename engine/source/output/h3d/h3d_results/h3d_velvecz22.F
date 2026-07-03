@@ -34,6 +34,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    i22edge_mod        ../common_source/modules/interfaces/cut-cell-buffer_mod.F
 !||    i22tri_mod         ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE H3D_VELVECZ22(ELBUF_TAB,IPARG,IPARI,IGRNOD,X,IXS,IXQ,ITAB,IFLG,
      .                         IOK_PART,IS_WRITTEN_NODE,NODAL_VECTOR)
@@ -56,6 +58,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -96,7 +100,7 @@ C-----------------------------------------------
        !---------------------------------------------------------!                 
        NBF         = 1                                                                                                                                       
        NBL         = NB                                                                                                                                                   
-       ALLOCATE(BUFFER(3,NUMNOD))
+       call my_alloc(BUFFER, 3, NUMNOD, "BUFFER")
        BUFFER(:,:) = ZERO  
        !---------------------------------------------------------!  
        
@@ -154,7 +158,7 @@ C-----------------------------------------------
      .            VALUE)
        ENDDO
           
-       DEALLOCATE(BUFFER)  
+       call my_dealloc(BUFFER)
         
 C----------------------------------------------- 
       RETURN

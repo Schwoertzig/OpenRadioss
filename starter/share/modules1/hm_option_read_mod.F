@@ -114,7 +114,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_sphio                         ../starter/source/loads/sph/hm_preread_sphio.F
 !||    hm_rbodies_add_main_node                 ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_activ                            ../starter/source/tools/activ/hm_read_activ.F
-!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_grid                         ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
 !||    hm_read_ale_link                         ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -236,6 +235,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_mat100                           ../starter/source/materials/mat/mat100/hm_read_mat100.F
 !||    hm_read_mat106                           ../starter/source/materials/mat/mat106/hm_read_mat106.F90
 !||    hm_read_mat109                           ../starter/source/materials/mat/mat109/hm_read_mat109.F
+!||    hm_read_mat136                           ../starter/source/materials/mat/mat136/hm_read_mat136.F90
 !||    hm_read_mat163                           ../starter/source/materials/mat/mat163/hm_read_mat163.F90
 !||    hm_read_mat36                            ../starter/source/materials/mat/mat036/hm_read_mat36.F
 !||    hm_read_mat38                            ../starter/source/materials/mat/mat038/hm_read_mat38.F
@@ -354,6 +354,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_yield_criterion_hershey          ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hershey.F90
 !||    hm_read_yield_criterion_hill             ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_hill.F90
 !||    hm_read_yield_criterion_vonmises         ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_vonmises.F90
+!||    hm_s_ale                                 ../starter/source/devtools/hm_reader/hm_s_ale.F90
 !||    hm_set                                   ../starter/source/model/sets/hm_set.F
 !||    hm_setfxrbyon                            ../starter/source/constraints/fxbody/hm_setfxrbyon.F
 !||    hm_submodpart                            ../starter/source/groups/hm_submodpart.F

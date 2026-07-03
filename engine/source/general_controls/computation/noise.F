@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    wrtdes            ../engine/source/output/th/wrtdes.F
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod      ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    my_alloc_mod      ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE NOISE(
      1   DT2R  ,IN,J     ,BUF  ,V     ,
@@ -45,6 +46,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -100,10 +102,10 @@ C
 C initialization of the arrays of elements by saved nodes
 C
         IF(NOISEP/=0)THEN
-          ALLOCATE (NOIADD(NNOISE+1))
+          call my_alloc(NOIADD, NNOISE+1, "NOIADD")
           CALL INITNOISE(IN,NOIADD,IXS,ITAG(0),LENGTH,IXQ)
-          ALLOCATE(ELNOI(LENGTH))        
-          ALLOCATE(ELG(LENGTH))
+          call my_alloc(ELNOI, LENGTH, "ELNOI")
+          call my_alloc(ELG, LENGTH, "ELG")
           CALL INITNOISE2(IN,ELNOI,ELG,NOIADD,IXS,ITAG(1),IPARG,IXQ)
         ENDIF
 C tc cutoff period
@@ -115,7 +117,7 @@ C number of coefficients and allocation; phase shift
         DEC=FLOAT(3*NE) - HALF
         TO=FLOAT(3*NE)*TE
         IF(NC>0)THEN
-          ALLOCATE(C(NC))
+          call my_alloc(C, NC, "C")
         ENDIF
 C
 C perfect filter coefficients with hamming window

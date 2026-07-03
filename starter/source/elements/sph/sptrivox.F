@@ -22,13 +22,13 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
 !||====================================================================
-!||    sptrivox   ../starter/source/elements/sph/sptrivox.F
+!||    sptrivox       ../starter/source/elements/sph/sptrivox.F
 !||--- called by ------------------------------------------------------
-!||    spbuc31    ../starter/source/elements/sph/spbuc31.F
+!||    spbuc31        ../starter/source/elements/sph/spbuc31.F
 !||--- calls      -----------------------------------------------------
-!||    sppro31    ../starter/source/elements/sph/spbuc31.F
+!||    sppro31        ../starter/source/elements/sph/spbuc31.F
 !||--- uses       -----------------------------------------------------
-!||    tri7box    ../starter/share/modules1/tri7box.F
+!||    tri7box        ../starter/share/modules1/tri7box.F
 !||====================================================================
       SUBROUTINE SPTRIVOX(
      1      NSN    ,X       ,BMINMA  ,NOD2SP  ,
@@ -41,6 +41,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -115,10 +116,10 @@ c provisional
       SAVE IIX,IIY,IIZ,DISTMAX
 C-----------------------------------------------
 C      IF(ITASK == 0)THEN
-      ALLOCATE(NEXT_NOD(NSN))
-      ALLOCATE(IIX(NSN))
-      ALLOCATE(IIY(NSN))
-      ALLOCATE(IIZ(NSN))
+      call my_alloc(NEXT_NOD, NSN, "NEXT_NOD")
+      call my_alloc(IIX, NSN, "IIX")
+      call my_alloc(IIY, NSN, "IIY")
+      call my_alloc(IIZ, NSN, "IIZ")
 C      END IF
 C Barrier to wait init voxel and allocation NEX_NOD
 C      CALL MY_BARRIER
@@ -335,10 +336,10 @@ C=======================================================================
 C
 C     CALL MY_BARRIER()
 C     IF(ITASK == 0)THEN
-      DEALLOCATE(NEXT_NOD)
-      DEALLOCATE(IIX)
-      DEALLOCATE(IIY)
-      DEALLOCATE(IIZ)
+      CALL MY_DEALLOC(NEXT_NOD)
+      CALL MY_DEALLOC(IIX)
+      CALL MY_DEALLOC(IIY)
+      CALL MY_DEALLOC(IIZ)
 C     ENDIF
 
       RETURN

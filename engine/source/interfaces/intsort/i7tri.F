@@ -21,15 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i7tri           ../engine/source/interfaces/intsort/i7tri.F
+!||    i7tri            ../engine/source/interfaces/intsort/i7tri.F
 !||--- called by ------------------------------------------------------
-!||    i7buce          ../engine/source/interfaces/intsort/i7buce.F
+!||    i7buce           ../engine/source/interfaces/intsort/i7buce.F
 !||--- calls      -----------------------------------------------------
-!||    i7dstk          ../engine/source/interfaces/intsort/i7dstk.F
-!||    i7sto           ../engine/source/interfaces/intsort/i7sto.F
-!||    spmd_oldnumcd   ../engine/source/mpi/interfaces/spmd_i7tool.F
+!||    i7dstk           ../engine/source/interfaces/intsort/i7dstk.F
+!||    i7sto            ../engine/source/interfaces/intsort/i7sto.F
+!||    spmd_oldnumcd    ../engine/source/mpi/interfaces/spmd_i7tool.F
 !||--- uses       -----------------------------------------------------
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE I7TRI(
      1      ADD   ,NSN    ,RENUM  ,NSNR     ,ISZNSNR  ,
@@ -50,6 +51,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -646,7 +648,7 @@ C-------------------------------------------------------------------------
      8              CAND_F ,DGAPLOAD)
 C-------------------------------------------------------------------------
       IF(FLAGREMNODE==2) THEN
-        DEALLOCATE(TAGREMNODE)
+        call my_dealloc(TAGREMNODE)
       ENDIF
       RETURN
       END

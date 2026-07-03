@@ -21,26 +21,28 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    hm_read_part           ../starter/source/model/assembling/hm_read_part.F
+!||    hm_read_part                   ../starter/source/model/assembling/hm_read_part.F
 !||--- called by ------------------------------------------------------
-!||    lectur                 ../starter/source/starter/lectur.F
+!||    lectur                         ../starter/source/starter/lectur.F
 !||--- calls      -----------------------------------------------------
-!||    ale_euler_init         ../starter/source/materials/ale/ale_euler_init.F
-!||    ancmsg                 ../starter/source/output/message/message.F
-!||    fretitl                ../starter/source/starter/freform.F
-!||    fretitl2               ../starter/source/starter/freform.F
-!||    get_u_geo              ../starter/source/user_interface/uaccess.F
-!||    hm_get_floatv          ../starter/source/devtools/hm_reader/hm_get_floatv.F
-!||    hm_get_intv            ../starter/source/devtools/hm_reader/hm_get_intv.F
-!||    hm_option_read_key     ../starter/source/devtools/hm_reader/hm_option_read_key.F
-!||    hm_option_start        ../starter/source/devtools/hm_reader/hm_option_start.F
-!||    nintri                 ../starter/source/system/nintrr.F
-!||    udouble                ../starter/source/system/sysfus.F
+!||    ale_euler_init                 ../starter/source/materials/ale/ale_euler_init.F
+!||    ancmsg                         ../starter/source/output/message/message.F
+!||    fretitl                        ../starter/source/starter/freform.F
+!||    fretitl2                       ../starter/source/starter/freform.F
+!||    get_u_geo                      ../starter/source/user_interface/uaccess.F
+!||    hm_get_floatv                  ../starter/source/devtools/hm_reader/hm_get_floatv.F
+!||    hm_get_intv                    ../starter/source/devtools/hm_reader/hm_get_intv.F
+!||    hm_is_part_with_elements       ../starter/source/devtools/hm_reader/hm_is_part_with_elements.F90
+!||    hm_option_read_key             ../starter/source/devtools/hm_reader/hm_option_read_key.F
+!||    hm_option_start                ../starter/source/devtools/hm_reader/hm_option_start.F
+!||    nintri                         ../starter/source/system/nintrr.F
+!||    udouble                        ../starter/source/system/sysfus.F
 !||--- uses       -----------------------------------------------------
-!||    elbuftag_mod           ../starter/share/modules1/elbuftag_mod.F
-!||    hm_option_read_mod     ../starter/share/modules1/hm_option_read_mod.F
-!||    message_mod            ../starter/share/message_module/message_mod.F
-!||    submodel_mod           ../starter/share/modules1/submodel_mod.F
+!||    elbuftag_mod                   ../starter/share/modules1/elbuftag_mod.F
+!||    hm_is_part_with_elements_mod   ../starter/source/devtools/hm_reader/hm_is_part_with_elements.F90
+!||    hm_option_read_mod             ../starter/share/modules1/hm_option_read_mod.F
+!||    message_mod                    ../starter/share/message_module/message_mod.F
+!||    submodel_mod                   ../starter/share/modules1/submodel_mod.F
 !||====================================================================
       SUBROUTINE HM_READ_PART(IPART,PM,GEO,IPM,IGEO,IWA,THK_PART,
      .                        UNITAB,LSUBMODEL,MULTI_FVM,MLAW_TAG,
@@ -69,6 +71,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE UNITAB_MOD
       USE MESSAGE_MOD           
+      use my_alloc_mod
       USE SUBMODEL_MOD           
       USE HM_OPTION_READ_MOD
       USE MULTI_FVM_MOD
@@ -77,6 +80,8 @@ C-----------------------------------------------
       USE MAT_ELEM_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use glob_therm_mod
+      use hm_is_part_with_elements_mod
+      use, intrinsic :: iso_c_binding , only : c_bool
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -122,6 +127,7 @@ C-----------------------------------------------
      .        ILAW_PLY,IPMAT,NPT,IDPARTSPH,SUB_INDEX, IDS, CNT,
      .        STAT,JALE_FROM_PROP,JALE_FROM_MAT
       my_real BID, THICK,FAC_L,MP,VOL,DIAM
+      logical(c_bool) :: IS_FILLED
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
@@ -209,6 +215,9 @@ C--------------------------------------------------
             CALL FRETITL2(TITR1,IGEO(NPROPGI-LTITR+1,IPID),LTITR)
         ENDIF
 
+        IS_FILLED = .FALSE.
+        call hm_is_part_with_elements(ID,IS_FILLED)
+
         IGTYP=NINT(GEO(12,IPID))
         IF(IGTYP == 17 .OR. IGTYP == 51) IPART_STACK = 1
         IF(IGTYP ==  52) IPART_PCOMPP = 1
@@ -221,7 +230,7 @@ C--------------------------------------------------
      .      (IGTYP == 17).OR.(IGTYP == 51).OR.(IGTYP == 52).OR. 
      .      (IGTYP == 23).OR.(IGTYP == 43)) THEN
             IF(MID == 0) THEN
-               CALL ANCMSG(MSGID=179,
+               IF(IS_FILLED) CALL ANCMSG(MSGID=179,
      .                     MSGTYPE=MSGERROR,
      .                     ANMODE=ANINFO,
      .                     I1=ID,
@@ -237,7 +246,7 @@ C--------------------------------------------------
         ELSE
          IMID = NINTRI(MID,IPM,NPROPMI,NUMMAT,1)
          IF(IMID == 0) THEN
-            CALL ANCMSG(MSGID=179,
+            IF(IS_FILLED) CALL ANCMSG(MSGID=179,
      .                  MSGTYPE=MSGERROR,
      .                  ANMODE=ANINFO,
      .                  I1=ID,
@@ -467,9 +476,9 @@ C--------------------------------------------------
       IF (MULTI_FVM%IS_USED) THEN
          IMULTI_FVM = 1     
          IF (N2D == 0) THEN
-            ALLOCATE(MULTI_FVM%VEL(3, NUMELS), STAT=stat)
+            call my_alloc(MULTI_FVM%VEL, 3, NUMELS, "MULTI_FVM%VEL", stat=stat)
          ELSE
-            ALLOCATE(MULTI_FVM%VEL(3, NUMELQ + NUMELTG), STAT=stat)
+            call my_alloc(MULTI_FVM%VEL, 3, NUMELQ + NUMELTG, "MULTI_FVM%VEL", stat=stat)
          ENDIF
          IF(STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='MULTI_FVM%VEL')
          MULTI_FVM%VEL(: ,:) = ZERO

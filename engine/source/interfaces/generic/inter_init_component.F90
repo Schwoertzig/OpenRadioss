@@ -26,7 +26,7 @@
 !||    resol                      ../engine/source/engine/resol.F
 !||====================================================================
       module inter_init_component_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   procedures
@@ -50,6 +50,8 @@
 !||    inter_init_component_list_mod   ../engine/source/interfaces/generic/inter_init_component_list.F90
 !||    inter_init_node_color_mod       ../engine/source/interfaces/generic/inter_init_node_color.F90
 !||    inter_sorting_mod               ../engine/share/modules/inter_sorting_mod.F
+!||    my_alloc_mod                    ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                  ../common_source/tools/memory/my_dealloc.F90
 !||    precision_mod                   ../common_source/modules/precision_mod.F90
 !||    spmd_mod                        ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
@@ -68,6 +70,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
@@ -140,8 +144,8 @@
             nrtm = ipari(4,i)
             nsn = ipari(5,i)
             nmn = ipari(6,i)
-            allocate(s_node_color(nsn))
-            allocate(m_node_color(nrtm))
+            call my_alloc(s_node_color, nsn, "s_node_color")
+            call my_alloc(m_node_color, nrtm, "m_node_color")
             call inter_init_node_color( nsn,nrtm,nb_cell_x,nb_cell_y,nb_cell_z, &
               numnod,component(i)%s_comp_nb,component(i)%m_comp_nb, &
               intbuf_tab(i)%nsv,intbuf_tab(i)%irectm,s_node_color,m_node_color, &
@@ -155,12 +159,12 @@
             component(i)%proc_comp(1:nspmd)%need_comm_s = .false.
             component(i)%proc_comp(1:nspmd)%need_comm_r = .false.
 
-            deallocate(s_node_color)
-            deallocate(m_node_color)
+            call my_dealloc(s_node_color)
+            call my_dealloc(m_node_color)
           enddo
 
-          allocate(s_buffer(2*ninter))
-          allocate(r_buffer(2*ninter*nspmd))
+          call my_alloc(s_buffer, 2*ninter, "s_buffer")
+          call my_alloc(r_buffer, 2*ninter*nspmd, "r_buffer")
           s_buffer(1:2*ninter) = 0
           r_buffer(1:2*ninter*nspmd) = 0
           do j=1,type7_nb

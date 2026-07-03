@@ -21,23 +21,24 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    s4lagsfem      ../engine/source/elements/solid/solide4_sfem/s4lagsfem.F
+!||    s4lagsfem        ../engine/source/elements/solid/solide4_sfem/s4lagsfem.F
 !||--- called by ------------------------------------------------------
-!||    resol          ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    initbuf        ../engine/share/resol/initbuf.F
-!||    s10volnod3     ../engine/source/elements/solid/solide4_sfem/s10volnod3.F
-!||    s10volnodt3    ../engine/source/elements/solid/solide4_sfem/s10volnodt3.F
-!||    s4volnod3      ../engine/source/elements/solid/solide4_sfem/s4volnod3.F
-!||    s4volnod_sm    ../engine/source/elements/solid/solide4_sfem/s4volnod_sm.F
-!||    spmd_waitall   ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitany   ../engine/source/mpi/spmd_wait.F90
+!||    initbuf          ../engine/share/resol/initbuf.F
+!||    s10volnod3       ../engine/source/elements/solid/solide4_sfem/s10volnod3.F
+!||    s10volnodt3      ../engine/source/elements/solid/solide4_sfem/s10volnodt3.F
+!||    s4volnod3        ../engine/source/elements/solid/solide4_sfem/s4volnod3.F
+!||    s4volnod_sm      ../engine/source/elements/solid/solide4_sfem/s4volnod_sm.F
+!||    spmd_waitall     ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitany     ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    initbuf_mod    ../engine/share/resol/initbuf.F
-!||    sfem_mod       ../common_source/modules/elements/sfem_mod.F90
-!||    spmd_mod       ../engine/source/mpi/spmd_mod.F90
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    initbuf_mod      ../engine/share/resol/initbuf.F
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    sfem_mod         ../common_source/modules/elements/sfem_mod.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE S4LAGSFEM(IPARG,IXS,X,V,ELBUF_TAB,SFEM_NODVAR,S_SFEM_NODVAR,
      .                     IXS10,XDP,s_xdp,
@@ -54,6 +55,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -263,7 +265,7 @@ C---------------------------------------------------
               sfem%tetra_fsky(my_address,j) = sfem%spmd(proc_id)%r_buffer(k,j) ! save the received Fsky value into the right place
             enddo
           enddo
-          deallocate(sfem%spmd(proc_id)%r_buffer)
+          call my_dealloc(sfem%spmd(proc_id)%r_buffer)
         enddo
 
 !$omp parallel 
@@ -306,12 +308,12 @@ C---------------------------------------------------
         call spmd_waitall(sfem%s_request_nb,sfem%s_request)
 
         do i=1,nspmd
-          if(allocated(sfem%spmd(i)%s_buffer)) deallocate(sfem%spmd(i)%s_buffer)
+          if(allocated(sfem%spmd(i)%s_buffer)) call my_dealloc(sfem%spmd(i)%s_buffer)
         enddo
-        if(allocated(sfem%r_request)) deallocate(sfem%r_request)
-        if(allocated(sfem%s_request)) deallocate(sfem%s_request)
-        if(allocated(sfem%r_index)) deallocate(sfem%r_index)
-        if(allocated(sfem%s_index)) deallocate(sfem%s_index)
+        if(allocated(sfem%r_request)) call my_dealloc(sfem%r_request)
+        if(allocated(sfem%s_request)) call my_dealloc(sfem%s_request)
+        if(allocated(sfem%r_index)) call my_dealloc(sfem%r_index)
+        if(allocated(sfem%s_index)) call my_dealloc(sfem%s_index)
       endif
 
 C-----------------------------------------------

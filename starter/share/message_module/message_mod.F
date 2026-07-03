@@ -153,8 +153,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    cuserini4                              ../starter/source/elements/shell/coqueba/cuserini4.F
 !||    damping_rby_spmdset                    ../starter/source/general_controls/damping/damping_rby_spmdset.F90
 !||    ddsplit                                ../starter/source/restart/ddsplit/ddsplit.F
-!||    deallocate_elbuf                       ../starter/source/elements/elbuf_init/deallocate_buffer.F
-!||    deallocate_one_element_group           ../starter/source/elements/elbuf_init/deallocate_one_element_group.F
 !||    defbeam_sect                           ../starter/source/properties/beam/hm_read_prop18.F
 !||    definter                               ../starter/source/interfaces/interf1/definter.F
 !||    domdec2                                ../starter/source/spmd/domdec2.F
@@ -304,7 +302,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_prop_read21                         ../starter/source/properties/thickshell/hm_read_prop21.F
 !||    hm_rbodies_add_main_node               ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_activ                          ../starter/source/tools/activ/hm_read_activ.F
-!||    hm_read_adinertia                      ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                          ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_grid                       ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
 !||    hm_read_ale_link                       ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -520,6 +517,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_mat133                         ../starter/source/materials/mat/mat133/hm_read_mat133.F90
 !||    hm_read_mat134                         ../starter/source/materials/mat/mat134/hm_read_mat134.F90
 !||    hm_read_mat135                         ../starter/source/materials/mat/mat135/hm_read_mat135.F90
+!||    hm_read_mat136                         ../starter/source/materials/mat/mat136/hm_read_mat136.F90
 !||    hm_read_mat14                          ../starter/source/materials/mat/mat014/hm_read_mat14.F
 !||    hm_read_mat15                          ../starter/source/materials/mat/mat015/hm_read_mat15.F
 !||    hm_read_mat151                         ../starter/source/materials/mat/mat151/hm_read_mat151.F
@@ -738,6 +736,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_xelem                          ../starter/source/elements/reader/hm_read_xelem.F
 !||    hm_read_xref                           ../starter/source/loads/reference_state/xref/hm_read_xref.F
 !||    hm_read_yield_criterion_barlat2000     ../starter/source/materials/mat/mat131/yield_criterion/hm_read_yield_criterion_barlat2000.F90
+!||    hm_s_ale                               ../starter/source/devtools/hm_reader/hm_s_ale.F90
 !||    hm_select_option_by_name               ../starter/source/devtools/hm_reader/hm_select_option_by_name.F
 !||    hm_set                                 ../starter/source/model/sets/hm_set.F
 !||    hm_set_floatv                          ../starter/source/devtools/hm_reader/hm_set_floatv.F
@@ -1166,6 +1165,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    s8zjac_i3                              ../starter/source/elements/solid/solide8z/s8zderi3.F
 !||    s8zjac_ic                              ../starter/source/elements/solid/solide8z/s8zderi3.F
 !||    s8zpij_ic                              ../starter/source/elements/solid/solide8z/s8zderi3.F
+!||    s_ale_message                          ../starter/source/ale/s_ale_message.F90
 !||    sboxboxsurf                            ../starter/source/model/box/bigbox.F
 !||    scaleini                               ../starter/source/elements/initia/scaleini.F
 !||    sccoor3                                ../starter/source/elements/thickshell/solidec/sccoor3.F

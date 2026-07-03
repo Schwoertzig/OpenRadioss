@@ -27,7 +27,7 @@
 !||    rdresb             ../engine/source/output/restart/rdresb.F
 !||====================================================================
       module read_bcs_nrf_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   PROCEDURES
@@ -36,16 +36,18 @@
 !! \details  necessary buffer specific to option /BCS/NRF/...
 !
 !||====================================================================
-!||    read_bcs_nrf    ../engine/source/output/restart/read_bcs_nrf.F90
+!||    read_bcs_nrf     ../engine/source/output/restart/read_bcs_nrf.F90
 !||--- called by ------------------------------------------------------
-!||    rdresb          ../engine/source/output/restart/rdresb.F
+!||    rdresb           ../engine/source/output/restart/rdresb.F
 !||--- calls      -----------------------------------------------------
-!||    read_db         ../common_source/tools/input_output/read_db.F
-!||    read_i_c        ../common_source/tools/input_output/write_routines.c
+!||    read_db          ../common_source/tools/input_output/read_db.F
+!||    read_i_c         ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
-!||    bcs_mod         ../common_source/modules/boundary_conditions/bcs_mod.F90
-!||    constant_mod    ../common_source/modules/constant_mod.F
-!||    precision_mod   ../common_source/modules/precision_mod.F90
+!||    bcs_mod          ../common_source/modules/boundary_conditions/bcs_mod.F90
+!||    constant_mod     ../common_source/modules/constant_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    precision_mod    ../common_source/modules/precision_mod.F90
 !||====================================================================
         subroutine read_bcs_nrf(numnod)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -57,6 +59,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
@@ -76,7 +80,7 @@
 
             if(.not.allocated(bcs%nrf))allocate(bcs%nrf(bcs%num_nrf))
             if(.not.allocated(bcs%la_nrf))then
-              allocate(bcs%la_nrf(3,numnod))
+              call my_alloc(bcs%la_nrf, 3, numnod, "bcs%la_nrf")
               bcs%la_nrf(1:3,1:numnod) = zero
             end if
 
@@ -110,7 +114,7 @@
             end do
 
             ! --- Build compact list of unique NRF boundary node IDs ---
-            allocate(l_tag(numnod))
+            call my_alloc(l_tag, numnod, "l_tag")
             l_tag(1:numnod) = .false.
             do ii = 1, bcs%num_nrf
               do jj = 1, bcs%nrf(ii)%list%size
@@ -129,7 +133,7 @@
                 bcs%nrf_node_ids(kk) = ii
               end if
             end do
-            deallocate(l_tag)
+            call my_dealloc(l_tag)
           end if
 
 ! ----------------------------------------------------------------------------------------------------------------------

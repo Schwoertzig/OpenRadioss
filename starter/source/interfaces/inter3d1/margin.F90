@@ -37,6 +37,7 @@
 !||--- called by ------------------------------------------------------
 !||    i25buc_vox1        ../starter/source/interfaces/inter3d1/i25buc_vox1.F
 !||    i7buc_vox1         ../starter/source/interfaces/inter3d1/i7buc_vox1.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
         subroutine margin_reduction(X,NUMNOD,IRECT,NRTM,NSV,NSN,DRAD,GAP,DGAPLOAD,BUMULT,STIFN,DD0)
@@ -45,6 +46,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           use constant_mod, only : FOUR
           use precision_mod, only : WP
+          use MY_ALLOC_MOD
+          use my_dealloc_mod, only : my_dealloc
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -78,7 +81,7 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
           dsav = DD0
-          allocate(volume(nrtm))
+          call my_alloc(volume, nrtm, "volume")
           ! Initialize bounding box with first segment (avoid vector-subscript temporaries)
           ! extend bounding box for remaining segments
           do i = 1, nrtm
@@ -166,7 +169,7 @@
             write(6,*) "reduction of margin for single element interface, new margin size: ", bumult*dd0, candidate_count,nsn
             if(dd0 < (dsav*0.001)) exit ! avoid too small margin
           enddo
-          deallocate(volume)
+          call my_dealloc(volume)
 
 
         end subroutine margin_reduction

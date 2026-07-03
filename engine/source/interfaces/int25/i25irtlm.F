@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    my_barrier        ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod     ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    my_alloc_mod      ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod    ../common_source/tools/memory/my_dealloc.F90
 !||    tri7box           ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE I25IRTLM(IPARI,INTBUF_TAB,ITAB,NIN,itask)
@@ -40,6 +42,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -72,13 +76,13 @@ C-----------------------------------------------
       NSNR  =IPARI(24,NIN)
       IVIS2 =IPARI(14,NIN)
 !$omp single
-      allocate(local_i_stok(nthread)) 
-      allocate(offset(nthread+1))
+      call my_alloc(local_i_stok, nthread, "local_i_stok")
+      call my_alloc(offset, nthread+1, "offset")
       i_stok_rtlm = 0
 !$omp end single
 
-      allocate(local_cand_opt_n(nsn+nsnr))
-      allocate(local_cand_opt_e(nsn+nsnr))
+      call my_alloc(local_cand_opt_n, nsn+nsnr, "local_cand_opt_n")
+      call my_alloc(local_cand_opt_e, nsn+nsnr, "local_cand_opt_e")
       local_i_stok(itask+1) = 0
       offset(itask+1) = 0
       IF(IVIS2/=-1) THEN
@@ -364,12 +368,12 @@ C-----------------------------------------------
 !$omp single
       INTBUF_TAB%I_STOK(3) = I_STOK_RTLM
       INTBUF_TAB%I_STOK(2) = I_STOK_RTLM
-      deallocate(local_i_stok) 
-      deallocate(offset)
+      call my_dealloc(local_i_stok)
+      call my_dealloc(offset)
 !$omp end single
 
-      deallocate(local_cand_opt_n)
-      deallocate(local_cand_opt_e)
+      call my_dealloc(local_cand_opt_n)
+      call my_dealloc(local_cand_opt_e)
 
       call my_barrier()
       RETURN

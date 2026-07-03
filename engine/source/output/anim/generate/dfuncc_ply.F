@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||    matparam_def_mod   ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    plyxfem_mod        ../engine/share/modules/plyxfem_mod.F
 !||    stack_mod          ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -57,6 +58,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -115,7 +117,7 @@ C     REAL
      .  DIMENSION(:), POINTER  :: UVAR 
       REAL,DIMENSION(:),ALLOCATABLE:: WAL
 C-----------------------------------------------
-      CALL MY_ALLOC(WAL,NBF_L)
+      call my_alloc(WAL, NBF_L, "WAL")
 !
       LL = 0
 C      
@@ -953,6 +955,6 @@ C
           CALL SPMD_R4GET_PARTN(1,NBF_L,NBPART,IADG,WAL,BUF)
       ENDIF
 
-      DEALLOCATE(WAL)
+      call my_dealloc(WAL)
       RETURN
       END

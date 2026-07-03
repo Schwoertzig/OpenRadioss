@@ -499,19 +499,21 @@ C
       RETURN
       END
 !||====================================================================
-!||    cncoefort      ../engine/source/elements/sh3n/coquedk/cncoef3.F
+!||    cncoefort        ../engine/source/elements/sh3n/coquedk/cncoef3.F
 !||--- called by ------------------------------------------------------
-!||    czforc3        ../engine/source/elements/shell/coquez/czforc3.F
-!||    czforc3_crk    ../engine/source/elements/xfem/czforc3_crk.F
+!||    czforc3          ../engine/source/elements/shell/coquez/czforc3.F
+!||    czforc3_crk      ../engine/source/elements/xfem/czforc3_crk.F
 !||--- calls      -----------------------------------------------------
-!||    cctoglob       ../engine/source/elements/shell/coqueba/cmatc3.F
-!||    gepm_lc        ../engine/source/elements/shell/coqueba/cmatc3.F
-!||    layini         ../engine/source/elements/shell/coque/layini.F
+!||    cctoglob         ../engine/source/elements/shell/coqueba/cmatc3.F
+!||    gepm_lc          ../engine/source/elements/shell/coqueba/cmatc3.F
+!||    layini           ../engine/source/elements/shell/coque/layini.F
 !||--- uses       -----------------------------------------------------
-!||    drape_mod      ../engine/share/modules/drape_mod.F
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    mat_elem_mod   ../common_source/modules/mat_elem/mat_elem_mod.F90
-!||    stack_mod      ../engine/share/modules/stack_mod.F
+!||    drape_mod        ../engine/share/modules/drape_mod.F
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    mat_elem_mod     ../common_source/modules/mat_elem/mat_elem_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    stack_mod        ../engine/share/modules/stack_mod.F
 !||====================================================================
       SUBROUTINE CNCOEFORT(JFT    ,JLT     ,PM        ,MAT     ,GEO    ,
      1                     PID    ,MTN     ,NPT       ,HM      ,HF     ,
@@ -529,6 +531,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -604,8 +608,10 @@ C--------IORTH=2 -> HMFOR couplage non-null----------------
         ENDDO  
       ENDIF
       NLAY_MAX   = MAX(NLAY,NPT, ELBUF_STR%NLAY)
-      ALLOCATE(MATLY(MVSIZ*NLAY_MAX), THKLY(MVSIZ*NLAY_MAX*LAYNPT_MAX),
-     .         POSLY(MVSIZ,NLAY_MAX*LAYNPT_MAX),THK_LY(NEL,NLAY_MAX*LAYNPT_MAX))
+      call my_alloc(MATLY, MVSIZ*NLAY_MAX, "MATLY")
+      call my_alloc(THKLY, MVSIZ*NLAY_MAX*LAYNPT_MAX, "THKLY")
+      call my_alloc(POSLY, MVSIZ, NLAY_MAX*LAYNPT_MAX, "POSLY")
+      call my_alloc(THK_LY, NEL, NLAY_MAX*LAYNPT_MAX, "THK_LY")
       IF (IGTYP == 11 .OR. IGTYP == 17 ) THEN
            CALL LAYINI(ELBUF_STR,JFT      ,JLT      ,GEO      ,IGEO    , 
      .                    MAT      ,PID      ,THKLY    ,MATLY    ,POSLY   , 
@@ -979,7 +985,10 @@ C-----------
               ENDIF ! igmat + igtyp == 11
         ENDIF !IF (MTN==19)
       ENDIF    ! IF (IORTH==1) THEN
-      DEALLOCATE(MATLY, THKLY, POSLY, THK_LY)
+      call my_dealloc(MATLY)
+      call my_dealloc(THKLY)
+      call my_dealloc(POSLY)
+      call my_dealloc(THK_LY)
 C
       RETURN
       END

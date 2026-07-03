@@ -21,14 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    rbyvit          ../engine/source/constraints/general/rbody/rbyvit.F
+!||    rbyvit           ../engine/source/constraints/general/rbody/rbyvit.F
 !||--- called by ------------------------------------------------------
-!||    resol           ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    rgbodv          ../engine/source/constraints/general/rbody/rgbodv.F
-!||    spmd_all_dmax   ../engine/source/mpi/elements/spmd_sph.F
+!||    rgbodv           ../engine/source/constraints/general/rbody/rgbodv.F
+!||    spmd_all_dmax    ../engine/source/mpi/elements/spmd_sph.F
 !||--- uses       -----------------------------------------------------
-!||    message_mod     ../engine/share/message_module/message_mod.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE RBYVIT(RBY   ,X       ,V        ,VR   ,SKEW,
      2                  FSAV  ,LPBY    ,NPBY     ,ISKEW,ITAB,
@@ -42,6 +44,8 @@ C-----------------------------------------------
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -72,10 +76,10 @@ C     REAL
 C-----------------------------------------------
 !$OMP SINGLE
        IF(NRBFAIL /= 0 .AND. NSPMD > 1)THEN
-         ALLOCATE(CRIT(NRBYKIN))
+         call my_alloc(CRIT, NRBYKIN, "CRIT")
          CRIT(1:NRBYKIN) = ZERO
        ELSE
-         ALLOCATE(CRIT(0))
+         call my_alloc(CRIT, 0, "CRIT")
        END IF
 !$OMP END SINGLE
 !      
@@ -162,6 +166,9 @@ C
      6                  FREAC     )
 !
             IF(NRBFAIL /= 0 .AND. NSPMD > 1) CRIT(N)= RBY(30,N)
+          ELSEIF(IM>0.AND.NPBY(21,N)>0) THEN 
+            A(1:3,IM) = ZERO
+            AR(1:3,IM) = ZERO
 !
           ENDIF
         ENDDO
@@ -175,7 +182,7 @@ C
           RBY(30,N) = CRIT(N)
         ENDDO
       END IF
-      DEALLOCATE(CRIT)
+      call my_dealloc(CRIT)
 !$OMP END SINGLE
 C
       RETURN

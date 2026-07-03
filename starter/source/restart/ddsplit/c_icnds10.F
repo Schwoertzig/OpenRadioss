@@ -21,11 +21,12 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    c_icnds10   ../starter/source/restart/ddsplit/c_icnds10.F
+!||    c_icnds10      ../starter/source/restart/ddsplit/c_icnds10.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
-!||    nlocal      ../starter/source/spmd/node/ddtools.F
+!||    nlocal         ../starter/source/spmd/node/ddtools.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE C_ICNDS10(ICNDS10,ITAGND,PROC,NS10E_L,NBDDCNDM,MS,MS_ND)
 C-----------------------------------------------
@@ -35,6 +36,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -84,7 +86,7 @@ c        ENDDO
       ENDDO
       IF (NS10E_L==0) RETURN
 !     allocate 1d array
-      ALLOCATE( TAGI(NUMNOD) )
+      call my_alloc(TAGI, NUMNOD, "TAGI")
       TAGI(1:NUMNOD) = 0 
 C-------------for main nodes---------
       DO N = 1, NS10E
@@ -130,7 +132,7 @@ c                IF (NF > 1) NBDDCNDM = NBDDCNDM + 1
             ENDIF
       END DO
 C ----------------------------
-      DEALLOCATE( TAGI )
+      CALL MY_DEALLOC(TAGI)
 C ----------------------------
 C
       RETURN

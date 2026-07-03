@@ -21,11 +21,13 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    init_trim   ../engine/source/interfaces/intsort/init_trim.F
+!||    init_trim      ../engine/source/interfaces/intsort/init_trim.F
 !||--- called by ------------------------------------------------------
-!||    resol       ../engine/source/engine/resol.F
+!||    resol          ../engine/source/engine/resol.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    tri7box     ../engine/share/modules/tri7box.F
+!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
+!||    tri7box        ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE INIT_TRIM(NINTER)
 C Initialize arrays that are use to decide if bounding boxes
@@ -37,10 +39,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
       INTEGER, INTENT(IN) :: NINTER 
-        ALLOCATE(TO_TRIM(NINTER))
-        ALLOCATE(FIRST_TEST(NINTER))
+        call my_alloc(TO_TRIM, NINTER, "TO_TRIM")
+        call my_alloc(FIRST_TEST, NINTER, "FIRST_TEST")
         TO_TRIM(1:NINTER) = .TRUE.
         FIRST_TEST(1:NINTER) = .TRUE.
       END

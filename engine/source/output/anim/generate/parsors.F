@@ -30,6 +30,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c          ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
 !||    element_mod        ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE PARSORS(IADD ,IPARG     ,IXS    ,MATER ,IPARTS ,
      2                  EL2FA ,                   DD_IAD, 
@@ -41,6 +43,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -75,7 +79,7 @@ C     REAL
       INTEGER, DIMENSION(:), ALLOCATABLE :: NP
 C-----------------------------------------------
 C
-      ALLOCATE(NP(NUMELS*8+24*NUMELS16+NUMSPH*8))
+      call my_alloc(NP, NUMELS*8+24*NUMELS16+NUMSPH*8, "NP")
       NN1 = 1
       NN2 = 1
       NN3 = NN2 + NUMELS
@@ -327,6 +331,6 @@ C
         END DO
       ENDIF
 C-----------------------------------------------
-      DEALLOCATE(NP)
+      call my_dealloc(NP)
       RETURN
       END

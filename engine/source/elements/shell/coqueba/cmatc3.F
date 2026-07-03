@@ -21,20 +21,22 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    cmatc3         ../engine/source/elements/shell/coqueba/cmatc3.F
+!||    cmatc3           ../engine/source/elements/shell/coqueba/cmatc3.F
 !||--- called by ------------------------------------------------------
-!||    c3ke3          ../engine/source/elements/sh3n/coque3n/c3ke3.F
-!||    cbake3         ../engine/source/elements/shell/coqueba/cbake3.F
-!||    czke3          ../engine/source/elements/shell/coquez/czke3.F
+!||    c3ke3            ../engine/source/elements/sh3n/coque3n/c3ke3.F
+!||    cbake3           ../engine/source/elements/shell/coqueba/cbake3.F
+!||    czke3            ../engine/source/elements/shell/coquez/czke3.F
 !||--- calls      -----------------------------------------------------
-!||    cctoglob       ../engine/source/elements/shell/coqueba/cmatc3.F
-!||    gepm_lc        ../engine/source/elements/shell/coqueba/cmatc3.F
-!||    get_etfac_s    ../engine/source/elements/solid/solide8z/get_etfac_s.F
-!||    layini         ../engine/source/elements/shell/coque/layini.F
+!||    cctoglob         ../engine/source/elements/shell/coqueba/cmatc3.F
+!||    gepm_lc          ../engine/source/elements/shell/coqueba/cmatc3.F
+!||    get_etfac_s      ../engine/source/elements/solid/solide8z/get_etfac_s.F
+!||    layini           ../engine/source/elements/shell/coque/layini.F
 !||--- uses       -----------------------------------------------------
-!||    drape_mod      ../engine/share/modules/drape_mod.F
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    stack_mod      ../engine/share/modules/stack_mod.F
+!||    drape_mod        ../engine/share/modules/drape_mod.F
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    stack_mod        ../engine/share/modules/stack_mod.F
 !||====================================================================
       SUBROUTINE CMATC3(JFT    ,JLT     ,PM     ,MAT     ,GEO      ,
      1                  PID    ,AREA    ,THK0   ,THK02   ,THK      , 
@@ -53,6 +55,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -136,8 +140,10 @@ C-----------------------------------------------
         ENDDO  
       ENDIF
       NLAY_MAX   = MAX(NLAY,NPT, ELBUF_STR%NLAY)
-      ALLOCATE(MATLY(MVSIZ*NLAY_MAX), THKLY(MVSIZ*NLAY_MAX*LAYNPT_MAX),
-     .         POSLY(MVSIZ,NLAY_MAX*LAYNPT_MAX),THK_LY(NEL,NLAY_MAX*LAYNPT_MAX))
+      call my_alloc(MATLY, MVSIZ*NLAY_MAX, "MATLY")
+      call my_alloc(THKLY, MVSIZ*NLAY_MAX*LAYNPT_MAX, "THKLY")
+      call my_alloc(POSLY, MVSIZ, NLAY_MAX*LAYNPT_MAX, "POSLY")
+      call my_alloc(THK_LY, NEL, NLAY_MAX*LAYNPT_MAX, "THK_LY")
       
 C      IF (IHBE>=21.AND.IHBE<=29) COEF =EM03 
       IF(ITHK>0.AND.ISMDISP==0)THEN
@@ -390,7 +396,10 @@ C          HZ(I)= HM(I,4)*FACG
          ENDDO
        END IF !(IDRIL>0) THEN
 C
-      DEALLOCATE(MATLY, THKLY, POSLY, THK_LY)
+      call my_dealloc(MATLY)
+      call my_dealloc(THKLY)
+      call my_dealloc(POSLY)
+      call my_dealloc(THK_LY)
       RETURN
       END
 !||====================================================================

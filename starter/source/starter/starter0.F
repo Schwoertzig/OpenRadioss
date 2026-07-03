@@ -79,6 +79,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_create_rbodies_from_rigid_parts_mod     ../starter/source/devtools/hm_reader/hm_create_rbodies_from_rigid_parts.F90
 !||    hm_evaluate_rbodies_from_rigid_parts_mod   ../starter/source/devtools/hm_reader/hm_evaluate_rbodies_from_rigid_parts.F90
 !||    hm_rbodies_add_main_node_mod               ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
+!||    input_modification_mod                     ../starter/source/starter/input_modification.F90
 !||    message_mod                                ../starter/share/message_module/message_mod.F
 !||    submodel_mod                               ../starter/share/modules1/submodel_mod.F
 !||    th_mod                                     ../starter/share/modules1/th_mod.F90
@@ -92,6 +93,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE MULTI_FVM_MOD
       USE SUBMODEL_MOD
+      use my_alloc_mod
       USE CHECK_MOD
       USE INOUTFILE_MOD
       USE DETONATORS_MOD
@@ -117,6 +119,7 @@ C-----------------------------------------------
       use hm_evaluate_rbodies_from_rigid_parts_mod
       use hm_create_rbodies_from_rigid_parts_mod
       use hm_convert_tetra4_to_tetra10_mod
+      use input_modification_mod, only : input_modif_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -216,6 +219,7 @@ c      TYPE(SENSORS_) :: SENSORS    ! declared as global in USER_SENSOR_MOD
       TYPE(DEFAULTS_)           :: DEFAULTS            !< Hosts the variables from /DEF/ option
       TYPE(glob_therm_) :: glob_therm
       TYPE(pblast_) :: PBLAST
+      type(input_modif_) :: input_modification !< input modification data structure
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
@@ -680,7 +684,7 @@ C Runnumber is taken from input name or previous treatments
 C-------------------------------------------------------------------
       IRUN = RUNN
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
-      ALLOCATE(LSUBMODEL(1))
+      allocate(LSUBMODEL(1))
       IF(ALLOCATED(LSUBMODEL)) DEALLOCATE(LSUBMODEL)
 
 C------------------------------------------------
@@ -745,7 +749,7 @@ C------------------------------------------------
       IBID = 0
       CALL CPP_SUBMODEL_COUNT(NSUBMOD,IBID)
       IF(NSUBMOD > 0)THEN
-        ALLOCATE (LSUBMODEL(NSUBMOD),STAT=stat)
+        allocate(LSUBMODEL(NSUBMOD), stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                         C1='LSUBMODEL')
@@ -755,7 +759,7 @@ C------------------------------------------------
         LSUBMODEL(1:NSUBMOD)%SKEW = 0
         CALL HM_READ_SUBMODEL(LSUBMODEL)
       ELSE
-        ALLOCATE (LSUBMODEL(0),STAT=stat)
+        allocate(LSUBMODEL(0), stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                         C1='LSUBMODEL')
@@ -781,7 +785,7 @@ C-------------------------------------------------------------------
 c Count number of translated shell elements
       NB_SEATBELT_SHELLS = 0
       CALL HM_COUNT_2D_ELEMENT_SEATBELT(NB_SEATBELT_SHELLS,LSUBMODEL)
-      ALLOCATE (SEATBELT_CONVERTED_ELEMENTS(3,NB_SEATBELT_SHELLS),STAT=stat)
+      call my_alloc(SEATBELT_CONVERTED_ELEMENTS, 3, NB_SEATBELT_SHELLS, "SEATBELT_CONVERTED_ELEMENTS", stat=stat)
       SEATBELT_CONVERTED_ELEMENTS(1:3,1:NB_SEATBELT_SHELLS) = 0
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
@@ -805,13 +809,14 @@ C-------------------------------------------------------------------
 C Build RBODY from PART with Irigid
 C------------------------------------------------------------------
       CALL HM_OPTION_COUNT('/PART', NPART)
-      ALLOCATE(NBRBODIES_PER_PART(NPART))
+      call my_alloc(NBRBODIES_PER_PART, NPART, "NBRBODIES_PER_PART")
       NBRBODIES_PER_PART(1:NPART) = 0
       CALL hm_evaluate_rbodies_from_rigid_parts(NPART,NBRBODIES_PER_PART)
 	  
       NB_NEWRBODIES = SUM(NBRBODIES_PER_PART)
 
-      ALLOCATE (NEW_RBODY_TO_PART(NB_NEWRBODIES),NEW_RBODY_ID(NB_NEWRBODIES),STAT=stat)
+      call my_alloc(NEW_RBODY_TO_PART, NB_NEWRBODIES, "NEW_RBODY_TO_PART", stat=stat)
+      call my_alloc(NEW_RBODY_ID, NB_NEWRBODIES, "NEW_RBODY_ID", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                         C1='RBODY_BY_PART')
@@ -833,7 +838,7 @@ C-------------------------------------------------------------------
 C     Control variables (count options)
 C-------------------------------------------------------------------
       CALL CONTRL(MULTI_FVM,LSUBMODEL,IS_DYNA,DETONATORS,USER_WINDOWS,MAT_ELEM,
-     .            NAMES_AND_TITLES,LIPART1,DEFAULTS,GLOB_THERM,PBLAST,OUTPUT)
+     .            NAMES_AND_TITLES,LIPART1,DEFAULTS,GLOB_THERM,PBLAST,OUTPUT,input_modification)
 C-------------------------------------------------------------------
 C     Parameters modification and parameters write (-HSTP_READ -HSTP_WRITE ARGUMENTS)
 C-------------------------------------------------------------------
@@ -878,7 +883,7 @@ C--------------------------------------------------
      .       MULTI_FVM                   ,LSUBMODEL         ,IS_DYNA          ,DETONATORS   ,EBCS_TAB,
      .       SEATBELT_CONVERTED_ELEMENTS ,NB_SEATBELT_SHELLS,NB_DYNA_INCLUDE  ,USER_WINDOWS ,OUTPUT  ,
      .       MAT_ELEM,NAMES_AND_TITLES,DEFAULTS,glob_therm,PBLAST,SENSOR_USER_STRUCT,CHECK_USED,
-     .       NB_NEWRBODIES,NEW_RBODY_TO_PART)
+     .       NB_NEWRBODIES,NEW_RBODY_TO_PART,input_modification)
 
 c       stop CPU timer for lectur
         CALL STOPTIME(2,1)
@@ -897,9 +902,9 @@ C --------------------------------------------------
 
       ENDIF
 C
-      IF(ALLOCATED(SEATBELT_CONVERTED_ELEMENTS)) DEALLOCATE(SEATBELT_CONVERTED_ELEMENTS)  
-      IF(ALLOCATED(NBRBODIES_PER_PART)) DEALLOCATE(NBRBODIES_PER_PART)  
-      IF(ALLOCATED(NEW_RBODY_ID)) DEALLOCATE(NEW_RBODY_ID)
+      IF(ALLOCATED(SEATBELT_CONVERTED_ELEMENTS)) CALL MY_DEALLOC(SEATBELT_CONVERTED_ELEMENTS)
+      IF(ALLOCATED(NBRBODIES_PER_PART)) CALL MY_DEALLOC(NBRBODIES_PER_PART)
+      IF(ALLOCATED(NEW_RBODY_ID)) CALL MY_DEALLOC(NEW_RBODY_ID)
       CALL USER_WINDOWS_CLEAN(USER_WINDOWS)
       CALL TH_CLEAN(OUTPUT%TH)
 C
@@ -941,7 +946,6 @@ C
 
       CALL F_ANEND(OUTPUT,NAMES_AND_TITLES)
 C---  
-      print*,'done'
       RETURN
 C---  
       END

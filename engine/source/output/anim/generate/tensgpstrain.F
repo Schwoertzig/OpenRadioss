@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod        ../engine/share/resol/initbuf.F
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    outmax_mod         ../common_source/modules/outmax_mod.F
 !||====================================================================
       SUBROUTINE TENSGPSTRAIN(ELBUF_TAB,FUNC1   ,FUNC2   ,IPARG   ,GEO     ,
@@ -52,6 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -152,7 +154,7 @@ C=======================================================================
 C======================================================================= 
       ALPHA = ZEP1381966
       BETA  = ZEP5854102
-      CALL MY_ALLOC(EVAR,6,NUMNOD)
+      call my_alloc(EVAR, 6, NUMNOD, "EVAR")
       DO I=1,NUMNOD
         EVAR(1,I) = ZERO
         EVAR(2,I) = ZERO
@@ -585,7 +587,7 @@ c
         ENDIF
 
       ENDDO ! next NG
-      DEALLOCATE(EVAR)
+      call my_dealloc(EVAR)
 C-----------------------------------------------
       RETURN
       END SUBROUTINE TENSGPSTRAIN
@@ -603,6 +605,7 @@ C-----------------------------------------------
 !||    element_mod           ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod           ../engine/share/resol/initbuf.F
 !||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE GPSSTRAIN_SKIN(ELBUF_TAB,FUNC1   ,FUNC2   ,IPARG   ,
      .                    IXS      ,IXS10   ,IXS16   ,IXS20   ,X        ,
@@ -617,6 +620,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -714,7 +718,7 @@ C=======================================================================
 C======================================================================= 
       ALPHA = ZEP1381966
       BETA  = ZEP5854102
-      CALL MY_ALLOC(EVAR,6,NUMNOD)
+      call my_alloc(EVAR, 6, NUMNOD, "EVAR")
       DO I=1,NUMNOD
         EVAR(1,I) = ZERO
         EVAR(2,I) = ZERO
@@ -1168,7 +1172,7 @@ c       STRHG(NEL,6,8)
         ENDIF
 
       ENDDO ! next NG
-      DEALLOCATE(EVAR)
+      call my_dealloc(EVAR)
 C-----------------------------------------------
       RETURN
       END SUBROUTINE GPSSTRAIN_SKIN

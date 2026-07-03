@@ -21,13 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    read_failwave   ../engine/source/output/restart/read_failwave.F
+!||    read_failwave    ../engine/source/output/restart/read_failwave.F
 !||--- called by ------------------------------------------------------
-!||    rdresb          ../engine/source/output/restart/rdresb.F
+!||    rdresb           ../engine/source/output/restart/rdresb.F
 !||--- calls      -----------------------------------------------------
-!||    read_i_c        ../common_source/tools/input_output/write_routines.c
+!||    read_i_c         ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
-!||    failwave_mod    ../common_source/modules/failwave_mod.F
+!||    failwave_mod     ../common_source/modules/failwave_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE READ_FAILWAVE(FAILWAVE)
 C-----------------------------------------------
@@ -37,6 +39,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -67,13 +71,13 @@ c
 c
       IF (IWAVE > 0) THEN
         LEN = NDDL*NNOD*SIZE
-        ALLOCATE (RBUF(LEN))
-        ALLOCATE (FAILWAVE%INDX(NNOD))
-        ALLOCATE (FAILWAVE%IDXI(NUMNOD))
-        ALLOCATE (FAILWAVE%MAXLEV(NNOD))
-        ALLOCATE (FAILWAVE%FWAVE_NOD(NDDL,NNOD,SIZE))
-        ALLOCATE (FAILWAVE%FWAVE_NOD_STACK(NDDL,NNOD,SIZE))
-        ALLOCATE (FAILWAVE%MAXLEV_STACK(NNOD))
+        call my_alloc(RBUF, LEN, "RBUF")
+        call my_alloc(FAILWAVE%INDX, NNOD, "FAILWAVE%INDX")
+        call my_alloc(FAILWAVE%IDXI, NUMNOD, "FAILWAVE%IDXI")
+        call my_alloc(FAILWAVE%MAXLEV, NNOD, "FAILWAVE%MAXLEV")
+        call my_alloc(FAILWAVE%FWAVE_NOD, NDDL, NNOD, SIZE, "FAILWAVE%FWAVE_NOD")
+        call my_alloc(FAILWAVE%FWAVE_NOD_STACK, NDDL, NNOD, SIZE, "FAILWAVE%FWAVE_NOD_STACK")
+        call my_alloc(FAILWAVE%MAXLEV_STACK, NNOD, "FAILWAVE%MAXLEV_STACK")
         FAILWAVE%FWAVE_NOD_STACK(:,:,:)  = 0
         FAILWAVE%MAXLEV_STACK(:) = 0
 c
@@ -95,14 +99,14 @@ c
           END DO 
         END DO 
 c
-        DEALLOCATE( RBUF )
+        call my_dealloc(RBUF)
       ELSE
-        ALLOCATE (FAILWAVE%FWAVE_NOD(0,0,0))
-        ALLOCATE (FAILWAVE%FWAVE_NOD_STACK(0,0,0))
-        ALLOCATE (FAILWAVE%INDX(0))
-        ALLOCATE (FAILWAVE%IDXI(0))
-        ALLOCATE (FAILWAVE%MAXLEV(0))
-        ALLOCATE (FAILWAVE%MAXLEV_STACK(0))
+        call my_alloc(FAILWAVE%FWAVE_NOD, 0, 0, 0, "FAILWAVE%FWAVE_NOD")
+        call my_alloc(FAILWAVE%FWAVE_NOD_STACK, 0, 0, 0, "FAILWAVE%FWAVE_NOD_STACK")
+        call my_alloc(FAILWAVE%INDX, 0, "FAILWAVE%INDX")
+        call my_alloc(FAILWAVE%IDXI, 0, "FAILWAVE%IDXI")
+        call my_alloc(FAILWAVE%MAXLEV, 0, "FAILWAVE%MAXLEV")
+        call my_alloc(FAILWAVE%MAXLEV_STACK, 0, "FAILWAVE%MAXLEV_STACK")
       ENDIF
 c-----------
       RETURN

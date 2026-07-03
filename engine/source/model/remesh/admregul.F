@@ -21,20 +21,21 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    admregul       ../engine/source/model/remesh/admregul.F
+!||    admregul         ../engine/source/model/remesh/admregul.F
 !||--- called by ------------------------------------------------------
-!||    resol          ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    admmap3        ../engine/source/model/remesh/admmap3.F
-!||    admmap4        ../engine/source/model/remesh/admmap4.F
-!||    my_barrier     ../engine/source/system/machine.F
-!||    my_orders      ../common_source/tools/sort/my_orders.c
-!||    sync_data      ../engine/source/system/machine.F
+!||    admmap3          ../engine/source/model/remesh/admmap3.F
+!||    admmap4          ../engine/source/model/remesh/admmap4.F
+!||    my_barrier       ../engine/source/system/machine.F
+!||    my_orders        ../common_source/tools/sort/my_orders.c
+!||    sync_data        ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
-!||    remesh_mod     ../engine/share/modules/remesh_mod.F
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    remesh_mod       ../engine/share/modules/remesh_mod.F
 !||====================================================================
       SUBROUTINE ADMREGUL(IXC  ,IPARTC  ,IXTG ,IPARTTG,IPART,
      .                    ITASK,IPARG   ,X    ,MS     ,IN   ,
@@ -52,6 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -98,10 +100,10 @@ C-----------------------------------------------
       my_real
      .        MSBIG, INBIG, MCPM, MCPN
 C-----------------------------------------------
-      CALL MY_ALLOC(KDIVIDE4,NUMELC)
-      CALL MY_ALLOC(KDIVIDE3,NUMELTG)
-      CALL MY_ALLOC(ITRI,MAX(NUMELC,NUMELTG))
-      CALL MY_ALLOC(INDEX1,2*MAX(NUMELC,NUMELTG))
+      call my_alloc(KDIVIDE4, NUMELC, "KDIVIDE4")
+      call my_alloc(KDIVIDE3, NUMELTG, "KDIVIDE3")
+      call my_alloc(ITRI, MAX(NUMELC,NUMELTG), "ITRI")
+      call my_alloc(INDEX1, 2*MAX(NUMELC,NUMELTG), "INDEX1")
 
  10   CONTINUE 
 
@@ -608,9 +610,9 @@ C     compaction of LSH3ACT
 
       GO TO 10
 C----6---------------------------------------------------------------7---------8
-      DEALLOCATE(KDIVIDE4)
-      DEALLOCATE(KDIVIDE3)
-      DEALLOCATE(ITRI)
-      DEALLOCATE(INDEX1)
+      call my_dealloc(KDIVIDE4)
+      call my_dealloc(KDIVIDE3)
+      call my_dealloc(ITRI)
+      call my_dealloc(INDEX1)
       RETURN
       END     

@@ -3193,11 +3193,13 @@ C
       RETURN
       END
 !||====================================================================
-!||    fvbc_allo    ../engine/source/constraints/general/impvel/fv_imp0.F
+!||    fvbc_allo      ../engine/source/constraints/general/impvel/fv_imp0.F
 !||--- called by ------------------------------------------------------
-!||    upd_glob_k   ../engine/source/implicit/upd_glob_k.F
+!||    upd_glob_k     ../engine/source/implicit/upd_glob_k.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    imp_fvbcl    ../engine/share/modules/impbufdef_mod.F
+!||    imp_fvbcl      ../engine/share/modules/impbufdef_mod.F
+!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE FVBC_ALLO
 C-----------------------------------------------
@@ -3207,6 +3209,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -3228,21 +3231,24 @@ C-----------------------------------------------
 C-----
       IF (NCYCLE /= 1 .OR.INCONV /=1) RETURN
 
-       ALLOCATE(ICT_1(NUMNOD))
+       call my_alloc(ICT_1, NUMNOD, "ICT_1")
        IF (IRODDL >0 ) ALLOCATE(ICR_1(NUMNOD))
-       ALLOCATE(FVBCUDL(NFXVEL))
+       call my_alloc(FVBCUDL, NFXVEL, "FVBCUDL")
        IF (NKUD_L>0) THEN
-        ALLOCATE(IKUD_1(NKUD_L),BKUD_1(NKUD_L))
+        call my_alloc(IKUD_1, NKUD_L, "IKUD_1")
+        call my_alloc(BKUD_1, NKUD_L, "BKUD_1")
        ENDIF
 C
       RETURN
       END
 !||====================================================================
-!||    fvbc_deallo    ../engine/source/constraints/general/impvel/fv_imp0.F
+!||    fvbc_deallo      ../engine/source/constraints/general/impvel/fv_imp0.F
 !||--- called by ------------------------------------------------------
-!||    deallocm_imp   ../engine/source/implicit/imp_solv.F
+!||    deallocm_imp     ../engine/source/implicit/imp_solv.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    imp_fvbcl      ../engine/share/modules/impbufdef_mod.F
+!||    imp_fvbcl        ../engine/share/modules/impbufdef_mod.F
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE FVBC_DEALLO
 C-----------------------------------------------
@@ -3252,6 +3258,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -3271,12 +3278,12 @@ C-----------------------------------------------
 C-----
       IF (NFVBCL > 0) THEN
 
-       DEALLOCATE(ICT_1)
-       IF (IRODDL >0 ) DEALLOCATE(ICR_1)
-       DEALLOCATE(FVBCUDL)
+       call my_dealloc(ICT_1)
+       IF (IRODDL >0 ) call my_dealloc(ICR_1)
+       call my_dealloc(FVBCUDL)
        IF (NKUD_L>0) THEN
-        DEALLOCATE(IKUD_1)
-        DEALLOCATE(BKUD_1)
+        call my_dealloc(IKUD_1)
+        call my_dealloc(BKUD_1)
        ENDIF
       END IF !(NFVBCL > 0) THEN
 C

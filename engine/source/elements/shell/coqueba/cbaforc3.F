@@ -89,6 +89,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    failwave_mod        ../common_source/modules/failwave_mod.F
 !||    glob_therm_mod      ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    mat_elem_mod        ../common_source/modules/mat_elem/mat_elem_mod.F90
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||    nlocal_reg_mod      ../common_source/modules/nlocal_reg_mod.F
 !||    pinch_local_mod     ../engine/share/modules/pinch_local_mod.F
 !||    sensor_mod          ../common_source/modules/sensor_mod.F90
@@ -148,6 +150,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G L O B A L   P A R A M E T E R S
@@ -364,7 +368,7 @@ C
 !-------------------------------------------      
 ! array for the non-local variable
       NDDL = NPTTOT
-      ALLOCATE(VAR_REG(NEL,NDDL)) 
+      call my_alloc(VAR_REG, NEL, NDDL, "VAR_REG")
 !-------------------------------------------
 C
 c--------------------------------------------
@@ -388,8 +392,8 @@ c-------------------------------------
       L_DIRB = ELBUF_STR%BUFLY(1)%LY_DIRB
       IGTYP = IGEO(11,PID(1))
       IF(IDRAPE > 0 .AND. (IGTYP == 51 .OR. IGTYP == 52)) THEN
-        ALLOCATE(DIRA(NPTTOT*NEL*L_DIRA))
-        ALLOCATE(DIRB(NPTTOT*NEL*L_DIRB))
+        call my_alloc(DIRA, NPTTOT*NEL*L_DIRA, "DIRA")
+        call my_alloc(DIRB, NPTTOT*NEL*L_DIRB, "DIRB")
         DIRA = ZERO
         DIRB = ZERO
         IF (L_DIRA == 0) THEN
@@ -415,8 +419,8 @@ c-------------------------------------
       ELSE ! idrape
         SDIR_A=NLAY*NEL*L_DIRA
         SDIR_B=NLAY*NEL*L_DIRB
-        ALLOCATE(DIRA(NLAY*NEL*L_DIRA))
-        ALLOCATE(DIRB(NLAY*NEL*L_DIRB))
+        call my_alloc(DIRA, NLAY*NEL*L_DIRA, "DIRA")
+        call my_alloc(DIRB, NLAY*NEL*L_DIRB, "DIRB")
         DIRA=ZERO
         DIRB=ZERO
         IF (L_DIRA == 0) THEN
@@ -434,8 +438,8 @@ c-------------------------------------
          DIR_B => DIRB(1:NLAY*NEL*L_DIRB)
       ENDIF ! IDRAPE    
 c-------------------------------------
-      ALLOCATE(DIR1_CRK(0))
-      ALLOCATE(DIR2_CRK(0))
+      call my_alloc(DIR1_CRK, 0, "DIR1_CRK")
+      call my_alloc(DIR2_CRK, 0, "DIR2_CRK")
 c-------------------------------------
       DO I=JFT,JLT
         DO J=1,8
@@ -468,9 +472,9 @@ C initialization for thermal ---
        ENDDO
 C
        IF(NPINCH > 0) THEN
-         ALLOCATE(PINCH_LOCAL%EPINCHXZ(MVSIZ))
-         ALLOCATE(PINCH_LOCAL%EPINCHYZ(MVSIZ))
-         ALLOCATE(PINCH_LOCAL%EPINCHZZ(MVSIZ))
+         call my_alloc(PINCH_LOCAL%EPINCHXZ, MVSIZ, "PINCH_LOCAL%EPINCHXZ")
+         call my_alloc(PINCH_LOCAL%EPINCHYZ, MVSIZ, "PINCH_LOCAL%EPINCHYZ")
+         call my_alloc(PINCH_LOCAL%EPINCHZZ, MVSIZ, "PINCH_LOCAL%EPINCHZZ")
       ENDIF
 C
       SSP_MAX = ZERO
@@ -1156,14 +1160,14 @@ C
      8   STI_PLY,   MSZ2,      NFT,       NPT)
       ENDIF  
 C------------
-      IF (ALLOCATED(DIRB)) DEALLOCATE(DIRB) 
-      IF (ALLOCATED(DIRA)) DEALLOCATE(DIRA)
-      IF (ALLOCATED(VAR_REG))   DEALLOCATE(VAR_REG)
+      IF (ALLOCATED(DIRB)) call my_dealloc(DIRB)
+      IF (ALLOCATED(DIRA)) call my_dealloc(DIRA)
+      IF (ALLOCATED(VAR_REG)) call my_dealloc(VAR_REG)
 C
        IF(NPINCH > 0) THEN
-         DEALLOCATE(PINCH_LOCAL%EPINCHXZ)
-         DEALLOCATE(PINCH_LOCAL%EPINCHYZ)
-         DEALLOCATE(PINCH_LOCAL%EPINCHZZ)
+         call my_dealloc(PINCH_LOCAL%EPINCHXZ)
+         call my_dealloc(PINCH_LOCAL%EPINCHYZ)
+         call my_dealloc(PINCH_LOCAL%EPINCHZZ)
        ENDIF
 C
 C------------

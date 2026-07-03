@@ -24,12 +24,15 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    int18_law151_init   ../engine/source/interfaces/int18/int18_law151_init.F
 !||--- called by ------------------------------------------------------
 !||    resol               ../engine/source/engine/resol.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod        ../common_source/modules/groupdef_mod.F
 !||    message_mod         ../engine/share/message_module/message_mod.F
 !||    multi_fvm_mod       ../common_source/modules/ale/multi_fvm_mod.F90
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         SUBROUTINE INT18_LAW151_INIT(MULTI_FVM,IGRBRIC,IPARI,IXS,
      1                               IGROUPS ,IPARG   ,ELBUF_TAB  ,FORCE_INT   ,
@@ -64,6 +67,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 #include      "com04_c.inc"
@@ -101,7 +106,7 @@ C-----------------------------------------------
         !                              the ALE elements)
         !   INT18_GLOBAL_LIST --> true if /INT18 + LAW151 for the NIN interface
         MULTI_FVM%INT18_GLOBAL_LIST(1:NINTER) = .FALSE.
-        ALLOCATE(TAG(NUMELS))
+        call my_alloc(TAG, NUMELS, "TAG")
         TAG(1:NUMELS)=.FALSE.
         IF( MULTI_FVM%IS_INT18_LAW151 ) THEN
             DO N=1,MULTI_FVM%NUMBER_INT18
@@ -152,7 +157,7 @@ C-----------------------------------------------
                 ENDDO
             ENDDO
         ENDIF
-        IF(ALLOCATED(TAG))DEALLOCATE(TAG)
+        IF(ALLOCATED(TAG)) call my_dealloc(TAG)
 
         RETURN
         END SUBROUTINE INT18_LAW151_INIT

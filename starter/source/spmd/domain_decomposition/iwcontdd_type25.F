@@ -24,6 +24,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    iwcontdd_type25   ../starter/source/spmd/domain_decomposition/iwcontdd_type25.F
 !||--- called by ------------------------------------------------------
 !||    inint3            ../starter/source/interfaces/inter3d1/inint3.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
         SUBROUTINE IWCONTDD_TYPE25(NLEDGE,NUMNOD,NSN,NMN,IEDGE,NRTM,NEDGE,NSV,MSR,IRECT,IWCONT,NSNT,NMNT,INTBUF_TAB)
@@ -43,6 +44,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !            * add the weight to the 2 S nodes (e2e)
 !$ENDCOMMENT
         USE INTBUFDEF_MOD 
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -95,7 +97,7 @@ C-----------------------------------------------
         ! ---------------------------
         ! special treatment for edge to edge
         IF(IEDGE/=0) THEN
-          ALLOCATE(TAG_NODE(NUMNOD))
+          call my_alloc(TAG_NODE, NUMNOD, "TAG_NODE")
           TAG_NODE(1:NUMNOD) = 0
           ! ------------
           ! S node for e2e & e2s
@@ -166,7 +168,7 @@ C-----------------------------------------------
             ENDIF
           ENDDO
           ! ------------    
-          DEALLOCATE(TAG_NODE)
+          CALL MY_DEALLOC(TAG_NODE)
         ENDIF
         ! ---------------------------
 

@@ -24,12 +24,15 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    anim_nodal_p_elems   ../engine/source/output/anim/generate/anim_nodal_p_elems.F
 !||--- called by ------------------------------------------------------
 !||    nodalp               ../engine/source/output/anim/generate/nodalp.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod         ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    i22bufbric_mod       ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    i22edge_mod          ../common_source/modules/interfaces/cut-cell-buffer_mod.F
 !||    i22tri_mod           ../common_source/modules/interfaces/cut-cell-search_mod.F
 !||    initbuf_mod          ../engine/share/resol/initbuf.F
+!||    my_alloc_mod         ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod       ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE ANIM_NODAL_P_ELEMS(IFUNC, WA4, IPARG,  ELBUF_TAB, IX , NIX  , NUMEL, ITAB , NV46, IS_WRITTEN_NODE)
 C-----------------------------------------------
@@ -54,6 +57,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -93,7 +98,7 @@ C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------      
 
-         ALLOCATE(SUM_WEIGHT(NUMNOD))      
+         call my_alloc(SUM_WEIGHT, NUMNOD, "SUM_WEIGHT")
          SUM_WEIGHT = 0
          NNOD = NIX-3   !8-node brick or 4-node quad
 
@@ -221,7 +226,7 @@ C-----------------------------------------------
            ENDIF
          ENDDO
          
-         DEALLOCATE(SUM_WEIGHT)          
+         call my_dealloc(SUM_WEIGHT)
 C-----------------------------------------------
       
       RETURN

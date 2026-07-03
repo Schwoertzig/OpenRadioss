@@ -21,15 +21,17 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    w_alelag   ../starter/source/restart/ddsplit/w_alelag.F
+!||    w_alelag       ../starter/source/restart/ddsplit/w_alelag.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit    ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_ALELAG(DFLOW,VFLOW,WFLOW,NODGLOB,NUMNOD_L,LEN_AM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -44,7 +46,8 @@ C-----------------------------------------------
       my_real, DIMENSION(:,:), ALLOCATABLE :: RTMP1,RTMP2,RTMP3
 C-----------------------------------------------
 !      2d array
-       ALLOCATE( RTMP1(3,NUMNOD_L),RTMP2(3,NUMNOD_L) )
+       call my_alloc(RTMP1, 3, NUMNOD_L, "RTMP1")
+       call my_alloc(RTMP2, 3, NUMNOD_L, "RTMP2")
        ALLOCATE( RTMP3(3,NUMNOD_L) )
 ! ------------------------------------
 C
@@ -74,7 +77,8 @@ C grille velocity
 C
 ! ------------------------------------
 !      2d array
-       DEALLOCATE( RTMP1,RTMP2 )
+       CALL MY_DEALLOC(RTMP1)
+       CALL MY_DEALLOC(RTMP2)
        DEALLOCATE( RTMP3 )
 ! ------------------------------------
       RETURN

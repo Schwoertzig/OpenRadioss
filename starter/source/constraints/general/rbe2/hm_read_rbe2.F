@@ -386,16 +386,18 @@ C-----------
       RETURN
       END SUBROUTINE HM_PREREAD_RBE2
 !||====================================================================
-!||    reorbe2   ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    reorbe2        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||--- called by ------------------------------------------------------
-!||    inirbe2   ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    inirbe2        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||--- calls      -----------------------------------------------------
-!||    setiadm   ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    setiadm        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE REORBE2(IRBE2  ,LRBE2  ,NC )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -418,8 +420,8 @@ C
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG,IAD_N
 C========================================================================|
 C--------re-ordering if with hierarchy---------------------------------------
-      ALLOCATE(ITAG(NUMNOD))
-      ALLOCATE(IAD_N(NUMNOD+1))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
+      call my_alloc(IAD_N, NUMNOD+1, "IAD_N")
       NC=0
       DO I=1,NUMNOD
        ITAG(I)=0
@@ -531,18 +533,22 @@ C----------reodering---
         ENDDO
         IAD1 =IAD1+NSL
       ENDDO
-      DEALLOCATE(ITAG,IAD_N)
+      CALL MY_DEALLOC(ITAG)
+      CALL MY_DEALLOC(IAD_N)
 
 C
       RETURN
       END SUBROUTINE REORBE2
 !||====================================================================
-!||    setiadm     ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    setiadm        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||--- called by ------------------------------------------------------
-!||    hierarbe2   ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
-!||    reorbe2     ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    hierarbe2      ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    reorbe2        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE SETIADM(IADM,NZ,IAD_N,IRBE2)
+        USE MY_ALLOC_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -564,7 +570,7 @@ C
       INTEGER IADM_CP(NZ)
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG
 C========================================================================|
-      ALLOCATE(ITAG(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
 C========================================================================|
       DO I=1,NUMNOD
        ITAG(I)=0
@@ -592,21 +598,23 @@ C========================================================================|
       DO J=1,NZ
        IADM(J)=IADM_CP(J)
       ENDDO
-      DEALLOCATE(ITAG)
+      CALL MY_DEALLOC(ITAG)
 C
       RETURN
       END SUBROUTINE SETIADM
 !||====================================================================
-!||    hierarbe2   ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    hierarbe2      ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||--- called by ------------------------------------------------------
-!||    inirbe2     ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    inirbe2        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||--- calls      -----------------------------------------------------
-!||    setiadm     ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    setiadm        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE HIERARBE2(IRBE2  ,LRBE2)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -628,8 +636,8 @@ C
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG, IAD_N
 C========================================================================|
 C--------defining hierarchy---------------------------------------
-      ALLOCATE(ITAG(NUMNOD))
-      ALLOCATE(IAD_N(NUMNOD+1))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
+      call my_alloc(IAD_N, NUMNOD+1, "IAD_N")
       DO I=1,NUMNOD
        ITAG(I)=0
       ENDDO
@@ -703,7 +711,8 @@ C----------reodering---
        ENDDO
       ENDDO
 C
-      DEALLOCATE(ITAG,IAD_N)
+      CALL MY_DEALLOC(ITAG)
+      CALL MY_DEALLOC(IAD_N)
       RETURN
       END SUBROUTINE HIERARBE2
 !||====================================================================
@@ -1323,17 +1332,19 @@ C
       END
 C
 !||====================================================================
-!||    rbe2_merge   ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    rbe2_merge     ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||--- called by ------------------------------------------------------
-!||    inirbe2      ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    inirbe2        ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
 !||--- calls      -----------------------------------------------------
-!||    ic_mrg       ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
-!||    same_nsn     ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    ic_mrg         ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||    same_nsn       ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE RBE2_MERGE(IRBE2  ,LRBE2  )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1355,7 +1366,7 @@ C
 
 C========================================================================|
 C--------merging RBE2 w/ the same NS/M (separated IC)--------------------
-      ALLOCATE(ITAG(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
       ITAG(1:NUMNOD)=0
 C--------if same node as several IND. of /RBE2------------
       NZ=0
@@ -1369,7 +1380,7 @@ C--------if same node as several IND. of /RBE2------------
         ENDDO
       ENDDO
       IF (NZ==0) THEN 
-         DEALLOCATE(ITAG)
+         CALL MY_DEALLOC(ITAG)
          RETURN
       ENDIF
 C --------merge if same all excepting IC     
@@ -1392,7 +1403,7 @@ C --------merge if same all excepting IC
         ENDDO
       ENDDO
 C
-      DEALLOCATE(ITAG)
+      CALL MY_DEALLOC(ITAG)
       RETURN
       END SUBROUTINE RBE2_MERGE
 !||====================================================================

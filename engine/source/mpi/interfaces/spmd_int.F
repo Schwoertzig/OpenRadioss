@@ -194,18 +194,20 @@ C
 C END TRI7VOX0
 C This routine cannot be used for type25 anymore
 !||====================================================================
-!||    spmd_tri7vox   ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri7vox     ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i23main_tri    ../engine/source/interfaces/intsort/i23main_tri.F
+!||    i23main_tri      ../engine/source/interfaces/intsort/i23main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg         ../engine/source/output/message/message.F
-!||    arret          ../engine/source/system/arret.F
-!||    spmd_wait      ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitany   ../engine/source/mpi/spmd_wait.F90
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    spmd_wait        ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitany     ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
-!||    message_mod    ../engine/share/message_module/message_mod.F
-!||    spmd_mod       ../engine/source/mpi/spmd_mod.F90
-!||    tri7box        ../engine/share/modules/tri7box.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI7VOX(
      1   NSV     ,NSN      ,X      ,V     ,MS     ,
@@ -226,6 +228,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -424,7 +428,7 @@ C-----for   NBINFLG
 
       JDEB = 0
       IF(ITYP==25)THEN
-        ALLOCATE(ITAGNSNFI(NUMNOD),STAT=IERROR)
+        call my_alloc(ITAGNSNFI, NUMNOD, "ITAGNSNFI", stat=IERROR)
         ITAGNSNFI(1:NUMNOD) = 0
       END IF
       
@@ -768,7 +772,7 @@ C reset old tag for next P
         ENDDO
       ENDIF       
 C
-      IF(ITYP==25) DEALLOCATE(ITAGNSNFI)
+      IF(ITYP==25) call my_dealloc(ITAGNSNFI)
 C
 C   reception of XREM data
 C
@@ -796,8 +800,8 @@ C Allocate total size
 C
        IF(NSNR>0) THEN
 
-          ALLOCATE(XREM(RSIZ,NSNR),STAT=IERROR)
-          ALLOCATE(IREM(ISIZ,NSNR),STAT=IERROR)    
+          call my_alloc(XREM, RSIZ, NSNR, "XREM", stat=IERROR)
+          call my_alloc(IREM, ISIZ, NSNR, "IREM", stat=IERROR)
 
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -850,9 +854,9 @@ C
               CALL SPMD_WAIT(REQ_SD(P))
               IF(NBOX(P)/=0) THEN
                 CALL SPMD_WAIT(REQ_SD2(P))
-                DEALLOCATE(RBUF(P)%p)
+                call my_dealloc(RBUF(P)%p)
                 CALL SPMD_WAIT(REQ_SD3(P))
-                DEALLOCATE(IBUF(P)%p)
+                call my_dealloc(IBUF(P)%p)
               END IF
             ENDIF
           ENDIF
@@ -878,6 +882,8 @@ c END TRI7VOX
 !||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    message_mod         ../engine/share/message_module/message_mod.F
 !||    multi_fvm_mod       ../common_source/modules/ale/multi_fvm_mod.F90
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
 !||    tri7box             ../engine/share/modules/tri7box.F
 !||====================================================================
@@ -902,6 +908,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -1299,8 +1307,8 @@ C Allocate total size
 C
        IF(NSNR>0) THEN
 
-          ALLOCATE(XREM(RSIZ,NSNR),STAT=IERROR)
-          ALLOCATE(IREM(ISIZ,NSNR),STAT=IERROR)    
+          call my_alloc(XREM, RSIZ, NSNR, "XREM", stat=IERROR)
+          call my_alloc(IREM, ISIZ, NSNR, "IREM", stat=IERROR)
 
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -1353,9 +1361,9 @@ C
               CALL SPMD_WAIT(REQ_SD(P))
               IF(NBOX(P)/=0) THEN
                 CALL SPMD_WAIT(REQ_SD2(P))
-                DEALLOCATE(RBUF(P)%p)
+                call my_dealloc(RBUF(P)%p)
                 CALL SPMD_WAIT(REQ_SD3(P))
-                DEALLOCATE(IBUF(P)%p)
+                call my_dealloc(IBUF(P)%p)
               END IF
             ENDIF
           ENDIF
@@ -1367,18 +1375,20 @@ C
       RETURN
       END
 !||====================================================================
-!||    spmd_tri24vox   ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri24vox    ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i24main_tri     ../engine/source/interfaces/intsort/i24main_tri.F
+!||    i24main_tri      ../engine/source/interfaces/intsort/i24main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
-!||    spmd_wait       ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitany    ../engine/source/mpi/spmd_wait.F90
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    spmd_wait        ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitany     ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI24VOX(
      1   NSV     ,NSN      ,X      ,V     ,MS     ,
@@ -1402,6 +1412,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1465,15 +1477,15 @@ C   S o u r c e  L i n e s
 C-----------------------------------------------
 C
       IF(IEDGE4 /=0)THEN 
-           ALLOCATE(TAG_SN(NUMNOD))
-           ALLOCATE(INDEXE(NUMNOD+NSNE))
-           ALLOCATE(TAG_2RY(NSN))
-           ALLOCATE(NSV_INV(NUMNOD))
+           call my_alloc(TAG_SN, NUMNOD, "TAG_SN")
+           call my_alloc(INDEXE, NUMNOD+NSNE, "INDEXE")
+           call my_alloc(TAG_2RY, NSN, "TAG_2RY")
+           call my_alloc(NSV_INV, NUMNOD, "NSV_INV")
       ELSE
-           ALLOCATE(TAG_SN(0))
-           ALLOCATE(INDEXE(0))
-           ALLOCATE(TAG_2RY(0))
-           ALLOCATE(NSV_INV(0))
+           call my_alloc(TAG_SN, 0, "TAG_SN")
+           call my_alloc(INDEXE, 0, "INDEXE")
+           call my_alloc(TAG_2RY, 0, "TAG_2RY")
+           call my_alloc(NSV_INV, 0, "NSV_INV")
       ENDIF
 C=======================================================================
 C     tag of the boxes containing facets
@@ -2117,8 +2129,8 @@ C
 
        IF(NSNR>0) THEN
 
-          ALLOCATE(XREM(RSIZ,NSNR),STAT=IERROR)
-          ALLOCATE(IREM(ISIZ,NSNR),STAT=IERROR)
+          call my_alloc(XREM, RSIZ, NSNR, "XREM", stat=IERROR)
+          call my_alloc(IREM, ISIZ, NSNR, "IREM", stat=IERROR)
         
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -2192,17 +2204,17 @@ C
               CALL SPMD_WAIT(REQ_SD(P))
               IF(NBOX(P)/=0) THEN
                 CALL SPMD_WAIT(REQ_SD2(P))
-                DEALLOCATE(RBUF(P)%p)
+                call my_dealloc(RBUF(P)%p)
                 CALL SPMD_WAIT(REQ_SD3(P))
-                DEALLOCATE(IBUF(P)%p)
+                call my_dealloc(IBUF(P)%p)
               END IF
             ENDIF
           ENDIF
         ENDDO
       ENDIF
 C
-      IF(ALLOCATED(TAG_SN)) DEALLOCATE(TAG_SN)
-      IF(ALLOCATED(TAG_SN)) DEALLOCATE(INDEXE)
+      IF(ALLOCATED(TAG_SN)) call my_dealloc(TAG_SN)
+      IF(ALLOCATED(TAG_SN)) call my_dealloc(INDEXE)
 
 #endif
 C
@@ -2211,17 +2223,19 @@ C
 C
 c END TRI24VOX
 !||====================================================================
-!||    spmd_tri24gat   ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri24gat    ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i24main_tri     ../engine/source/interfaces/intsort/i24main_tri.F
+!||    i24main_tri      ../engine/source/interfaces/intsort/i24main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
-!||    h3d_mod         ../engine/share/modules/h3d_mod.F
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    h3d_mod          ../engine/share/modules/h3d_mod.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI24GAT(RESULT,NSN ,CAND_N ,I_STOK,NIN,
      2                        IGAP  ,NSNR,MULTIMP,ITY,INTTH ,
@@ -2237,6 +2251,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2397,118 +2413,118 @@ C
         IERROR16 = 0
         IERROR17 = 0
         IERROR18 = 0
-        IF(ASSOCIATED(NSVFI(NIN)%P)) DEALLOCATE(NSVFI(NIN)%P)
+        IF(ASSOCIATED(NSVFI(NIN)%P)) call my_dealloc(NSVFI(NIN)%P)
         ALLOCATE(NSVFI(NIN)%P(NODFI),STAT=IERROR1)
-        IF(ASSOCIATED(XFI(NIN)%P)) DEALLOCATE(XFI(NIN)%P)
+        IF(ASSOCIATED(XFI(NIN)%P)) call my_dealloc(XFI(NIN)%P)
         ALLOCATE(XFI(NIN)%P(3,NODFI),STAT=IERROR2)
-        IF(ASSOCIATED(VFI(NIN)%P)) DEALLOCATE(VFI(NIN)%P)
+        IF(ASSOCIATED(VFI(NIN)%P)) call my_dealloc(VFI(NIN)%P)
         ALLOCATE(VFI(NIN)%P(3,NODFI),STAT=IERROR3)
-        IF(ASSOCIATED(MSFI(NIN)%P)) DEALLOCATE(MSFI(NIN)%P)
+        IF(ASSOCIATED(MSFI(NIN)%P)) call my_dealloc(MSFI(NIN)%P)
         ALLOCATE(MSFI(NIN)%P(NODFI),STAT=IERROR4)
-        IF(ASSOCIATED(STIFI(NIN)%P)) DEALLOCATE(STIFI(NIN)%P)
+        IF(ASSOCIATED(STIFI(NIN)%P)) call my_dealloc(STIFI(NIN)%P)
         ALLOCATE(STIFI(NIN)%P(NODFI),STAT=IERROR5)
-        IF(ASSOCIATED(ITAFI(NIN)%P)) DEALLOCATE(ITAFI(NIN)%P)
+        IF(ASSOCIATED(ITAFI(NIN)%P)) call my_dealloc(ITAFI(NIN)%P)
         ALLOCATE(ITAFI(NIN)%P(NODFI),STAT=IERROR6)
         IF(ITY==7.OR.ITY==22.OR.ITY==23.OR.ITY==24) THEN
-          IF(ASSOCIATED(KINFI(NIN)%P)) DEALLOCATE(KINFI(NIN)%P)
+          IF(ASSOCIATED(KINFI(NIN)%P)) call my_dealloc(KINFI(NIN)%P)
           ALLOCATE(KINFI(NIN)%P(NODFI),STAT=IERROR8)
           IF(INTTH > 0 ) THEN
-           IF(ASSOCIATED(TEMPFI(NIN)%P)) DEALLOCATE(TEMPFI(NIN)%P)
+           IF(ASSOCIATED(TEMPFI(NIN)%P)) call my_dealloc(TEMPFI(NIN)%P)
            ALLOCATE(TEMPFI(NIN)%P(NODFI),STAT=IERROR9)
-           IF(ASSOCIATED(MATSFI(NIN)%P)) DEALLOCATE(MATSFI(NIN)%P)
+           IF(ASSOCIATED(MATSFI(NIN)%P)) call my_dealloc(MATSFI(NIN)%P)
            ALLOCATE(MATSFI(NIN)%P(NODFI),STAT=IERROR0)
-           IF(ASSOCIATED(AREASFI(NIN)%P)) DEALLOCATE(AREASFI(NIN)%P)
+           IF(ASSOCIATED(AREASFI(NIN)%P)) call my_dealloc(AREASFI(NIN)%P)
            ALLOCATE(AREASFI(NIN)%P(NODFI),STAT=IERROR11)
           ENDIF 
         ENDIF
         IF(IDTMINS == 2) THEN
-         IF(ASSOCIATED(NODNXFI(NIN)%P)) DEALLOCATE(NODNXFI(NIN)%P)
+         IF(ASSOCIATED(NODNXFI(NIN)%P)) call my_dealloc(NODNXFI(NIN)%P)
          ALLOCATE(NODNXFI(NIN)%P(NODFI),STAT=IERROR12)
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR13)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR14)
-         IF(ASSOCIATED(T2MAIN_SMS_FI(NIN)%P)) DEALLOCATE(T2MAIN_SMS_FI(NIN)%P)
+         IF(ASSOCIATED(T2MAIN_SMS_FI(NIN)%P)) call my_dealloc(T2MAIN_SMS_FI(NIN)%P)
          ALLOCATE(T2MAIN_SMS_FI(NIN)%P(6,NODFI),STAT=IERROR14)
-         IF(ASSOCIATED(T2FAC_SMS_FI(NIN)%P)) DEALLOCATE(T2FAC_SMS_FI(NIN)%P)
+         IF(ASSOCIATED(T2FAC_SMS_FI(NIN)%P)) call my_dealloc(T2FAC_SMS_FI(NIN)%P)
          ALLOCATE(T2FAC_SMS_FI(NIN)%P(NODFI),STAT=IERROR14)
         ELSEIF(IDTMINS_INT /= 0) THEN
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR13)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR14)
-         IF(ASSOCIATED(T2MAIN_SMS_FI(NIN)%P)) DEALLOCATE(T2MAIN_SMS_FI(NIN)%P)
+         IF(ASSOCIATED(T2MAIN_SMS_FI(NIN)%P)) call my_dealloc(T2MAIN_SMS_FI(NIN)%P)
          ALLOCATE(T2MAIN_SMS_FI(NIN)%P(6,NODFI),STAT=IERROR14)
-         IF(ASSOCIATED(T2FAC_SMS_FI(NIN)%P)) DEALLOCATE(T2FAC_SMS_FI(NIN)%P)
+         IF(ASSOCIATED(T2FAC_SMS_FI(NIN)%P)) call my_dealloc(T2FAC_SMS_FI(NIN)%P)
          ALLOCATE(T2FAC_SMS_FI(NIN)%P(NODFI),STAT=IERROR14)
         ENDIF 
         IF(IGAP/=0) THEN
-          IF(ASSOCIATED(GAPFI(NIN)%P)) DEALLOCATE(GAPFI(NIN)%P)
+          IF(ASSOCIATED(GAPFI(NIN)%P)) call my_dealloc(GAPFI(NIN)%P)
           ALLOCATE(GAPFI(NIN)%P(NODFI),STAT=IERROR7)
           IF(IGAP==3) THEN
-            IF(ASSOCIATED(GAP_LFI(NIN)%P)) DEALLOCATE(GAP_LFI(NIN)%P)
+            IF(ASSOCIATED(GAP_LFI(NIN)%P)) call my_dealloc(GAP_LFI(NIN)%P)
             ALLOCATE(GAP_LFI(NIN)%P(NODFI),STAT=IERROR7)
           ENDIF
         ENDIF
         IF(ITY==24)THEN
-          IF(ASSOCIATED(IRTLM_FI(NIN)%P)) DEALLOCATE(IRTLM_FI(NIN)%P)
+          IF(ASSOCIATED(IRTLM_FI(NIN)%P)) call my_dealloc(IRTLM_FI(NIN)%P)
           ALLOCATE(IRTLM_FI(NIN)%P(2,NODFI),STAT=IERROR15)
 
-          IF(ASSOCIATED(TIME_SFI(NIN)%P)) DEALLOCATE(TIME_SFI(NIN)%P)
+          IF(ASSOCIATED(TIME_SFI(NIN)%P)) call my_dealloc(TIME_SFI(NIN)%P)
           ALLOCATE(TIME_SFI(NIN)%P(NODFI),STAT=IERROR16)
 
-          IF(ASSOCIATED(SECND_FRFI(NIN)%P)) DEALLOCATE(SECND_FRFI(NIN)%P)
+          IF(ASSOCIATED(SECND_FRFI(NIN)%P)) call my_dealloc(SECND_FRFI(NIN)%P)
           ALLOCATE(SECND_FRFI(NIN)%P(6,NODFI),STAT=IERROR16)
 
-          IF(ASSOCIATED(PENE_OLDFI(NIN)%P))DEALLOCATE(PENE_OLDFI(NIN)%P)
+          IF(ASSOCIATED(PENE_OLDFI(NIN)%P)) call my_dealloc(PENE_OLDFI(NIN)%P)
           ALLOCATE(PENE_OLDFI(NIN)%P(5,NODFI),STAT=IERROR16)
 
-          IF(ASSOCIATED(STIF_OLDFI(NIN)%P))DEALLOCATE(STIF_OLDFI(NIN)%P)
+          IF(ASSOCIATED(STIF_OLDFI(NIN)%P)) call my_dealloc(STIF_OLDFI(NIN)%P)
           ALLOCATE(STIF_OLDFI(NIN)%P(2,NODFI),STAT=IERROR16)
            
-          IF(ASSOCIATED(ICONT_I_FI(NIN)%P))DEALLOCATE(ICONT_I_FI(NIN)%P)
+          IF(ASSOCIATED(ICONT_I_FI(NIN)%P)) call my_dealloc(ICONT_I_FI(NIN)%P)
           ALLOCATE(ICONT_I_FI(NIN)%P(NODFI),STAT=IERROR16)
 
           IF(ISTIF_MSDT > 0) THEN
-             IF(ASSOCIATED(STIF_MSDT_FI(NIN)%P))DEALLOCATE(STIF_MSDT_FI(NIN)%P)
+             IF(ASSOCIATED(STIF_MSDT_FI(NIN)%P)) call my_dealloc(STIF_MSDT_FI(NIN)%P)
              ALLOCATE(STIF_MSDT_FI(NIN)%P(NODFI),STAT=IERROR16)        
           ENDIF
 
           IF(IFSUB_CAREA > 0) THEN
-             IF(ASSOCIATED(INTAREANFI(NIN)%P))DEALLOCATE(INTAREANFI(NIN)%P)
+             IF(ASSOCIATED(INTAREANFI(NIN)%P)) call my_dealloc(INTAREANFI(NIN)%P)
              ALLOCATE(INTAREANFI(NIN)%P(NODFI),STAT=IERROR16)        
           ENDIF
 
 C E2E //          
-          IF(ASSOCIATED(ISEDGE_FI(NIN)%P))DEALLOCATE(ISEDGE_FI(NIN)%P)
+          IF(ASSOCIATED(ISEDGE_FI(NIN)%P)) call my_dealloc(ISEDGE_FI(NIN)%P)
           ALLOCATE(ISEDGE_FI(NIN)%P(NODFI),STAT=IERROR16)
 
           IF(IEDGE4 >0)THEN
-            IF(ASSOCIATED(IRTSE_FI(NIN)%P))DEALLOCATE(IRTSE_FI(NIN)%P)
+            IF(ASSOCIATED(IRTSE_FI(NIN)%P)) call my_dealloc(IRTSE_FI(NIN)%P)
             ALLOCATE(IRTSE_FI(NIN)%P(5,NODFI),STAT=IERROR16)
 
-            IF(ASSOCIATED(IS2PT_FI(NIN)%P))DEALLOCATE(IS2PT_FI(NIN)%P)
+            IF(ASSOCIATED(IS2PT_FI(NIN)%P)) call my_dealloc(IS2PT_FI(NIN)%P)
             ALLOCATE(IS2PT_FI(NIN)%P(NODFI),STAT=IERROR16)
 
-            IF(ASSOCIATED(ISPT2_FI(NIN)%P))DEALLOCATE(ISPT2_FI(NIN)%P)
+            IF(ASSOCIATED(ISPT2_FI(NIN)%P)) call my_dealloc(ISPT2_FI(NIN)%P)
             ALLOCATE(ISPT2_FI(NIN)%P(NODFI),STAT=IERROR16)
 
-            IF(ASSOCIATED(ISEGPT_FI(NIN)%P))DEALLOCATE(ISEGPT_FI(NIN)%P) 
+            IF(ASSOCIATED(ISEGPT_FI(NIN)%P)) call my_dealloc(ISEGPT_FI(NIN)%P)
             ALLOCATE(ISEGPT_FI(NIN)%P(NODFI),STAT=IERROR16)
 
-            IF(ASSOCIATED(IS2SE_FI(NIN)%P))DEALLOCATE(IS2SE_FI(NIN)%P) 
+            IF(ASSOCIATED(IS2SE_FI(NIN)%P)) call my_dealloc(IS2SE_FI(NIN)%P)
             ALLOCATE(IS2SE_FI(NIN)%P(2,NODFI),STAT=IERROR16)
 
            ENDIF
 
         ENDIF
         IF(INTFRIC > 0 ) THEN
-           IF(ASSOCIATED(IPARTFRICSFI(NIN)%P)) DEALLOCATE(IPARTFRICSFI(NIN)%P)
+           IF(ASSOCIATED(IPARTFRICSFI(NIN)%P)) call my_dealloc(IPARTFRICSFI(NIN)%P)
            ALLOCATE(IPARTFRICSFI(NIN)%P(NODFI),STAT=IERROR17)
         ENDIF
 
         IF(INTNITSCHE > 0 ) THEN 
-           IF(ASSOCIATED(FORNEQSFI(NIN)%P))DEALLOCATE(FORNEQSFI(NIN)%P) 
+           IF(ASSOCIATED(FORNEQSFI(NIN)%P)) call my_dealloc(FORNEQSFI(NIN)%P)
            ALLOCATE(FORNEQSFI(NIN)%P(3,NODFI),STAT=IERROR18) 
         ENDIF  
 
@@ -2532,8 +2548,8 @@ C
               
           IF(OLDNSNR/=0) THEN
              
-              ALLOCATE(IAUX(OLDNSNR),STAT=IERROR17)
-              ALLOCATE(IAUXINV(OLDNSNR),STAT=IERROR17)
+              call my_alloc(IAUX, OLDNSNR, "IAUX", stat=IERROR17)
+              call my_alloc(IAUXINV, OLDNSNR, "IAUXINV", stat=IERROR17)
             IAUXINV(1:OLDNSNR)=0
             IF(IERROR17/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -2769,8 +2785,8 @@ C NITSCHE
           IDEB = IDEB + OLDNSNR    
           NSNFI(NIN)%P(P) = NN2-NNP
              
-              DEALLOCATE(IAUX)
-              DEALLOCATE(IAUXINV)
+              call my_dealloc(IAUX)
+              call my_dealloc(IAUXINV)
               
           ENDIF !IF(OLDNSNR/=0) 
              
@@ -2783,8 +2799,8 @@ C   NSNR New useful for inactive
 C
 C deallocation of XREM IREM
 C
-      IF(ALLOCATED(XREM)) DEALLOCATE(XREM)
-      IF(ALLOCATED(IREM)) DEALLOCATE(IREM)
+      IF(ALLOCATED(XREM)) call my_dealloc(XREM)
+      IF(ALLOCATED(IREM)) call my_dealloc(IREM)
 
 C
       IERROR1=0 
@@ -2798,11 +2814,11 @@ C
         IF(IPARIT==0) THEN
          
           IF(ASSOCIATED(AFI(NIN)%P)) THEN
-              DEALLOCATE(AFI(NIN)%P)
+              call my_dealloc(AFI(NIN)%P)
               NULLIFY(AFI(NIN)%P)
           ENDIF
           IF(ASSOCIATED(STNFI(NIN)%P)) THEN
-              DEALLOCATE(STNFI(NIN)%P)
+              call my_dealloc(STNFI(NIN)%P)
               NULLIFY(AFI(NIN)%P) 
           ENDIF
 
@@ -2817,7 +2833,7 @@ C Init a 0
           ENDDO
 C
           IF(KDTINT/=0)THEN
-            IF(ASSOCIATED(VSCFI(NIN)%P)) DEALLOCATE(VSCFI(NIN)%P)
+            IF(ASSOCIATED(VSCFI(NIN)%P)) call my_dealloc(VSCFI(NIN)%P)
             IF(NODFI>0)ALLOCATE(VSCFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR3)
 C Init a 0
             DO I = 1, NODFI*NTHREAD
@@ -2830,8 +2846,8 @@ C
 C
 C Allocation Parith/ON
 C
-          IF(ASSOCIATED(FSKYFI(NIN)%P)) DEALLOCATE(FSKYFI(NIN)%P)
-          IF(ASSOCIATED(ISKYFI(NIN)%P)) DEALLOCATE(ISKYFI(NIN)%P)
+          IF(ASSOCIATED(FSKYFI(NIN)%P)) call my_dealloc(FSKYFI(NIN)%P)
+          IF(ASSOCIATED(ISKYFI(NIN)%P)) call my_dealloc(ISKYFI(NIN)%P)
           NLSKYFI(NIN) = LSKYFI
           IF(LSKYFI>0) THEN
             ALLOCATE(ISKYFI(NIN)%P(LSKYFI),STAT=IERROR1)
@@ -2847,15 +2863,15 @@ C
 C Allocation Parith/OFF
 C
         IF(IPARIT==0) THEN
-          IF(ASSOCIATED(AFI(NIN)%P)) DEALLOCATE(AFI(NIN)%P)
-          IF(ASSOCIATED(STNFI(NIN)%P)) DEALLOCATE(STNFI(NIN)%P)
-          IF(ASSOCIATED(FTHEFI(NIN)%P)) DEALLOCATE(FTHEFI(NIN)%P)
+          IF(ASSOCIATED(AFI(NIN)%P)) call my_dealloc(AFI(NIN)%P)
+          IF(ASSOCIATED(STNFI(NIN)%P)) call my_dealloc(STNFI(NIN)%P)
+          IF(ASSOCIATED(FTHEFI(NIN)%P)) call my_dealloc(FTHEFI(NIN)%P)
           IF(NODFI>0)ALLOCATE(AFI(NIN)%P(3,NODFI*NTHREAD),STAT=IERROR1)
           IF(NODFI>0)ALLOCATE(STNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR2)
           IF(NODFI>0)ALLOCATE(FTHEFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR3)
 C
           IF(NODADT_THERM ==1) THEN
-            IF(ASSOCIATED(CONDNFI(NIN)%P)) DEALLOCATE(CONDNFI(NIN)%P)
+            IF(ASSOCIATED(CONDNFI(NIN)%P)) call my_dealloc(CONDNFI(NIN)%P)
             IF(NODFI>0.AND.NODADT_THERM ==1)ALLOCATE(CONDNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR4)
           ENDIF
 C
@@ -2877,7 +2893,7 @@ C Init a 0
           ENDIF
 C
           IF(KDTINT/=0)THEN
-            IF(ASSOCIATED(VSCFI(NIN)%P)) DEALLOCATE(VSCFI(NIN)%P)
+            IF(ASSOCIATED(VSCFI(NIN)%P)) call my_dealloc(VSCFI(NIN)%P)
             IF(NODFI>0)ALLOCATE(VSCFI(NIN)%P(NODFI),STAT=IERROR4)
 C Init a 0
             DO I = 1, NODFI
@@ -2889,9 +2905,9 @@ C
 C
 C Allocation Parith/ON
 C
-          IF(ASSOCIATED(FSKYFI(NIN)%P)) DEALLOCATE(FSKYFI(NIN)%P)
-          IF(ASSOCIATED(ISKYFI(NIN)%P)) DEALLOCATE(ISKYFI(NIN)%P)
-          IF(ASSOCIATED(FTHESKYFI(NIN)%P)) DEALLOCATE(FTHESKYFI(NIN)%P)
+          IF(ASSOCIATED(FSKYFI(NIN)%P)) call my_dealloc(FSKYFI(NIN)%P)
+          IF(ASSOCIATED(ISKYFI(NIN)%P)) call my_dealloc(ISKYFI(NIN)%P)
+          IF(ASSOCIATED(FTHESKYFI(NIN)%P)) call my_dealloc(FTHESKYFI(NIN)%P)
           NLSKYFI(NIN) = LSKYFI
           IF(LSKYFI>0) THEN
             ALLOCATE(ISKYFI(NIN)%P(LSKYFI),STAT=IERROR1)
@@ -2906,7 +2922,7 @@ C
             ENDIF
 C
           IF(NODADT_THERM ==1) THEN
-            IF(ASSOCIATED(CONDNSKYFI(NIN)%P)) DEALLOCATE(CONDNSKYFI(NIN)%P)
+            IF(ASSOCIATED(CONDNSKYFI(NIN)%P)) call my_dealloc(CONDNSKYFI(NIN)%P)
             IF(LSKYFI>0) ALLOCATE(CONDNSKYFI(NIN)%P(LSKYFI),STAT=IERROR4)
           ENDIF
 C
@@ -2922,8 +2938,8 @@ C
 C Output Pressure / Friction Energy conditional allowances
 C
       IF(ANIM_V(12)+OUTP_V(12)+H3D_DATA%N_VECT_PCONT >0)THEN
-        IF(ASSOCIATED(FNCONTI(NIN)%P)) DEALLOCATE(FNCONTI(NIN)%P)
-        IF(ASSOCIATED(FTCONTI(NIN)%P)) DEALLOCATE(FTCONTI(NIN)%P)
+        IF(ASSOCIATED(FNCONTI(NIN)%P)) call my_dealloc(FNCONTI(NIN)%P)
+        IF(ASSOCIATED(FTCONTI(NIN)%P)) call my_dealloc(FTCONTI(NIN)%P)
         ALLOCATE(FNCONTI(NIN)%P(3,NODFI),STAT=IERROR1)
         ALLOCATE(FTCONTI(NIN)%P(3,NODFI),STAT=IERROR2)
         IF(IERROR1+IERROR2/=0) THEN
@@ -2943,7 +2959,7 @@ C
 
       IF(H3D_DATA%N_SCAL_CSE_FRICINT >0)THEN
        IF(H3D_DATA%N_CSE_FRIC_INTER (NIN) >0)THEN
-        IF(ASSOCIATED(EFRICFI(NIN)%P)) DEALLOCATE(EFRICFI(NIN)%P)
+        IF(ASSOCIATED(EFRICFI(NIN)%P)) call my_dealloc(EFRICFI(NIN)%P)
         ALLOCATE(EFRICFI(NIN)%P(NODFI),STAT=IERROR1)
         IF(IERROR1/=0) THEN
           CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -2956,7 +2972,7 @@ C
        END IF
       ENDIF
       IF(H3D_DATA%N_SCAL_CSE_FRIC >0)THEN
-        IF(ASSOCIATED(EFRICGFI(NIN)%P)) DEALLOCATE(EFRICGFI(NIN)%P)
+        IF(ASSOCIATED(EFRICGFI(NIN)%P)) call my_dealloc(EFRICGFI(NIN)%P)
         ALLOCATE(EFRICGFI(NIN)%P(NODFI),STAT=IERROR1)
         IF(IERROR1/=0) THEN
           CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -2985,21 +3001,23 @@ C
 
 C END TRI24GAT
 !||====================================================================
-!||    spmd_tri7gat    ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri7gat     ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i22main_tri     ../engine/source/interfaces/intsort/i22main_tri.F
-!||    i23main_tri     ../engine/source/interfaces/intsort/i23main_tri.F
-!||    i7main_tri      ../engine/source/interfaces/intsort/i7main_tri.F
-!||    inter_sort_07   ../engine/source/interfaces/int07/inter_sort_07.F
+!||    i22main_tri      ../engine/source/interfaces/intsort/i22main_tri.F
+!||    i23main_tri      ../engine/source/interfaces/intsort/i23main_tri.F
+!||    i7main_tri       ../engine/source/interfaces/intsort/i7main_tri.F
+!||    inter_sort_07    ../engine/source/interfaces/int07/inter_sort_07.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
-!||    h3d_mod         ../engine/share/modules/h3d_mod.F
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    multi_fvm_mod   ../common_source/modules/ale/multi_fvm_mod.F90
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    h3d_mod          ../engine/share/modules/h3d_mod.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    multi_fvm_mod    ../common_source/modules/ale/multi_fvm_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI7GAT(RESULT ,NSN    ,CAND_N  ,I_STOK  ,NIN    ,
      2                        IGAP   ,NSNR   ,MULTIMP ,ITY     ,INTTH  ,
@@ -3016,6 +3034,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -3095,77 +3115,77 @@ C
         IERROR16 = 0
         IERROR17 = 0
 
-        IF(ASSOCIATED(NSVFI(NIN)%P)) DEALLOCATE(NSVFI(NIN)%P)
+        IF(ASSOCIATED(NSVFI(NIN)%P)) call my_dealloc(NSVFI(NIN)%P)
         ALLOCATE(NSVFI(NIN)%P(NODFI),STAT=IERROR1)
-        IF(ASSOCIATED(PMAINFI(NIN)%P)) DEALLOCATE(PMAINFI(NIN)%P)
+        IF(ASSOCIATED(PMAINFI(NIN)%P)) call my_dealloc(PMAINFI(NIN)%P)
         ALLOCATE(PMAINFI(NIN)%P(NODFI),STAT=IERROR2)
         IERROR1 = IERROR2 + IERROR1
-        IF(ASSOCIATED(XFI(NIN)%P)) DEALLOCATE(XFI(NIN)%P)
+        IF(ASSOCIATED(XFI(NIN)%P)) call my_dealloc(XFI(NIN)%P)
         ALLOCATE(XFI(NIN)%P(3,NODFI),STAT=IERROR2)
-        IF(ASSOCIATED(VFI(NIN)%P)) DEALLOCATE(VFI(NIN)%P)
+        IF(ASSOCIATED(VFI(NIN)%P)) call my_dealloc(VFI(NIN)%P)
         ALLOCATE(VFI(NIN)%P(3,NODFI),STAT=IERROR3)
-        IF(ASSOCIATED(MSFI(NIN)%P)) DEALLOCATE(MSFI(NIN)%P)
+        IF(ASSOCIATED(MSFI(NIN)%P)) call my_dealloc(MSFI(NIN)%P)
         ALLOCATE(MSFI(NIN)%P(NODFI),STAT=IERROR4)
-        IF(ASSOCIATED(STIFI(NIN)%P)) DEALLOCATE(STIFI(NIN)%P)
+        IF(ASSOCIATED(STIFI(NIN)%P)) call my_dealloc(STIFI(NIN)%P)
         ALLOCATE(STIFI(NIN)%P(NODFI),STAT=IERROR5)
-        IF(ASSOCIATED(ITAFI(NIN)%P)) DEALLOCATE(ITAFI(NIN)%P)
+        IF(ASSOCIATED(ITAFI(NIN)%P)) call my_dealloc(ITAFI(NIN)%P)
         ALLOCATE(ITAFI(NIN)%P(NODFI),STAT=IERROR6)
         IF(ITY==7.OR.ITY==22.OR.ITY==23.OR.ITY==24) THEN
-          IF(ASSOCIATED(KINFI(NIN)%P)) DEALLOCATE(KINFI(NIN)%P)
+          IF(ASSOCIATED(KINFI(NIN)%P)) call my_dealloc(KINFI(NIN)%P)
           ALLOCATE(KINFI(NIN)%P(NODFI),STAT=IERROR8)
           IF(INTTH > 0 ) THEN
-           IF(ASSOCIATED(TEMPFI(NIN)%P)) DEALLOCATE(TEMPFI(NIN)%P)
+           IF(ASSOCIATED(TEMPFI(NIN)%P)) call my_dealloc(TEMPFI(NIN)%P)
            ALLOCATE(TEMPFI(NIN)%P(NODFI),STAT=IERROR9)
-           IF(ASSOCIATED(MATSFI(NIN)%P)) DEALLOCATE(MATSFI(NIN)%P)
+           IF(ASSOCIATED(MATSFI(NIN)%P)) call my_dealloc(MATSFI(NIN)%P)
            ALLOCATE(MATSFI(NIN)%P(NODFI),STAT=IERROR0)
-           IF(ASSOCIATED(AREASFI(NIN)%P)) DEALLOCATE(AREASFI(NIN)%P)
+           IF(ASSOCIATED(AREASFI(NIN)%P)) call my_dealloc(AREASFI(NIN)%P)
            ALLOCATE(AREASFI(NIN)%P(NODFI),STAT=IERROR11)
           ENDIF 
         ENDIF
         IF(IDTMINS == 2) THEN
-         IF(ASSOCIATED(NODNXFI(NIN)%P)) DEALLOCATE(NODNXFI(NIN)%P)
+         IF(ASSOCIATED(NODNXFI(NIN)%P)) call my_dealloc(NODNXFI(NIN)%P)
          ALLOCATE(NODNXFI(NIN)%P(NODFI),STAT=IERROR12)
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR13)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR14)
         ELSEIF(IDTMINS_INT /= 0) THEN
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR13)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR14)
         ENDIF 
         IF(IGAP/=0) THEN
-          IF(ASSOCIATED(GAPFI(NIN)%P)) DEALLOCATE(GAPFI(NIN)%P)
+          IF(ASSOCIATED(GAPFI(NIN)%P)) call my_dealloc(GAPFI(NIN)%P)
           ALLOCATE(GAPFI(NIN)%P(NODFI),STAT=IERROR7)
           IF(IGAP==3) THEN
-            IF(ASSOCIATED(GAP_LFI(NIN)%P)) DEALLOCATE(GAP_LFI(NIN)%P)
+            IF(ASSOCIATED(GAP_LFI(NIN)%P)) call my_dealloc(GAP_LFI(NIN)%P)
             ALLOCATE(GAP_LFI(NIN)%P(NODFI),STAT=IERROR7)
           ENDIF
         ENDIF
         IF(ITY==24)THEN
-          IF(ASSOCIATED(IRTLM_FI(NIN)%P)) DEALLOCATE(IRTLM_FI(NIN)%P)
+          IF(ASSOCIATED(IRTLM_FI(NIN)%P)) call my_dealloc(IRTLM_FI(NIN)%P)
           ALLOCATE(IRTLM_FI(NIN)%P(2,NODFI),STAT=IERROR15)
 
-          IF(ASSOCIATED(TIME_SFI(NIN)%P)) DEALLOCATE(TIME_SFI(NIN)%P)
+          IF(ASSOCIATED(TIME_SFI(NIN)%P)) call my_dealloc(TIME_SFI(NIN)%P)
           ALLOCATE(TIME_SFI(NIN)%P(NODFI),STAT=IERROR16)
 
-          IF(ASSOCIATED(SECND_FRFI(NIN)%P)) DEALLOCATE(SECND_FRFI(NIN)%P)
+          IF(ASSOCIATED(SECND_FRFI(NIN)%P)) call my_dealloc(SECND_FRFI(NIN)%P)
           ALLOCATE(SECND_FRFI(NIN)%P(6,NODFI),STAT=IERROR16)
 
-          IF(ASSOCIATED(PENE_OLDFI(NIN)%P))DEALLOCATE(PENE_OLDFI(NIN)%P)
+          IF(ASSOCIATED(PENE_OLDFI(NIN)%P)) call my_dealloc(PENE_OLDFI(NIN)%P)
           ALLOCATE(PENE_OLDFI(NIN)%P(5,NODFI),STAT=IERROR16)
 
-          IF(ASSOCIATED(STIF_OLDFI(NIN)%P))DEALLOCATE(STIF_OLDFI(NIN)%P)
+          IF(ASSOCIATED(STIF_OLDFI(NIN)%P)) call my_dealloc(STIF_OLDFI(NIN)%P)
           ALLOCATE(STIF_OLDFI(NIN)%P(2,NODFI),STAT=IERROR16)
            
-          IF(ASSOCIATED(ICONT_I_FI(NIN)%P))DEALLOCATE(ICONT_I_FI(NIN)%P)
+          IF(ASSOCIATED(ICONT_I_FI(NIN)%P)) call my_dealloc(ICONT_I_FI(NIN)%P)
           ALLOCATE(ICONT_I_FI(NIN)%P(NODFI),STAT=IERROR16)
         ENDIF
 c
         IF(ITY==7) THEN
           IF(INTFRIC > 0 ) THEN
-           IF(ASSOCIATED(IPARTFRICSFI(NIN)%P)) DEALLOCATE(IPARTFRICSFI(NIN)%P)
+           IF(ASSOCIATED(IPARTFRICSFI(NIN)%P)) call my_dealloc(IPARTFRICSFI(NIN)%P)
            ALLOCATE(IPARTFRICSFI(NIN)%P(NODFI),STAT=IERROR0)
           ENDIF
         ENDIF
@@ -3176,7 +3196,7 @@ C
             ! -----------
             ! check if the present interface is a TYPE18+LAW151
             IF( MULTI_FVM%INT18_GLOBAL_LIST(NIN) ) THEN
-                IF( ALLOCATED( MULTI_FVM%R_AFI(NIN)%R_FORCE_INT ) ) DEALLOCATE( MULTI_FVM%R_AFI(NIN)%R_FORCE_INT )
+                IF( ALLOCATED( MULTI_FVM%R_AFI(NIN)%R_FORCE_INT ) ) call my_dealloc(MULTI_FVM%R_AFI(NIN)%R_FORCE_INT)
                 MULTI_FVM%R_AFI(NIN)%NODFI = NODFI
                 ALLOCATE( MULTI_FVM%R_AFI(NIN)%R_FORCE_INT(3,6,NODFI*NTHREAD) )
                 MULTI_FVM%R_AFI(NIN)%R_FORCE_INT(1:3,1:6,1:NODFI*NTHREAD) = 0d+00
@@ -3206,7 +3226,7 @@ C
               
           IF(OLDNSNR/=0) THEN
              
-              ALLOCATE(IAUX(OLDNSNR),STAT=IERROR17)
+              call my_alloc(IAUX, OLDNSNR, "IAUX", stat=IERROR17)
             IF(IERROR17/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
@@ -3349,7 +3369,7 @@ C We Store PENE_OLD(3 in PENE_OLD(4 during sorting
           IDEB = IDEB + OLDNSNR    
           NSNFI(NIN)%P(P) = NN2-NNP
              
-              DEALLOCATE(IAUX)
+              call my_dealloc(IAUX)
               
           ENDIF !IF(OLDNSNR/=0) 
              
@@ -3362,8 +3382,8 @@ C   NSNR New useful for inactive
 C
 C deallocation of XREM IREM
 C
-      IF(ALLOCATED(XREM)) DEALLOCATE(XREM)
-      IF(ALLOCATED(IREM)) DEALLOCATE(IREM)
+      IF(ALLOCATED(XREM)) call my_dealloc(XREM)
+      IF(ALLOCATED(IREM)) call my_dealloc(IREM)
 
 C
       IERROR1=0 
@@ -3377,11 +3397,11 @@ C
         IF(IPARIT==0) THEN
          
           IF(ASSOCIATED(AFI(NIN)%P)) THEN
-              DEALLOCATE(AFI(NIN)%P)
+              call my_dealloc(AFI(NIN)%P)
               NULLIFY(AFI(NIN)%P)
           ENDIF
           IF(ASSOCIATED(STNFI(NIN)%P)) THEN
-              DEALLOCATE(STNFI(NIN)%P)
+              call my_dealloc(STNFI(NIN)%P)
               NULLIFY(AFI(NIN)%P) 
           ENDIF
 
@@ -3396,7 +3416,7 @@ C Init a 0
           ENDDO
 C
           IF(KDTINT/=0)THEN
-            IF(ASSOCIATED(VSCFI(NIN)%P)) DEALLOCATE(VSCFI(NIN)%P)
+            IF(ASSOCIATED(VSCFI(NIN)%P)) call my_dealloc(VSCFI(NIN)%P)
             IF(NODFI>0)ALLOCATE(VSCFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR3)
 C Init a 0
             DO I = 1, NODFI*NTHREAD
@@ -3415,15 +3435,15 @@ C
 C Allocation Parith/OFF
 C
         IF(IPARIT==0) THEN
-          IF(ASSOCIATED(AFI(NIN)%P)) DEALLOCATE(AFI(NIN)%P)
-          IF(ASSOCIATED(STNFI(NIN)%P)) DEALLOCATE(STNFI(NIN)%P)
-          IF(ASSOCIATED(FTHEFI(NIN)%P)) DEALLOCATE(FTHEFI(NIN)%P)
+          IF(ASSOCIATED(AFI(NIN)%P)) call my_dealloc(AFI(NIN)%P)
+          IF(ASSOCIATED(STNFI(NIN)%P)) call my_dealloc(STNFI(NIN)%P)
+          IF(ASSOCIATED(FTHEFI(NIN)%P)) call my_dealloc(FTHEFI(NIN)%P)
           IF(NODFI>0)ALLOCATE(AFI(NIN)%P(3,NODFI*NTHREAD),STAT=IERROR1)
           IF(NODFI>0)ALLOCATE(STNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR2)
           IF(NODFI>0)ALLOCATE(FTHEFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR3)
 C
           IF(NODADT_THERM ==1) THEN
-            IF(ASSOCIATED(CONDNFI(NIN)%P)) DEALLOCATE(CONDNFI(NIN)%P)
+            IF(ASSOCIATED(CONDNFI(NIN)%P)) call my_dealloc(CONDNFI(NIN)%P)
             IF(NODFI>0.AND.NODADT_THERM ==1)ALLOCATE(CONDNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR4)
           ENDIF
 C
@@ -3445,7 +3465,7 @@ C Init a 0
           ENDIF
 C
           IF(KDTINT/=0)THEN
-            IF(ASSOCIATED(VSCFI(NIN)%P)) DEALLOCATE(VSCFI(NIN)%P)
+            IF(ASSOCIATED(VSCFI(NIN)%P)) call my_dealloc(VSCFI(NIN)%P)
             IF(NODFI>0)ALLOCATE(VSCFI(NIN)%P(NODFI),STAT=IERROR4)
 C Init a 0
             DO I = 1, NODFI
@@ -3470,8 +3490,8 @@ C
 C Output Pressure conditional allowances
 C
       IF(ANIM_V(12)+OUTP_V(12)+H3D_DATA%N_VECT_PCONT >0)THEN
-        IF(ASSOCIATED(FNCONTI(NIN)%P)) DEALLOCATE(FNCONTI(NIN)%P)
-        IF(ASSOCIATED(FTCONTI(NIN)%P)) DEALLOCATE(FTCONTI(NIN)%P)
+        IF(ASSOCIATED(FNCONTI(NIN)%P)) call my_dealloc(FNCONTI(NIN)%P)
+        IF(ASSOCIATED(FTCONTI(NIN)%P)) call my_dealloc(FTCONTI(NIN)%P)
         ALLOCATE(FNCONTI(NIN)%P(3,NODFI),STAT=IERROR1)
         ALLOCATE(FTCONTI(NIN)%P(3,NODFI),STAT=IERROR2)
         IF(IERROR1+IERROR2/=0) THEN
@@ -3491,7 +3511,7 @@ C
 
       IF(H3D_DATA%N_SCAL_CSE_FRICINT >0)THEN
        IF(H3D_DATA%N_CSE_FRIC_INTER (NIN) >0)THEN
-        IF(ASSOCIATED(EFRICFI(NIN)%P)) DEALLOCATE(EFRICFI(NIN)%P)
+        IF(ASSOCIATED(EFRICFI(NIN)%P)) call my_dealloc(EFRICFI(NIN)%P)
         ALLOCATE(EFRICFI(NIN)%P(NODFI),STAT=IERROR1)
         IF(IERROR1/=0) THEN
           CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -3504,7 +3524,7 @@ C
        END IF
       ENDIF
       IF(H3D_DATA%N_SCAL_CSE_FRIC >0)THEN
-        IF(ASSOCIATED(EFRICGFI(NIN)%P)) DEALLOCATE(EFRICGFI(NIN)%P)
+        IF(ASSOCIATED(EFRICGFI(NIN)%P)) call my_dealloc(EFRICGFI(NIN)%P)
         ALLOCATE(EFRICGFI(NIN)%P(NODFI),STAT=IERROR1)
         IF(IERROR1/=0) THEN
           CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
@@ -3533,18 +3553,20 @@ C
 
 C END TRI7GAT
 !||====================================================================
-!||    spmd_tri10box   ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri10box    ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i10main_tri     ../engine/source/interfaces/intsort/i10main_tri.F
+!||    i10main_tri      ../engine/source/interfaces/intsort/i10main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
-!||    spmd_wait       ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitany    ../engine/source/mpi/spmd_wait.F90
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    spmd_wait        ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitany     ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI10BOX(NSV     ,NSN     ,X      ,V   ,MS     ,
      2                         BMINMAL ,WEIGHT  ,STIFN  ,NIN ,ISENDTO,
@@ -3559,6 +3581,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -3843,9 +3867,9 @@ C
 C Allocate total size
 C
         IF(NSNR>0) THEN
-          ALLOCATE(XREM(RSIZ,NSNR),STAT=IERROR)
+          call my_alloc(XREM, RSIZ, NSNR, "XREM", stat=IERROR)
             
-          ALLOCATE(IREM(ISIZ,NSNR),STAT=IERROR1)
+          call my_alloc(IREM, ISIZ, NSNR, "IREM", stat=IERROR1)
           IERROR=IERROR+IERROR1
             
           IF(IERROR/=0) THEN
@@ -3897,9 +3921,9 @@ C
               CALL SPMD_WAIT(REQ_SD(P))
               IF(NBOX(P)/=0) THEN
                 CALL SPMD_WAIT(REQ_SD2(P))
-                DEALLOCATE(RBUF(P)%p)
+                call my_dealloc(RBUF(P)%p)
                   CALL SPMD_WAIT(REQ_SD3(P))
-                DEALLOCATE(IBUF(P)%p)
+                call my_dealloc(IBUF(P)%p)
               END IF
             ENDIF
           ENDIF
@@ -3912,17 +3936,19 @@ C
 C      
 C END SPMD_TRI10BOX
 !||====================================================================
-!||    spmd_tri10gat   ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri10gat    ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i10main_tri     ../engine/source/interfaces/intsort/i10main_tri.F
+!||    i10main_tri      ../engine/source/interfaces/intsort/i10main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
-!||    h3d_mod         ../engine/share/modules/h3d_mod.F
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    h3d_mod          ../engine/share/modules/h3d_mod.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI10GAT(RESULT,NSN ,CAND_N ,I_STOK,NIN,
      2                        IGAP  ,NSNR,MULTIMP,ITY,INTTH,H3D_DATA)
@@ -3936,6 +3962,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -4005,36 +4033,36 @@ C
         IERROR12 = 0
         IERROR13 = 0
 
-        IF(ASSOCIATED(NSVFI(NIN)%P)) DEALLOCATE(NSVFI(NIN)%P)
+        IF(ASSOCIATED(NSVFI(NIN)%P)) call my_dealloc(NSVFI(NIN)%P)
         ALLOCATE(NSVFI(NIN)%P(NODFI),STAT=IERROR1)
-        IF(ASSOCIATED(XFI(NIN)%P)) DEALLOCATE(XFI(NIN)%P)
+        IF(ASSOCIATED(XFI(NIN)%P)) call my_dealloc(XFI(NIN)%P)
         ALLOCATE(XFI(NIN)%P(3,NODFI),STAT=IERROR2)
-        IF(ASSOCIATED(VFI(NIN)%P)) DEALLOCATE(VFI(NIN)%P)
+        IF(ASSOCIATED(VFI(NIN)%P)) call my_dealloc(VFI(NIN)%P)
         ALLOCATE(VFI(NIN)%P(3,NODFI),STAT=IERROR3)
-        IF(ASSOCIATED(MSFI(NIN)%P)) DEALLOCATE(MSFI(NIN)%P)
+        IF(ASSOCIATED(MSFI(NIN)%P)) call my_dealloc(MSFI(NIN)%P)
         ALLOCATE(MSFI(NIN)%P(NODFI),STAT=IERROR4)
-        IF(ASSOCIATED(STIFI(NIN)%P)) DEALLOCATE(STIFI(NIN)%P)
+        IF(ASSOCIATED(STIFI(NIN)%P)) call my_dealloc(STIFI(NIN)%P)
         ALLOCATE(STIFI(NIN)%P(NODFI),STAT=IERROR5)
-        IF(ASSOCIATED(ITAFI(NIN)%P)) DEALLOCATE(ITAFI(NIN)%P)
+        IF(ASSOCIATED(ITAFI(NIN)%P)) call my_dealloc(ITAFI(NIN)%P)
         ALLOCATE(ITAFI(NIN)%P(NODFI),STAT=IERROR6)
         IF(IDTMINS == 2) THEN
-         IF(ASSOCIATED(NODNXFI(NIN)%P)) DEALLOCATE(NODNXFI(NIN)%P)
+         IF(ASSOCIATED(NODNXFI(NIN)%P)) call my_dealloc(NODNXFI(NIN)%P)
          ALLOCATE(NODNXFI(NIN)%P(NODFI),STAT=IERROR7)
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR8)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR9)
         ELSEIF(IDTMINS_INT /= 0) THEN
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR10)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR11)
         ENDIF 
         IF(IGAP/=0) THEN
-          IF(ASSOCIATED(GAPFI(NIN)%P)) DEALLOCATE(GAPFI(NIN)%P)
+          IF(ASSOCIATED(GAPFI(NIN)%P)) call my_dealloc(GAPFI(NIN)%P)
           ALLOCATE(GAPFI(NIN)%P(NODFI),STAT=IERROR12)
           IF(IGAP==3) THEN
-            IF(ASSOCIATED(GAP_LFI(NIN)%P)) DEALLOCATE(GAP_LFI(NIN)%P)
+            IF(ASSOCIATED(GAP_LFI(NIN)%P)) call my_dealloc(GAP_LFI(NIN)%P)
             ALLOCATE(GAP_LFI(NIN)%P(NODFI),STAT=IERROR12)
           ENDIF
         ENDIF
@@ -4057,7 +4085,7 @@ C
               
            IF(OLDNSNR/=0) THEN
              
-              ALLOCATE(IAUX(OLDNSNR),STAT=IERROR13)
+              call my_alloc(IAUX, OLDNSNR, "IAUX", stat=IERROR13)
             IF(IERROR13/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
@@ -4128,7 +4156,7 @@ C -- IDTMINS_INT /= 0
             IDEB = IDEB + OLDNSNR    
             NSNFI(NIN)%P(P) = NN2-NNP
              
-              DEALLOCATE(IAUX)
+              call my_dealloc(IAUX)
               
            ENDIF !IF(OLDNSNR/=0) 
              
@@ -4141,8 +4169,8 @@ C   NSNR New useful for inactive
 C
 C deallocation of XREM
 C
-      IF(ALLOCATED(XREM)) DEALLOCATE(XREM)
-      IF(ALLOCATED(IREM)) DEALLOCATE(IREM)
+      IF(ALLOCATED(XREM)) call my_dealloc(XREM)
+      IF(ALLOCATED(IREM)) call my_dealloc(IREM)
 C
       IERROR1=0 
       IERROR2=0 
@@ -4152,8 +4180,8 @@ C
 C Allocation Parith/OFF
 C
       IF(IPARIT==0) THEN
-        IF(ASSOCIATED(AFI(NIN)%P)) DEALLOCATE(AFI(NIN)%P)
-        IF(ASSOCIATED(STNFI(NIN)%P)) DEALLOCATE(STNFI(NIN)%P)
+        IF(ASSOCIATED(AFI(NIN)%P)) call my_dealloc(AFI(NIN)%P)
+        IF(ASSOCIATED(STNFI(NIN)%P)) call my_dealloc(STNFI(NIN)%P)
         IF(NODFI>0)ALLOCATE(AFI(NIN)%P(3,NODFI*NTHREAD),STAT=IERROR1)
         IF(NODFI>0)ALLOCATE(STNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR2)
 C Init a 0
@@ -4165,7 +4193,7 @@ C Init a 0
         ENDDO
 C
         IF(KDTINT/=0)THEN
-          IF(ASSOCIATED(VSCFI(NIN)%P)) DEALLOCATE(VSCFI(NIN)%P)
+          IF(ASSOCIATED(VSCFI(NIN)%P)) call my_dealloc(VSCFI(NIN)%P)
           IF(NODFI>0)ALLOCATE(VSCFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR3)
 C Init a 0
           DO I = 1, NODFI*NTHREAD
@@ -4179,8 +4207,8 @@ C
 C
 C Allocation Parith/ON
 C
-        IF(ASSOCIATED(FSKYFI(NIN)%P)) DEALLOCATE(FSKYFI(NIN)%P)
-        IF(ASSOCIATED(ISKYFI(NIN)%P)) DEALLOCATE(ISKYFI(NIN)%P)
+        IF(ASSOCIATED(FSKYFI(NIN)%P)) call my_dealloc(FSKYFI(NIN)%P)
+        IF(ASSOCIATED(ISKYFI(NIN)%P)) call my_dealloc(ISKYFI(NIN)%P)
         NLSKYFI(NIN) = LSKYFI
         IF(LSKYFI>0) THEN
           ALLOCATE(ISKYFI(NIN)%P(LSKYFI),STAT=IERROR1)
@@ -4200,8 +4228,8 @@ C
 C Output Pressure conditional allowances
 C
       IF(ANIM_V(12)+OUTP_V(12)+H3D_DATA%N_VECT_PCONT >0)THEN
-        IF(ASSOCIATED(FNCONTI(NIN)%P)) DEALLOCATE(FNCONTI(NIN)%P)
-        IF(ASSOCIATED(FTCONTI(NIN)%P)) DEALLOCATE(FTCONTI(NIN)%P)
+        IF(ASSOCIATED(FNCONTI(NIN)%P)) call my_dealloc(FNCONTI(NIN)%P)
+        IF(ASSOCIATED(FTCONTI(NIN)%P)) call my_dealloc(FTCONTI(NIN)%P)
         ALLOCATE(FNCONTI(NIN)%P(3,NODFI),STAT=IERROR1)
         ALLOCATE(FTCONTI(NIN)%P(3,NODFI),STAT=IERROR2)
         IF(IERROR1+IERROR2/=0) THEN
@@ -4376,18 +4404,20 @@ C
       END
 C END TRI11VOX0
 !||====================================================================
-!||    spmd_tri11vox   ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri11vox    ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i11main_tri     ../engine/source/interfaces/intsort/i11main_tri.F
+!||    i11main_tri      ../engine/source/interfaces/intsort/i11main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
-!||    spmd_wait       ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitany    ../engine/source/mpi/spmd_wait.F90
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    spmd_wait        ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitany     ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI11VOX(
      1   IRECTS  ,NRTS     ,X      ,V     ,MS     ,
@@ -4406,6 +4436,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -4847,8 +4879,8 @@ C
 C Allocate total size
 C
         IF(NRTSR>0) THEN
-          ALLOCATE(XREM(RSIZ,NRTSR),STAT=IERROR)
-          ALLOCATE(IREM(ISIZ,NRTSR),STAT=IERROR1)
+          call my_alloc(XREM, RSIZ, NRTSR, "XREM", stat=IERROR)
+          call my_alloc(IREM, ISIZ, NRTSR, "IREM", stat=IERROR1)
             
           IERROR=IERROR+IERROR1
           IF(IERROR/=0) THEN
@@ -4893,9 +4925,9 @@ C
               CALL SPMD_WAIT(REQ_SD(P))
               IF(NBOX(P)/=0) THEN
                 CALL SPMD_WAIT(REQ_SD2(P))
-                DEALLOCATE(RBUF(P)%p)
+                call my_dealloc(RBUF(P)%p)
                 CALL SPMD_WAIT(REQ_SD3(P))
-                DEALLOCATE(IBUF(P)%p)
+                call my_dealloc(IBUF(P)%p)
               END IF
             ENDIF
           ENDIF
@@ -4907,16 +4939,18 @@ C
 C
 C END SPMD_TRI11VOX
 !||====================================================================
-!||    spmd_tri11gat   ../engine/source/mpi/interfaces/spmd_int.F
+!||    spmd_tri11gat    ../engine/source/mpi/interfaces/spmd_int.F
 !||--- called by ------------------------------------------------------
-!||    i11main_tri     ../engine/source/interfaces/intsort/i11main_tri.F
+!||    i11main_tri      ../engine/source/interfaces/intsort/i11main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI11GAT(RESULT,NRTS ,CAND_S ,I_STOK,NIN,
      2                         INACTI,NRTSR,MULTIMP,IGAP,INTTH,
@@ -4930,6 +4964,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -5005,64 +5041,64 @@ C
         IERROR16 = 0 
         IERROR17 = 0       
 C
-        IF(ASSOCIATED(NSVFI(NIN)%P)) DEALLOCATE(NSVFI(NIN)%P)
+        IF(ASSOCIATED(NSVFI(NIN)%P)) call my_dealloc(NSVFI(NIN)%P)
         ALLOCATE(NSVFI(NIN)%P(SEGFI),STAT=IERROR1)
-        IF(ASSOCIATED(XFI(NIN)%P)) DEALLOCATE(XFI(NIN)%P)
+        IF(ASSOCIATED(XFI(NIN)%P)) call my_dealloc(XFI(NIN)%P)
         ALLOCATE(XFI(NIN)%P(3,NODFI),STAT=IERROR2)
-        IF(ASSOCIATED(VFI(NIN)%P)) DEALLOCATE(VFI(NIN)%P)
+        IF(ASSOCIATED(VFI(NIN)%P)) call my_dealloc(VFI(NIN)%P)
         ALLOCATE(VFI(NIN)%P(3,NODFI),STAT=IERROR3)
-        IF(ASSOCIATED(MSFI(NIN)%P)) DEALLOCATE(MSFI(NIN)%P)
+        IF(ASSOCIATED(MSFI(NIN)%P)) call my_dealloc(MSFI(NIN)%P)
         ALLOCATE(MSFI(NIN)%P(NODFI),STAT=IERROR4)
-        IF(ASSOCIATED(STIFI(NIN)%P)) DEALLOCATE(STIFI(NIN)%P)
+        IF(ASSOCIATED(STIFI(NIN)%P)) call my_dealloc(STIFI(NIN)%P)
         ALLOCATE(STIFI(NIN)%P(SEGFI),STAT=IERROR5)
-        IF(ASSOCIATED(ITAFI(NIN)%P)) DEALLOCATE(ITAFI(NIN)%P)
+        IF(ASSOCIATED(ITAFI(NIN)%P)) call my_dealloc(ITAFI(NIN)%P)
         ALLOCATE(ITAFI(NIN)%P(NODFI),STAT=IERROR6)
         IF(IDTMINS == 2) THEN
-         IF(ASSOCIATED(NODNXFI(NIN)%P)) DEALLOCATE(NODNXFI(NIN)%P)
+         IF(ASSOCIATED(NODNXFI(NIN)%P)) call my_dealloc(NODNXFI(NIN)%P)
          ALLOCATE(NODNXFI(NIN)%P(NODFI),STAT=IERROR7)
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR8)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR9)
         ELSEIF(IDTMINS_INT /= 0) THEN
-         IF(ASSOCIATED(NODAMSFI(NIN)%P)) DEALLOCATE(NODAMSFI(NIN)%P)
+         IF(ASSOCIATED(NODAMSFI(NIN)%P)) call my_dealloc(NODAMSFI(NIN)%P)
          ALLOCATE(NODAMSFI(NIN)%P(NODFI),STAT=IERROR8)
-         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) DEALLOCATE(PROCAMSFI(NIN)%P)
+         IF(ASSOCIATED(PROCAMSFI(NIN)%P)) call my_dealloc(PROCAMSFI(NIN)%P)
          ALLOCATE(PROCAMSFI(NIN)%P(NODFI),STAT=IERROR9)
         ENDIF 
         IF(IGAP/=0) THEN
-          IF(ASSOCIATED(GAPFI(NIN)%P)) DEALLOCATE(GAPFI(NIN)%P)
+          IF(ASSOCIATED(GAPFI(NIN)%P)) call my_dealloc(GAPFI(NIN)%P)
           ALLOCATE(GAPFI(NIN)%P(SEGFI),STAT=IERROR10)
         END IF
         IF(IGAP==3) THEN
-          IF(ASSOCIATED(GAP_LFI(NIN)%P)) DEALLOCATE(GAP_LFI(NIN)%P)
+          IF(ASSOCIATED(GAP_LFI(NIN)%P)) call my_dealloc(GAP_LFI(NIN)%P)
           ALLOCATE(GAP_LFI(NIN)%P(NODFI),STAT=IERROR7)
         ENDIF
         IF(INACTI==5.OR.INACTI==6) THEN
-          IF(ASSOCIATED(PENFI(NIN)%P)) DEALLOCATE(PENFI(NIN)%P)
+          IF(ASSOCIATED(PENFI(NIN)%P)) call my_dealloc(PENFI(NIN)%P)
           ALLOCATE(PENFI(NIN)%P(2,SEGFI),STAT=IERROR11)
         END IF
 
        IF(INTTH > 0 ) THEN
-           IF(ASSOCIATED(TEMPFI(NIN)%P)) DEALLOCATE(TEMPFI(NIN)%P)
+           IF(ASSOCIATED(TEMPFI(NIN)%P)) call my_dealloc(TEMPFI(NIN)%P)
            ALLOCATE(TEMPFI(NIN)%P(2*NODFI),STAT=IERROR12)
-           IF(ASSOCIATED(MATSFI(NIN)%P)) DEALLOCATE(MATSFI(NIN)%P)
+           IF(ASSOCIATED(MATSFI(NIN)%P)) call my_dealloc(MATSFI(NIN)%P)
            ALLOCATE(MATSFI(NIN)%P(SEGFI),STAT=IERROR13)
-           IF(ASSOCIATED(AREASFI(NIN)%P)) DEALLOCATE(AREASFI(NIN)%P)
+           IF(ASSOCIATED(AREASFI(NIN)%P)) call my_dealloc(AREASFI(NIN)%P)
            ALLOCATE(AREASFI(NIN)%P(SEGFI),STAT=IERROR14)
         ENDIF
 
         IF(INTFRIC > 0 ) THEN
-           IF(ASSOCIATED(IPARTFRICSFI(NIN)%P)) DEALLOCATE(IPARTFRICSFI(NIN)%P)
+           IF(ASSOCIATED(IPARTFRICSFI(NIN)%P)) call my_dealloc(IPARTFRICSFI(NIN)%P)
            ALLOCATE(IPARTFRICSFI(NIN)%P(SEGFI),STAT=IERROR17)
         ENDIF
 
         IF(NISUB > 0 ) THEN
-           IF(ASSOCIATED(ADDSUBSFI(NIN)%P)) DEALLOCATE(ADDSUBSFI(NIN)%P)
+           IF(ASSOCIATED(ADDSUBSFI(NIN)%P)) call my_dealloc(ADDSUBSFI(NIN)%P)
            ALLOCATE(ADDSUBSFI(NIN)%P(SEGFI),STAT=IERROR15)
-           IF(ASSOCIATED(LISUBSFI(NIN)%P))  DEALLOCATE(LISUBSFI(NIN)%P)
+           IF(ASSOCIATED(LISUBSFI(NIN)%P)) call my_dealloc(LISUBSFI(NIN)%P)
            ALLOCATE(LISUBSFI(NIN)%P(NISUB*SEGFI),STAT=IERROR16)
-           IF(ASSOCIATED(INFLG_SUBSFI(NIN)%P))  DEALLOCATE(INFLG_SUBSFI(NIN)%P)
+           IF(ASSOCIATED(INFLG_SUBSFI(NIN)%P)) call my_dealloc(INFLG_SUBSFI(NIN)%P)
            ALLOCATE(INFLG_SUBSFI(NIN)%P(NISUB*SEGFI),STAT=IERROR16)
         ENDIF
 C
@@ -5087,7 +5123,7 @@ C
             
           IF(OLDNRTSR/=0) THEN
             
-             ALLOCATE(IAUX(OLDNRTSR),STAT=IERROR12)
+             call my_alloc(IAUX, OLDNRTSR, "IAUX", stat=IERROR12)
            IF(IERROR12/=0) THEN
              CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
              CALL ARRET(2)
@@ -5254,7 +5290,7 @@ C
            IDEB = IDEB + OLDNRTSR    
            NSNFI(NIN)%P(P) = NN2-NNP
 C      
-             DEALLOCATE(IAUX)
+             call my_dealloc(IAUX)
               
             ENDIF !IF(OLDNRTSR/=0)         
 
@@ -5268,8 +5304,8 @@ C   of the 1st allocated dimension
 C
 C deallocation of XREM IREM
 C
-      IF(ALLOCATED(XREM)) DEALLOCATE(XREM)
-      IF(ALLOCATED(IREM)) DEALLOCATE(IREM)
+      IF(ALLOCATED(XREM)) call my_dealloc(XREM)
+      IF(ALLOCATED(IREM)) call my_dealloc(IREM)
 C
       IERROR1=0 
       IERROR2=0 
@@ -5281,8 +5317,8 @@ C
 C Allocation Parith/OFF
 C
        IF(IPARIT==0) THEN
-        IF(ASSOCIATED(AFI(NIN)%P)) DEALLOCATE(AFI(NIN)%P)
-        IF(ASSOCIATED(STNFI(NIN)%P)) DEALLOCATE(STNFI(NIN)%P)
+        IF(ASSOCIATED(AFI(NIN)%P)) call my_dealloc(AFI(NIN)%P)
+        IF(ASSOCIATED(STNFI(NIN)%P)) call my_dealloc(STNFI(NIN)%P)
         IF(NODFI>0)ALLOCATE(AFI(NIN)%P(3,NODFI*NTHREAD),STAT=IERROR1)
         IF(NODFI>0)ALLOCATE(STNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR2)
 C Init a 0
@@ -5294,7 +5330,7 @@ C Init a 0
         ENDDO
 C
         IF(KDTINT/=0)THEN
-          IF(ASSOCIATED(VSCFI(NIN)%P)) DEALLOCATE(VSCFI(NIN)%P)
+          IF(ASSOCIATED(VSCFI(NIN)%P)) call my_dealloc(VSCFI(NIN)%P)
           IF(NODFI>0)ALLOCATE(VSCFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR3)
 C Init a 0
           DO I = 1, NODFI*NTHREAD
@@ -5314,14 +5350,14 @@ C
 C Allocation Parith/OFF
 C
        IF(IPARIT==0) THEN
-        IF(ASSOCIATED(AFI(NIN)%P)) DEALLOCATE(AFI(NIN)%P)
-        IF(ASSOCIATED(STNFI(NIN)%P)) DEALLOCATE(STNFI(NIN)%P)
+        IF(ASSOCIATED(AFI(NIN)%P)) call my_dealloc(AFI(NIN)%P)
+        IF(ASSOCIATED(STNFI(NIN)%P)) call my_dealloc(STNFI(NIN)%P)
         IF(NODFI>0)ALLOCATE(AFI(NIN)%P(3,NODFI*NTHREAD),STAT=IERROR1)
         IF(NODFI>0)ALLOCATE(STNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR2)
         IF(NODFI>0)ALLOCATE(FTHEFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR3)
 C
         IF(NODADT_THERM ==1) THEN
-          IF(ASSOCIATED(CONDNFI(NIN)%P)) DEALLOCATE(CONDNFI(NIN)%P)
+          IF(ASSOCIATED(CONDNFI(NIN)%P)) call my_dealloc(CONDNFI(NIN)%P)
           IF(NODFI>0) ALLOCATE(CONDNFI(NIN)%P(NODFI*NTHREAD),STAT=IERROR4)
         ENDIF
 C
@@ -5340,7 +5376,7 @@ C Init a 0
           ENDIF
 C
         IF(KDTINT/=0)THEN
-          IF(ASSOCIATED(VSCFI(NIN)%P)) DEALLOCATE(VSCFI(NIN)%P)
+          IF(ASSOCIATED(VSCFI(NIN)%P)) call my_dealloc(VSCFI(NIN)%P)
           IF(NODFI>0)ALLOCATE(VSCFI(NIN)%P(NODFI),STAT=IERROR3)
 C Init a 0
           DO I = 1, NODFI

@@ -58,12 +58,14 @@ C
 !||--- called by ------------------------------------------------------
 !||    lectur            ../starter/source/starter/lectur.F
 !||    r2r_void          ../starter/source/coupling/rad2rad/r2r_void.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    ddweights_mod     ../starter/share/modules1/ddweights_mod.F
 !||====================================================================
        SUBROUTINE INIT_MAT_WEIGHT(NUMMAT)
 C----------------------------------------------- 
       USE DDWEIGHTS_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 #include      "implicit_f.inc"
 C-----------------------------------------------
@@ -73,6 +75,6 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-         ALLOCATE (DDWEIGHTS(1:2,1:2,1:NUMMAT+1))
+         call my_alloc(DDWEIGHTS, 2, 2, NUMMAT+1, "DDWEIGHTS")
          DDWEIGHTS(1:2,1:2,1:NUMMAT+1)=ZERO
        END

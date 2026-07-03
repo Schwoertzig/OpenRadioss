@@ -22,6 +22,7 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
 !||    set_u_sens_spmd_node_list   ../starter/source/tools/sensor/set_u_sens_spmd_node_list.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    user_interface_mod          ../starter/source/modules/user_interface_mod.F90
 !||====================================================================
@@ -39,6 +40,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------  
       USE USER_INTERFACE_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -63,17 +65,17 @@ C-----------------------------------------------
             J = J + 1
             IF(J>SENSOR_USER_STRUCT%NUMBER_NODE) THEN
                 SENSOR_USER_STRUCT%NUMBER_NODE = SENSOR_USER_STRUCT%NUMBER_NODE + NUMNOD
-                ALLOCATE( LOCAL_ARRAY(SENSOR_USER_STRUCT%NUMBER_NODE) )
+                call my_alloc(LOCAL_ARRAY, SENSOR_USER_STRUCT%NUMBER_NODE, "LOCAL_ARRAY")
 
                 LOCAL_ARRAY(1:J-1) = SENSOR_USER_STRUCT%NODE_LIST(J-1)
 
-                DEALLOCATE( SENSOR_USER_STRUCT%NODE_LIST )
-                ALLOCATE( SENSOR_USER_STRUCT%NODE_LIST( SENSOR_USER_STRUCT%NUMBER_NODE ) )
+                CALL MY_DEALLOC(SENSOR_USER_STRUCT%NODE_LIST)
+      call my_alloc(SENSOR_USER_STRUCT%NODE_LIST, SENSOR_USER_STRUCT%NUMBER_NODE, "SENSOR_USER_STRUCT%NODE_LIST")
 
                 SENSOR_USER_STRUCT%NODE_LIST(1:J-1) = LOCAL_ARRAY(1:J-1)
                 SENSOR_USER_STRUCT%NODE_LIST(J:SENSOR_USER_STRUCT%NUMBER_NODE) = 0
 
-                DEALLOCATE( LOCAL_ARRAY )
+                CALL MY_DEALLOC(LOCAL_ARRAY)
             ENDIF
             SENSOR_USER_STRUCT%NODE_LIST(J) = ARRAY(I)
         ENDDO

@@ -21,16 +21,18 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i17buce_pena   ../engine/source/interfaces/int17/i17buce.F
+!||    i17buce_pena     ../engine/source/interfaces/int17/i17buce.F
 !||--- called by ------------------------------------------------------
-!||    i17main_tri    ../engine/source/interfaces/int17/i17main_pena.F
+!||    i17main_tri      ../engine/source/interfaces/int17/i17main_pena.F
 !||--- calls      -----------------------------------------------------
-!||    arret          ../engine/source/system/arret.F
-!||    i17tri         ../engine/source/interfaces/int17/i17tri.F
-!||    my_barrier     ../engine/source/system/machine.F
+!||    arret            ../engine/source/system/arret.F
+!||    i17tri           ../engine/source/interfaces/int17/i17tri.F
+!||    my_barrier       ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    icontact_mod   ../engine/share/modules/icontact_mod.F
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    icontact_mod     ../engine/share/modules/icontact_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
        SUBROUTINE I17BUCE_PENA(
      1   NELES    ,IXS        ,IXS16    ,IXS20    ,NELEM    ,
@@ -47,6 +49,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -123,8 +127,8 @@ C -------------------------------------------------------------
 C  Table allowance chain after calculations SPMD ELT Remote
 C -------------------------------------------------------------
         IF(ITASK == 0)THEN
-          ALLOCATE (ADCHAINE(NMES+NMESR),STAT=IERR1)
-          ALLOCATE (CHAINE(2,MX_CAND),STAT=IERR2)
+          call my_alloc(ADCHAINE, NMES+NMESR, "ADCHAINE", stat=IERR1)
+          call my_alloc(CHAINE, 2, MX_CAND, "CHAINE", stat=IERR2)
           IF(IERR1+IERR2 /= 0)THEN
             CALL ARRET(2)
           ENDIF
@@ -152,8 +156,8 @@ C -------------------------------------------------------------
 C -------------------------------------------------------------
         CALL MY_BARRIER
         IF(ITASK == 0)THEN
-          DEALLOCATE (ADCHAINE)
-          DEALLOCATE (CHAINE)
+          call my_dealloc(ADCHAINE)
+          call my_dealloc(CHAINE)
         ENDIF      
 C -------------------------------------------------------------
       ENDDO
@@ -162,19 +166,21 @@ C
       END
 C
 !||====================================================================
-!||    i17buce         ../engine/source/interfaces/int17/i17buce.F
+!||    i17buce          ../engine/source/interfaces/int17/i17buce.F
 !||--- called by ------------------------------------------------------
-!||    i17main         ../engine/source/interfaces/int17/i17main.F
+!||    i17main          ../engine/source/interfaces/int17/i17main.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
-!||    i17tri          ../engine/source/interfaces/int17/i17tri.F
-!||    my_barrier      ../engine/source/system/machine.F
-!||    spmd_tri17box   ../engine/source/mpi/interfaces/spmd_tri17box.F
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    i17tri           ../engine/source/interfaces/int17/i17tri.F
+!||    my_barrier       ../engine/source/system/machine.F
+!||    spmd_tri17box    ../engine/source/mpi/interfaces/spmd_tri17box.F
 !||--- uses       -----------------------------------------------------
-!||    element_mod     ../common_source/modules/elements/element_mod.F90
-!||    icontact_mod    ../engine/share/modules/icontact_mod.F
-!||    message_mod     ../engine/share/message_module/message_mod.F
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    icontact_mod     ../engine/share/modules/icontact_mod.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
        SUBROUTINE I17BUCE(
      1   NELES    ,IXS        ,IXS16    ,IXS20    ,NELEM    ,
@@ -193,6 +199,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -354,8 +362,8 @@ C -------------------------------------------------------------
 C  Table allowance chain after calculations SPMD ELT Remote
 C -------------------------------------------------------------
         IF(ITASK == 0)THEN
-          ALLOCATE (ADCHAINE(NMES+NMESR),STAT=IERR1)
-          ALLOCATE (CHAINE(2,MX_CAND),STAT=IERR2)
+          call my_alloc(ADCHAINE, NMES+NMESR, "ADCHAINE", stat=IERR1)
+          call my_alloc(CHAINE, 2, MX_CAND, "CHAINE", stat=IERR2)
           IF(IERR1+IERR2 /= 0)THEN
             CALL ARRET(2)
           ENDIF
@@ -380,8 +388,8 @@ C -------------------------------------------------------------
 C -------------------------------------------------------------
         CALL MY_BARRIER
         IF(ITASK == 0)THEN
-          DEALLOCATE (ADCHAINE)
-          DEALLOCATE (CHAINE)
+          call my_dealloc(ADCHAINE)
+          call my_dealloc(CHAINE)
         ENDIF      
 C -------------------------------------------------------------
       ENDDO

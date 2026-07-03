@@ -217,6 +217,7 @@ C
 !||    glob_therm_mod         ../common_source/modules/mat_elem/glob_therm_mod.F90
 !||    h3d_mod                ../engine/share/modules/h3d_mod.F
 !||    message_mod            ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
 !||    output_mod             ../common_source/modules/output/output_mod.F90
 !||    pinchtype_mod          ../common_source/modules/pinchtype_mod.F
 !||====================================================================
@@ -234,6 +235,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -534,7 +536,7 @@ C---------------------------------------------------------
 !    .          + 3*NUMNOD*MIN(1,ANIM_V(13)+H3D_DATA%N_VECT_CONT2)
 !    .          + 6*NUMNOD*MIN(1,ANIM_V(27)+H3D_DATA%N_VECT_PCONT2)  
       OUTPUT%DATA%S_FOPT = (NSECT + NRBODY + NRWALL)
-      allocate(OUTPUT%DATA%FOPT(6,NSECT + NRBODY + NRWALL+1))
+      call my_alloc(OUTPUT%DATA%FOPT, 6, NSECT + NRBODY + NRWALL+1, "OUTPUT%DATA%FOPT")
 
       OUTPUT%DATA%S_VECT_CONT =(MIN(1,ANIM_V(4)+OUTP_V(4)+H3D_DATA%N_VECT_CONT))
       OUTPUT%DATA%S_VECT_FINT = (MIN(1,ANIM_V(5)+OUTP_V(5)+H3D_DATA%N_VECT_FINT))

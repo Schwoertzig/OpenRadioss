@@ -33,6 +33,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    mat25_crasurv_c_mod   ../engine/source/materials/mat/mat025/mat25_crasurv_c.F90
 !||    mat25_tsaiwu_c_mod    ../engine/source/materials/mat/mat025/mat25_tsaiwu_c.F90
 !||    matparam_def_mod      ../common_source/modules/mat_elem/matparam_def_mod.F90
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SIGEPS25C(MAT_PARAM,
      1                    NEL      ,PM       ,OFF     ,GSTR    ,
@@ -51,7 +53,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      E                    PLY_EXX  ,PLY_EYY ,PLY_EXY  ,PLY_EXZ ,PLY_EYZ ,
      F                    PLY_F    ,PLA     ,CRAK     ,IERR    ,
      G                    IOFF_DUCT,IFAILURE,PLY_ID   ,IPG     ,TSAIWU  ,
-     H                    IMCONV   ,IOUT    ,DMG      ,L_DMG   ) 
+     H                    IMCONV   ,IOUT    ,DMG      ,L_DMG   ,ISLICE )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -61,6 +63,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -79,6 +83,7 @@ C-----------------------------------------------
      .   IPT,NPTT,NPTTOT,ILAY,IGTYP,IFAILURE,ISHPLYXFEM,IPG
       INTEGER ,INTENT(IN) :: IMCONV
       INTEGER ,INTENT(IN) :: IOUT,L_DMG
+      INTEGER ,INTENT(IN) :: ISLICE
       INTEGER NGL(MVSIZ),IERR(NEL),IOFF_DUCT(MVSIZ)
       INTEGER ,DIMENSION(NEL) ,INTENT(INOUT) :: NFIS1,NFIS2,NFIS3
       my_real ,INTENT(IN) :: TIME
@@ -134,26 +139,35 @@ C-----------------------------------------------------------
       IF (MAT_PARAM%IVISC == 1) THEN   ! PRONY model
         NPRONY = MAT_PARAM%VISC%IPARAM(1)
         KV     = MAT_PARAM%VISC%UPARAM(1)
-        ALLOCATE(GV(NPRONY),BETA(NPRONY))
+        call my_alloc(GV, NPRONY, "GV")
+        call my_alloc(BETA, NPRONY, "BETA")
         DO I=1,NPRONY
           GV(I)   = MAT_PARAM%VISC%UPARAM(1 + I)         
           BETA(I) = MAT_PARAM%VISC%UPARAM(1 + NPRONY + I)
         ENDDO 
       ELSE
-        ALLOCATE(GV(0),BETA(0))
+        call my_alloc(GV, 0, "GV")
+        call my_alloc(BETA, 0, "BETA")
       ENDIF      
 C-----------------------------------------------------------
       IF (ISHPLYXFEM == 0 .OR. IPLYXFEM == 2) THEN
         DO I=1,NEL
-          ZT=ZZ(I)*THK0(I)
-          EPS(I,1)=EXX(I)+ZT*KXX(I)
-          EPS(I,2)=EYY(I)+ZT*KYY(I)
-          EPS(I,3)=EXY(I)+ZT*KXY(I)
-          EPS(I,4)=EYZ(I)
-          EPS(I,5)=EXZ(I)
-          STRN1(I)= GSTR(I,1)+ZT*GSTR(I,6)
-          STRN2(I)= GSTR(I,2)+ZT*GSTR(I,7)
-          STRN3(I)=(GSTR(I,3)+ZT*GSTR(I,8))*HALF
+          IF(OFF(I) == ZERO) THEN
+            EPS(I,1:5) = ZERO
+            STRN1(I) = ZERO
+            STRN2(I) = ZERO
+            STRN3(I) = ZERO 
+          ELSE
+            ZT=ZZ(I)*THK0(I)
+            EPS(I,1)=(EXX(I)+ZT*KXX(I))
+            EPS(I,2)=(EYY(I)+ZT*KYY(I))
+            EPS(I,3)=(EXY(I)+ZT*KXY(I))
+            EPS(I,4)=EYZ(I)
+            EPS(I,5)=EXZ(I)
+            STRN1(I)= (GSTR(I,1)+ZT*GSTR(I,6))
+            STRN2(I)= (GSTR(I,2)+ZT*GSTR(I,7))
+            STRN3(I)=(GSTR(I,3)+ZT*GSTR(I,8))*HALF
+          ENDIF
         ENDDO
       ELSE 
         DO I=1,NEL
@@ -200,7 +214,8 @@ C-----------------------
      8                      PLY_EXY(1,IPT),SIGPLY,SIGPE,PLY_ID ,
      9                      SIGNXX   ,SIGNYY  ,SIGNXY  ,SIGNYZ  ,SIGNZX,
      A                      IPG      ,TSAIWU  ,IPLYXFEM,TIME    ,TIMESTEP,
-     B                      IMCONV   ,MVSIZ   ,IOUT    ,DMG     ,L_DMG )
+     B                      IMCONV   ,MVSIZ   ,IOUT    ,DMG     ,L_DMG ,
+     C                      ISLICE)
       
       ELSE    ! Crasurv 
       
@@ -215,7 +230,8 @@ C-----------------------
      8                       PLY_EXY(1,IPT),SIGPLY,SIGPE,PLY_ID ,
      9                       SIGNXX   ,SIGNYY  ,SIGNXY  ,SIGNYZ  ,SIGNZX,
      A                       IPG      ,TSAIWU  ,IPLYXFEM,TIME    ,TIMESTEP,
-     B                       IMCONV   ,MVSIZ   ,IOUT    ,DMG     ,L_DMG )
+     B                       IMCONV   ,MVSIZ   ,IOUT    ,DMG     ,L_DMG ,
+     C                       ISLICE )
 
       END IF
 !-----------------------------------------------------------------------
@@ -275,7 +291,8 @@ C-----------------------
      .             THLY   ,NGL    ,STRP1  ,STRP2  ,PLY_ID ,IGTYP  ,
      .             IPG    ,EPST1  ,EPST2  ,EPSM1  ,EPSM2  ,DMAX   )
 C-----------------------
-      DEALLOCATE(GV,BETA)
+      call my_dealloc(GV)
+      call my_dealloc(BETA)
 C----  -------------------
       DO I=1,NEL
         IF (OFF(I) == ZERO .AND. NPTT > 1) OFFL(I) = ZERO

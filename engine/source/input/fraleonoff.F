@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    wriusc2                ../engine/source/input/wriusc2.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod            ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||====================================================================
       SUBROUTINE FRALEONOFF (IKAD, KEY0, KALEONOFF, NBALEONOFF)
@@ -39,6 +41,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -60,7 +64,7 @@ C-----------------------------------------------
       DO II = 1, NBALEONOFF
          READ (IUSC1, REC = IKAD(IKEY) + K, FMT = '(7X, A, 37X, I10)')
      .        KEY1, NB_PARTS
-         ALLOCATE (PART_IDS(NB_PARTS))
+         call my_alloc(PART_IDS, NB_PARTS, "PART_IDS")
          IF (KEY1(1:2) == 'ON') THEN
             DO KK = 1, NB_PARTS
                CALL WRIUSC2 (IKAD(IKEY) + KK + K, 1, KEY0(IKEY))
@@ -75,7 +79,7 @@ C-----------------------------------------------
                WRITE (IIN, '(I10, I10)') PART_IDS(KK), 0
             ENDDO
          ENDIF
-         DEALLOCATE (PART_IDS)
+         call my_dealloc(PART_IDS)
          K = K + 1 + NB_PARTS
       ENDDO
  9990 CONTINUE

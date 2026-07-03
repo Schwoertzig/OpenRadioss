@@ -85,6 +85,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    matparam_def_mod            ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    message_mod                 ../engine/share/message_module/message_mod.F
 !||    mvsiz_mod                   ../engine/share/spe_inc/mvsiz_mod.F90
+!||    my_alloc_mod                ../common_source/tools/memory/my_alloc.F90
 !||    names_and_titles_mod        ../common_source/modules/names_and_titles_mod.F
 !||    nlocal_reg_mod              ../common_source/modules/nlocal_reg_mod.F
 !||    table_mod                   ../engine/share/modules/table_mod.F
@@ -154,6 +155,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -998,7 +1000,7 @@ c
       ELSE IF (MTN == 200) THEN  ! MDS MATERIAL LAW INTERFACE (in construction)
 
         IF(MDS_AVAIL == 1 )THEN
-          ALLOCATE(ISMSTR10_FP(15,NEL))
+          call my_alloc(ISMSTR10_FP, 15, NEL, "ISMSTR10_FP")
 
           IF (ISMSTR == 10) THEN
              DO I=LFT,LLT

@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    strs_txt50         ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE STAT_N_VEL(NUMNOD ,ITAB   ,ITABG ,LENG ,NODGLOB,
      .                      WEIGHT ,NODTAG ,V     ,VR   )
@@ -39,6 +40,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -65,9 +67,9 @@ C-----------------------------------------------
       CHARACTER(LEN=100) :: LINE
       INTEGER LEN_LINE
 C-----------------------------------------------
-      CALL MY_ALLOC(NODTAGLOB,LENG)
-      CALL MY_ALLOC(VG,3,LENG)
-      CALL MY_ALLOC(VRG,3,LENG)
+      call my_alloc(NODTAGLOB, LENG, "NODTAGLOB")
+      call my_alloc(VG, 3, LENG, "VG")
+      call my_alloc(VRG, 3, LENG, "VRG")
 C-----------------------------------------------
 !
       IF (NSPMD > 1) THEN
@@ -152,8 +154,8 @@ C-----------------------------------------------
         END DO
       ENDIF
 C-----------------------------------------------
-      DEALLOCATE(NODTAGLOB)
-      DEALLOCATE(VG)
-      DEALLOCATE(VRG)
+      call my_dealloc(NODTAGLOB)
+      call my_dealloc(VG)
+      call my_dealloc(VRG)
       RETURN
       END

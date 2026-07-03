@@ -21,13 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    fail_fld_xfem   ../engine/source/materials/fail/fld/fail_fld_xfem.F
+!||    fail_fld_xfem    ../engine/source/materials/fail/fld/fail_fld_xfem.F
 !||--- called by ------------------------------------------------------
-!||    mulawc          ../engine/source/materials/mat_share/mulawc.F90
-!||    usermat_shell   ../engine/source/materials/mat_share/usermat_shell.F
+!||    mulawc           ../engine/source/materials/mat_share/mulawc.F90
+!||    usermat_shell    ../engine/source/materials/mat_share/usermat_shell.F
 !||--- calls      -----------------------------------------------------
-!||    finter          ../engine/source/tools/curve/finter.F
-!||    finterfld       ../engine/source/materials/fail/fld/fail_fld_c.F
+!||    finter           ../engine/source/tools/curve/finter.F
+!||    finterfld        ../engine/source/materials/fail/fld/fail_fld_c.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE FAIL_FLD_XFEM(
      1     NEL      ,NUPARAM  ,NUVAR    ,NFUNC    ,IFUNC    ,
@@ -45,6 +48,8 @@ c    FLD failure model for XFEM
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -198,7 +203,7 @@ c
       IF (IENG == 1) THEN   ! transform input fld curve to true strain
         II   = NPF(IFUNC(1))
         LENF = NPF(IFUNC(1)+ 1) - NPF(IFUNC(1))
-        ALLOCATE(XF(LENF))
+        call my_alloc(XF, LENF, "XF")
         DO I = 1,LENF
           XF(I) = LOG(TF(II + I-1) + ONE)
         ENDDO
@@ -546,7 +551,7 @@ c               delete phantom
 c-----------------
       END SELECT ! LAYXFEM
 c
-      IF (IENG == 1) DEALLOCATE(XF)
+      IF (IENG == 1) call my_dealloc(XF)
 c-----------------------------------------------
 c---  multilayer xfem
  3000 FORMAT(1X,'CRACK INITIALIZATION IN SHELL ELEMENT',I10,1X,'LAYER',I3)

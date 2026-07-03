@@ -26,7 +26,7 @@
 !||    resol                           ../engine/source/engine/resol.F
 !||====================================================================
       module init_monvol_omp_structure_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   procedures
@@ -37,9 +37,12 @@
 !||    init_monvol_omp_structure   ../engine/source/airbag/init_monvol_omp_structure.F90
 !||--- called by ------------------------------------------------------
 !||    resol                       ../engine/source/engine/resol.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    groupdef_mod                ../common_source/modules/groupdef_mod.F
 !||    monvol_struct_mod           ../engine/share/modules/monvol_struct_mod.F
+!||    my_alloc_mod                ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod              ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine init_monvol_omp_structure(ispmd,nspmd,nvolu,nsurf,monvol,  &
           nimv,numnod,                     &
@@ -52,6 +55,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   arguments
@@ -96,8 +101,8 @@
 
             if(computation_needed) then
               allocate( t_monvoln(ijk)%normal(3,segment_number) )
-              allocate( w_array(numnod) )
-              allocate( node_id(numnod) )
+              call my_alloc(w_array, numnod, "w_array")
+              call my_alloc(node_id, numnod, "node_id")
               w_array(1:numnod) = 0
               total_contribution_number = 0
               node_number = 0
@@ -135,7 +140,7 @@
               t_monvoln(ijk)%omp_output%node_number = node_number
               t_monvoln(ijk)%omp_output%total_contribution_number = total_contribution_number
               t_monvoln(ijk)%omp_output%node_id(1:node_number) = node_id(1:node_number)
-              allocate( node_shift(node_number+1) )
+              call my_alloc(node_shift, node_number+1, "node_shift")
               node_shift( 1:node_number+1 ) = 0
               ! ---------------
 
@@ -174,9 +179,9 @@
                 end if
               end do
               ! ---------------
-              deallocate( node_shift )
-              deallocate( w_array )
-              deallocate( node_id )
+              call my_dealloc(node_shift)
+              call my_dealloc(w_array)
+              call my_dealloc(node_id)
             else
               allocate( t_monvoln(ijk)%normal(3,0) )
               t_monvoln(ijk)%omp_output%node_number = 0

@@ -21,17 +21,19 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    projecig3d     ../engine/source/elements/ige3d/projecig3d.F
+!||    projecig3d       ../engine/source/elements/ige3d/projecig3d.F
 !||--- called by ------------------------------------------------------
-!||    animig3d       ../engine/source/output/anim/generate/animig3d.F
+!||    animig3d         ../engine/source/output/anim/generate/animig3d.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg         ../engine/source/output/message/message.F
-!||    arret          ../engine/source/system/arret.F
-!||    ig3donebasis   ../engine/source/elements/ige3d/ig3donebasis.F
-!||    ig3donederiv   ../engine/source/elements/ige3d/ig3donederiv.F
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    ig3donebasis     ../engine/source/elements/ige3d/ig3donebasis.F
+!||    ig3donederiv     ../engine/source/elements/ige3d/ig3donederiv.F
 !||--- uses       -----------------------------------------------------
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    message_mod    ../engine/share/message_module/message_mod.F
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE PROJECIG3D(ELBUF_TAB, IPARG  ,X , D, V, A, WIGE ,KXIG3D   ,IXIG3D   ,
      .               IG3DSOLID,NANIM3D_L, X_TEMP, D_TEMP, V_TEMP, A_TEMP, TABSTRESL, 
@@ -46,6 +48,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -191,8 +195,9 @@ C-----------------------------------------------
       KNOTLOCELY = ZERO
       KNOTLOCELZ = ZERO
 
-      ALLOCATE(MAB(SIXIG3D),RI(6,SIXIG3D),
-     .         FI(6,SIXIG3D), STAT=IERROR)
+      call my_alloc(MAB, SIXIG3D, "MAB", stat=IERROR)
+      call my_alloc(RI, 6, SIXIG3D, "RI", stat=IERROR)
+      call my_alloc(FI, 6, SIXIG3D, "FI", stat=IERROR)
       
       IF(IERROR/=0)THEN
        CALL ANCMSG(MSGID=249,ANMODE=ANINFO)
@@ -578,7 +583,9 @@ c     .       KNOT(IAD_KNOT+NKNOT1+NKNOT2+1)   ,PX-1    ,PY-1    ,PZ-1    ,0 )
 
       ENDDO
 
-      DEALLOCATE(MAB,RI,FI)
+      call my_dealloc(MAB)
+      call my_dealloc(RI)
+      call my_dealloc(FI)
 
       NISOELCUT = DECAL 
 C-----------

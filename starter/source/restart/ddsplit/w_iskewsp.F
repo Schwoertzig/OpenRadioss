@@ -22,15 +22,18 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    w_iskewsp   ../starter/source/restart/ddsplit/w_iskewsp.F
+!||    w_iskewsp        ../starter/source/restart/ddsplit/w_iskewsp.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_ISKEWSP(ISKEW,NODGLOB,NUMNOD_L,NUMSPH_L,CEPSP,PROC,LEN_IA)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -51,7 +54,8 @@ C-----------------------------------------------
 C
 ! --------------------------------
 !     allocate 1d array
-      ALLOCATE( ITMP(NUMNOD_L),LOCAL(NUMSPH) )
+      call my_alloc(ITMP, NUMNOD_L, "ITMP")
+      call my_alloc(LOCAL, NUMSPH, "LOCAL")
 ! --------------------------------
       NL = 0
       DO I = 1, NUMSPH
@@ -82,7 +86,8 @@ C
 C
 ! --------------------------------
 !     deallocate 1d array
-      DEALLOCATE( ITMP,LOCAL )
+      call my_dealloc(ITMP)
+      call my_dealloc(LOCAL)
 ! --------------------------------
       RETURN
       END

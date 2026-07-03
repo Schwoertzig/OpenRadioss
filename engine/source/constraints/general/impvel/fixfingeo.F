@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    finter2                       ../engine/source/tools/curve/vinter.F
 !||    finter2_smooth                ../engine/source/tools/curve/finter_smooth.F
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod                  ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                ../common_source/tools/memory/my_dealloc.F90
 !||    nodal_arrays_mod              ../common_source/modules/nodal_arrays.F90
 !||    python_call_funct_cload_mod   ../engine/source/loads/general/python_call_funct_cload.F90
 !||    python_funct_mod              ../common_source/modules/python_mod.F90
@@ -47,6 +49,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -96,7 +100,10 @@ C-----------------------------------------------
 C-------------------------------------------------
 C  /IMPVEL/FGEO RIGID LINKS
 C-------------------------------------------------
-      ALLOCATE(MASS(NUMNOD),VX(NUMNOD),VY(NUMNOD),VZ(NUMNOD))
+      call my_alloc(MASS, NUMNOD, "MASS")
+      call my_alloc(VX, NUMNOD, "VX")
+      call my_alloc(VY, NUMNOD, "VY")
+      call my_alloc(VZ, NUMNOD, "VZ")
       MASS(1:NUMNOD)=ZERO
       VX(1:NUMNOD)=ZERO
       VY(1:NUMNOD)=ZERO
@@ -142,7 +149,10 @@ C
            NODES%A(3,N2)=(VZ(N2)-NODES%V(3,N2))/DT12
         ENDIF
       ENDDO
-      DEALLOCATE(MASS, VX, VY, VZ)
+      call my_dealloc(MASS)
+      call my_dealloc(VX)
+      call my_dealloc(VY)
+      call my_dealloc(VZ)
 C-----------------------
 C  DISPLACEMENT PHASE
 C-----------------------
