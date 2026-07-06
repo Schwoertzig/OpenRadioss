@@ -265,7 +265,7 @@ void smooth_vel_clipped_fortran_(my_real_c* vec_move_clippedx, my_real_c* vec_mo
     GrB_Matrix_new(&id, GrB_FP64, nb_pts, nb_pts);
 
     //smoothing_op = Id + eps*dt*(edges*edges')
-    GrB_mxm(smoothing_op, GrB_NULL, GrB_NULL, GrB_NULL, *(clipped->edges), *(clipped->edges), GrB_DESC_T1);
+    GrB_mxm(smoothing_op, GrB_NULL, GrB_NULL, GrB_PLUS_TIMES_SEMIRING_FP64, *(clipped->edges), *(clipped->edges), GrB_DESC_T1);
     GrB_assign(id, GrB_NULL, GrB_NULL, 1.0, ind_vector, GxB_RANGE, ind_vector, GxB_RANGE, GrB_NULL);
     GrB_apply(smoothing_op, GrB_NULL, GrB_NULL, GrB_TIMES_FP64, eps*(*dt), smoothing_op, GrB_NULL);
     GrB_eWiseAdd(smoothing_op, GrB_NULL, GrB_NULL, GrB_PLUS_FP64, id, smoothing_op, GrB_NULL);

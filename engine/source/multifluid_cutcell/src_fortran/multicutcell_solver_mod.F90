@@ -1319,6 +1319,7 @@ module multicutcell_solver_mod
 
     call build_clipped_from_pts_fortran(y_polygon, z_polygon, limits_polygon, nb_id_polygon)
     i = 0
+    call print_clipped_fortran(i)
     
     !Update polygon to meet length criteria
     allocate(vec_move_clippedy(nb_pts_poly))
@@ -1334,6 +1335,7 @@ module multicutcell_solver_mod
     call nb_pts_clipped_fortran(old_nb_pts_poly)
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, nb_edges_poly, &
                                 minimal_length, maximal_length, minimal_angle) !initialize clipped3D in C.
+    call print_clipped_fortran(i)
     call nb_pts_clipped_fortran(nb_pts_poly)
     do while (nb_pts_poly /= old_nb_pts_poly)
       old_nb_pts_poly = nb_pts_poly

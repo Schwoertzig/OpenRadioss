@@ -1504,6 +1504,12 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
             }
         }
 
+        GrB_set  (*(solid_new->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        GrB_wait (*(solid_new->edges), GrB_MATERIALIZE);
+        GxB_print(*(solid_new->edges), GxB_COMPLETE);
+        GrB_set  (*(solid_new->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
+        GrB_wait (*(solid_new->faces), GrB_MATERIALIZE);
+        GxB_print(*(solid_new->faces), GxB_COMPLETE);
         if (size_faces_to_split>0)
             create_new_faces_split(solid_new, faces_to_split, size_faces_to_split, &solid_new);
         if (size_faces_to_fuse>0)
@@ -1589,7 +1595,6 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
     coarsen_interface(solid_new, list_changed_edges);
     if (maximal_length<INFINITY)
         refine_interface(solid_new, maximal_length);
-
 
     //Clean the result if some points were suppressed
     clean_Polygon2D(solid_new, solid);

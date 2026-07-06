@@ -804,7 +804,10 @@ void polygon_split(const Polygon2D* old_p, const GrB_Matrix* original_edges, con
             //new_faces = spzeros(Int8, div(length(indices_sorted), 2), former_nb_faces)
             CHECK_GB_CALL(infogrb, GrB_Matrix_resize(new_faces, indices_sorted->size/2, former_nb_faces))
             CHECK_GB_CALL(infogrb, GrB_Matrix_clear(new_faces))
-            CHECK_GB_CALL(infogrb, GrB_assign(new_faces, GrB_NULL, GrB_NULL, orient_edge, GrB_ALL, 1, &i_face, 1, GrB_NULL))
+            //CHECK_GB_CALL(infogrb, GrB_assign(new_faces, GrB_NULL, GrB_NULL, orient_edge, GrB_ALL, 1, &i_face, 1, GrB_NULL))
+            for(j=0; j<indices_sorted->size/2; j++){
+                CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(new_faces, orient_edge, j, i_face))
+            }
             //p.faces = [p.faces; new_faces]
             CHECK_GB_CALL(infogrb, GrB_Matrix_dup(&copy_mat, *(p->faces)))
             CHECK_GB_CALL(infogrb, GrB_Matrix_ncols(&nb_cols_copy, copy_mat))
