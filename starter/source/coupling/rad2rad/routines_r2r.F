@@ -639,6 +639,7 @@ C     >IU>TABM
 !||    r2r_nom_opt    ../starter/source/coupling/rad2rad/routines_r2r.F
 !||--- called by ------------------------------------------------------
 !||    lectur         ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    r2r_mod        ../starter/share/modules1/r2r_mod.F
 !||    submodel_mod   ../starter/share/modules1/submodel_mod.F
@@ -649,6 +650,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE R2R_MOD
       USE SUBMODEL_MOD , ONLY : NSUBMOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -669,7 +671,7 @@ C-----------------------------------------------
 C=======================================================================
 C-- Split of NOM_OPT
 
-        ALLOCATE (NOM_OPT_TEMP(SNOM_OPT_OLD))
+        call my_alloc(NOM_OPT_TEMP, SNOM_OPT_OLD, "NOM_OPT_TEMP")
         DO I=1,SNOM_OPT_OLD
           NOM_OPT_TEMP(I) = NOM_OPT(I)
           NOM_OPT(I) = 0
@@ -684,7 +686,7 @@ C---  FRAMES --
           NOM_OPT(LNOPT1*INOM_OPT(10)+I)=NOM_OPT_TEMP(LNOPT1*IN10+I)
         END DO
 
-        DEALLOCATE (NOM_OPT_TEMP)
+        CALL MY_DEALLOC(NOM_OPT_TEMP)
 
 C-----------
         RETURN

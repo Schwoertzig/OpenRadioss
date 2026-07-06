@@ -2061,9 +2061,11 @@ C-----------------------------------------------
       USE LOADS_MOD
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
       use bcs_mod , only : bcs_struct_
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2120,8 +2122,11 @@ C-----------------------------------------------
 C   CALCULATION OF CNE ADDCNE
 C-----------------------------------------------
       ALLOCATE(ADSKY(0:NUMNOD+1))
-      ALLOCATE(ITRI(ILEN))
-      ALLOCATE(INDEX(2*ILEN))
+! TODO: non-default lower bound, convert manually
+! TODO: non-default lower bound, convert manually
+! TODO: non-default lower bound, convert manually
+      call my_alloc(ITRI, ILEN, "ITRI")
+      call my_alloc(INDEX, 2*ILEN, "INDEX")
       DO I = 0, NUMNOD+1
         ADSKY(I) = ADDCNE(I)
       ENDDO
@@ -2849,17 +2854,18 @@ C-----------------------------------------------
       enddo
       off = off + segment_offset ! update the offset for the next option   
 !   -------------------------------------
-      DEALLOCATE(ADSKY)
-      DEALLOCATE(ITRI)
-      DEALLOCATE(INDEX)
+      call my_dealloc(ADSKY)
+      CALL MY_DEALLOC(ITRI)
+      CALL MY_DEALLOC(INDEX)
 
       RETURN
       END
 C
 !||====================================================================
-!||    fillcni2        ../starter/source/spmd/domdec2.F
+!||    fillcni2         ../starter/source/spmd/domdec2.F
 !||--- called by ------------------------------------------------------
-!||    lectur          ../starter/source/starter/lectur.F
+!||    lectur           ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE FILLCNI2(
@@ -2871,6 +2877,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2897,6 +2904,9 @@ C-----------------------------------------------
 C   CALCULATION OF CNE ADDCNE
 C-----------------------------------------------
       ALLOCATE(ADSKYI2(0:NUMNOD+1))
+! TODO: non-default lower bound, convert manually
+! TODO: non-default lower bound, convert manually
+! TODO: non-default lower bound, convert manually
       DO I = 0, NUMNOD+1
         ADSKYI2(I) = ADDCNI2(I)
       ENDDO
@@ -2929,20 +2939,23 @@ C
           OFF = OFF + NSN
         END IF
       END DO
-      DEALLOCATE(ADSKYI2)
+      call my_dealloc(ADSKYI2)
 C
       RETURN
       END
 C
 !||====================================================================
-!||    ddprint   ../starter/source/spmd/domdec2.F
+!||    ddprint        ../starter/source/spmd/domdec2.F
 !||--- called by ------------------------------------------------------
-!||    lectur    ../starter/source/starter/lectur.F
+!||    lectur         ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE  DDPRINT(DDSTAT,  MEMFLOW)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2996,8 +3009,8 @@ C-----------------------------------------------
 C Double of float to Bytes conversion
 C In double precision : one double = 8 bytes
 C In single precision : one float  = 4 bytes
-      ALLOCATE( AVERAGE(NACTIVE) )
-      ALLOCATE( DEVIATION(NACTIVE) ) 
+      call my_alloc(AVERAGE, NACTIVE, "AVERAGE")
+      call my_alloc(DEVIATION, NACTIVE, "DEVIATION")
       MBYTE=1024*1024
       IF (IRESP==1) THEN
          RTOBYTES = 4
@@ -3197,22 +3210,24 @@ C
      . '                                 ---------'/
      . '        NEW TOTAL . . . . . . . ',I10,' MB'/)
 C
-      DEALLOCATE( AVERAGE )
-      DEALLOCATE( DEVIATION ) 
+      CALL MY_DEALLOC(AVERAGE)
+      CALL MY_DEALLOC(DEVIATION)
       RETURN
       END
 !||====================================================================
-!||    c_doms10     ../starter/source/spmd/domdec2.F
+!||    c_doms10       ../starter/source/spmd/domdec2.F
 !||--- called by ------------------------------------------------------
-!||    domdec2      ../starter/source/spmd/domdec2.F
+!||    domdec2        ../starter/source/spmd/domdec2.F
 !||--- calls      -----------------------------------------------------
-!||    ifrontplus   ../starter/source/spmd/node/frontplus.F
-!||    nlocal       ../starter/source/spmd/node/ddtools.F
+!||    ifrontplus     ../starter/source/spmd/node/frontplus.F
+!||    nlocal         ../starter/source/spmd/node/ddtools.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE C_DOMS10(ICNDS10,ITAGND,IPLUS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -3235,7 +3250,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGI,NNF
 C-----------------------------------------------
 !     TAGI->N: NNF(N)=MAX_NF
-      ALLOCATE( TAGI(NUMNOD),NNF(NS10E) )
+      call my_alloc(TAGI, NUMNOD, "TAGI")
+      call my_alloc(NNF, NS10E, "NNF")
       TAGI(1:NUMNOD) = 0 
       NNF(1:NS10E) = 1 
       IPLUS = 0
@@ -3355,7 +3371,8 @@ C      END DO
           END DO
       END DO
 C ----------------------------
-      DEALLOCATE( TAGI,NNF )
+      CALL MY_DEALLOC(TAGI)
+      CALL MY_DEALLOC(NNF)
 C ----------------------------
 C
       RETURN

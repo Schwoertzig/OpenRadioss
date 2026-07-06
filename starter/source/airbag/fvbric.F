@@ -21,17 +21,19 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    fvbric      ../starter/source/airbag/fvbric.F
+!||    fvbric         ../starter/source/airbag/fvbric.F
 !||--- called by ------------------------------------------------------
-!||    fvmesh0     ../starter/source/airbag/fvmesh0.F
+!||    fvmesh0        ../starter/source/airbag/fvmesh0.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    fvbag_mod   ../starter/share/modules1/fvbag_mod.F
+!||    fvbag_mod      ../starter/share/modules1/fvbag_mod.F
 !||====================================================================
       SUBROUTINE FVBRIC(IVOLU, RVOLU, IBUF, X, NN)
 C-----------------------------------------------
 C   M o d u l e s 
 C-----------------------------------------------
       USE FVBAG_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -170,7 +172,7 @@ C
          ENDDO
       ENDDO
 C
-      ALLOCATE(ITAG(NNB))
+      call my_alloc(ITAG, NNB, "ITAG")
       DO I=1,NNB
          ITAG(I)=0
       ENDDO
@@ -220,7 +222,7 @@ C
             ENDDO
          ENDDO
       ENDDO
-      DEALLOCATE(ITAG)
+      CALL MY_DEALLOC(ITAG)
 C
       DO I=1,NBRIC
          N1=FVDATA(IFV)%BRIC(1,I)

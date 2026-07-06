@@ -41,6 +41,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    groupdef_mod       ../common_source/modules/groupdef_mod.F
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    stack_mod          ../engine/share/modules/stack_mod.F
 !||    th_mod             ../engine/share/modules/th_mod.F
 !||====================================================================
@@ -58,6 +60,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -151,9 +155,9 @@ C-------------------------------------------------------
         !   ----------------------------------
         
         !   allocation of local arrays
-        ALLOCATE( INDEX_WA_ELTYPE(2*NTHGRP2+1) )
-        ALLOCATE( INDEX_WA_SIZE_P0(NSPMD) )
-        ALLOCATE( WA_INDEX_DIPLS(NSPMD) )
+        call my_alloc(INDEX_WA_ELTYPE, 2*NTHGRP2+1, "INDEX_WA_ELTYPE")
+        call my_alloc(INDEX_WA_SIZE_P0, NSPMD, "INDEX_WA_SIZE_P0")
+        call my_alloc(WA_INDEX_DIPLS, NSPMD, "WA_INDEX_DIPLS")
 
         DO ELTYPE=1,9
             !   ELTYPE = 1 --> spring
@@ -289,7 +293,7 @@ C-------------------------------------------------------
                 TOTAL_INDEX_WA_SIZE = TOTAL_INDEX_WA_SIZE + INDEX_WA_SIZE_P0(NSPMD)
             ENDIF
             !   allocation of INDEX_WA_ELTYPE_P0
-            ALLOCATE( INDEX_WA_ELTYPE_P0(TOTAL_INDEX_WA_SIZE) )
+            call my_alloc(INDEX_WA_ELTYPE_P0, TOTAL_INDEX_WA_SIZE, "INDEX_WA_ELTYPE_P0")
     
             IF(NSPMD>1) THEN
                 !   send the local index to PROC0
@@ -370,12 +374,12 @@ C-------------------------------------------------------
             ALLOCATE( WA(ID)%WA_REAL(WA_SIZE(ID)) )
             ALLOCATE( WA_P0(ID)%WA_REAL(TOTAL_WA_SIZE(ID)) )
             !   initialisation done : next element type
-             DEALLOCATE( INDEX_WA_ELTYPE_P0 )
+             call my_dealloc(INDEX_WA_ELTYPE_P0)
         ENDDO
         !   initialisation done
-        DEALLOCATE( INDEX_WA_ELTYPE )
-        DEALLOCATE( INDEX_WA_SIZE_P0 )
-        DEALLOCATE( WA_INDEX_DIPLS )
+        call my_dealloc(INDEX_WA_ELTYPE)
+        call my_dealloc(INDEX_WA_SIZE_P0)
+        call my_dealloc(WA_INDEX_DIPLS)
         !   ----------------------------------    
         RETURN
         END SUBROUTINE INIT_TH

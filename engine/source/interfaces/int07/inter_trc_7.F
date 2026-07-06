@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod      ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    inter_struct_mod   ../engine/share/modules/inter_struct_mod.F
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         SUBROUTINE INTER_TRC_7( ITASK,NIN,IPARI,IND_IMP,
      1                          INTBUF_TAB,NB_INTER_SORTED,LIST_INTER_SORTED,INTER_STRUCT)
@@ -44,6 +45,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -102,7 +104,7 @@ C-----------------------------------------------
                 INTER_STRUCT(NIN)%I_SK_OLD = INTBUF_TAB(NIN)%I_STOK(1)
     
                 IF( INTER_STRUCT(NIN)%SIZE_CAND_A<NSN+NSNROLD+3) THEN
-                    IF(ALLOCATED(INTER_STRUCT(NIN)%CAND_A)) DEALLOCATE(INTER_STRUCT(NIN)%CAND_A)
+                    IF(ALLOCATED(INTER_STRUCT(NIN)%CAND_A)) call my_dealloc(INTER_STRUCT(NIN)%CAND_A)
                     ALLOCATE(INTER_STRUCT(NIN)%CAND_A(NSN+NSNROLD+3) )
                     INTER_STRUCT(NIN)%SIZE_CAND_A=NSN+NSNROLD+3
                 ENDIF

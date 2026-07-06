@@ -27,7 +27,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_lecgrn                      ../starter/source/groups/hm_lecgrn.F
 !||    hm_prelecgrns                  ../starter/source/groups/hm_prelecgrns.F
 !||    hm_preread_skw                 ../starter/source/tools/skew/hm_preread_skw.F90
-!||    hm_read_adinertia              ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                  ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_link               ../starter/source/constraints/ale/hm_read_ale_link_vel.F
 !||    hm_read_beam                   ../starter/source/elements/reader/hm_read_beam.F
@@ -552,12 +551,14 @@ C
 !||    read_rwall            ../starter/source/constraints/general/rwall/read_rwall.F
 !||--- calls      -----------------------------------------------------
 !||    udoubl2               ../starter/source/system/sysfus.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE UDOUBLE(LIST,ILIST,NLIST,MESS,IR,RLIST)
 C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -584,13 +585,13 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2(INDEX,NLIST,MESS,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif
@@ -600,14 +601,16 @@ C
       END
 
 !||====================================================================
-!||    udoublex   ../starter/source/system/sysfus.F
+!||    udoublex       ../starter/source/system/sysfus.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE UDOUBLEX(NLIST,ILIST,IXX,KXX)
 C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -633,9 +636,9 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
       DO n=1,nlist
         IAD=KXX(4,N)
@@ -646,7 +649,7 @@ C-----------------------------------------------
         enddo
       enddo
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif
@@ -721,12 +724,14 @@ C
 !||    hm_read_rbody   ../starter/source/constraints/general/rbody/hm_read_rbody.F
 !||--- calls      -----------------------------------------------------
 !||    newdbl2         ../starter/source/system/sysfus.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE NEWDBL(LIST,ILIST,NLIST,TAB,ERRID,STATUS,NOM_OPT)
 C      TEST FOR DUPLICATE NODES IN LISTS OF NODE OR ELEMENT IDs, ETC.
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -750,13 +755,13 @@ C-----------------------------------------------
 #endif
       IF (INVERS>=40.AND.NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL NEWDBL2(INDEX,NLIST,LIST,ILIST,TAB,ERRID,STATUS,NOM_OPT) 
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif
@@ -848,12 +853,14 @@ C
 !||    read_monvol          ../starter/source/airbag/read_monvol.F
 !||--- calls      -----------------------------------------------------
 !||    vdoubl2              ../starter/source/system/sysfus.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE VDOUBLE(LIST,ILIST,NLIST,MESS,IR,RLIST)
 C      TEST LES N0 DOUBLES , TOUS FORMATS, ERREUR
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -876,13 +883,13 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
       CALL VDOUBL2(INDEX,NLIST,MESS,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif
@@ -953,12 +960,14 @@ C-----------------------
 !||    hm_read_unit       ../starter/source/general_controls/computation/hm_read_unit.F
 !||--- calls      -----------------------------------------------------
 !||    udoubl2_wo_title   ../starter/source/system/sysfus.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE UDOUBLE_WO_TITLE(LIST,ILIST,NLIST,MESS,IR,RLIST)
 C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -985,13 +994,13 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2_WO_TITLE(INDEX,NLIST,MESS,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif
@@ -1064,12 +1073,14 @@ C-----------------------
 !||    hm_read_drape   ../starter/source/properties/composite_options/drape/hm_read_drape.F
 !||--- calls      -----------------------------------------------------
 !||    udoubl3         ../starter/source/system/sysfus.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE UDOUBLE3(LIST,ILIST,NLIST,MESS,MESS2,IR,RLIST)
 C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -1096,13 +1107,13 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL3(INDEX,NLIST,MESS,MESS2,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif
@@ -1184,12 +1195,14 @@ C-----------------------
 !||    hm_read_surf       ../starter/source/groups/hm_read_surf.F
 !||--- calls      -----------------------------------------------------
 !||    udoubl2_igr        ../starter/source/system/sysfus.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE UDOUBLE_IGR(LIST,NLIST,MESS,IR,RLIST)
 C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -1216,13 +1229,13 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2_IGR(INDEX,NLIST,MESS,LIST,IR,RLIST) 
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif
@@ -1231,15 +1244,17 @@ C
       RETURN
       END
 !||====================================================================
-!||    udouble_set   ../starter/source/system/sysfus.F
+!||    udouble_set    ../starter/source/system/sysfus.F
 !||--- calls      -----------------------------------------------------
-!||    udoubl2_set   ../starter/source/system/sysfus.F
+!||    udoubl2_set    ../starter/source/system/sysfus.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE UDOUBLE_SET(LIST,NLIST,MESS,IR,RLIST)
 C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -1266,13 +1281,13 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2_SET(INDEX,NLIST,MESS,LIST,IR,RLIST) 
 #if CPP_comp == f90
-         DEALLOCATE(INDEX)
+         CALL MY_DEALLOC(INDEX)
 #else
         CALL MY_FREE(IINDEX)
 #endif

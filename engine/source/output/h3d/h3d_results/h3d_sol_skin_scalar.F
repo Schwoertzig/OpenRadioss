@@ -34,6 +34,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    element_mod            ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod            ../engine/share/resol/initbuf.F
 !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F90
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||====================================================================
       SUBROUTINE H3D_SOL_SKIN_SCALAR(
@@ -53,6 +55,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -93,8 +97,11 @@ C-----------------------------------------------
      .           1,5,8,4/
 C-----------------------------------------------
 C
-      ALLOCATE(AFLU(3,NUMNOD),VFLU(3,NUMNOD),T6GPS(6,NUMNOD))
-      ALLOCATE(ITAGPS(NUMNOD),TAG_SKIN_ND(NUMNOD))
+      call my_alloc(AFLU, 3, NUMNOD, "AFLU")
+      call my_alloc(VFLU, 3, NUMNOD, "VFLU")
+      call my_alloc(T6GPS, 6, NUMNOD, "T6GPS")
+      call my_alloc(ITAGPS, NUMNOD, "ITAGPS")
+      call my_alloc(TAG_SKIN_ND, NUMNOD, "TAG_SKIN_ND")
       AFLU  = ZERO
       VFLU  = ZERO
       T6GPS = ZERO
@@ -137,7 +144,11 @@ C
      .                          NPF,TF,H3D_PART,IS_WRITTEN_SKIN,
      .                          KEYWORD,NSKIN,MAT_PARAM)
 C
-       DEALLOCATE(AFLU,VFLU,T6GPS,ITAGPS,TAG_SKIN_ND)
+       call my_dealloc(AFLU)
+       call my_dealloc(VFLU)
+       call my_dealloc(T6GPS)
+       call my_dealloc(ITAGPS)
+       call my_dealloc(TAG_SKIN_ND)
 C-----------
       RETURN
       END 
@@ -148,6 +159,9 @@ C-----------
 !||--- calls      -----------------------------------------------------
 !||    finter                 ../engine/source/tools/curve/finter.F
 !||    finterfld              ../engine/source/materials/fail/fld/fail_fld_c.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE IDX_FLD_SOL(
      1     NEL      ,NUPARAM  ,NFUNC    ,IFUNC    ,
@@ -158,6 +172,8 @@ c    FLD failure model
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -240,7 +256,7 @@ c
       IF (IENG == 1) THEN   ! transform input fld curve to true strain
         II   = NPF(IFUNC(1))
         LENF = NPF(IFUNC(1)+ 1) - NPF(IFUNC(1))
-        ALLOCATE(XF(LENF))
+        call my_alloc(XF, LENF, "XF")
         DO I = 1,LENF
           XF(I) = LOG(TF(II + I-1) + ONE)
         ENDDO
@@ -248,7 +264,7 @@ c
         DO I = 1,NEL
           EM(I) = FINTERFLD(EMIN(I),LENF,XF)
         ENDDO
-        DEALLOCATE(XF)
+        call my_dealloc(XF)
       ! -> True strains input
       ELSE
         ! -> Classical formulation
@@ -349,6 +365,9 @@ C------------------------
 !||--- calls      -----------------------------------------------------
 !||    finter                 ../engine/source/tools/curve/finter.F
 !||    finterfld              ../engine/source/materials/fail/fld/fail_fld_c.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE DAM_FLD_SOL(
      1     NEL      ,NUPARAM  ,NFUNC    ,IFUNC    ,
@@ -359,6 +378,8 @@ c    FLD failure model
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -444,7 +465,7 @@ c
       IF (IENG == 1) THEN   ! transform input fld curve to true strain
         II   = NPF(IFUNC(1))
         LENF = NPF(IFUNC(1)+ 1) - NPF(IFUNC(1))
-        ALLOCATE(XF(LENF))
+        call my_alloc(XF, LENF, "XF")
         DO I = 1,LENF
           XF(I) = LOG(TF(II + I-1) + ONE)
         ENDDO
@@ -454,7 +475,7 @@ c
           DAM(I)   = EMAJ(I) / EM(I)
 c          DFMAX(I) = MIN(ONE, DAM(I))
         ENDDO
-        DEALLOCATE(XF)
+        call my_dealloc(XF)
       ! -> True strains input
       ELSE
         ! -> Classical formulation

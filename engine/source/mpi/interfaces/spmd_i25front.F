@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod         ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    message_mod           ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||    tri7box               ../engine/share/modules/tri7box.F
 !||====================================================================
@@ -41,6 +42,8 @@ C-----------------------------------------------
       USE TRI7BOX
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD
+      use my_alloc_mod
+
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -112,7 +115,7 @@ C Split communicator
             IF(NEDGE > 0) THEN 
               COLOR = 1 
 
-              ALLOCATE(TAB(NEDGE,3))
+              call my_alloc(TAB, NEDGE, 3, "TAB")
 
               ! Gather iformations
               DO IE = 1,NEDGE
@@ -133,7 +136,7 @@ C Split communicator
      .               - INTBUF_TAB(NIN)%NB_BOUNDARY_EDGES_LOCAL 
      .               - INTBUF_TAB(NIN)%NB_INTERNAL_EDGES
 
-              DEALLOCATE(TAB)
+              call my_dealloc(TAB)
             ENDIF
 #ifdef MPI
             CALL SPMD_COMM_SPLIT(COLOR,KEY,INTBUF_TAB(NIN)%MPI_COMM,
@@ -292,8 +295,8 @@ c                WRITE(6,*) "found at ",K
         NSN = IPARI(MACRO_NSN,NIN)
         IF( ITY == 25 ) THEN
           DO P=1,NSPMD
-            DEALLOCATE(SEND_BUF(NIN,P)%P)
-            DEALLOCATE(RECV_BUF(NIN,P)%P)
+            call my_dealloc(SEND_BUF(NIN,P)%P)
+            call my_dealloc(RECV_BUF(NIN,P)%P)
           ENDDO
         ENDIF
       ENDDO
@@ -309,6 +312,7 @@ c                WRITE(6,*) "found at ",K
 !||    intbufdef_mod         ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    message_mod           ../engine/share/message_module/message_mod.F
 !||    mpi_commod            ../engine/share/modules/mpi_comm_mod.F
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||    tri25ebox             ../engine/share/modules/tri25ebox.F
 !||    tri7box               ../engine/share/modules/tri7box.F
@@ -330,6 +334,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE MPI_COMMOD
       USE INTBUFDEF_MOD
+      USE MY_ALLOC_MOD
 #ifdef WITH_ASSERT
       use, intrinsic :: iso_fortran_env
       use, intrinsic :: ieee_arithmetic 
@@ -943,12 +948,12 @@ C --------------- Free Send request SEND wait
         IF( IEDGE > 0 ) THEN
           CALL MPI_WAITALL(NSPMD,BUFFERS(NI25)%SEND_RQ,MPI_STATUSES_IGNORE,IERROR)
 C         CALL MPI_WAITALL(NSPMD,BUFFERS(NI25)%RECV_RQ,MPI_STATUSES_IGNORE,IERROR)
-          DEALLOCATE(BUFFERS(NI25)%SEND_BUF)
-          DEALLOCATE(BUFFERS(NI25)%RECV_BUF)
-          DEALLOCATE(BUFFERS(NI25)%SEND_RQ)
-          DEALLOCATE(BUFFERS(NI25)%RECV_RQ)
-          DEALLOCATE(BUFFERS(NI25)%IAD_RECV)
-          DEALLOCATE(BUFFERS(NI25)%IAD_SEND)
+          call my_dealloc(BUFFERS(NI25)%SEND_BUF)
+          call my_dealloc(BUFFERS(NI25)%RECV_BUF)
+          call my_dealloc(BUFFERS(NI25)%SEND_RQ)
+          call my_dealloc(BUFFERS(NI25)%RECV_RQ)
+          call my_dealloc(BUFFERS(NI25)%IAD_RECV)
+          call my_dealloc(BUFFERS(NI25)%IAD_SEND)
         ENDIF
       ENDDO
 

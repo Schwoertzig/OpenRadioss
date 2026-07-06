@@ -21,16 +21,18 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i24trivox       ../engine/source/interfaces/intsort/i24trivox.F
+!||    i24trivox        ../engine/source/interfaces/intsort/i24trivox.F
 !||--- called by ------------------------------------------------------
-!||    i24buce         ../engine/source/interfaces/intsort/i24buce.F
+!||    i24buce          ../engine/source/interfaces/intsort/i24buce.F
 !||--- calls      -----------------------------------------------------
-!||    i24fic_getn     ../engine/source/interfaces/int24/i24for3e.F
-!||    i24sto          ../engine/source/interfaces/intsort/i24sto.F
-!||    my_barrier      ../engine/source/system/machine.F
-!||    spmd_oldnumcd   ../engine/source/mpi/interfaces/spmd_i7tool.F
+!||    i24fic_getn      ../engine/source/interfaces/int24/i24for3e.F
+!||    i24sto           ../engine/source/interfaces/intsort/i24sto.F
+!||    my_barrier       ../engine/source/system/machine.F
+!||    spmd_oldnumcd    ../engine/source/mpi/interfaces/spmd_i7tool.F
 !||--- uses       -----------------------------------------------------
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE I24TRIVOX(
      1      NSN    ,NSNR    ,ISZNSNR ,I_MEM   ,VMAXDT   ,
@@ -51,6 +53,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -150,10 +154,10 @@ C --------------------------------
       DATA IK2 /2,3,4,1/
 C-----------------------------------------------
       IF(ITASK == 0)THEN
-        ALLOCATE(NEXT_NOD(NSN+NSNR))
-        ALLOCATE(IIX(NSN+NSNR))
-        ALLOCATE(IIY(NSN+NSNR))
-        ALLOCATE(IIZ(NSN+NSNR))
+        call my_alloc(NEXT_NOD, NSN+NSNR, "NEXT_NOD")
+        call my_alloc(IIX, NSN+NSNR, "IIX")
+        call my_alloc(IIY, NSN+NSNR, "IIY")
+        call my_alloc(IIZ, NSN+NSNR, "IIZ")
       END IF
 C Barrier to wait init voxel and allocation NEX_NOD
       CALL MY_BARRIER
@@ -556,10 +560,10 @@ C=======================================================================
 C
       CALL MY_BARRIER()
       IF(ITASK == 0)THEN
-        DEALLOCATE(NEXT_NOD)
-        DEALLOCATE(IIX)
-        DEALLOCATE(IIY)
-        DEALLOCATE(IIZ)
+        call my_dealloc(NEXT_NOD)
+        call my_dealloc(IIX)
+        call my_dealloc(IIY)
+        call my_dealloc(IIZ)
       ENDIF
 
       RETURN

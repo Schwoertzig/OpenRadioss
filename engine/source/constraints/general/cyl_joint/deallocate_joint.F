@@ -24,8 +24,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    deallocate_joint   ../engine/source/constraints/general/cyl_joint/deallocate_joint.F
 !||--- called by ------------------------------------------------------
 !||    resol              ../engine/source/engine/resol.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    joint_mod          ../engine/share/modules/joint_mod.F
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         SUBROUTINE DEALLOCATE_JOINT()
 !$COMMENT
@@ -41,6 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -54,12 +57,12 @@ C-----------------------------------------------
             !   ------------------------------        
             DO N=1,NJOINT     
                 IF(CYL_JOIN(N)%NUMBER_NODE>0) THEN
-                    IF(ALLOCATED(CYL_JOIN(N)%LIST_PROC) )DEALLOCATE( CYL_JOIN(N)%LIST_PROC )
-                    IF( ALLOCATED(CYL_JOIN(N)%NODE) ) DEALLOCATE( CYL_JOIN(N)%NODE )
-                    IF( ALLOCATED(CYL_JOIN(N)%WEIGHT) ) DEALLOCATE( CYL_JOIN(N)%WEIGHT )
+                    IF(ALLOCATED(CYL_JOIN(N)%LIST_PROC) ) call my_dealloc(CYL_JOIN(N)%LIST_PROC)
+                    IF( ALLOCATED(CYL_JOIN(N)%NODE) ) call my_dealloc(CYL_JOIN(N)%NODE)
+                    IF( ALLOCATED(CYL_JOIN(N)%WEIGHT) ) call my_dealloc(CYL_JOIN(N)%WEIGHT)
                 ENDIF
-                IF(ALLOCATED(CYL_JOIN(N)%MAIN_NODE) )DEALLOCATE( CYL_JOIN(N)%MAIN_NODE )
-                IF(ALLOCATED(CYL_JOIN(N)%COMM_MPI%SIZE_SR) )DEALLOCATE( CYL_JOIN(N)%COMM_MPI%SIZE_SR )
+                IF(ALLOCATED(CYL_JOIN(N)%MAIN_NODE) ) call my_dealloc(CYL_JOIN(N)%MAIN_NODE)
+                IF(ALLOCATED(CYL_JOIN(N)%COMM_MPI%SIZE_SR) ) call my_dealloc(CYL_JOIN(N)%COMM_MPI%SIZE_SR)
             ENDDO
             !   ------------------------------
         ENDIF

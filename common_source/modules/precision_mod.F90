@@ -24,7 +24,6 @@
 !||    precision_mod                            ../common_source/modules/precision_mod.F90
 !||--- called by ------------------------------------------------------
 !||    aconve                                   ../engine/source/ale/aconve.F90
-!||    adinertia_mod                            ../starter/share/modules1/adinertia_mod.F90
 !||    afluxt                                   ../engine/source/ale/ale51/afluxt.F
 !||    afluxt_int22                             ../engine/source/ale/ale51/afluxt_int22.F90
 !||    ale51_antidiff2                          ../engine/source/ale/ale51/ale51_antidiff2.F
@@ -62,6 +61,7 @@
 !||    brokmann_elem_renum                      ../starter/source/materials/fail/windshield_alter/brokmann_elem_spmd_renum.F90
 !||    brokmann_random                          ../starter/source/materials/fail/windshield_alter/brokmann_random.F90
 !||    brokmann_random_def_mod                  ../common_source/modules/brokmann_random_def_mod.F90
+!||    calc_m                                   ../engine/source/materials/mat/mat136/sigeps136g.F90
 !||    calculp2                                 ../starter/source/materials/mat/mat057/calculp2.F90
 !||    check_sorting_criteria                   ../engine/source/interfaces/intsort/check_sorting_criteria.F90
 !||    chk_shell_offset                         ../starter/source/elements/shell/shell_offset/chk_shell_offset.F90
@@ -208,8 +208,7 @@
 !||    hm_pre_read_preload_axial                ../starter/source/loads/general/preload/hm_read_preload_axial.F90
 !||    hm_preread_inivel                        ../starter/source/initial_conditions/general/inivel/hm_preread_inivel.F90
 !||    hm_preread_skw                           ../starter/source/tools/skew/hm_preread_skw.F90
-!||    hm_read_adinertia                        ../starter/source/tools/adinertia/hm_read_adinertia.F90
-!||    hm_read_adinertia_mod                    ../starter/source/tools/adinertia/hm_read_adinertia.F90
+!||    hm_read_admas                            ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_bcs_nrf                          ../starter/source/boundary_conditions/hm_read_bcs_nrf.F90
 !||    hm_read_bcs_wall                         ../starter/source/boundary_conditions/hm_read_bcs_wall.F90
 !||    hm_read_ebcs_cyclic                      ../starter/source/boundary_conditions/ebcs/hm_read_ebcs_cyclic.F90
@@ -258,6 +257,7 @@
 !||    hm_read_mat133                           ../starter/source/materials/mat/mat133/hm_read_mat133.F90
 !||    hm_read_mat134                           ../starter/source/materials/mat/mat134/hm_read_mat134.F90
 !||    hm_read_mat135                           ../starter/source/materials/mat/mat135/hm_read_mat135.F90
+!||    hm_read_mat136                           ../starter/source/materials/mat/mat136/hm_read_mat136.F90
 !||    hm_read_mat163                           ../starter/source/materials/mat/mat163/hm_read_mat163.F90
 !||    hm_read_mat169_arup                      ../starter/source/materials/mat/mat169/hm_read_mat169.F90
 !||    hm_read_mat50                            ../starter/source/materials/mat/mat050/hm_read_mat50.F90
@@ -338,7 +338,6 @@
 !||    law123_upd                               ../starter/source/materials/mat/mat123/law123_upd.F90
 !||    law129_init                              ../starter/source/materials/mat/mat129/law129_init.F90
 !||    law133_upd                               ../starter/source/materials/mat/mat133/law133_upd.F90
-!||    law163_upd                               ../starter/source/materials/mat/mat163/law163_upd.F90
 !||    law190_upd                               ../starter/source/materials/mat/mat190/law190_upd.F90
 !||    law42c_ini                               ../starter/source/materials/mat/mat042/law42c_ini.F90
 !||    law76_func_comp                          ../starter/source/materials/mat/mat076/law76_func_comp.F90
@@ -385,6 +384,7 @@
 !||    nice_solids                              ../engine/source/materials/mat/mat131/return_mapping/nice_solids.F90
 !||    nodal_arrays_mod                         ../common_source/modules/nodal_arrays.F90
 !||    offset_nproj                             ../engine/source/interfaces/shell_offset/offset_nproj.F90
+!||    optiondef_mod                            ../common_source/modules/optiondef_mod.F
 !||    order3                                   ../engine/source/materials/mat/mat130/sigeps130.F90
 !||    output_mod                               ../common_source/modules/output/output_mod.F90
 !||    parith_on_mod                            ../common_source/modules/parith_on_mod.F90
@@ -422,6 +422,7 @@
 !||    rbe3pen_init                             ../engine/source/constraints/general/rbe3/rbe3pen_init.F90
 !||    rbody_part_check                         ../starter/source/constraints/general/rbody/rbody_part_modif.F90
 !||    rbody_part_modif                         ../starter/source/constraints/general/rbody/rbody_part_modif.F90
+!||    rbody_spring_check                       ../starter/source/elements/spring/rbody_spring_check.F90
 !||    read_ale_grid                            ../engine/source/output/restart/read_ale_grid.F90
 !||    read_bcs_nrf                             ../engine/source/output/restart/read_bcs_nrf.F90
 !||    read_bcs_wall                            ../engine/source/output/restart/read_bcs_wall.F90
@@ -529,6 +530,7 @@
 !||    sigeps132c                               ../engine/source/materials/mat/mat132/sigeps132c.F90
 !||    sigeps133                                ../engine/source/materials/mat/mat133/sigeps133.F90
 !||    sigeps134s                               ../engine/source/materials/mat/mat134/sigeps134s.F90
+!||    sigeps136g                               ../engine/source/materials/mat/mat136/sigeps136g.F90
 !||    sigeps163                                ../engine/source/materials/mat/mat163/sigeps163.F90
 !||    sigeps169_connect                        ../engine/source/materials/mat/mat169/sigeps169_connect.F90
 !||    sigeps50s                                ../engine/source/materials/mat/mat050/sigeps50s.F90

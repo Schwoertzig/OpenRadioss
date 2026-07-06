@@ -98,6 +98,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    intstamp_mod                 ../engine/share/modules/intstamp_mod.F
 !||    metric_mod                   ../common_source/modules/interfaces/metric_mod.F
 !||    multi_fvm_mod                ../common_source/modules/ale/multi_fvm_mod.F90
+!||    my_alloc_mod                 ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod               ../common_source/tools/memory/my_dealloc.F90
 !||    nodal_arrays_mod             ../common_source/modules/nodal_arrays.F90
 !||    output_mod                   ../common_source/modules/output/output_mod.F90
 !||    sensor_mod                   ../common_source/modules/sensor_mod.F90
@@ -161,6 +163,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 #include      "macro.inc"
@@ -384,20 +388,21 @@ C        Look if interface is activated
       IF (NSNE_MAX>0 ) THEN
        L_FIC=3*(NSNE_MAX+NUMNOD)
        NNOD3 =3*NUMNOD
-       ALLOCATE(XE(L_FIC),VE(L_FIC))
+       call my_alloc(XE, L_FIC, "XE")
+       call my_alloc(VE, L_FIC, "VE")
        XE(1:NNOD3) = X(1:NNOD3)
        VE(1:NNOD3) = V(1:NNOD3)
       END IF
 
       IF(MAX_IGE>0) THEN
-        ALLOCATE( X_IGE(3*(NUMNOD+MAX_IGE)) )
-        ALLOCATE( V_IGE(3*(NUMNOD+MAX_IGE)) )
+        call my_alloc(X_IGE, 3*(NUMNOD+MAX_IGE), "X_IGE")
+        call my_alloc(V_IGE, 3*(NUMNOD+MAX_IGE), "V_IGE")
         X_IGE(1:3*NUMNOD) = X(1:3*NUMNOD)
         V_IGE(1:3*NUMNOD) = V(1:3*NUMNOD)
         SIZE_X_IGE = 3*(NUMNOD+MAX_IGE)
       ELSE
-        ALLOCATE( X_IGE(0) )
-        ALLOCATE( V_IGE(0) )
+        call my_alloc(X_IGE, 0, "X_IGE")
+        call my_alloc(V_IGE, 0, "V_IGE")
         SIZE_X_IGE = 0
       ENDIF
 
@@ -881,7 +886,7 @@ c-----------------------------------------------------------------------
 
           CALL MY_BARRIER
           IF(ITASK==0)THEN            
-            DEALLOCATE(IRECT_L)
+            call my_dealloc(IRECT_L)
           END IF
           !--------------------------------------------------------------
           !    CINEMATIC TIME STEP (MINIMUM LENGTH)
@@ -1601,7 +1606,8 @@ C Fin Partie non parallele
 
       ENDIF
 
-      DEALLOCATE(X_IGE,V_IGE)
+      call my_dealloc(X_IGE)
+      call my_dealloc(V_IGE)
 !$OMP END SINGLE
 
       RETURN

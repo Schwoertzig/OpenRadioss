@@ -292,6 +292,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    reaction_forces_th                           ../engine/source/output/reaction_forces_th.F
 !||    reallocate_i_skyline                         ../engine/source/system/reallocate_skyline.F
 !||    renum_siz                                    ../engine/source/interfaces/interf/renum_siz.F
+!||    report_alloc                                 ../common_source/tools/memory/my_alloc_tools.F90
 !||    resol_alloc_nitsche                          ../engine/source/engine/resol_alloc.F90
 !||    resol_alloc_phase1                           ../engine/source/engine/resol_alloc.F90
 !||    resol_alloc_phase10                          ../engine/source/engine/resol_alloc.F90
@@ -1039,8 +1040,8 @@ C-----------------------------------------------
      .           ISTOP,  NFIA, NFEA, NFOA, NDMA, NDIN,
      .           NFNCA, NFTCA,NDMA2, NFNCA2, NFTCA2,
      .           L1,L2,L3,LL1,LL2,LL3,NFT2,LISENDP_PXFEM,
-     .           LIRECVP_PXFEM,NDAMA2,FLG_KJ2,NCONT,BID,K12,IVAD,IAD_GREL,
-     .           FLG_KJ2_RAZ,I_EXCH_FLG_RAZ
+     .           LIRECVP_PXFEM,NDAMA2,FLG_KJ2,FLG_SPR_DT,NCONT,BID,K12,IVAD,IAD_GREL,
+     .           FLG_KJ2_RAZ,FLG_SPR_RAZ,I_EXCH_FLG_RAZ
               INTEGER :: LISENDP_CRK,LIRECVP_CRK
               INTEGER :: I13A,I13B,I13C,I13D,I13E,I13F,I13G,I13H,I13I
               INTEGER :: I15A,I15B,I15C,I15D,I15E,I15F,I15G,I15H,I15I,I15J,I15K
@@ -1179,7 +1180,7 @@ C End Parith/ON specific
               my_real DT3
               INTEGER  IGROUPFLG(2)
               INTEGER, DIMENSION(:),ALLOCATABLE :: IGROUPC,IGROUPTG,IGROUPS
-              INTEGER  IOLDSECT
+              INTEGER  IOLDSECT,S_NODA_FEXT
               ! TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS now in SFEM%
 C-----------------------------------------------------------------------------------
 C Parith/OFF + AMS
@@ -1405,6 +1406,7 @@ C
               IDAMP_RDOF_TAB = 0
               FLG_DTNODAMP = 0
               FLG_KJ2 = 0
+              FLG_SPR_DT = 0
               I_EXCH_FLG_RAZ = 0
               NELTST  = 0
               ITYPTST = 0
@@ -1835,13 +1837,13 @@ C ---------------------
 C Allocating FEXT Array
 C ---------------------
               IF(ANIM_V(5)+OUTP_V(5)+H3D_DATA%N_VECT_FINT+
-     .           ANIM_V(6)+OUTP_V(6)+H3D_DATA%N_VECT_FEXT >0 .or. ViperCoupling) THEN
-                ALLOCATE(NODA_FEXT(3*NUMNOD))
-                NODA_FEXT(1:3*NUMNOD)=ZERO
+     .           ANIM_V(6)+OUTP_V(6)+H3D_DATA%N_VECT_FEXT >0 .or. ViperCoupling .OR. NFLOW>0 ) THEN
+                S_NODA_FEXT = NUMNOD
               ELSE
-                ALLOCATE(NODA_FEXT(3))
-                NODA_FEXT(1:3)=ZERO
+                S_NODA_FEXT = 1
               ENDIF
+              ALLOCATE(NODA_FEXT(3*S_NODA_FEXT))
+              NODA_FEXT(1:3*S_NODA_FEXT)=ZERO
 C ---------------------
 C Allocating PEXT Array
 C ---------------------
@@ -3095,8 +3097,9 @@ C
               IF (NFLOW>0) THEN
                 CALL FLOW0(OUTPUT,IFLOW, RFLOW,   WIFLOW, WRFLOW, NODES%X,
      .                     NODES%V,     NODES%A,       NPC,    TF,     SENSORS%SENSOR_TAB,
-     .                     NBGAUGE,LGAUGE,  GAUGE , NSENSOR,
-     .                     IGRV,   AGRV  ,NFUNCT  ,PYTHON, OUTPUT%TH%WFEXT)
+     .                     NBGAUGE,LGAUGE,  GAUGE , NSENSOR,  IGRV,   
+     .                     AGRV  ,NFUNCT  ,NUMNOD   ,PYTHON, OUTPUT%TH%WFEXT,
+     .                     S_NODA_FEXT, NODA_FEXT, OUTPUT%DATA%NODA_SURF, OUTPUT%DATA%NODA_PEXT)
               ENDIF
 
 C----------------------------------------
@@ -4234,7 +4237,7 @@ C
      Z         SBUFMAT        ,SNPC          ,STF         ,NODADT  ,DTFAC1,
      .         DTMIN1         ,IDTMIN        ,IOUT        ,ISTDO   ,IDTMINS,DTFACS,NSVOIS,
      .         IRESP          ,MAXFUNC       ,USERL_AVAIL ,GLOB_THERM,IMON_MAT,DTMINS,SANIN,
-     .         NGRTH          ,NELEM         ,SFEM  )
+     .         NGRTH          ,NELEM         ,SFEM        ,FLG_SPR_DT)
 
 C
 #include "lockon.inc"
@@ -5820,15 +5823,16 @@ C --------------------------
               IF (I_EXCH_FLG_RAZ==0) THEN
                 ! Flag for reset of stifn and stifr - must be set only at first cycle - ncycle=0 not enough because of chkpt
                 ! I_EXCH_FLG_RAZ ensures that it is set only once
-
                 FLG_KJ2_RAZ = FLG_KJ2
+                FLG_SPR_RAZ = FLG_SPR_DT
                 IF (NSPMD > 1) call spmd_allreduce(FLG_KJ2,FLG_KJ2_RAZ,1,SPMD_SUM)
+                IF (NSPMD > 1) call spmd_allreduce(FLG_SPR_DT,FLG_SPR_RAZ,1,SPMD_SUM)
                 I_EXCH_FLG_RAZ = 1
               ENDIF
 C
-              IF (FLG_KJ2==1) THEN
+              IF ((FLG_KJ2==1).OR.(FLG_SPR_DT==1)) THEN
 C
-                IF (NCYCLE==0) THEN
+                IF ((NCYCLE==0).AND.(FLG_KJ2==1)) THEN
                   ALLOCATE(STK_SN(NUMNOD),STK_SR(NUMNOD))
                   STK_SN(1:NUMNOD)=NODES%STIFN(1:NUMNOD)
                   STK_SR(1:NUMNOD)=NODES%STIFR(1:NUMNOD)
@@ -5977,7 +5981,7 @@ C------------Need to stop computation at Tstop for /DT/THERM----------
              CALL PYTHON_END_OPENMP(PYTHON)
 
 C ----RAZ of NODES%STIFN AND NODES%STIFR for kjoints with element time step----------------------
-              IF ((FLG_KJ2_RAZ==1).AND.(I7KGLO==0).AND.(IDTMINS==0).AND.(NODADT==0)) THEN
+              IF ((FLG_KJ2_RAZ + FLG_SPR_RAZ > 0).AND.(I7KGLO==0).AND.(IDTMINS==0).AND.(NODADT==0)) THEN
                 NODES%STIFN(1:NUMNOD) = EM20
                 IF (IRODDL > 0) NODES%STIFR(1:NUMNOD) = EM20
               ENDIF
@@ -9497,11 +9501,21 @@ C--- //0 ----------------
                   CALL ADD_ELAPSED_TIME_MON_OFF(TIMERS)
                 ENDIF
                 CALL TRACE_OUT(3)
+              DO I = 0, NSPMD-1
+                IF(ISPMD == I) THEN
+                  call report_alloc()
+                ENDIF
+                CALL SPMD_BARRIER()  ! ensure all processes reach this point before any process can finalize
+              END DO
+
+
+
                 RETURN
               ENDIF
 C-------------------------------
  500          CONTINUE
 C-------------------------------
+              
 !             CALL PYTHON_FINALIZE()
               IF(MSTOP/=0) THEN
                 PARALLEL_SECTION = 0
@@ -9733,6 +9747,12 @@ C
                 IF (ALLOCATED(SPH_WORK%VOXEL%DXMAX)) DEALLOCATE(SPH_WORK%VOXEL%DXMAX)                
                 IF (ALLOCATED(SPH_WORK%VOXEL%DYMAX)) DEALLOCATE(SPH_WORK%VOXEL%DYMAX)
                 IF (ALLOCATED(SPH_WORK%VOXEL%DZMAX)) DEALLOCATE(SPH_WORK%VOXEL%DZMAX)
+                DO I = 0, NSPMD-1
+                  IF(ISPMD == I) THEN
+                    call report_alloc()
+                  ENDIF
+                  CALL SPMD_BARRIER()  ! ensure all processes reach this point before any process can finalize
+                END DO
                 RETURN
               ENDIF    ! MSTOP/=0
 
@@ -9754,6 +9774,15 @@ C                Deallocate indexing arrays
                  IF(ALLOCATED(VIPER%IXEM1))DEALLOCATE(VIPER%IXEM1)
                  CLOSE(VIPER%io_dt)
               ENDIF
+
+              DO I = 0, NSPMD-1
+                IF(ISPMD == I) THEN
+                  call report_alloc()
+                ENDIF
+                CALL SPMD_BARRIER()  ! ensure all processes reach this point before any process can finalize
+              END DO
+
+
 c-----------
               RETURN
             END

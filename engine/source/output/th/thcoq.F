@@ -24,10 +24,13 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    thcoq              ../engine/source/output/th/thcoq.F
 !||--- called by ------------------------------------------------------
 !||    hist2              ../engine/source/output/th/hist2.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    elbufdef_mod       ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    matparam_def_mod   ../common_source/modules/mat_elem/matparam_def_mod.F90
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    pinchtype_mod      ../common_source/modules/pinchtype_mod.F
 !||    stack_mod          ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -46,6 +49,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -584,7 +589,7 @@ c----
      .               MTE==44.OR.MTE==45.OR.MTE==48.OR.MTE>=50) THEN
 c                   
                   NUVAR = ELBUF_TAB(NG)%BUFLY(1)%NVAR_MAT 
-                  ALLOCATE (VAR(NUVAR,MAX(1,MPT)))
+                  call my_alloc(VAR, NUVAR, MAX(1,MPT), "VAR")
                   VAR = ZERO                                                   
 C---  
                   IF (MTE == 58 .or. MTE == 158) THEN
@@ -693,7 +698,7 @@ C---
                     ENDDO ! IPT =1,MPT                                                   
                   ENDDO   ! J = 1, NU                                                         
 c
-                  DEALLOCATE (VAR)                                                      
+                  call my_dealloc(VAR)
                 ENDIF       ! MTE user                                                         
 c----
 c------------ Strain

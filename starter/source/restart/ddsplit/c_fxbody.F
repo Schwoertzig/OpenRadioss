@@ -155,11 +155,12 @@ C
       RETURN
       END
 !||====================================================================
-!||    c_fxbody2   ../starter/source/restart/ddsplit/c_fxbody.F
+!||    c_fxbody2      ../starter/source/restart/ddsplit/c_fxbody.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
-!||    nlocal      ../starter/source/spmd/node/ddtools.F
+!||    nlocal         ../starter/source/spmd/node/ddtools.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE C_FXBODY2(
      .   FXBIPM   , FXBNOD  , NODLOCAL, IPARG   , FXBELM ,
@@ -172,6 +173,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -499,7 +501,8 @@ C
                ENDDO
             ELSEIF (IFILE==1) THEN
                LVSIG=NELS*7+NELC*10+NELT*2+NELP*8+NELTG*10
-               ALLOCATE(VSIG(LVSIG), VSIG2(LVSIG))
+               call my_alloc(VSIG, LVSIG, "VSIG")
+               call my_alloc(VSIG2, LVSIG, "VSIG2")
                IAD=0
                DO J=1,LVSIG/6
                   IRCS=IRCS+1
@@ -664,7 +667,8 @@ C
                   IRCS_L=IRCS_L+1
                   WRITE(IFXS_L+ITASK,REC=IRCS_L) (VSIG2(IAD+K),K=1,JJ)
                ENDIF
-               DEALLOCATE(VSIG, VSIG2)
+               CALL MY_DEALLOC(VSIG)
+               CALL MY_DEALLOC(VSIG2)
             ENDIF
          ENDDO
          FXBIPM_L(21,NFX)=NELS_L

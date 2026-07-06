@@ -22,16 +22,18 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    w_elmx      ../starter/source/restart/ddsplit/w_elmx.F
+!||    w_elmx         ../starter/source/restart/ddsplit/w_elmx.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_ELMX(KXX,NUMELX_L,ISUMNX_L,IXX,CEP,
      +                  PROC,NODLOCAL,LEN_IA)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -53,7 +55,7 @@ C-----------------------------------------------
 C
 ! ----------------------------
 !     allocate 1d array
-      ALLOCATE( IXX_L(ISUMNX_L) ) 
+      call my_alloc(IXX_L, ISUMNX_L, "IXX_L")
 !     allocate 2d array
       ALLOCATE( KXX_L(NIXX,NUMELX_L) )
 ! ----------------------------
@@ -85,7 +87,7 @@ C
 C
 ! ----------------------------
 !     deallocate 1d array
-      DEALLOCATE( IXX_L ) 
+      CALL MY_DEALLOC(IXX_L)
 !     deallocate 2d array
       DEALLOCATE( KXX_L )
 ! ----------------------------

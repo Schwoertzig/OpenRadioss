@@ -22,12 +22,15 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C Orthotropic Hill
 !||====================================================================
-!||    sigeps93       ../engine/source/materials/mat/mat093/sigeps93.F
+!||    sigeps93         ../engine/source/materials/mat/mat093/sigeps93.F
 !||--- called by ------------------------------------------------------
-!||    mulaw          ../engine/source/materials/mat_share/mulaw.F90
+!||    mulaw            ../engine/source/materials/mat_share/mulaw.F90
 !||--- calls      -----------------------------------------------------
-!||    mstrain_rate   ../engine/source/materials/mat_share/mstrain_rate.F
-!||    vinter         ../engine/source/tools/curve/vinter.F
+!||    mstrain_rate     ../engine/source/materials/mat_share/mstrain_rate.F
+!||    vinter           ../engine/source/tools/curve/vinter.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
        SUBROUTINE SIGEPS93(
      1      NEL      ,NUPARAM  ,NUVAR    ,MFUNC    ,KFUNC    , 
@@ -42,6 +45,8 @@ C Orthotropic Hill
 C-----------------------------------------------
 C   I M P L I C I T   T Y P E S
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include "implicit_f.inc"
 C----------------------------------------------------------------
 C  I N P U T   A R G U M E N T S
@@ -133,7 +138,8 @@ C
       ITAB = 0  
       IF (MFUNC > 0) THEN 
         ITAB = 1
-        ALLOCATE(RATE(MFUNC),YFAC(MFUNC))
+        call my_alloc(RATE, MFUNC, "RATE")
+        call my_alloc(YFAC, MFUNC, "YFAC")
         DO I = 1,MFUNC
           RATE(I) = UPARAM(30+I)
           YFAC(I) = UPARAM(30+MFUNC+I)
@@ -469,7 +475,7 @@ C
           EPSP(I)   = UVAR(I,1)
         ENDIF
       ENDDO 
-      IF (ALLOCATED(RATE)) DEALLOCATE(RATE)
-      IF (ALLOCATED(YFAC)) DEALLOCATE(YFAC)      
+      IF (ALLOCATED(RATE)) call my_dealloc(RATE)
+      IF (ALLOCATED(YFAC)) call my_dealloc(YFAC)
 C
       END

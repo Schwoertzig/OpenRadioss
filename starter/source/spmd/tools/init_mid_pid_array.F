@@ -25,6 +25,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    init_mid_pid_array   ../starter/source/spmd/tools/init_mid_pid_array.F
 !||--- called by ------------------------------------------------------
 !||    initwg               ../starter/source/spmd/domain_decomposition/initwg.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    mid_pid_mod          ../starter/share/modules1/mid_pid_mod.F
 !||====================================================================
@@ -35,6 +36,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4                                POIN_PART_SHELL,POIN_PART_TRI,POIN_PART_SOL)
 
         USE MID_PID_MOD
+        use my_alloc_mod
 
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -160,23 +162,23 @@ C=======================================================================
                 MID_PID_TRI(I)%NBR_PID = 0
                 MID_PID_SOL(I,1:7)%NBR_PID = 0
                 IF(PID_SHELL(I)>0) THEN
-                        ALLOCATE( MID_PID_SHELL(I)%PID1D( PID_SHELL(I) ) )
-                        ALLOCATE( MID_PID_SHELL(I)%COST1D( PID_SHELL(I) ) )
+                        call my_alloc(MID_PID_SHELL(I)%PID1D, PID_SHELL(I), "MID_PID_SHELL(I)%PID1D")
+                        call my_alloc(MID_PID_SHELL(I)%COST1D, PID_SHELL(I), "MID_PID_SHELL(I)%COST1D")
                         MID_PID_SHELL(I)%PID1D( 1:PID_SHELL(I) ) = 0
                         MID_PID_SHELL(I)%COST1D( 1:PID_SHELL(I) ) = ZERO
                         MID_PID_SHELL(I)%NBR_PID = PID_SHELL(I)
                 ENDIF
                 IF(PID_TRI(I)>0) THEN
-                        ALLOCATE( MID_PID_TRI(I)%PID1D( PID_TRI(I) ) )
-                        ALLOCATE( MID_PID_TRI(I)%COST1D( PID_TRI(I) ) )
+                        call my_alloc(MID_PID_TRI(I)%PID1D, PID_TRI(I), "MID_PID_TRI(I)%PID1D")
+                        call my_alloc(MID_PID_TRI(I)%COST1D, PID_TRI(I), "MID_PID_TRI(I)%COST1D")
                         MID_PID_TRI(I)%PID1D( 1 : PID_TRI(I) ) = 0 
                         MID_PID_TRI(I)%COST1D( 1 : PID_TRI(I) ) = ZERO 
                         MID_PID_TRI(I)%NBR_PID = PID_TRI(I)
                 ENDIF
                 DO INDI=1,7
                         IF(PID_SOL(I,INDI)>0) THEN
-                                ALLOCATE( MID_PID_SOL(I,INDI)%PID1D( PID_SOL(I,INDI) ) )
-                                ALLOCATE( MID_PID_SOL(I,INDI)%COST1D( PID_SOL(I,INDI) ) )
+                                call my_alloc(MID_PID_SOL(I,INDI)%PID1D, PID_SOL(I,INDI), "MID_PID_SOL(I,INDI)%PID1D")
+                                call my_alloc(MID_PID_SOL(I,INDI)%COST1D, PID_SOL(I,INDI), "MID_PID_SOL(I,INDI)%COST1D")
                                 MID_PID_SOL(I,INDI)%PID1D( 1:PID_SOL(I,INDI) ) = 0
                                 MID_PID_SOL(I,INDI)%COST1D( 1:PID_SOL(I,INDI) ) = ZERO
                                 MID_PID_SOL(I,INDI)%NBR_PID = PID_SOL(I,INDI) 

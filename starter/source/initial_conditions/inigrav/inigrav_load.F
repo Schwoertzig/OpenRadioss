@@ -43,8 +43,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   Description
 C-----------------------------------------------
-C This subroutine is computing distance from a given surface along vector provided by /GRAV option.
-C    Surface can be planar or provided by user.
+C This subroutine computes a positive depth measured along gravity direction.
+C Then inigrav_eos subroutine is updating the state
 C
 C REMINDER :
 !     
@@ -73,6 +73,7 @@ C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       USE MATPARAM_DEF_MOD
       use element_mod , only : nixs,nixc,nixq,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -114,9 +115,10 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       my_real :: GRAV0,BX,BY,BZ,NX,NY,NZ,DOTP,RHO0,NGX,NGY,NGZ,ALPHA,INTERP(3),NORM
       my_real :: Z(3), DEPTH(MVSIZ), N(3,8),PSURF,PGRAV(MVSIZ),VFRAC,P(3,1:4)
-      my_real :: LAMBDA,DIAG1(3),DIAG2(3),TOL,DIST,B(3),VOLFRAC,DEPT
+      my_real :: LAMBDA,DIAG1(3),DIAG2(3),DIST,B(3),VOLFRAC,DEPT
       my_real,ALLOCATABLE,DIMENSION(:,:) :: MIN_COOR, MAX_COOR, N_SURF, ZF
-      INTEGER :: K,KK,IGRP,ISURF,IGRAV,NPART_IN_GROUP,MLW,NG,IAD0,NEL,IE,I,IERROR,IMAT,M(MVSIZ),Q,NSEG,ISEG
+      my_real :: TOLSEG
+      INTEGER :: K,KK,IGRP,ISURF,NPART_IN_GROUP,MLW,NG,NEL,IE,I,IERROR,IMAT,M(MVSIZ),Q,NSEG,ISEG
       INTEGER :: USERID
       INTEGER :: MATID, IADBUF,IFORM,NEL2,LIST(MVSIZ),NBMAT,MATLAW,NIX,UID,SURF_TYPE
       INTEGER, ALLOCATABLE, DIMENSION(:) :: IP
@@ -134,7 +136,6 @@ C-----------------------------------------------
       DO K=1,NINIGRAV     
         IGRP    = INIGRV(1,K)
         ISURF   = INIGRV(2,K)
-        IGRAV   = INIGRV(3,K)  
         UID     = INIGRV(4,K)        
         BX      = LINIGRAV(01,K)
         BY      = LINIGRAV(02,K)
@@ -146,12 +147,12 @@ C-----------------------------------------------
         NGX     = LINIGRAV(08,K)
         NGY     = LINIGRAV(09,K)
         NGZ     = LINIGRAV(10,K) 
-        PSURF   = LINIGRAV(11,K)        
+        PSURF   = LINIGRAV(11,K)
         IF (GRAV0==ZERO)CYCLE          !nothing to do if g=0 at time=0 => Delta_P=0 => P=P(t=0)=P0
         !READING GRPART DATA
         IF(IGRP/=0)THEN
          NPART_IN_GROUP = IGRPART(IGRP)%NENTITY
-         ALLOCATE(IP(NPART_IN_GROUP),STAT=IERROR)
+         call my_alloc(IP, NPART_IN_GROUP, "IP", stat=IERROR)
          IF(IERROR/=0)CALL ANCMSG(MSGID   = 268,
      .                            ANMODE  = ANINFO,
      .                            MSGTYPE = MSGERROR,
@@ -159,7 +160,6 @@ C-----------------------------------------------
          IP(1:NPART_IN_GROUP) = IPART(4,IGRPART(IGRP)%ENTITY(1:NPART_IN_GROUP))
         ELSE
          !by default treat all parts
-         IAD0 = 0
          NPART_IN_GROUP = 0
         ENDIF
         l_PLANAR_SURF = .FALSE.
@@ -172,7 +172,10 @@ C-----------------------------------------------
           l_USER_SURF=.TRUE.
           NSEG = IGRSURF(ISURF)%NSEG
           !STORING DATA FROM USER SURFACE (BOX,NORMAL,CENTROID)
-          ALLOCATE(MAX_COOR(3,NSEG),MIN_COOR(3,NSEG),N_SURF(3,NSEG),ZF(3,NSEG))
+          call my_alloc(MAX_COOR, 3, NSEG, "MAX_COOR")
+          call my_alloc(MIN_COOR, 3, NSEG, "MIN_COOR")
+          call my_alloc(N_SURF, 3, NSEG, "N_SURF")
+          call my_alloc(ZF, 3, NSEG, "ZF")
           DO ISEG=1,NSEG
             lTRIA=.FALSE.
             IF(IGRSURF(ISURF)%NODES(ISEG,4)==0)lTRIA=.TRUE.
@@ -214,10 +217,7 @@ C-----------------------------------------------
               ZF(2,ISEG)=FOURTH*SUM(P(2,1:4))
               ZF(3,ISEG)=FOURTH*SUM(P(3,1:4))                    
             ENDIF                         
-          ENDDO 
-          !define a tolerance to check if cell centroid too far from face (box)
-          ISEG=1
-          TOL=EM02*MAX(MAX_COOR(1,ISEG)-MIN_COOR(1,ISEG), MAX_COOR(2,ISEG)-MIN_COOR(2,ISEG), MAX_COOR(3,ISEG)-MIN_COOR(3,ISEG))  
+          ENDDO
         ENDIF
          
 
@@ -320,17 +320,11 @@ C-----------------------------------------------
               !---NORMAL : NX,NY,NZ 
               !---BASIS POINT : BX,BY,BZ
                  !intersection point such as INTERP = Z + ALPHA . NG   et   <B-INTERP,N> = 0, donc :
-                 ALPHA                 = (BX-Z(1))*NX+(BY-Z(2))*NY+(BZ-Z(3))*NZ / (NGX*NX+NGY*NY+NGZ*NZ)  !non nul car verification a la lecture
-                 INTERP(1)             = Z(1) + ALPHA*NGX
-                   INTERP(2)             = Z(2) + ALPHA*NGY
-                   INTERP(3)             = Z(3) + ALPHA*NGZ
-                 ! Depth = <perf_P, n>
-                 !DEPTH(I) = (INTERP(1)-Z(1))*(INTERP(1)-Z(1))+(INTERP(2)-Z(2))*(INTERP(2)-Z(2))+(INTERP(3)-Z(3))*(INTERP(3)-Z(3))
-                 !DEPTH(I) = SQRT(DEPTH(I))
-                 DEPTH(KK)= (INTERP(1)-Z(1))*NGX+(INTERP(2)-Z(2))*NGY+(INTERP(3)-Z(3))*NGZ
-                 DEPTH(KK) = -DEPTH(KK)  
-                 lERROR=.FALSE.
-                 lFOUND_PROJ=.TRUE.
+                 DOTP = NGX*NX + NGY*NY + NGZ*NZ
+                 ALPHA = ((Z(1)-BX)*NX + (Z(2)-BY)*NY + (Z(3)-BZ)*NZ) / DOTP
+                 DEPTH(KK) = ALPHA ! positive DEPTH is below the surface
+                 lERROR = .FALSE.
+                 lFOUND_PROJ = .TRUE.
               ELSEIF(l_USER_SURF) THEN             
               !===================================================================!
               ! --- DISTANCE CALCULATION ---
@@ -340,54 +334,49 @@ C-----------------------------------------------
                  lERROR=.FALSE.
                  lFOUND_PROJ=.FALSE.
                  DO ISEG=1,NSEG
-                
+                   TOLSEG = EM02*MAX(MAX_COOR(1,ISEG)-MIN_COOR(1,ISEG),
+     .                               MAX_COOR(2,ISEG)-MIN_COOR(2,ISEG),
+     .                               MAX_COOR(3,ISEG)-MIN_COOR(3,ISEG))
                    IF(NGX==ZERO)THEN
-                     IF(Z(1)+TOL < MIN_COOR(1,ISEG)  .OR. Z(1)-TOL > MAX_COOR(1,ISEG))CYCLE
+                     IF(Z(1)+TOLSEG < MIN_COOR(1,ISEG)  .OR. Z(1)-TOLSEG > MAX_COOR(1,ISEG))CYCLE
                    ENDIF
                    IF(NGY==ZERO)THEN
-                     IF(Z(2)+TOL < MIN_COOR(2,ISEG)  .OR. Z(2)-TOL > MAX_COOR(2,ISEG))CYCLE
+                     IF(Z(2)+TOLSEG < MIN_COOR(2,ISEG)  .OR. Z(2)-TOLSEG > MAX_COOR(2,ISEG))CYCLE
                    ENDIF
                    IF(NGZ==ZERO)THEN
-                     IF(Z(3)+TOL < MIN_COOR(3,ISEG)  .OR. Z(3)-TOL > MAX_COOR(3,ISEG))CYCLE 
-                   ENDIF                                     
-                   DOTP = N_SURF(1,ISEG)*NGX + N_SURF(2,ISEG)*NGY + N_SURF(3,ISEG)*NGZ
-                   IF(ABS(DOTP)<=EM04)THEN
-                     CALL ANCMSG(MSGID   = 90,
-     .                           ANMODE  = ANINFO,
-     .                           MSGTYPE = MSGERROR,
-     .                           I1=UID,
-     .                           C1="INPUT SURFACE HAS INCOMPATIBLE SLOPE WITH GRAVITY DIRECTION"
-     .                     )  
-                      lERROR=.TRUE.
-                      EXIT                   
+                     IF(Z(3)+TOLSEG < MIN_COOR(3,ISEG)  .OR. Z(3)-TOLSEG > MAX_COOR(3,ISEG))CYCLE
                    ENDIF
+
+                   DOTP = N_SURF(1,ISEG)*NGX + N_SURF(2,ISEG)*NGY + N_SURF(3,ISEG)*NGZ
+                   IF(ABS(DOTP) < EM10) CYCLE! gravity parallel to face, no intersection
+
                    P(1,1:4)=X(1,IGRSURF(ISURF)%NODES(ISEG,1:4))
                    P(2,1:4)=X(2,IGRSURF(ISURF)%NODES(ISEG,1:4))
-                   P(3,1:4)=X(3,IGRSURF(ISURF)%NODES(ISEG,1:4))            
-                   ! Let INTERP the normal projection point on plane generated by current face ISEG
-                   ! INTERP = Z + LAMBDA*NG  (colinear to gravity direction , NG gravity vector, Z cell centroid, LAMBDA unknown scalar)
-                   ! <INTERP-B,N_SURF> = 0   (must satisfying plane equation,  B basis point, Z cell centroid)
-                   !  => INTERP = ...
+                   P(3,1:4)=X(3,IGRSURF(ISURF)%NODES(ISEG,1:4))
+
                    B(1:3)=ZF(1:3,ISEG)
                    DIST=(B(1)-Z(1))*(B(1)-Z(1)) + (B(2)-Z(2))*(B(2)-Z(2)) + (B(3)-Z(3))*(B(3)-Z(3))
-                   IF(DIST<=TOL*TOL)THEN
-                     !use another basis point if face centroid superimposed with cell centroid
-                     B(1:3)=P(1:3,1)                                         
+                   IF(DIST<=TOLSEG*TOLSEG)THEN
+                     B(1:3)=P(1:3,1)
                    ENDIF
-                   LAMBDA = (B(1)-Z(1))*N_SURF(1,ISEG) + (B(2)-Z(2))*N_SURF(2,ISEG) + (B(3)-Z(3))*N_SURF(3,ISEG)
+
+                   LAMBDA = (Z(1)-B(1))*N_SURF(1,ISEG) + (Z(2)-B(2))*N_SURF(2,ISEG) + (Z(3)-B(3))*N_SURF(3,ISEG)
                    LAMBDA = LAMBDA / DOTP
-                   INTERP(1) = Z(1)+LAMBDA*NGX
-                   INTERP(2) = Z(2)+LAMBDA*NGY
-                   INTERP(3) = Z(3)+LAMBDA*NGZ
-                   !CHECK INTERP IS INSIDE FACE, OTHERWISE SKIP IT
+
+                   INTERP(1) = Z(1)-LAMBDA*NGX
+                   INTERP(2) = Z(2)-LAMBDA*NGY
+                   INTERP(3) = Z(3)-LAMBDA*NGZ
+
                    CALL CHECK_IS_ON_SEGMENT(P(1:3,1:4),B,INTERP,lTRIA,lTEST)
                    IF(.NOT.lTEST)CYCLE
-                   DEPT = -((INTERP(1)-Z(1))*NGX+(INTERP(2)-Z(2))*NGY+(INTERP(3)-Z(3))*NGZ)
-                   IF(ABS(DEPT) < ABS(DEPTH(KK)))THEN
-                     DEPTH(KK) = DEPT
+
+                   IF(DEPTH(KK) == EP20)THEN
+                     DEPTH(KK) = LAMBDA
+                   ELSEIF(LAMBDA > DEPTH(KK))THEN
+                     DEPTH(KK) = LAMBDA !positive DEPTH is below the surface
                    ENDIF
-                   lFOUND_PROJ=.TRUE.                                     
-                 ENDDO           
+                   lFOUND_PROJ=.TRUE.
+                 ENDDO
                  IF(lERROR)EXIT
                  IF(.NOT.lFOUND_PROJ)THEN
                    ERRMSG = "UNABLE TO PROJECT ON SURFACE CENTROID FROM CELL ID=          "
@@ -532,12 +521,12 @@ C-----------------------------------------------
           ENDIF !(ITY == 1. .OR. ITY == 2) .AND.MLW /= 0)
         ENDDO   !next NG
             
-        IF(ALLOCATED(MAX_COOR))DEALLOCATE(MAX_COOR)
-        IF(ALLOCATED(MIN_COOR))DEALLOCATE(MIN_COOR)
-        IF(ALLOCATED(N_SURF))DEALLOCATE(N_SURF)
-        IF(ALLOCATED(ZF))DEALLOCATE(ZF)
+        IF(ALLOCATED(MAX_COOR))CALL MY_DEALLOC(MAX_COOR)
+        IF(ALLOCATED(MIN_COOR))CALL MY_DEALLOC(MIN_COOR)
+        IF(ALLOCATED(N_SURF))CALL MY_DEALLOC(N_SURF)
+        IF(ALLOCATED(ZF))CALL MY_DEALLOC(ZF)
         IF(IGRP/=0)THEN
-          IF(ALLOCATED(IP))DEALLOCATE(IP)  
+          IF(ALLOCATED(IP))CALL MY_DEALLOC(IP)
         ENDIF
 
       ENDDO    !next K

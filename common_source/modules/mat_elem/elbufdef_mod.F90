@@ -422,6 +422,9 @@
 !||    multifluid_init2t                   ../starter/source/multifluid/multifluid_init2t.F
 !||    multifluid_init3                    ../starter/source/multifluid/multifluid_init3.F
 !||    multifluid_init3t                   ../starter/source/multifluid/multifluid_init3t.F
+!||    my_alloc_impl_idx4_mod              ../common_source/tools/memory/my_alloc_impl_idx4.F90
+!||    my_alloc_impl_idx8_mod              ../common_source/tools/memory/my_alloc_impl_idx8.F90
+!||    my_dealloc_mod                      ../common_source/tools/memory/my_dealloc.F90
 !||    nloc_dmg_init                       ../starter/source/materials/fail/nloc_dmg_init.F
 !||    nlocal_init_sta                     ../starter/source/materials/fail/nlocal_init_sta.F
 !||    nodal_schlieren                     ../engine/source/output/anim/generate/nodal_schlieren.F
@@ -478,6 +481,7 @@
 !||    r4ke3                               ../engine/source/elements/spring/r4ke3.F
 !||    r8ke3                               ../engine/source/elements/spring/r8ke3.F
 !||    radiatoff                           ../engine/source/constraints/thermic/radiatoff.F
+!||    rbody_spring_check                  ../starter/source/elements/spring/rbody_spring_check.F90
 !||    rbyonf                              ../engine/source/constraints/general/rbody/rbyonf.F
 !||    rbypid                              ../engine/source/constraints/general/rbody/rbypid.F
 !||    rbysens                             ../engine/source/constraints/general/rbody/rbyonf.F
@@ -841,6 +845,7 @@
           integer  :: g_skew_id
           integer  :: g_yield_in_comp
           integer  :: g_xxold_in_comp
+          integer  :: g_rbody_node
 !
 !    -  for seatbelt elements
           integer  :: g_slipring_id
@@ -972,6 +977,7 @@
           integer, dimension(:) , pointer ::   skew_id => null()
           real(kind=WP), dimension(:) , pointer ::   yield_in_comp => null()
           real(kind=WP), dimension(:) , pointer ::   xxold_in_comp => null()
+          real(kind=WP), dimension(:) , pointer ::   rbody_node => null()
           type (fail_loc_) , dimension(:) , pointer ::   fail => null()
 !
 !    -  for seatbelt elements

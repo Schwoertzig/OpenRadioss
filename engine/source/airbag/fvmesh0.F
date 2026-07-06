@@ -21,15 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    fvmesh0       ../engine/source/airbag/fvmesh0.F
+!||    fvmesh0          ../engine/source/airbag/fvmesh0.F
 !||--- called by ------------------------------------------------------
-!||    resol         ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    fvbric        ../engine/source/airbag/fvbric.F
-!||    fvmesh1       ../engine/source/airbag/fvmesh.F
+!||    fvbric           ../engine/source/airbag/fvbric.F
+!||    fvmesh1          ../engine/source/airbag/fvmesh.F
 !||--- uses       -----------------------------------------------------
-!||    element_mod   ../common_source/modules/elements/element_mod.F90
-!||    fvbag_mod     ../engine/share/modules/fvbag_mod.F
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    fvbag_mod        ../engine/share/modules/fvbag_mod.F
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE FVMESH0(MONVOL, X, VOLMON, IXS)
 C-----------------------------------------------
@@ -40,6 +41,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -119,8 +121,10 @@ C
      . MONVOL(KIA1), MONVOL(KIA2), MONVOL(KIA3), MONVOL(KIA4),
      . MONVOL(KIA5), MONVOL(KIA6), IXS,          NNS         )
 C
-            DEALLOCATE(FVDATA(IFV)%BRIC, FVDATA(IFV)%TBRIC,
-     .                 FVDATA(IFV)%XB,   FVDATA(IFV)%SFAC )
+            call my_dealloc(FVDATA(IFV)%BRIC)
+            call my_dealloc(FVDATA(IFV)%TBRIC)
+            call my_dealloc(FVDATA(IFV)%XB)
+            call my_dealloc(FVDATA(IFV)%SFAC)
           ENDIF
          ENDIF
          K1=K1+NIMV

@@ -21,11 +21,14 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    init_i25_edge   ../engine/source/interfaces/int25/init_i25_edge.F
+!||    init_i25_edge    ../engine/source/interfaces/int25/init_i25_edge.F
 !||--- called by ------------------------------------------------------
-!||    resol           ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    intbufdef_mod    ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         SUBROUTINE INIT_I25_EDGE(NLEDGE,NINTER,NPARI,IPARI,INTBUF_TAB)
 !$COMMENT
@@ -43,6 +46,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -76,7 +81,7 @@ C-----------------------------------------------
           ! check if the interface is a type 25 with edge to edge
           IF(INTERFACE_TYPE==25.AND.IEDGE/=0) THEN
             NEDGE = IPARI(68,I)
-            ALLOCATE (TMP_ARRAY(NEDGE) )
+            call my_alloc(TMP_ARRAY, NEDGE, "TMP_ARRAY")
             ! ----------
             ! loop over the edge to find the edge solid
             DO J=1,NEDGE
@@ -104,7 +109,7 @@ C-----------------------------------------------
             INTBUF_TAB(I)%EDGE_TYPE1_0(1:INTBUF_TAB(I)%NUMBER_EDGE_TYPE1_0) = TMP_ARRAY(1:INTBUF_TAB(I)%NUMBER_EDGE_TYPE1_0)
             ! ----------
 
-            DEALLOCATE( TMP_ARRAY )
+            call my_dealloc(TMP_ARRAY)
           ELSE
             ALLOCATE( INTBUF_TAB(I)%EDGE_TYPE1(INTBUF_TAB(I)%NUMBER_EDGE_TYPE1) )
             ALLOCATE( INTBUF_TAB(I)%EDGE_TYPE1_0(INTBUF_TAB(I)%NUMBER_EDGE_TYPE1_0) )

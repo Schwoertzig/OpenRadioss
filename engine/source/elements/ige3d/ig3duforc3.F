@@ -52,6 +52,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    message_mod            ../engine/share/message_module/message_mod.F
 !||    mmain_mod              ../engine/source/materials/mat_share/mmain.F90
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    nlocal_reg_mod         ../common_source/modules/nlocal_reg_mod.F
 !||    output_mod             ../common_source/modules/output/output_mod.F90
 !||    sensor_mod             ../common_source/modules/sensor_mod.F90
@@ -102,6 +104,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -417,7 +421,7 @@ C------------------------------------------------------
       TC = EP10
       SMAX(:)=ZERO
 
-      ALLOCATE(VGAUSS(PX*PY*PZ,MVSIZ),STAT=IERROR)
+      call my_alloc(VGAUSS, PX*PY*PZ, MVSIZ, "VGAUSS", stat=IERROR)
       IF(IERROR/=0)THEN
        CALL ANCMSG(MSGID=246,ANMODE=ANINFO)
        CALL ARRET(2)
@@ -819,7 +823,7 @@ C------------------------------------------------------
 
        ENDDO
 
-      DEALLOCATE(VGAUSS)
+      call my_dealloc(VGAUSS)
       ENDIF
 
 C----------------------------

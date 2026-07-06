@@ -21,14 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    rgbodfp        ../engine/source/constraints/general/rbody/rgbodfp.F
+!||    rgbodfp          ../engine/source/constraints/general/rbody/rgbodfp.F
 !||--- called by ------------------------------------------------------
-!||    rbyfor         ../engine/source/constraints/general/rbody/rbyfor.F
+!||    rbyfor           ../engine/source/constraints/general/rbody/rbyfor.F
 !||--- calls      -----------------------------------------------------
-!||    rotbmr         ../engine/source/tools/skew/rotbmr.F
-!||    sum_6_float    ../engine/source/system/parit.F
+!||    rotbmr           ../engine/source/tools/skew/rotbmr.F
+!||    sum_6_float      ../engine/source/system/parit.F
 !||--- uses       -----------------------------------------------------
-!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE RGBODFP(AF   ,AM    ,X      ,FS   ,RBY  ,
      2                   NOD  ,M     ,IN     ,VR   ,STIFN,
@@ -43,6 +44,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -86,14 +88,14 @@ C     REAL
       my_real,DIMENSION(:), ALLOCATABLE :: F7
       my_real,DIMENSION(:), ALLOCATABLE :: F8
 C-----------------------------------------------
-      CALL MY_ALLOC(F1,NSN)
-      CALL MY_ALLOC(F2,NSN)
-      CALL MY_ALLOC(F3,NSN)
-      CALL MY_ALLOC(F4,NSN)
-      CALL MY_ALLOC(F5,NSN)
-      CALL MY_ALLOC(F6,NSN)
-      CALL MY_ALLOC(F7,NSN)
-      CALL MY_ALLOC(F8,NSN)
+      call my_alloc(F1, NSN, "F1")
+      call my_alloc(F2, NSN, "F2")
+      call my_alloc(F3, NSN, "F3")
+      call my_alloc(F4, NSN, "F4")
+      call my_alloc(F5, NSN, "F5")
+      call my_alloc(F6, NSN, "F6")
+      call my_alloc(F7, NSN, "F7")
+      call my_alloc(F8, NSN, "F8")
 C-----------------------------------------------
 C
 c      M   =NBY(1)
@@ -755,14 +757,14 @@ C
        ENDDO
       ENDIF
 C
-      DEALLOCATE(F1)
-      DEALLOCATE(F2)
-      DEALLOCATE(F3)
-      DEALLOCATE(F4)
-      DEALLOCATE(F5)
-      DEALLOCATE(F6)
-      DEALLOCATE(F7)
-      DEALLOCATE(F8)
+      call my_dealloc(F1)
+      call my_dealloc(F2)
+      call my_dealloc(F3)
+      call my_dealloc(F4)
+      call my_dealloc(F5)
+      call my_dealloc(F6)
+      call my_dealloc(F7)
+      call my_dealloc(F8)
 
       RETURN
       END

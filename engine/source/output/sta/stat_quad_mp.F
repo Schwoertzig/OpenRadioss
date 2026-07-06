@@ -21,14 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    stat_quad_mp   ../engine/source/output/sta/stat_quad_mp.F
+!||    stat_quad_mp     ../engine/source/output/sta/stat_quad_mp.F
 !||--- called by ------------------------------------------------------
-!||    genstat        ../engine/source/output/sta/genstat.F
+!||    genstat          ../engine/source/output/sta/genstat.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
+!||    elbufdef_mod     ../common_source/modules/mat_elem/elbufdef_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE STAT_QUAD_MP(ITAB,IPART,IGEO,IXQ,IPARTQ,
      .                        IPART_STATE,NODTAG,STAT_INDXQ,
@@ -42,6 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -69,8 +71,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C     QUAD
 C-----------------------------------------------
-      CALL MY_ALLOC(NP,4*NUMELQ)
-      CALL MY_ALLOC(CLEF,2,NUMELQ)
+      call my_alloc(NP, 4*NUMELQ, "NP")
+      call my_alloc(CLEF, 2, NUMELQ, "CLEF")
 C-----------------------------------------------
       JJ = 0
       IF(NUMELQ/=0)THEN
@@ -100,8 +102,8 @@ C-----------------------------------------------
 
       ENDIF
 C-----------------------------------------------
-      DEALLOCATE(NP)
-      DEALLOCATE(CLEF)
+      call my_dealloc(NP)
+      call my_dealloc(CLEF)
 C-----------------------------------------------
       RETURN
       END

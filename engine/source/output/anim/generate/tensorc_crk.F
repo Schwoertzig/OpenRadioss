@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    element_mod        ../common_source/modules/elements/element_mod.F90
 !||    matparam_def_mod   ../common_source/modules/mat_elem/matparam_def_mod.F90
 !||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE TENSORC_CRK(ELBUF_TAB,XFEM_TAB,IPARG     ,IPM     ,
      1                       ITENS    ,INVERT  ,EL2FA     ,NBF     ,
@@ -53,6 +54,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -113,10 +115,10 @@ C
      .   DIMENSION(:), POINTER :: DIR_A
 C=======================================================================
 !
-      CALL MY_ALLOC(TENS,3,LEN)
-      CALL MY_ALLOC(WA,3,NBF_L)
-      CALL MY_ALLOC(NELCRK,NCRKPART)
-      CALL MY_ALLOC(IE,NCRKPART)
+      call my_alloc(TENS, 3, LEN, "TENS")
+      call my_alloc(WA, 3, NBF_L, "WA")
+      call my_alloc(NELCRK, NCRKPART, "NELCRK")
+      call my_alloc(IE, NCRKPART, "IE")
 
       NEL_CRK = 0
       ITG = 1 + 4*ECRKXFEC
@@ -669,9 +671,9 @@ C
         CALL SPMD_R4GET_PARTN(3,3*NBF_L,NCRKPART,IADG,WA,BUF)
       ENDIF
 C---
-      IF (ALLOCATED(TENS)) DEALLOCATE(TENS)
-      IF (ALLOCATED(WA)) DEALLOCATE(WA)
-      IF (ALLOCATED(NELCRK)) DEALLOCATE(NELCRK)
-      IF (ALLOCATED(IE)) DEALLOCATE(IE)
+      IF (ALLOCATED(TENS)) call my_dealloc(TENS)
+      IF (ALLOCATED(WA)) call my_dealloc(WA)
+      IF (ALLOCATED(NELCRK)) call my_dealloc(NELCRK)
+      IF (ALLOCATED(IE)) call my_dealloc(IE)
       RETURN
       END

@@ -46,6 +46,8 @@
 !||--- uses       -----------------------------------------------------
 !||    debug_mod                             ../engine/share/modules/debug_mod.F
 !||    intbufdef_mod                         ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    my_alloc_mod                          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                        ../common_source/tools/memory/my_dealloc.F90
 !||    shooting_node_mod                     ../engine/share/modules/shooting_node_mod.F90
 !||====================================================================
         subroutine get_hashtable_for_neighbour_segment( nin,npari,ninter,ipari,intbuf_tab,shoot_struct )
@@ -58,6 +60,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   arguments
@@ -117,7 +121,7 @@
           ! ------------
 
           ! ------------
-          allocate(tmp_address(local_seg_nb+1))
+          call my_alloc(tmp_address, local_seg_nb+1, "tmp_address")
           tmp_address(1:local_seg_nb+1) = 0
           shoot_struct%neighbour(nin)%seg_index(1:local_seg_nb+1) = 0
           shoot_struct%neighbour(nin)%seg_index(1) = 1
@@ -141,7 +145,7 @@
           enddo
           ! ------------
 
-          deallocate( tmp_address )
+          call my_dealloc(tmp_address)
           ! ------------
           ! --------------------------
 

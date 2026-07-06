@@ -24,9 +24,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    h3d_skin_pre_map   ../engine/source/output/h3d/h3d_results/h3d_skin_pre_map.F
 !||--- called by ------------------------------------------------------
 !||    genh3d             ../engine/source/output/h3d/h3d_results/genh3d.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    h3d_inc_mod        ../engine/share/modules/h3d_inc_mod.F
 !||    loads_mod          ../common_source/modules/loads/loads_mod.F90
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod     ../common_source/tools/memory/my_dealloc.F90
 !||    pblast_mod         ../common_source/modules/loads/pblast_mod.F90
 !||    pinchtype_mod      ../common_source/modules/pinchtype_mod.F
 !||====================================================================
@@ -41,6 +44,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "param_c.inc"
 C-----------------------------------------------
@@ -68,7 +73,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:,:), ALLOCATABLE  :: IRECT
       INTEGER, DIMENSION(:), ALLOCATABLE  :: ITAGN
 C=======================================================================
-       ALLOCATE(IRECT(4,MAX(1,NUMSKINP)),ITAGN(MAX(1,NUMNOD)))
+       call my_alloc(IRECT, 4, MAX(1,NUMSKINP), "IRECT")
+       call my_alloc(ITAGN, MAX(1,NUMNOD), "ITAGN")
 C
          ITAGN = 0         
          NP = 0
@@ -236,7 +242,8 @@ C
                 END IF 
               ENDDO
            END DO 
-        DEALLOCATE(IRECT,ITAGN)
+        call my_dealloc(IRECT)
+        call my_dealloc(ITAGN)
 C
       RETURN
       END SUBROUTINE H3D_SKIN_PRE_MAP

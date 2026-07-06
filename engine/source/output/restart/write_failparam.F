@@ -31,6 +31,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_mat_table        ../engine/source/materials/tools/write_mat_table.F
 !||--- uses       -----------------------------------------------------
 !||    fail_param_mod         ../common_source/modules/mat_elem/fail_param_mod.F90
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||====================================================================
       SUBROUTINE WRITE_FAILPARAM(FAIL)
@@ -42,6 +44,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -56,7 +60,7 @@ C-----------------------------------------------
       my_real ,DIMENSION(:) ,ALLOCATABLE :: RBUF
 C=======================================================================
       LENI = 11
-      ALLOCATE (IBUF(LENI))
+      call my_alloc(IBUF, LENI, "IBUF")
 c
       IBUF(1)  = FAIL%IRUPT
       IBUF(2)  = FAIL%FAIL_ID
@@ -71,13 +75,13 @@ c
       IBUF(11) = FAIL%FAIL_IP
 c
       CALL WRITE_I_C(IBUF,LENI)
-      DEALLOCATE(IBUF)
+      call my_dealloc(IBUF)
 c
       LENR = 1
-      ALLOCATE (RBUF(LENR))
+      call my_alloc(RBUF, LENR, "RBUF")
       RBUF(1) = FAIL%PTHK
       CALL WRITE_DB(RBUF ,LENR)
-      DEALLOCATE(RBUF)
+      call my_dealloc(RBUF)
 c
 c     write law keyword and keywords of failure modes
 c

@@ -24,6 +24,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    ale_element_size_computation   ../starter/source/initial_conditions/inivol/ale_element_size_computation.F
 !||--- called by ------------------------------------------------------
 !||    init_inivol                    ../starter/source/initial_conditions/inivol/init_inivol.F90
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
         SUBROUTINE ALE_ELEMENT_SIZE_COMPUTATION(NPARG, NGROUP, NUMELS,NUMELTG,NUMELQ,NUMNOD,N2D,
@@ -43,6 +44,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !               - compute the min/max node's positions & save the ALE node id
 !$ENDCOMMENT
         use element_mod , only :nixs,nixq,nixtg
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -77,7 +79,7 @@ C-----------------------------------------------
         my_real, DIMENSION(3) :: MAX_NODE,MIN_NODE,DISTANCE
         integer, target :: nothing(1,1) !< dummy for indirection
 C-----------------------------------------------
-        ALLOCATE(TAG_ARRAY(NUMNOD))
+        call my_alloc(TAG_ARRAY, NUMNOD, "TAG_ARRAY")
         TAG_ARRAY(1:NUMNOD) = 0
         IX => nothing
         ELEMENT_SIZE = -ONE
@@ -160,7 +162,7 @@ C-----------------------------------------------
             ! ---------------
         ENDDO
 
-        DEALLOCATE(TAG_ARRAY)
+        CALL MY_DEALLOC(TAG_ARRAY)
         ! -----------------------
 
         RETURN

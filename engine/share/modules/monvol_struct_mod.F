@@ -73,11 +73,15 @@ C-----------------------------------------------
       CONTAINS
 !||====================================================================
 !||    monvol_deallocate   ../engine/share/modules/monvol_struct_mod.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE MONVOL_DEALLOCATE(NVOLU, T_MONVOL)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"    
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -90,7 +94,7 @@ C-----------------------------------------------
       INTEGER :: II
       
       DO II = 1, NVOLU
-         IF (ALLOCATED(T_MONVOL(II)%FILL_TRI)) DEALLOCATE(T_MONVOL(II)%FILL_TRI)
+         IF (ALLOCATED(T_MONVOL(II)%FILL_TRI)) call my_dealloc(T_MONVOL(II)%FILL_TRI)
       ENDDO
       END SUBROUTINE MONVOL_DEALLOCATE
       END

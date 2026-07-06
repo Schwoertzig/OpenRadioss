@@ -21,16 +21,19 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    nsegmt   ../starter/source/interfaces/interf1/nsegmt.F
+!||    nsegmt         ../starter/source/interfaces/interf1/nsegmt.F
 !||--- called by ------------------------------------------------------
-!||    lecins   ../starter/source/interfaces/interf1/lecins.F
-!||    scrint   ../starter/source/interfaces/interf1/scrint.F
+!||    lecins         ../starter/source/interfaces/interf1/lecins.F
+!||    scrint         ../starter/source/interfaces/interf1/scrint.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE NSEGMT(IPAR,IRECT,NODES,NSEG,NST,NRT,NNO)
 C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -53,7 +56,7 @@ C-----------------------------------------------
       NSEG(1) = 1
       NSEG(2:NNO+1) = 0
 C
-      ALLOCATE(NTAG(NUMNOD))
+      call my_alloc(NTAG, NUMNOD, "NTAG")
       DO I=1,NNO
         NTAG(NODES(I))=I
       ENDDO
@@ -66,7 +69,7 @@ C
           ENDIF
         ENDDO
       ENDDO
-      DEALLOCATE(NTAG)
+      CALL MY_DEALLOC(NTAG)
 C
       DO I=1,NNO
         NST = NST+NSEG(I+1)

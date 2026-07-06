@@ -36,6 +36,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    drape_mod           ../engine/share/modules/drape_mod.F
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod         ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||    stack_mod           ../engine/share/modules/stack_mod.F
 !||    state_mod           ../common_source/modules/state_mod.F
 !||====================================================================
@@ -56,6 +58,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -115,10 +119,10 @@ C=======================================================================
 C-----------------------
 C    Allocation Tabs
 C-----------------------
-      ALLOCATE(PTWA(MAX(DYNAIN_DATA%DYNAIN_NUMELC ,
-     .             DYNAIN_DATA%DYNAIN_NUMELTG)),STAT=IERR)
+      call my_alloc(PTWA, MAX(DYNAIN_DATA%DYNAIN_NUMELC ,DYNAIN_DATA%DYNAIN_NUMELTG), "PTWA", stat=IERR)
       ALLOCATE(PTWA_P0(0:MAX(1,DYNAIN_DATA%DYNAIN_NUMELC_G,
      .         DYNAIN_DATA%DYNAIN_NUMELTG_G)),STAT=IERR)
+! TODO: non-default lower bound, convert manually
 C*********************************************
 C     4-NODE SHELLS
 C*********************************************
@@ -175,8 +179,10 @@ C
           ENDIF
 
           NLAY_MAX   = MAX(NLAY,NPT,  ELBUF_TAB(NG)%NLAY)
-          ALLOCATE(MATLY(MVSIZ*NLAY_MAX), THKLY(MVSIZ*NLAY_MAX*LAYNPT_MAX),
-     .         POSLY(MVSIZ,NLAY_MAX*LAYNPT_MAX),THK_LY(NEL,NLAY_MAX*LAYNPT_MAX))
+          call my_alloc(MATLY, MVSIZ*NLAY_MAX, "MATLY")
+          call my_alloc(THKLY, MVSIZ*NLAY_MAX*LAYNPT_MAX, "THKLY")
+          call my_alloc(POSLY, MVSIZ, NLAY_MAX*LAYNPT_MAX, "POSLY")
+          call my_alloc(THK_LY, NEL, NLAY_MAX*LAYNPT_MAX, "THK_LY")
           MATLY  = 0
           THKLY  = ZERO
           POSLY  = ZERO
@@ -363,7 +369,10 @@ C           Pointer last position of shell IE in WA
           ENDDO  !  DO I=LFT,LLT
 
 c------- end loop over 4 node shell elements
-          DEALLOCATE(MATLY, THKLY, POSLY, THK_LY)
+          call my_dealloc(MATLY)
+          call my_dealloc(THKLY)
+          call my_dealloc(POSLY)
+          call my_dealloc(THK_LY)
         ENDIF ! ITY == 3
        ENDDO   ! NG = 1, NGROUP
       ENDIF  ! DYNAIN_NUMEL /= 0
@@ -529,8 +538,10 @@ C
           ENDIF
 
           NLAY_MAX   = MAX(NLAY,NPT,  ELBUF_TAB(NG)%NLAY)
-          ALLOCATE(MATLY(MVSIZ*NLAY_MAX), THKLY(MVSIZ*NLAY_MAX*LAYNPT_MAX),
-     .         POSLY(MVSIZ,NLAY_MAX*LAYNPT_MAX),THK_LY(NEL,NLAY_MAX*LAYNPT_MAX))
+          call my_alloc(MATLY, MVSIZ*NLAY_MAX, "MATLY")
+          call my_alloc(THKLY, MVSIZ*NLAY_MAX*LAYNPT_MAX, "THKLY")
+          call my_alloc(POSLY, MVSIZ, NLAY_MAX*LAYNPT_MAX, "POSLY")
+          call my_alloc(THK_LY, NEL, NLAY_MAX*LAYNPT_MAX, "THK_LY")
           MATLY  = 0
           THKLY  = ZERO
           POSLY  = ZERO
@@ -723,7 +734,10 @@ C
 C        pointer for last position for element IE
             PTWA(IE)=JJ
           ENDDO  !  DO I=LFT,LLT
-          DEALLOCATE(MATLY, THKLY, POSLY, THK_LY) 
+          call my_dealloc(MATLY)
+          call my_dealloc(THKLY)
+          call my_dealloc(POSLY)
+          call my_dealloc(THK_LY)
         ENDIF  !  IF (ITY == 7)
        ENDDO  !  DO NG=1,NGROUP
       ENDIF
@@ -839,6 +853,7 @@ C
         ENDDO  !  DO N=1,DYNAIN_NUMELTG_G
       ENDIF  !  IF (ISPMD == 0.AND.LEN > 0)
 C
-      DEALLOCATE(PTWA,PTWA_P0)
+      call my_dealloc(PTWA)
+      call my_dealloc(PTWA_P0)
       RETURN
       END

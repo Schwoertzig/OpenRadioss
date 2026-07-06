@@ -21,20 +21,22 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    spmd_tri25vox   ../engine/source/mpi/interfaces/spmd_tri25vox.F
+!||    spmd_tri25vox    ../engine/source/mpi/interfaces/spmd_tri25vox.F
 !||--- called by ------------------------------------------------------
-!||    i25main_tri     ../engine/source/interfaces/intsort/i25main_tri.F
+!||    i25main_tri      ../engine/source/interfaces/intsort/i25main_tri.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg          ../engine/source/output/message/message.F
-!||    arret           ../engine/source/system/arret.F
-!||    spmd_wait       ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitall    ../engine/source/mpi/spmd_wait.F90
-!||    spmd_waitany    ../engine/source/mpi/spmd_wait.F90
+!||    ancmsg           ../engine/source/output/message/message.F
+!||    arret            ../engine/source/system/arret.F
+!||    spmd_wait        ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitall     ../engine/source/mpi/spmd_wait.F90
+!||    spmd_waitany     ../engine/source/mpi/spmd_wait.F90
 !||--- uses       -----------------------------------------------------
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
-!||    tri25ebox       ../engine/share/modules/tri25ebox.F
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+!||    tri25ebox        ../engine/share/modules/tri25ebox.F
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE SPMD_TRI25VOX(
      1   NSV       ,NSN       ,X        ,V       ,MS         ,
@@ -62,6 +64,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -328,9 +332,9 @@ C-----for   NBINFLG
 
       JDEB = 0
       IF(ITYP==25)THEN
-        ALLOCATE(ITAGNSNFI(NUMNOD),STAT=IERROR)
+        call my_alloc(ITAGNSNFI, NUMNOD, "ITAGNSNFI", stat=IERROR)
         ITAGNSNFI(1:NUMNOD) = 0
-        ALLOCATE(INDEX_EDGE(NEDGE),STAT=IERROR)
+        call my_alloc(INDEX_EDGE, NEDGE, "INDEX_EDGE", stat=IERROR)
         INDEX_EDGE(1:NEDGE) = 0 
       END IF
     
@@ -949,8 +953,8 @@ C reset
       ENDIF       
 C
       IF(ITYP==25) THEN
-        DEALLOCATE(ITAGNSNFI)
-        DEALLOCATE(INDEX_EDGE) 
+        call my_dealloc(ITAGNSNFI)
+        call my_dealloc(INDEX_EDGE)
       ENDIF
 C
 C   reception of xrem data
@@ -991,23 +995,23 @@ C Allocate total size
 C
 
        IF(NSNR > 0 .OR. NEDGE_REMOTE > 0 ) THEN
-          ALLOCATE(XREM(RSIZ,NSNR),STAT=IERROR)
+          call my_alloc(XREM, RSIZ, NSNR, "XREM", stat=IERROR)
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
           ENDIF
-          ALLOCATE(IREM(ISIZ,NSNR),STAT=IERROR)   
+          call my_alloc(IREM, ISIZ, NSNR, "IREM", stat=IERROR)
           IF(IERROR/=0) THEN
             CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
             CALL ARRET(2)
           ENDIF
           IF(IEDGE /= 0) THEN
-            ALLOCATE(IREM_EDGE(E_IBUF_SIZE,NEDGE_REMOTE),STAT=IERROR)   
+            call my_alloc(IREM_EDGE, E_IBUF_SIZE, NEDGE_REMOTE, "IREM_EDGE", stat=IERROR)
             IF(IERROR/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
             ENDIF
-            ALLOCATE(XREM_EDGE(E_RBUF_SIZE,NEDGE_REMOTE),STAT=IERROR)   
+            call my_alloc(XREM_EDGE, E_RBUF_SIZE, NEDGE_REMOTE, "XREM_EDGE", stat=IERROR)
             IF(IERROR/=0) THEN
               CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
               CALL ARRET(2)
@@ -1089,15 +1093,15 @@ C
               CALL SPMD_WAIT(REQ_SD(P))
               IF(NBOX(1,P) > 0) THEN
                 CALL SPMD_WAIT(REQ_SD2(P))
-                DEALLOCATE(RBUF(P)%p)
+                call my_dealloc(RBUF(P)%p)
                 CALL SPMD_WAIT(REQ_SD3(P))
-                DEALLOCATE(IBUF(P)%p)                   
+                call my_dealloc(IBUF(P)%p)
               ENDIF
               IF(NBOX(2,P) > 0) THEN
                 CALL SPMD_WAIT(REQ_SD4(P))
-                DEALLOCATE(IBUF_EDGE(P)%p)                   
+                call my_dealloc(IBUF_EDGE(P)%p)
                 CALL SPMD_WAIT(REQ_SD5(P))
-                DEALLOCATE(RBUF_EDGE(P)%p)                   
+                call my_dealloc(RBUF_EDGE(P)%p)
               END IF
             ENDIF
           ENDIF

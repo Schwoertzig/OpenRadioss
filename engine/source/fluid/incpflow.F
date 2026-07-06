@@ -32,8 +32,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_fl_sum           ../engine/source/mpi/generic/spmd_fl_sum.F
 !||    trgrad                ../engine/source/fluid/incpflow.F
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod        ../common_source/tools/memory/my_dealloc.F90
+!||    output_mod            ../common_source/modules/output/output_mod.F90
 !||    python_funct_mod      ../common_source/modules/python_mod.F90
 !||    sensor_mod            ../common_source/modules/sensor_mod.F90
+!||    th_mod                ../engine/share/modules/th_mod.F
 !||====================================================================
       SUBROUTINE INCPFLOW(NNO   , NEL   , NINOUT , NNI    , IFLOW  ,
      .                    IBUF  , ELEM  , IINOUT , IBUFI  , IBUFR  ,
@@ -42,15 +46,20 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                    NPC   , TF    , NSENSOR,SENSOR_TAB,
      .                    CNP   , ITAGEL, IBUFELR, IBUFELC, IPIV   ,
      .                    HBEM  , GBEM  , IBUFIL , CNPI   , IPINT  ,
-     .                    PYTHON, WFEXT )
+     .                    PYTHON, WFEXT ,
+     .                    S_NODA_FEXT,NODA_FEXT, NODA_SURF, NODA_PEXT, OUTPUT)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------  
       USE SENSOR_MOD
       USE PYTHON_FUNCT_MOD
+      USE TH_MOD , ONLY : TH_HAS_NODA_PEXT
+      USE OUTPUT_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -69,13 +78,15 @@ C-----------------------------------------------
      .        IINOUT(NIIOFLOW,*), IBUFI(*), IBUFR(*), IBUFC(*), 
      .        IBUFL(*), NPC(*),CNP(*),
      .        ITAGEL(*), IBUFELR(*), IBUFELC(*), IPIV(*), IBUFIL(*),
-     .        CNPI(*), IPINT, ISMOOTH
+     .        CNPI(*), IPINT, ISMOOTH,S_NODA_FEXT
       my_real
      .        RFLOW(*), PHI(*), PRES(*), U(3,*), RINOUT(NRIOFLOW,*),
      .        X(3,*), V(3,*), A(3,*), TF(*), HBEM(*),
      .        GBEM(*)
+      my_real,INTENT(INOUT) :: NODA_FEXT(3,S_NODA_FEXT), NODA_SURF(NUMNOD), NODA_PEXT(NUMNOD)
       TYPE (SENSOR_STR_) ,DIMENSION(NSENSOR) :: SENSOR_TAB
       TYPE(PYTHON_) , INTENT(INOUT) :: PYTHON
+      TYPE(OUTPUT_) , INTENT(INOUT) :: OUTPUT
       DOUBLE PRECISION,INTENT(INOUT) :: WFEXT
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -104,7 +115,8 @@ C-----------------------------------------------
      .        SFPA, SFPRES, RHO, PA, PIO, PHI_OLD(NNO+NNI), UU,
      .        COEF, AREA2, W, KSI, ETA, VAL1, VAL2, VAL3, X0, Y0, Z0,
      .        R2, D2, VGX_OLD, VGY_OLD, VGZ_OLD, VGX, VGY, VGZ, AGX,
-     .        AGY, AGZ, SFVINI, VV, PHIP(NNO+NNI), PHI_INF(NNO+NNI)
+     .        AGY, AGZ, SFVINI, VV, PHIP(NNO+NNI), PHI_INF(NNO+NNI),
+     .        PRES_AVG
       INTEGER NPG
       my_real PG(50), WPG(25)
       DATA PG  /.33333333,.33333333,
@@ -195,7 +207,8 @@ C coordinates and local velocities SPMD
             VL(3,NNO+I)=V(3,II)
          ENDDO
       ELSE
-         ALLOCATE(SBUF(6*(NNO+NNI)), RBUF(6*(NNO+NNI)))
+         call my_alloc(SBUF, 6*(NNO+NNI), "SBUF")
+         call my_alloc(RBUF, 6*(NNO+NNI), "RBUF")
 
          LENBUF=6*(NNO+NNI)
          DO I=1,LENBUF
@@ -235,7 +248,8 @@ C coordinates and local velocities SPMD
             VL(3,I)=RBUF(6*(I-1)+6)
          ENDDO
 C
-         DEALLOCATE(SBUF, RBUF)
+         call my_dealloc(SBUF)
+         call my_dealloc(RBUF)
       ENDIF
 C outgoing unitary normal vectors
       DO I=1,NNO
@@ -753,7 +767,8 @@ C number of Gauss point on the triangle
          ENDIF
       ELSE
 C exchange of POtentials
-         ALLOCATE(SBUF(NNO), RBUF(NNO))
+         call my_alloc(SBUF, NNO, "SBUF")
+         call my_alloc(RBUF, NNO, "RBUF")
          DO I=1,NNO
             SBUF(I)=ZERO
             RBUF(I)=ZERO
@@ -774,7 +789,8 @@ C exchange of POtentials
          DO I=1,NNO
             PHI(I)=RBUF(I)
          ENDDO
-         DEALLOCATE(SBUF, RBUF)
+         call my_dealloc(SBUF)
+         call my_dealloc(RBUF)
          PHI(NNO)=ZERO
          !velocity on surface
          DO I=1,NNO
@@ -1032,7 +1048,8 @@ C number of gauss point on the triangle
                U(3,NNO+I)=U(3,NNO+I)+VGZ
             ENDDO
 C Exchange of potentials and velocities on internal nodes
-            ALLOCATE(SBUF(4*NNI), RBUF(4*NNI))
+            call my_alloc(SBUF, 4*NNI, "SBUF")
+            call my_alloc(RBUF, 4*NNI, "RBUF")
             LENBUF=4*NNI
             DO I=1,LENBUF
                SBUF(I)=ZERO
@@ -1131,7 +1148,7 @@ C pressure imposed at inlet/outlet
          ENDDO
       ENDIF   
 C---------------------------------------------------
-C 5- Force on the boundary
+C 5- Force on the boundary and populate FEXT arrays
 C---------------------------------------------------
       IF (NSPMD == 1) THEN
          DO I=1,NEL
@@ -1148,18 +1165,27 @@ C---------------------------------------------------
             A(1,NN1)=A(1,NN1)+COEF*NRX
             A(2,NN1)=A(2,NN1)+COEF*NRY
             A(3,NN1)=A(3,NN1)+COEF*NRZ
-            A(1,NN2)=A(1,NN2)+COEF*NRX
-            A(2,NN2)=A(2,NN2)+COEF*NRY
-            A(3,NN2)=A(3,NN2)+COEF*NRZ
-            A(1,NN3)=A(1,NN3)+COEF*NRX
-            A(2,NN3)=A(2,NN3)+COEF*NRY
-            A(3,NN3)=A(3,NN3)+COEF*NRZ
+            NODA_FEXT(1,NN1) = NODA_FEXT(1,NN1) + COEF*NRX
+            NODA_FEXT(2,NN1) = NODA_FEXT(2,NN1) + COEF*NRY
+            NODA_FEXT(3,NN1) = NODA_FEXT(3,NN1) + COEF*NRZ
             WFEXT=WFEXT+COEF*NRX*V(1,NN1)*DT1
      .                 +COEF*NRY*V(2,NN1)*DT1
      .                 +COEF*NRZ*V(3,NN1)*DT1
+            A(1,NN2)=A(1,NN2)+COEF*NRX
+            A(2,NN2)=A(2,NN2)+COEF*NRY
+            A(3,NN2)=A(3,NN2)+COEF*NRZ
+            NODA_FEXT(1,NN2) = NODA_FEXT(1,NN2) + COEF*NRX
+            NODA_FEXT(2,NN2) = NODA_FEXT(2,NN2) + COEF*NRY
+            NODA_FEXT(3,NN2) = NODA_FEXT(3,NN2) + COEF*NRZ
             WFEXT=WFEXT+COEF*NRX*V(1,NN2)*DT1
      .                 +COEF*NRY*V(2,NN2)*DT1
      .                 +COEF*NRZ*V(3,NN2)*DT1
+            A(1,NN3)=A(1,NN3)+COEF*NRX
+            A(2,NN3)=A(2,NN3)+COEF*NRY
+            A(3,NN3)=A(3,NN3)+COEF*NRZ
+            NODA_FEXT(1,NN3) = NODA_FEXT(1,NN3) + COEF*NRX
+            NODA_FEXT(2,NN3) = NODA_FEXT(2,NN3) + COEF*NRY
+            NODA_FEXT(3,NN3) = NODA_FEXT(3,NN3) + COEF*NRZ
             WFEXT=WFEXT+COEF*NRX*V(1,NN3)*DT1
      .                 +COEF*NRY*V(2,NN3)*DT1
      .                 +COEF*NRZ*V(3,NN3)*DT1
@@ -1189,6 +1215,9 @@ C---------------------------------------------------
                A(1,NN1)=A(1,NN1)+COEF*NRX
                A(2,NN1)=A(2,NN1)+COEF*NRY
                A(3,NN1)=A(3,NN1)+COEF*NRZ
+               NODA_FEXT(1,NN1) = NODA_FEXT(1,NN1) + COEF*NRX
+               NODA_FEXT(2,NN1) = NODA_FEXT(2,NN1) + COEF*NRY
+               NODA_FEXT(3,NN1) = NODA_FEXT(3,NN1) + COEF*NRZ
                WFEXT=WFEXT+COEF*NRX*V(1,NN1)*DT1
      .                    +COEF*NRY*V(2,NN1)*DT1
      .                    +COEF*NRZ*V(3,NN1)*DT1
@@ -1198,6 +1227,9 @@ C---------------------------------------------------
                A(1,NN2)=A(1,NN2)+COEF*NRX
                A(2,NN2)=A(2,NN2)+COEF*NRY
                A(3,NN2)=A(3,NN2)+COEF*NRZ
+               NODA_FEXT(1,NN2) = NODA_FEXT(1,NN2) + COEF*NRX
+               NODA_FEXT(2,NN2) = NODA_FEXT(2,NN2) + COEF*NRY
+               NODA_FEXT(3,NN2) = NODA_FEXT(3,NN2) + COEF*NRZ
                WFEXT=WFEXT+COEF*NRX*V(1,NN2)*DT1
      .                    +COEF*NRY*V(2,NN2)*DT1
      .                    +COEF*NRZ*V(3,NN2)*DT1
@@ -1207,12 +1239,64 @@ C---------------------------------------------------
                A(1,NN3)=A(1,NN3)+COEF*NRX
                A(2,NN3)=A(2,NN3)+COEF*NRY
                A(3,NN3)=A(3,NN3)+COEF*NRZ
+               NODA_FEXT(1,NN3) = NODA_FEXT(1,NN3) + COEF*NRX
+               NODA_FEXT(2,NN3) = NODA_FEXT(2,NN3) + COEF*NRY
+               NODA_FEXT(3,NN3) = NODA_FEXT(3,NN3) + COEF*NRZ
                WFEXT=WFEXT+COEF*NRX*V(1,NN3)*DT1
      .                    +COEF*NRY*V(2,NN3)*DT1
      .                    +COEF*NRZ*V(3,NN3)*DT1
             ENDIF
          ENDDO      
-      ENDIF 
+      ENDIF
+C---------------------------------------------------
+C     Populate NODA_PEXT output array for H3D/NODA/PEXT
+C---------------------------------------------------
+      IF(TH_HAS_NODA_PEXT > 0 .OR. OUTPUT%DATA%ANIM_HAS_NODA_PEXT > 0 .OR. OUTPUT%DATA%H3D_HAS_NODA_PEXT > 0) THEN
+        IF (NSPMD == 1) THEN
+          DO I=1,NEL
+             N1=ELEM(1,I)
+             N2=ELEM(2,I)
+             N3=ELEM(3,I)
+             NN1=IBUF(N1)
+             NN2=IBUF(N2)
+             NN3=IBUF(N3)
+             AREA=SQRT(NORM(1,I)**2+NORM(2,I)**2+NORM(3,I)**2)
+             AREA2=AREA*THIRD
+             PRES_AVG=THIRD*(PRES(N1)+PRES(N2)+PRES(N3))
+             NODA_SURF(NN1) = NODA_SURF(NN1) + AREA2
+             NODA_PEXT(NN1) = NODA_PEXT(NN1) + PRES_AVG*AREA2
+             NODA_SURF(NN2) = NODA_SURF(NN2) + AREA2
+             NODA_PEXT(NN2) = NODA_PEXT(NN2) + PRES_AVG*AREA2
+             NODA_SURF(NN3) = NODA_SURF(NN3) + AREA2
+             NODA_PEXT(NN3) = NODA_PEXT(NN3) + PRES_AVG*AREA2
+          ENDDO
+        ELSE
+          DO I=1,NEL
+             N1=ELEM(1,I)
+             N2=ELEM(2,I)
+             N3=ELEM(3,I)
+             IF(IBUF(N1)==0.AND.IBUF(N2)==0.AND.IBUF(N3)==0) CYCLE
+             AREA=SQRT(NORM(1,I)**2+NORM(2,I)**2+NORM(3,I)**2)
+             AREA2=AREA*THIRD
+             PRES_AVG=THIRD*(PRES(N1)+PRES(N2)+PRES(N3))
+             IF (IBUF(N1)/=0) THEN
+                NN1=IBUF(N1)
+                NODA_SURF(NN1) = NODA_SURF(NN1) + AREA2
+                NODA_PEXT(NN1) = NODA_PEXT(NN1) + PRES_AVG*AREA2
+             ENDIF
+             IF (IBUF(N2)/=0) THEN
+                NN2=IBUF(N2)
+                NODA_SURF(NN2) = NODA_SURF(NN2) + AREA2
+                NODA_PEXT(NN2) = NODA_PEXT(NN2) + PRES_AVG*AREA2
+             ENDIF
+             IF (IBUF(N3)/=0) THEN
+                NN3=IBUF(N3)
+                NODA_SURF(NN3) = NODA_SURF(NN3) + AREA2
+                NODA_PEXT(NN3) = NODA_PEXT(NN3) + PRES_AVG*AREA2
+             ENDIF
+          ENDDO
+        ENDIF
+      ENDIF
 
       RETURN
       END

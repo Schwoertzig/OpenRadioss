@@ -55,6 +55,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    intbufdef_mod               ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    interfaces_mod              ../common_source/modules/interfaces/interfaces_mod.F90
 !||    message_mod                 ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod                ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod              ../common_source/tools/memory/my_dealloc.F90
 !||    output_mod                  ../common_source/modules/output/output_mod.F90
 !||    timer_mod                   ../engine/source/system/timer_mod.F90
 !||    tri25ebox                   ../engine/share/modules/tri25ebox.F
@@ -97,6 +99,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -351,7 +355,7 @@ C
 C
       INTCAREA = IPARI(99,NIN)
 C
-      ALLOCATE(INDEX2(LINDMAX))
+      call my_alloc(INDEX2, LINDMAX, "INDEX2")
 C--- Corresponding Friction model  
       INTFRIC=IPARI(72,NIN)
       IORTHFRIC = 0
@@ -566,7 +570,7 @@ C-----------------------------------------------------------------------
         ENDIF
       ENDDO
       IF (SFSAVPARIT /= 0) THEN
-        ALLOCATE(FSAVPARIT(NISUB+1,11,I_STOK),STAT=IERROR)
+        call my_alloc(FSAVPARIT, NISUB+1, 11, I_STOK, "FSAVPARIT", stat=IERROR)
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .         C1='(/INTER/TYPE25)')
@@ -574,7 +578,7 @@ C-----------------------------------------------------------------------
         ENDIF
         FSAVPARIT(1:NISUB+1,1:11,1:I_STOK) = ZERO
       ELSE
-        ALLOCATE(FSAVPARIT(0,0,0),STAT=IERROR)
+        call my_alloc(FSAVPARIT, 0, 0, 0, "FSAVPARIT", stat=IERROR)
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .         C1='(/INTER/TYPE25)')
@@ -771,7 +775,7 @@ C-----------------------------------------------------------------------
           CALL SUM_6_FLOAT_SENS(FSAVPARIT, NISUB+1, 11, I_STOK,1,I_STOK,
      .                          FBSAV6, 12, 6, DIMFB, ISENSINT )
       ENDIF
-      DEALLOCATE (FSAVPARIT)
+      call my_dealloc(FSAVPARIT)
 C-----------------------------------------------------------------------
       CALL MY_BARRIER
 C-----------------------------------------------------------------------
@@ -846,7 +850,7 @@ C
           ENDIF
         ENDDO
         IF (SFSAVPARIT /= 0) THEN
-          ALLOCATE(FSAVPARIT(NISUB+1,11,I_STOK))
+          call my_alloc(FSAVPARIT, NISUB+1, 11, I_STOK, "FSAVPARIT")
           DO J=1,I_STOK
             DO I=1,11
               DO H=1,NISUB+1
@@ -855,7 +859,7 @@ C
             ENDDO
           ENDDO
         ELSE
-          ALLOCATE(FSAVPARIT(0,0,0))
+          call my_alloc(FSAVPARIT, 0, 0, 0, "FSAVPARIT")
         ENDIF
 C
         DO NFT = 0 , I_STOK - 1 , NVSIZ
@@ -973,7 +977,7 @@ C-------------------------------------------------------------------------------
             CALL SUM_6_FLOAT_SENS(FSAVPARIT, NISUB+1, 11, I_STOK,1,I_STOK,
      .                            FBSAV6, 12, 6, DIMFB, ISENSINT )
         ENDIF
-        DEALLOCATE (FSAVPARIT)
+        call my_dealloc(FSAVPARIT)
 C
 C-----------------------------------------------------------------------
 C
@@ -1033,7 +1037,7 @@ C
           ENDIF
         ENDDO
         IF (SFSAVPARIT /= 0) THEN
-          ALLOCATE(FSAVPARIT(NISUB+1,11,I_STOK))
+          call my_alloc(FSAVPARIT, NISUB+1, 11, I_STOK, "FSAVPARIT")
           DO J=1,I_STOK
             DO I=1,11
               DO H=1,NISUB+1
@@ -1042,7 +1046,7 @@ C
             ENDDO
           ENDDO
         ELSE
-          ALLOCATE(FSAVPARIT(0,0,0))
+          call my_alloc(FSAVPARIT, 0, 0, 0, "FSAVPARIT")
         ENDIF
 C
         DO NFT = 0 , I_STOK - 1 , NVSIZ
@@ -1154,13 +1158,13 @@ C-------------------------------------------------------------------------------
             CALL SUM_6_FLOAT_SENS(FSAVPARIT, NISUB+1, 11, I_STOK,1,I_STOK,
      .                            FBSAV6, 12, 6, DIMFB, ISENSINT )
         ENDIF
-        DEALLOCATE (FSAVPARIT)
+        call my_dealloc(FSAVPARIT)
 C
       CALL MY_BARRIER
 C
 C-----------------------------------------------------------------------
  500  CONTINUE
-      DEALLOCATE(INDEX2)
+      call my_dealloc(INDEX2)
       RETURN
       END
 !||====================================================================

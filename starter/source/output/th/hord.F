@@ -30,11 +30,13 @@ C
 !||    hm_read_thgrsurf       ../starter/source/output/th/hm_read_thgrsurf.F
 !||    hm_thgrki_vent         ../starter/source/output/th/hm_thgrki_vent.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
         SUBROUTINE HORD(NEL,NSEL)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -48,8 +50,8 @@ C-----------------------------------------------
         INTEGER, DIMENSION(:), ALLOCATABLE :: ITRI,INDX
         INTEGER, DIMENSION(70000) :: WORK
 !   ---------------------------------------------
-        ALLOCATE( ITRI(NSEL) )
-        ALLOCATE( INDX(2*NSEL) )
+        call my_alloc(ITRI, NSEL, "ITRI")
+        call my_alloc(INDX, 2*NSEL, "HORD/INDX")
 
         ITRI(1:NSEL) = NEL(1:NSEL)
         DO I=1,NSEL
@@ -62,8 +64,8 @@ C-----------------------------------------------
             NEL(I) = ITRI(INDX(I))
         ENDDO
 
-        DEALLOCATE( ITRI )
-        DEALLOCATE( INDX )
+        CALL MY_DEALLOC(ITRI)
+        CALL MY_DEALLOC(INDX)
 
         RETURN
         END SUBROUTINE HORD

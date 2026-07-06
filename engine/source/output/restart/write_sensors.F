@@ -30,6 +30,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_dpdb             ../common_source/tools/input_output/write_db.F
 !||    write_i_c              ../common_source/tools/input_output/write_routines.c
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||    sensor_mod             ../common_source/modules/sensor_mod.F90
 !||====================================================================
@@ -42,6 +44,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include "implicit_f.inc"
 #include "scr07_c.inc"
 #include "scr17_c.inc"
@@ -71,7 +75,7 @@ c
           TITLE = SENSOR%TITLE
           
           LEN = NFIX + NPARI + NPARR + NVAR
-          ALLOCATE (RBUF(LEN) )
+          call my_alloc(RBUF, LEN, "RBUF")
 c
           IAD = 0
           RBUF(IAD+1) = SENSOR%TYPE    
@@ -107,7 +111,7 @@ c
           END IF
 c
           CALL WRITE_DB (RBUF,LEN)
-          DEALLOCATE (RBUF)
+          call my_dealloc(RBUF)
 c
 c         write sensor title
           CALL FRETITL(TITLE,ITITLE,LTITR)

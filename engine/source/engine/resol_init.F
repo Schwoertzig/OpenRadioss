@@ -86,6 +86,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inter_sh_offset_mod        ../engine/source/modules/interfaces/sh_offset_mod.F90
 !||    inter_sorting_mod          ../engine/share/modules/inter_sorting_mod.F
 !||    loads_mod                  ../common_source/modules/loads/loads_mod.F90
+!||    my_alloc_mod               ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod             ../common_source/tools/memory/my_dealloc.F90
 !||    nlocal_reg_mod             ../common_source/modules/nlocal_reg_mod.F
 !||    outmax_mod                 ../common_source/modules/outmax_mod.F
 !||    output_mod                 ../common_source/modules/output/output_mod.F90
@@ -202,6 +204,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1119,16 +1123,19 @@ C-----------------------
         IF (ITASK == 0) THEN
           IF(NSPMD>1) THEN
             CALL S10CNDS_DIM(ICNDS10,ITAGND,FR_ELEM,IAD_ELEM,NBS  )
-            ALLOCATE (IAD_CNDS(NSPMD+1),FR_CNDS(NBS))
+            call my_alloc(IAD_CNDS, NSPMD+1, "IAD_CNDS")
+            call my_alloc(FR_CNDS, NBS, "FR_CNDS")
             CALL S10CNDS_INI(ICNDS10,ITAGND,FR_ELEM,IAD_ELEM,IAD_CNDS,FR_CNDS )
           ELSE
-            ALLOCATE (IAD_CNDS(0),FR_CNDS(0))
+            call my_alloc(IAD_CNDS, 0, "IAD_CNDS")
+            call my_alloc(FR_CNDS, 0, "FR_CNDS")
           END IF
 
           CALL CNDMASI2_DIM(IPARI,INTBUF_TAB,ICNDS10,ITAGND,WEIGHT,NKEND,
      1                      IAD_CNDS,FR_CNDS,NBS,NSPMD) 
             IF(NKEND>0) THEN
-              ALLOCATE (IMAP2ND(NKEND),MASI2ND0(NKEND))
+              call my_alloc(IMAP2ND, NKEND, "IMAP2ND")
+              call my_alloc(MASI2ND0, NKEND, "MASI2ND0")
               CALL CNDMASI2_INI(IPARI,INTBUF_TAB,ICNDS10,ITAGND,
      .                    NKEND,IMAP2ND,MASI2ND0,MS0,WEIGHT, itab ) 
               IF(MCHECK>0) NKEND = -NKEND
@@ -1171,21 +1178,26 @@ C-----------------------
          CALL SPMD_MAX_I(NTSHEGG)
        END IF
        IF (NTSHEG > 0) THEN
-         ALLOCATE (IENUNL(2*NTSHEG),ALPHA_DC(NUMNOD))
+         call my_alloc(IENUNL, 2*NTSHEG, "IENUNL")
+         call my_alloc(ALPHA_DC, NUMNOD, "ALPHA_DC")
          IENUNL=0
          ALPHA_DC=ONE
          CALL IND_TSHEDG(ELBUF_TAB  ,IENUNL, IXS ,IPARG )
          IF(NSPMD>1) THEN
           NBS = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-          ALLOCATE (ISEND(NBS),IRECV(NBS))
+          call my_alloc(ISEND, NBS, "ISEND")
+          call my_alloc(IRECV, NBS, "IRECV")
           ISEND=0
           CALL TSHCDCOM_DIM(IENUNL,FR_ELEM,IAD_ELEM,NBS,NBR ,
      .                      ISEND ,IRECV )
-          ALLOCATE (IAD_STSH(NSPMD+1),FR_STSH(NBS))
+          call my_alloc(IAD_STSH, NSPMD+1, "IAD_STSH")
+          call my_alloc(FR_STSH, NBS, "FR_STSH")
           CALL TSHCDCOM_INI(ISEND,IAD_ELEM,FR_ELEM,IAD_STSH,FR_STSH)
-          ALLOCATE (IAD_RTSH(NSPMD+1),FR_RTSH(NBR))
+          call my_alloc(IAD_RTSH, NSPMD+1, "IAD_RTSH")
+          call my_alloc(FR_RTSH, NBR, "FR_RTSH")
           CALL TSHCDCOM_INI(IRECV,IAD_ELEM,FR_ELEM,IAD_RTSH,FR_RTSH)
-          DEALLOCATE(ISEND,IRECV)
+          call my_dealloc(ISEND)
+          call my_dealloc(IRECV)
          END IF
        END IF
 C-----------------------
@@ -1220,13 +1232,15 @@ C-------------------------------------------
 C
 C-----------------------------------------------
 !||====================================================================
-!||    grpsplit       ../engine/source/engine/resol_init.F
+!||    grpsplit         ../engine/source/engine/resol_init.F
 !||--- called by ------------------------------------------------------
-!||    resol_init     ../engine/source/engine/resol_init.F
+!||    resol_init       ../engine/source/engine/resol_init.F
 !||--- calls      -----------------------------------------------------
-!||    sort_mid_pid   ../engine/source/system/sort_mid_pid.F
+!||    sort_mid_pid     ../engine/source/system/sort_mid_pid.F
 !||--- uses       -----------------------------------------------------
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE  GRPSPLIT(
      1     IPARG, IGROUC, NGROUC, IGROUNC, NGROUNC,
@@ -1235,6 +1249,8 @@ C-----------------------------------------------
 C----6------------------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1288,19 +1304,23 @@ C
        NGROUC = 0
        NGROUNC = 0
 
-       ALLOCATE(TAB_SHELL_LOC(NGROUP,5))
-       ALLOCATE(TAB_TRI_LOC(NGROUP,5))
-       ALLOCATE(TAB_SOL_LOC(NGROUP,5,7))
-       ALLOCATE( IGROUC_SHELL(NGROUP),IGROUC_TRI(NGROUP) )
-       ALLOCATE( IGROUC_SOL(NGROUP,7) )
+       call my_alloc(TAB_SHELL_LOC, NGROUP, 5, "TAB_SHELL_LOC")
+       call my_alloc(TAB_TRI_LOC, NGROUP, 5, "TAB_TRI_LOC")
+       call my_alloc(TAB_SOL_LOC, NGROUP, 5, 7, "TAB_SOL_LOC")
+       call my_alloc(IGROUC_SHELL, NGROUP, "IGROUC_SHELL")
+       call my_alloc(IGROUC_TRI, NGROUP, "IGROUC_TRI")
+       call my_alloc(IGROUC_SOL, NGROUP, 7, "IGROUC_SOL")
 
-       ALLOCATE( POIN_GROUP_MID_SHELL(NGROUP),POIN_GROUP_MID_TRI(NGROUP) )
-       ALLOCATE( POIN_GROUP_PID_SHELL(NGROUP),POIN_GROUP_PID_TRI(NGROUP) )
-       ALLOCATE( POIN_GROUP_MID_SOL(NGROUP,7),POIN_GROUP_PID_SOL(NGROUP,7) )
+       call my_alloc(POIN_GROUP_MID_SHELL, NGROUP, "POIN_GROUP_MID_SHELL")
+       call my_alloc(POIN_GROUP_MID_TRI, NGROUP, "POIN_GROUP_MID_TRI")
+       call my_alloc(POIN_GROUP_PID_SHELL, NGROUP, "POIN_GROUP_PID_SHELL")
+       call my_alloc(POIN_GROUP_PID_TRI, NGROUP, "POIN_GROUP_PID_TRI")
+       call my_alloc(POIN_GROUP_MID_SOL, NGROUP, 7, "POIN_GROUP_MID_SOL")
+       call my_alloc(POIN_GROUP_PID_SOL, NGROUP, 7, "POIN_GROUP_PID_SOL")
 
-       ALLOCATE(MID_SHELL(NUMMAT))
-       ALLOCATE(MID_TRI(NUMMAT))
-       ALLOCATE(MID_SOL(NUMMAT,7))
+       call my_alloc(MID_SHELL, NUMMAT, "MID_SHELL")
+       call my_alloc(MID_TRI, NUMMAT, "MID_TRI")
+       call my_alloc(MID_SOL, NUMMAT, 7, "MID_SOL")
 
        COMPTEUR_MAT_PROP_SHELL = 0
        MID_SHELL(1:NUMMAT) = 0
@@ -1391,7 +1411,7 @@ C
 ! -------------------------
        IF(N_SHELL>0) THEN
 
-        ALLOCATE( TAB_LOC(N_SHELL,3) )
+        call my_alloc(TAB_LOC, N_SHELL, 3, "TAB_LOC")
         TAB_LOC(1:N_SHELL,1:3) = -1
 
 
@@ -1407,12 +1427,12 @@ C
                 IGROUC(II) = JJ
         ENDDO        
  
-        DEALLOCATE( TAB_LOC )
+        call my_dealloc(TAB_LOC)
        ENDIF ! N_SHELL>0 
 ! -------------------------
        IF(N_TRI>0) THEN
 
-        ALLOCATE( TAB_LOC(N_TRI,3) )
+        call my_alloc(TAB_LOC, N_TRI, 3, "TAB_LOC")
         TAB_LOC(1:N_TRI,1:3) = -1
 
 
@@ -1428,13 +1448,13 @@ C
                 IGROUC(II) = JJ
         ENDDO
  
-        DEALLOCATE( TAB_LOC )
+        call my_dealloc(TAB_LOC)
        ENDIF ! N_TRI>0 
 ! -------------------------
        DO INDI=1,7
         IF(N_SOL(INDI)>0) THEN
 
-                ALLOCATE( TAB_LOC(N_SOL(INDI),3) )
+                call my_alloc(TAB_LOC, N_SOL(INDI), 3, "TAB_LOC")
                 TAB_LOC(1:N_SOL(INDI),1:3) = -1
 
 
@@ -1450,25 +1470,29 @@ C
                         IGROUNC(II) = JJ
                 ENDDO
  
-                DEALLOCATE( TAB_LOC )
+                call my_dealloc(TAB_LOC)
         ENDIF ! N_SOL>0 
        ENDDO
 ! -------------------------
 
-       DEALLOCATE(MID_SHELL)
-       DEALLOCATE(MID_TRI)
-       DEALLOCATE(MID_SOL)
+       call my_dealloc(MID_SHELL)
+       call my_dealloc(MID_TRI)
+       call my_dealloc(MID_SOL)
 
-       DEALLOCATE( POIN_GROUP_MID_SHELL,POIN_GROUP_MID_TRI )
-       DEALLOCATE( POIN_GROUP_PID_SHELL,POIN_GROUP_PID_TRI )
-       DEALLOCATE( POIN_GROUP_MID_SOL,POIN_GROUP_PID_SOL )
+       call my_dealloc(POIN_GROUP_MID_SHELL)
+       call my_dealloc(POIN_GROUP_MID_TRI)
+       call my_dealloc(POIN_GROUP_PID_SHELL)
+       call my_dealloc(POIN_GROUP_PID_TRI)
+       call my_dealloc(POIN_GROUP_MID_SOL)
+       call my_dealloc(POIN_GROUP_PID_SOL)
 
 
-       DEALLOCATE(TAB_SHELL_LOC)
-       DEALLOCATE(TAB_TRI_LOC)
-       DEALLOCATE(TAB_SOL_LOC)
-       DEALLOCATE( IGROUC_SHELL,IGROUC_TRI )
-       DEALLOCATE( IGROUC_SOL )
+       call my_dealloc(TAB_SHELL_LOC)
+       call my_dealloc(TAB_TRI_LOC)
+       call my_dealloc(TAB_SOL_LOC)
+       call my_dealloc(IGROUC_SHELL)
+       call my_dealloc(IGROUC_TRI)
+       call my_dealloc(IGROUC_SOL)
 
        RETURN
        END
@@ -1648,7 +1672,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER  N,I,J,K,NSN
+      INTEGER  N,I,J,K,NSN,M,NI
 
       DO J=1,NUMNOD
         IKINE(J)=0
@@ -1667,6 +1691,26 @@ C-------------------------------------
         ENDDO
         K = K + NSN
       ENDDO
+! initialize  NPBY(12,N) : parent id 
+      NPBY(12,1:NRBYKIN) =0 
+      IF (NHIER_RBY>0) THEN
+        TAGSLV_RBY(1:NUMNOD)=0
+        DO N=1,NRBYKIN 
+          M = NPBY(1,N) 
+          IF (M>0) TAGSLV_RBY(M) = N
+        END DO
+        DO N=NRBYKIN,1,-1
+          K = NPBY(11,N)
+          NSN = NPBY(2,N) 
+          DO I=1,NSN
+            J=LPBY(K+I)
+            IF (TAGSLV_RBY(J)>0) THEN 
+              NI = TAGSLV_RBY(J) 
+              NPBY(12,NI) =N 
+            END IF
+          END DO
+        END DO
+      END IF !(NHIER_RBY>0) THEN
 C-------------------------------------------
       TAGSLV_RBY(1:NUMNOD)=0
       K=0

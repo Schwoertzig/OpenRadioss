@@ -21,15 +21,17 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    dsdim0        ../starter/source/implicit/dsolve/dsdim.F
+!||    dsdim0         ../starter/source/implicit/dsolve/dsdim.F
 !||--- called by ------------------------------------------------------
-!||    lectur        ../starter/source/starter/lectur.F
+!||    lectur         ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE DSDIM0(NDOF  ,IXS   , IXQ    , IXC    , IXT    ,
      2                  IXP   ,IXR   , IXTG   , KXX    ,
      3                  IXX   ,GEO   )
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -55,7 +57,7 @@ C-----------------------------------------------
       INTEGER I, IEL, J, N, IGTYP, NN
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAG8
 
-      ALLOCATE(TAG8(NUMNOD))
+      call my_alloc(TAG8, NUMNOD, "TAG8")
 C
 C Filling of ndof (see dim_glob_k in engine)
 C
@@ -185,7 +187,7 @@ C----   AMS
            ENDIF
         ENDDO
       END IF
-      DEALLOCATE(TAG8)
+      CALL MY_DEALLOC(TAG8)
       RETURN
       END
 

@@ -23,17 +23,19 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 
 C
 !||====================================================================
-!||    spmd_fvb_gath   ../engine/source/mpi/airbags/spmd_fvb_gath.F
+!||    spmd_fvb_gath    ../engine/source/mpi/airbags/spmd_fvb_gath.F
 !||--- called by ------------------------------------------------------
-!||    fv_up_switch    ../engine/source/airbag/fv_up_switch.F
-!||    fvbag1          ../engine/source/airbag/fvbag1.F
-!||    fvbric          ../engine/source/airbag/fvbric.F
-!||    fvmesh1         ../engine/source/airbag/fvmesh.F
-!||    fvrezone1       ../engine/source/airbag/fvrezone.F
-!||    lecfvbag        ../engine/source/input/lecfvbag.F
+!||    fv_up_switch     ../engine/source/airbag/fv_up_switch.F
+!||    fvbag1           ../engine/source/airbag/fvbag1.F
+!||    fvbric           ../engine/source/airbag/fvbric.F
+!||    fvmesh1          ../engine/source/airbag/fvmesh.F
+!||    fvrezone1        ../engine/source/airbag/fvrezone.F
+!||    lecfvbag         ../engine/source/input/lecfvbag.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    fvbag_mod       ../engine/share/modules/fvbag_mod.F
+!||    fvbag_mod        ../engine/share/modules/fvbag_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SPMD_FVB_GATH(IFV, X, XXX, XXXA, XXXSA,
      .                         IDO)
@@ -56,6 +58,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -119,7 +123,8 @@ C
             LENI=LENI+ITAB(1,II)+ITAB(2,II)+ITAB(3,II)
             LENR=LENR+3*(ITAB(1,II)+ITAB(2,II)+ITAB(3,II))
          ENDDO
-         ALLOCATE(IBUF(LENI), RBUF(LENR))
+         call my_alloc(IBUF, LENI, "IBUF")
+         call my_alloc(RBUF, LENR, "RBUF")
          RBUF(1:LENR) = ZERO
          IBUF(1:LENI) = 0
 C reception of integers
@@ -208,7 +213,8 @@ C Addition Internal nodes
                XXXSA(3,J1)=RBUF(IAD2-1+3*(J-1)+3)
             ENDDO
          ENDDO
-         DEALLOCATE(IBUF, RBUF)
+         call my_dealloc(IBUF)
+         call my_dealloc(RBUF)
       ELSE IF(FVSPMD(IFV)%RANK > 0) THEN
          ITABL(1)=FVSPMD(IFV)%NN_L
 C Addition Internal nodes
@@ -223,7 +229,8 @@ C Addition Internal nodes
          PMAIN=FVSPMD(IFV)%PMAIN
 C
          LEN=ITABL(1)+ITABL(2)+ITABL(3)
-         ALLOCATE(IBUF(LEN), RBUF(3*LEN))
+         call my_alloc(IBUF, LEN, "IBUF")
+         call my_alloc(RBUF, 3*LEN, "RBUF")
          IAD1=1
          IAD2=1
          LEN = FVSPMD(IFV)%NN_L
@@ -278,7 +285,8 @@ C
      .                  ITAG, FVSPMD(IFV)%MPI_COMM, REQ(2), IERR)
 C
          CALL MPI_WAITALL(2, REQ, STAT, IERR)
-         DEALLOCATE(IBUF, RBUF)
+         call my_dealloc(IBUF)
+         call my_dealloc(RBUF)
       ENDIF
 C
 

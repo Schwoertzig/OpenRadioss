@@ -27,7 +27,7 @@
 !||    nodalssp                   ../engine/source/output/anim/generate/nodalssp.F
 !||====================================================================
       module anim_nodal_ssp_elems_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   PROCEDURES
@@ -38,11 +38,14 @@
 !||    anim_nodal_ssp_elems   ../engine/source/output/anim/generate/anim_nodal_ssp_elems.F90
 !||--- called by ------------------------------------------------------
 !||    nodalssp               ../engine/source/output/anim/generate/nodalssp.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    constant_mod           ../common_source/modules/constant_mod.F
 !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    initbuf_mod            ../engine/share/resol/initbuf.F
 !||    multi_fvm_mod          ../common_source/modules/ale/multi_fvm_mod.F90
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    precision_mod          ../common_source/modules/precision_mod.F90
 !||====================================================================
         subroutine anim_nodal_ssp_elems( wa4, swa4, iparg, elbuf_tab, ix, nix, numel, is_written_node, &
@@ -58,6 +61,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
@@ -83,7 +88,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          allocate(sum_weight(numnod))
+          call my_alloc(sum_weight, numnod, "sum_weight")
           sum_weight = 0
           nnod = nix-3   !8-node brick or 4-node quad
 
@@ -134,7 +139,7 @@
             end if
           end do
 
-          deallocate(sum_weight)
+          call my_dealloc(sum_weight)
 !-----------------------------------------------
 
           return

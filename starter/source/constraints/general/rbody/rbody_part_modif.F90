@@ -49,6 +49,7 @@
 !                                                        Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           use precision_mod, only : WP
           use message_mod
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -79,7 +80,7 @@
           integer, dimension(nsn)     :: isl_copy
           integer, dimension(:), allocatable :: itag
 ! ======================================================================================================================
-          call my_alloc(itag,numnod)
+          call my_alloc(itag,numnod,"itag")
           itag = 0
           do i=1,nsn
             ns = isl(i)
@@ -142,7 +143,7 @@
             nsn = nsn_i
             isl(1:nsn) = isl_copy(1:nsn)
           end if !(changed) then
-          deallocate(itag)
+          call my_dealloc(itag)
         end subroutine rbody_part_modif
 ! ======================================================================================================================
 ! \brief check rbody by part with bcs(boundary conditions),impvel,gravity,inivel
@@ -168,6 +169,7 @@
 !                                                        Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           use precision_mod, only : WP
           use message_mod
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -211,7 +213,7 @@
 !  for gravity add main_id, change num inside HM_PREREAD_GRAV
 !  for inivel,add main_id if his 2nd nodes inside
 ! ======================================================================================================================
-          call my_alloc(itag,numnod)
+          call my_alloc(itag,numnod,"itag")
           itag = 0
           do i=1,nrbykin
             jpart = npby(21,i)
@@ -221,7 +223,7 @@
             nsl = npby(2,i)
             part_id = ipart(4,jpart)
             itag(lpby(iad+1:iad+nsl)) = 1
-            call rpart_bcs_check(m,nsl,lpby(iad+1:iad+nsl),icode,iskew,numnod,itab,part_id,numskw,ns1) 
+            call rpart_bcs_check(m,nsl,lpby(iad+1:iad+nsl),icode,iskew,numnod,itab,part_id,numskw,ns1)
             if (ns1>0) then ! special case w/ only one secondary node with bcs
               x(1:3,m)=x(1:3,ns1)
               npby(3,i) = 3   ! ICoG is fixed to 3 to respect the boundary conditions
@@ -230,7 +232,7 @@
             call rpart_grav_check(m,itag,ngrav,nigrav,igrav,slgrav,lgrav,numnod,itab,part_id)
             itag(lpby(iad+1:iad+nsl)) = 0
           end do
-          deallocate(itag)
+          call my_dealloc(itag)
         end subroutine rbody_part_check
 ! ======================================================================================================================
 ! \brief check rbody by part with bcs(boundary conditions),replace slave nodes by main_id if needed
@@ -306,7 +308,7 @@
                 jr_m(3) = 1
               end if
               if ((jt(3)+jt_m(3))==2) jr_m(1:2) = 1
-            end if 
+            end if
             if ((jt_m(1)+jt_m(2)+jt_m(3))<3) then
               jt(1) = ict/4
               jt(2) = (ict-4*jt(1))/2
@@ -326,16 +328,16 @@
             iskew(m) = isk_m
             if (ns1==0) then
               call ancmsg(msgid=3137,          &
-              msgtype=msgwarning,              &
-              anmode=aninfo_blind_1,           &
-              i1=part_id,                      &
-              i2=itab(m)) 
-            else 
+                msgtype=msgwarning,              &
+                anmode=aninfo_blind_1,           &
+                i1=part_id,                      &
+                i2=itab(m))
+            else
               call ancmsg(msgid=3144,          &
-              msgtype=msgwarning,              &
-              anmode=aninfo_blind_1,           &
-              i1=part_id,                      &
-              i2=itab(m)) 
+                msgtype=msgwarning,              &
+                anmode=aninfo_blind_1,           &
+                i1=part_id,                      &
+                i2=itab(m))
             end if
           end if
 
@@ -510,7 +512,7 @@
           ntransf   ,nrtrans,rtrans,rby_iniaxis,iskwn,       &
           liskn    ,numskw ,lskew  ,skew   ,iframe  ,        &
           numfram  ,nxframe,xframe ,ngrnod ,igrnod  ,        &
-          n2d      ,x      ,v     ,vr  )
+          n2d      ,x      ,v      ,vr     ,itab )
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                        Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -520,6 +522,7 @@
           use message_mod
           use groupdef_mod
           use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           use hm_option_read_mod
           use names_and_titles_mod
           use precision_mod,          only: WP
@@ -550,9 +553,10 @@
           integer, intent(in)                                      :: slpby           !< dimesion of lpby
           integer, dimension(nnpby,nrbykin),    intent(inout)      :: npby            !< rbody data
           integer, dimension(slpby),            intent(inout)      :: lpby            !< rbody secondary node data
-          integer, dimension(2*numnod),         intent(in)         :: itabm1          !< node user id
+          integer, dimension(2*numnod),         intent(in)         :: itabm1          !< node user id index
           integer , intent(in  ),dimension(liskn,numskw+1)         :: iskwn           !< iskew skew id data
           integer , intent(in  ),dimension(liskn,numfram+1)        :: iframe          !< iframe frame id data
+          integer, dimension(numnod),           intent(in)         :: itab            !< node user id
           real(kind=WP), intent(in) ,dimension(3,numnod)           :: x               !< coordinate array
           real(kind=WP),dimension(3,numnod),     intent (inout)    :: v               !< velocity of nodes
           real(kind=WP),dimension(3,numnod),     intent (inout)    :: vr              !< rotational velocity of nodes
@@ -588,7 +592,8 @@
 ! for inivel w/ restart, to be done :do differently w/ module (adding n_add, i_add in each inivel_t)
 ! ======================================================================================================================
           vl = zero
-          call my_alloc(itagns2rb,numnod)
+          m_id = -HUGE(m_id)
+          call my_alloc(itagns2rb,numnod,"itagns2rb")
           itagns2rb = 0
           do i=1,nrbykin
             part_id = npby(21,i)
@@ -611,28 +616,28 @@
             tstart = zero
             sens_id = 0
             label='/inivel'
-            if(key(1:3)=='tra')then
+            if(key(1:3)=='TRA')then
               itype=0
               label='/inivel/tra'
-            elseif(key(1:3)=='rot')then
+            elseif(key(1:3)=='ROT')then
               itype=1
               label='/inivel/rot'
-            elseif(key(1:3)=='t+g')then
+            elseif(key(1:3)=='T+G')then
               itype=2
               label='/inivel/t+g'
               cycle
-            elseif(key(1:3)=='gri')then
+            elseif(key(1:3)=='GRI')then
               itype=3
               label='/inivel/grid'
               cycle
-            elseif(key(1:4)=='axis')then
+            elseif(key(1:4)=='AXIS')then
               itype=4
               label='/inivel/axis'
             elseif(key(1:3) == 'fvm') then
               itype=5
-              label='/inivel/fvm'
+              label='/inivel/FVM'
               cycle
-            elseif(key(1:4)=='node')then
+            elseif(key(1:4)=='NODE')then
               itype=6
               label='/inivel/node'
             else
@@ -675,14 +680,14 @@
             if (itype == 6) then
               call hm_get_intv('nb_nodes', nb_nodes, is_available, lsubmodel)
               do n=1,nb_nodes
-                call hm_get_int_array_index('node', id_node, n, is_available, lsubmodel)
-                call hm_get_int_array_index('skewa', isk, n, is_available, lsubmodel)
-                call hm_get_float_array_index('vxta', vi(1), n, is_available, lsubmodel, unitab)
-                call hm_get_float_array_index('vyta', vi(2), n, is_available, lsubmodel, unitab)
-                call hm_get_float_array_index('vzta', vi(3), n, is_available, lsubmodel, unitab)
-                call hm_get_float_array_index('vxra', vri(1), n, is_available, lsubmodel, unitab)
-                call hm_get_float_array_index('vyra', vri(2), n, is_available, lsubmodel, unitab)
-                call hm_get_float_array_index('vzra', vri(3), n, is_available, lsubmodel, unitab)
+                call hm_get_int_array_index('NODE', id_node, n, is_available, lsubmodel)
+                call hm_get_int_array_index('SKEWA', isk, n, is_available, lsubmodel)
+                call hm_get_float_array_index('VXTA', vi(1), n, is_available, lsubmodel, unitab)
+                call hm_get_float_array_index('VYTA', vi(2), n, is_available, lsubmodel, unitab)
+                call hm_get_float_array_index('VZTA', vi(3), n, is_available, lsubmodel, unitab)
+                call hm_get_float_array_index('VXRA', vri(1), n, is_available, lsubmodel, unitab)
+                call hm_get_float_array_index('VYRA', vri(2), n, is_available, lsubmodel, unitab)
+                call hm_get_float_array_index('VZRA', vri(3), n, is_available, lsubmodel, unitab)
                 if(n2d /= 0 .and. isk == 0)then
                   vi(1) = zero
                   vri(2:3) = zero
@@ -713,10 +718,10 @@
                     v(1:3,m_id)  = vi(1:3)
                     vr(1:3,m_id) = vri(1:3)
                   end if
-                  call ancmsg(msgid=3140,                      &
+                  call ancmsg(msgid=3140,            &
                     msgtype=msgwarning,              &
                     anmode=aninfo_blind_1,           &
-                    i1=m_id,                         &
+                    i1=itab(m_id),                   &
                     i2=id)
                 end if
               end do !n=1,nb_nodes
@@ -725,18 +730,18 @@
               call hm_get_intv('inputsystem',ifra,is_available,lsubmodel)
               call hm_get_intv('entityid',igr,is_available,lsubmodel)
 
-              call hm_get_floatv('vector_x',vi(1),is_available,lsubmodel,unitab)
-              call hm_get_floatv('vector_y',vi(2),is_available,lsubmodel,unitab)
-              call hm_get_floatv('vector_z',vi(3),is_available,lsubmodel,unitab)
+              call hm_get_floatv('vector_X',vi(1),is_available,lsubmodel,unitab)
+              call hm_get_floatv('vector_Y',vi(2),is_available,lsubmodel,unitab)
+              call hm_get_floatv('vector_Z',vi(3),is_available,lsubmodel,unitab)
               call hm_get_floatv('rad_rotational_velocity',vra,is_available,lsubmodel,unitab)
               if(n2d /= 0 .and. ifra == 0) vi(2:3) = zero
               if(ifra == 0 .and. sub_index  /=  0) call subrotvect(vi(1),vi(2),vi(3),rtrans,sub_id,lsubmodel)
               idir = 0
-              if(xyz(1:1)=='x') then
+              if(xyz(1:1)=='X') then
                 idir=1
-              elseif(xyz(1:1)=='y') then
+              elseif(xyz(1:1)=='Y') then
                 idir=2
-              elseif(xyz(1:1)=='z') then
+              elseif(xyz(1:1)=='Z') then
                 idir=3
               endif
               nixj = zero
@@ -792,11 +797,11 @@
                   rby_iniaxis(1,j) = one
                   rby_iniaxis(2:4,j) = v(1:3,m_id)
                   rby_iniaxis(5:7,j) = vr(1:3,m_id)
-                  call ancmsg(msgid=3140,                     &
+                  call ancmsg(msgid=3140,            &
                     msgtype=msgwarning,              &
                     anmode=aninfo_blind_1,           &
                     i1=id,                           &
-                    i2=m_id,                         &
+                    i2=itab(m_id),                   &
                     i3=npby(6,j))
                 end if
               end do
@@ -805,9 +810,9 @@
               call hm_get_intv('entityid',igr,is_available,lsubmodel)
               call hm_get_intv('inputsystem',isk,is_available,lsubmodel)
               if(isk == 0 .and. sub_index /= 0 ) isk = lsubmodel(sub_index)%skew
-              call hm_get_floatv('vector_x',vi(1),is_available,lsubmodel,unitab)
-              call hm_get_floatv('vector_y',vi(2),is_available,lsubmodel,unitab)
-              call hm_get_floatv('vector_z',vi(3),is_available,lsubmodel,unitab)
+              call hm_get_floatv('vector_X',vi(1),is_available,lsubmodel,unitab)
+              call hm_get_floatv('vector_Y',vi(2),is_available,lsubmodel,unitab)
+              call hm_get_floatv('vector_Z',vi(3),is_available,lsubmodel,unitab)
               if(n2d /= 0 .and. isk == 0) vi(1:3) = zero
               if (isk > 0) then
                 do j=0,numskw
@@ -830,18 +835,18 @@
                   elseif(itype == 1) then
                     vr(1:3,m_id)=vl(1:3)
                   end if
-                  call ancmsg(msgid=3140,                     &
+                  call ancmsg(msgid=3140,            &
                     msgtype=msgwarning,              &
                     anmode=aninfo_blind_1,           &
                     i1=id,                           &
-                    i2=m_id,                         &
+                    i2=itab(m_id),                   &
                     i3=npby(6,j))
                 end if
               end do
             end if !(itype == 6) then
 
           end do
-          deallocate(itagns2rb)
+          call my_dealloc(itagns2rb)
 
 
         end subroutine rpart_inivel_check

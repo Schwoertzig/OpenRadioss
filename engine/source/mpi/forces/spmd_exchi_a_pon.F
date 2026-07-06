@@ -27,6 +27,7 @@ C
 !||    spmd_exch2_a_pon      ../engine/source/mpi/forces/spmd_exch2_a_pon.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod          ../common_source/tools/memory/my_alloc.F90
 !||    plyxfem_mod           ../engine/share/modules/plyxfem_mod.F
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
@@ -37,6 +38,8 @@ C
      4   CONDNSKYIF,FSKYIF_PXFEM,INTHEAT,NODADT_THERM)
 C
        USE PLYXFEM_MOD       
+       use my_alloc_mod
+
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -81,8 +84,8 @@ C   S o u r c e  L i n e s
 C-----------------------------------------------
       LOC_PROC = ISPMD + 1
 C
-      ALLOCATE(RBUF((SIZI)*NBIRCT))
-      ALLOCATE(SBUF((SIZI)*NBISDT))
+      call my_alloc(RBUF, (SIZI)*NBIRCT, "RBUF")
+      call my_alloc(SBUF, (SIZI)*NBISDT, "SBUF")
       NBIRECV = 0
       L = 1
       IAD_RECV(1) = 1
@@ -608,8 +611,8 @@ C
         IF(NBISDP(I)>0)
      .    CALL MPI_WAIT(REQ_S(I),STATUS,IERROR)
       ENDDO
-      DEALLOCATE(RBUF)
-      DEALLOCATE(SBUF)
+      call my_dealloc(RBUF)
+      call my_dealloc(SBUF)
 C
 #endif
       RETURN

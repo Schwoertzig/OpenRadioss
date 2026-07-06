@@ -21,15 +21,17 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    rmdim_imp     ../engine/source/model/remesh/rm_imp0.F
+!||    rmdim_imp        ../engine/source/model/remesh/rm_imp0.F
 !||--- called by ------------------------------------------------------
-!||    dim_kinmax    ../engine/source/implicit/ind_glob_k.F
+!||    dim_kinmax       ../engine/source/implicit/ind_glob_k.F
 !||--- calls      -----------------------------------------------------
-!||    cp_int        ../engine/source/implicit/produt_v.F
-!||    reorder_a     ../engine/source/implicit/ind_glob_k.F
+!||    cp_int           ../engine/source/implicit/produt_v.F
+!||    reorder_a        ../engine/source/implicit/ind_glob_k.F
 !||--- uses       -----------------------------------------------------
-!||    element_mod   ../common_source/modules/elements/element_mod.F90
-!||    remesh_mod    ../engine/share/modules/remesh_mod.F
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    remesh_mod       ../engine/share/modules/remesh_mod.F
 !||====================================================================
       SUBROUTINE RMDIM_IMP(IXC ,IXTG  ,NDOF   ,NNMAX ,NKINE,
      1                     INLOC,NROW ,ITAB   ,SH4TREE,SH3TREE)
@@ -41,6 +43,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -109,7 +113,8 @@ C
       
       IF (NSH_KIN==0) RETURN
 
-      ALLOCATE(ISH_NS(NSH_KIN),ISH_MS(2,NSH_KIN))
+      call my_alloc(ISH_NS, NSH_KIN, "ISH_NS")
+      call my_alloc(ISH_MS, 2, NSH_KIN, "ISH_MS")
       
       NS = 0
       TAGNOD=0
@@ -222,7 +227,8 @@ C-------i,j<->j,i
       END DO 
 C
       L=4**LEVELMAX
-      ALLOCATE(NROWK(NK),ICOK(NNMAX+L,NK))
+      call my_alloc(NROWK, NK, "NROWK")
+      call my_alloc(ICOK, NNMAX+L, NK, "ICOK")
       NROWK=0
 C-----------------elementary connectivity -----
       DO NN=1,NSH4ACT
@@ -304,7 +310,8 @@ C
       END DO 
 C
       
-      ALLOCATE(IAD_NJ(NSH_KIN+1),JDI_NJ(NZ))
+      call my_alloc(IAD_NJ, NSH_KIN+1, "IAD_NJ")
+      call my_alloc(JDI_NJ, NZ, "JDI_NJ")
       
       IAD_NJ(1) = 1
       
@@ -316,7 +323,8 @@ C
       END DO
       
 C
-      DEALLOCATE(NROWK,ICOK)
+      call my_dealloc(NROWK)
+      call my_dealloc(ICOK)
 C
       RETURN
       END     

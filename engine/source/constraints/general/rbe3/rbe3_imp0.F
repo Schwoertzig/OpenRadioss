@@ -21,13 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    rbe3_imp0    ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3_imp0        ../engine/source/constraints/general/rbe3/rbe3_imp0.F
 !||--- called by ------------------------------------------------------
-!||    upd_glob_k   ../engine/source/implicit/upd_glob_k.F
+!||    upd_glob_k       ../engine/source/implicit/upd_glob_k.F
 !||--- calls      -----------------------------------------------------
-!||    prerbe3      ../engine/source/constraints/general/rbe3/rbe3f.F
-!||    rbe3_imp1    ../engine/source/constraints/general/rbe3/rbe3_imp0.F
-!||    rbe3cl       ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    prerbe3          ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    rbe3_imp1        ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3cl           ../engine/source/constraints/general/rbe3/rbe3f.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE RBE3_IMP0(
      1                    IRBE3  ,LRBE3 ,FRBE3  ,X     ,SKEW   ,
@@ -37,6 +40,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -66,7 +71,7 @@ C     REAL
 C-----------------------------------------------
       IADS = SLRBE3/2
       CALL PRERBE3(IRBE3 ,MAX_M , IROTG,JT  ,JR   )
-      ALLOCATE(FDSTNB(18*MAX_M))
+      call my_alloc(FDSTNB, 18*MAX_M, "FDSTNB")
       IF (IROTG>0) ALLOCATE(MDSTNB(18*MAX_M))
       IADJ=1
       DO N=1,NRBE3
@@ -88,19 +93,22 @@ C-----------------------------------------------
        IADJ=IADJ+NSJ
       ENDDO
 C
-      DEALLOCATE(FDSTNB)
-      IF (IROTG>0) DEALLOCATE(MDSTNB)
+      call my_dealloc(FDSTNB)
+      IF (IROTG>0) call my_dealloc(MDSTNB)
 C
       RETURN
       END
 !||====================================================================
-!||    rbe3_impi   ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3_impi        ../engine/source/constraints/general/rbe3/rbe3_imp0.F
 !||--- called by ------------------------------------------------------
-!||    upd_int_k   ../engine/source/implicit/upd_glob_k.F
+!||    upd_int_k        ../engine/source/implicit/upd_glob_k.F
 !||--- calls      -----------------------------------------------------
-!||    prerbe3     ../engine/source/constraints/general/rbe3/rbe3f.F
-!||    rbe3_imp1   ../engine/source/constraints/general/rbe3/rbe3_imp0.F
-!||    rbe3cl      ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    prerbe3          ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    rbe3_imp1        ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3cl           ../engine/source/constraints/general/rbe3/rbe3f.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE RBE3_IMPI(
      1                    IRBE3  ,LRBE3 ,FRBE3  ,X     ,SKEW   ,
@@ -110,6 +118,8 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -139,7 +149,7 @@ C     REAL
 C-----------------------------------------------
       IADS = SLRBE3/2
       CALL PRERBE3(IRBE3 ,MAX_M , IROTG,JT  ,JR   )
-      ALLOCATE(FDSTNB(18*MAX_M))
+      call my_alloc(FDSTNB, 18*MAX_M, "FDSTNB")
       IF (IROTG>0) ALLOCATE(MDSTNB(18*MAX_M))
       IADJ=1
       DO N=1,NRBE3
@@ -163,8 +173,8 @@ C-----------------------------------------------
        END IF
       ENDDO
 C
-      DEALLOCATE(FDSTNB)
-      IF (IROTG>0) DEALLOCATE(MDSTNB)
+      call my_dealloc(FDSTNB)
+      IF (IROTG>0) call my_dealloc(MDSTNB)
 C
       RETURN
       END
@@ -301,16 +311,19 @@ C
       RETURN
       END
 !||====================================================================
-!||    rbe3_impr1   ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3_impr1       ../engine/source/constraints/general/rbe3/rbe3_imp0.F
 !||--- called by ------------------------------------------------------
-!||    imp_dykv     ../engine/source/implicit/imp_dyna.F
-!||    imp_dykv0    ../engine/source/implicit/imp_dyna.F
-!||    upd_rhs      ../engine/source/implicit/upd_glob_k.F
-!||    upd_rhs_fr   ../engine/source/implicit/imp_solv.F
+!||    imp_dykv         ../engine/source/implicit/imp_dyna.F
+!||    imp_dykv0        ../engine/source/implicit/imp_dyna.F
+!||    upd_rhs          ../engine/source/implicit/upd_glob_k.F
+!||    upd_rhs_fr       ../engine/source/implicit/imp_solv.F
 !||--- calls      -----------------------------------------------------
-!||    prerbe3      ../engine/source/constraints/general/rbe3/rbe3f.F
-!||    rbe3_impb0   ../engine/source/constraints/general/rbe3/rbe3_imp0.F
-!||    rbe3cl       ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    prerbe3          ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    rbe3_impb0       ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3cl           ../engine/source/constraints/general/rbe3/rbe3f.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE RBE3_IMPR1(
      1                    IRBE3  ,LRBE3 ,FRBE3  ,X     ,SKEW   ,
@@ -318,6 +331,8 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -345,7 +360,7 @@ C     REAL
 C-----------------------------------------------
       IADS = SLRBE3/2
       CALL PRERBE3(IRBE3 ,MAX_M , IROTG,JT  ,JR   )
-      ALLOCATE(FDSTNB(18*MAX_M))
+      call my_alloc(FDSTNB, 18*MAX_M, "FDSTNB")
       IF (IROTG>0) ALLOCATE(MDSTNB(18*MAX_M))
       DO N=1,NRBE3
         IAD = IRBE3(1,N)
@@ -363,8 +378,8 @@ C-----------------------------------------------
        END IF
       ENDDO
 C
-      DEALLOCATE(FDSTNB)
-      IF (IROTG>0) DEALLOCATE(MDSTNB)
+      call my_dealloc(FDSTNB)
+      IF (IROTG>0) call my_dealloc(MDSTNB)
 C
       RETURN
       END
@@ -426,16 +441,19 @@ C
       RETURN
       END
 !||====================================================================
-!||    rbe3_impr2   ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3_impr2       ../engine/source/constraints/general/rbe3/rbe3_imp0.F
 !||--- called by ------------------------------------------------------
-!||    imp_dykv     ../engine/source/implicit/imp_dyna.F
-!||    imp_dykv0    ../engine/source/implicit/imp_dyna.F
-!||    upd_rhs      ../engine/source/implicit/upd_glob_k.F
-!||    upd_rhs_fr   ../engine/source/implicit/imp_solv.F
+!||    imp_dykv         ../engine/source/implicit/imp_dyna.F
+!||    imp_dykv0        ../engine/source/implicit/imp_dyna.F
+!||    upd_rhs          ../engine/source/implicit/upd_glob_k.F
+!||    upd_rhs_fr       ../engine/source/implicit/imp_solv.F
 !||--- calls      -----------------------------------------------------
-!||    prerbe3      ../engine/source/constraints/general/rbe3/rbe3f.F
-!||    rbe3_impb2   ../engine/source/constraints/general/rbe3/rbe3_imp0.F
-!||    rbe3cl       ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    prerbe3          ../engine/source/constraints/general/rbe3/rbe3f.F
+!||    rbe3_impb2       ../engine/source/constraints/general/rbe3/rbe3_imp0.F
+!||    rbe3cl           ../engine/source/constraints/general/rbe3/rbe3f.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE RBE3_IMPR2(
      1                    IRBE3  ,LRBE3 ,FRBE3  ,X     ,SKEW   ,
@@ -444,6 +462,8 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -471,7 +491,7 @@ C     REAL
 C-----------------------------------------------
       IADS = SLRBE3/2
       CALL PRERBE3(IRBE3 ,MAX_M , IROTG,JT  ,JR   )
-      ALLOCATE(FDSTNB(18*MAX_M))
+      call my_alloc(FDSTNB, 18*MAX_M, "FDSTNB")
       IF (IROTG>0) ALLOCATE(MDSTNB(18*MAX_M))
       DO N=1,NRBE3
         IAD = IRBE3(1,N)
@@ -489,8 +509,8 @@ C-----------------------------------------------
        END IF
       ENDDO
 C
-      DEALLOCATE(FDSTNB)
-      IF (IROTG>0) DEALLOCATE(MDSTNB)
+      call my_dealloc(FDSTNB)
+      IF (IROTG>0) call my_dealloc(MDSTNB)
 C
       RETURN
       END

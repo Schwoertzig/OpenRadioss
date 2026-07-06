@@ -21,12 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    fail_fld_tsh   ../engine/source/materials/fail/fld/fail_fld_tsh.F
+!||    fail_fld_tsh     ../engine/source/materials/fail/fld/fail_fld_tsh.F
 !||--- called by ------------------------------------------------------
-!||    h3d_fld_tsh    ../engine/source/output/h3d/h3d_results/h3d_fld_tsh.F
+!||    h3d_fld_tsh      ../engine/source/output/h3d/h3d_results/h3d_fld_tsh.F
 !||--- calls      -----------------------------------------------------
-!||    finter         ../engine/source/tools/curve/finter.F
-!||    finterfld      ../engine/source/materials/fail/fld/fail_fld_c.F
+!||    finter           ../engine/source/tools/curve/finter.F
+!||    finterfld        ../engine/source/materials/fail/fld/fail_fld_c.F
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE FAIL_FLD_TSH(
      1     NEL      ,NUPARAM  ,NUVAR    ,NFUNC    ,IFUNC    ,
@@ -40,6 +43,8 @@ c    FLD failure model
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -160,7 +165,7 @@ c
       IF (IENG == 1) THEN   ! transform input fld curve to true strain
         II   = NPF(IFUNC(1))
         LENF = NPF(IFUNC(1)+ 1) - NPF(IFUNC(1))
-        ALLOCATE(XF(LENF))
+        call my_alloc(XF, LENF, "XF")
         DO I = 1,LENF
           XF(I) = LOG(TF(II + I-1) + ONE)
         ENDDO
@@ -172,7 +177,7 @@ c
           DFMAX(I,2) = DAM(I)
           DFMAX(I,1) = MIN(ONE, DAM(I))
         ENDDO
-        DEALLOCATE(XF)
+        call my_dealloc(XF)
       ! -> True strains input
       ELSE
         ! -> Classical formulation

@@ -45,6 +45,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    initbuf_mod                     ../engine/share/resol/initbuf.F
 !||    multimat_param_mod              ../common_source/modules/multimat_param_mod.F90
 !||    mvsiz_mod                       ../engine/share/spe_inc/mvsiz_mod.F90
+!||    my_alloc_mod                    ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                  ../common_source/tools/memory/my_dealloc.F90
 !||    precision_mod                   ../common_source/modules/precision_mod.F90
 !||    segvar_mod                      ../engine/share/modules/segvar_mod.F
 !||    spmd_exch_min_max_mod           ../engine/source/mpi/ale/spmd_exch_min_max.F90
@@ -81,6 +83,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -334,8 +338,8 @@ C     ALE ON / OFF
           s_proc_nb_3 = 0
           r_proc_nb_3 = 0
           buff_size = iad_elem(1,nspmd+1)
-          allocate(s_buffer(2*buff_size*trimat))
-          allocate(r_buffer(2*buff_size*trimat))
+          call my_alloc(s_buffer, 2*buff_size*trimat, "s_buffer")
+          call my_alloc(r_buffer, 2*buff_size*trimat, "r_buffer")
           call spmd_exch_min_max(flag,nspmd,numnod,buff_size,s_proc_nb_3,r_proc_nb_3,             
      .                           s_fr_elem,trimat,s_index_3,r_index_3,s_req_3,r_req_3,fr_elem,iad_elem,            
      .                           alemuscl_buffer%node_min_value,alemuscl_buffer%node_max_value,s_buffer,r_buffer)
@@ -382,8 +386,8 @@ C     ALE ON / OFF
           call spmd_exch_min_max(flag,nspmd,numnod,buff_size,s_proc_nb_3,r_proc_nb_3,             
      .                           s_fr_elem,trimat,s_index_3,r_index_3,s_req_3,r_req_3,fr_elem,iad_elem,            
      .                           alemuscl_buffer%node_min_value,alemuscl_buffer%node_max_value,s_buffer,r_buffer)
-          deallocate(s_buffer)
-          deallocate(r_buffer)
+          call my_dealloc(s_buffer)
+          call my_dealloc(r_buffer)
         endif
          if(itask==0) call stoptime(timers,timer_spmdcfd)
       endif

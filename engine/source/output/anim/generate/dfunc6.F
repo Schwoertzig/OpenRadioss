@@ -44,6 +44,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    multi_fvm_mod                ../common_source/modules/ale/multi_fvm_mod.F90
 !||    multimat_param_mod           ../common_source/modules/multimat_param_mod.F90
 !||    my_alloc_mod                 ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod               ../common_source/tools/memory/my_dealloc.F90
 !||    schlieren_mod                ../engine/share/modules/schlieren_mod.F
 !||====================================================================
       SUBROUTINE DFUNCS(ELBUF_TAB  ,FUNC      ,IFUNC     ,IPARG    ,GEO     ,
@@ -72,6 +73,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -143,7 +145,7 @@ C-----------------------------------------------
       my_real :: RHO0g !< global initial mass density (mixture)
       LOGICAL detected
 C=======================================================================
-      CALL MY_ALLOC(WAL,NBF)
+      call my_alloc(WAL, NBF, "WAL")
       NN1  = 1
       NN2  = 1
       NN3  = NN2 + NUMELS
@@ -2424,6 +2426,6 @@ C-----------------------------------------------
         CALL SPMD_R4GET_PARTN(1,NBF,NBPART,IADG,WAL,BUF)
       ENDIF
 c----------- 
-      IF(ALLOCATED(WA_L))DEALLOCATE(WA_L)
+      IF(ALLOCATED(WA_L)) call my_dealloc(WA_L)
       RETURN
       END

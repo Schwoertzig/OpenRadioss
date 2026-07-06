@@ -31,6 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    array_mod                       ../common_source/modules/array_mod.F
 !||    element_mod                     ../common_source/modules/elements/element_mod.F90
 !||    intbufdef_mod                   ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    my_alloc_mod                    ../common_source/tools/memory/my_alloc.F90
 !||    nodal_arrays_mod                ../common_source/modules/nodal_arrays.F90
 !||    shooting_node_mod               ../engine/share/modules/shooting_node_mod.F90
 !||    spmd_comm_world_mod             ../engine/source/mpi/spmd_comm_world.F90
@@ -53,6 +54,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         USE SHOOTING_NODE_MOD
         USE INTBUFDEF_MOD 
         use element_mod , only : nixs,nixc,nixt,nixp,nixr,nixtg
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -199,7 +201,7 @@ C-----------------------------------------------
      .           2 * REMOTE_SURF_PER_PROC(2,I-1)
             SIZE_BUFFER_R = SIZE_BUFFER_R + 4*REMOTE_SURF_PER_PROC(1,I) + 2*REMOTE_SURF_PER_PROC(2,I)
         ENDDO
-        ALLOCATE( BUFFER_R( SIZE_BUFFER_R ) )
+        call my_alloc(BUFFER_R, SIZE_BUFFER_R, "BUFFER_R")
         ! ----------------
 
         ! ----------------

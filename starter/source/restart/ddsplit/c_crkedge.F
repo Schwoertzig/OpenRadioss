@@ -21,11 +21,12 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    c_crkedge   ../starter/source/restart/ddsplit/c_crkedge.F
+!||    c_crkedge      ../starter/source/restart/ddsplit/c_crkedge.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
-!||    nlocal      ../starter/source/spmd/node/ddtools.F
+!||    nlocal         ../starter/source/spmd/node/ddtools.F
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE C_CRKEDGE(IELC_L   ,IELTG_L ,IEDGECRK_L,NUMEDGES  ,
      .                     IEDGESH4 ,IEDGESH3,CEP       ,P         ,
@@ -39,6 +40,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -69,7 +71,7 @@ C=======================================================================
       OFFC = NUMELS + NUMELQ
       OFFTG = OFFC + NUMELC + NUMELT + NUMELP + NUMELR
 C
-      ALLOCATE(ITAG_EDGE(NUMEDGES))
+      call my_alloc(ITAG_EDGE, NUMEDGES, "ITAG_EDGE")
       ITAG_EDGE = 0
 C
       NEXT = 0
@@ -197,7 +199,7 @@ C---
        ENDIF
       ENDDO
 C---
-      DEALLOCATE(ITAG_EDGE)
+      CALL MY_DEALLOC(ITAG_EDGE)
 C---
       RETURN
       END

@@ -377,7 +377,10 @@ C
 !||    i25prep_slid_2   ../engine/source/interfaces/int25/i25slid.F
 !||--- called by ------------------------------------------------------
 !||    i25main_slid     ../engine/source/interfaces/int25/i25main_slid.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE I25PREP_SLID_2(
@@ -393,6 +396,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -419,11 +424,11 @@ C--------------------------------------------------------
       K_STOK = 0
       ITAGM(1:NRTM)=0
 
-      ALLOCATE(PROV_E(SIZOPT))
-      ALLOCATE(PROV_N(SIZOPT))
+      call my_alloc(PROV_E, SIZOPT, "PROV_E")
+      call my_alloc(PROV_N, SIZOPT, "PROV_N")
 
       IF(FLAGREMN == 2)THEN
-        ALLOCATE(TAGMSR(NRTM))
+        call my_alloc(TAGMSR, NRTM, "TAGMSR")
         TAGMSR(1:NRTM) = 0
 c
         DO N=1,NSN
@@ -597,7 +602,8 @@ c
       ENDIF
 C-----
       IF(I_STOK_OPT+K_STOK>SIZOPT) THEN
-        DEALLOCATE(PROV_E,PROV_N)
+        call my_dealloc(PROV_E)
+        call my_dealloc(PROV_N)
         RETURN
       ENDIF
 C-----
@@ -606,8 +612,9 @@ C-----
       CAND_E(I_STOK_OPT+1:I_STOK_OPT+K_STOK) = PROV_E(1:K_STOK)
       I_STOK_OPT  = I_STOK_OPT + K_STOK
 
-      DEALLOCATE(PROV_E,PROV_N)
-      IF(FLAGREMN == 2) DEALLOCATE(TAGMSR)
+      call my_dealloc(PROV_E)
+      call my_dealloc(PROV_N)
+      IF(FLAGREMN == 2) call my_dealloc(TAGMSR)
 
       RETURN
       END

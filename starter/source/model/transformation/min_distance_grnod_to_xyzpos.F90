@@ -28,6 +28,7 @@
 !||====================================================================
       module min_dist_grnod_to_xyzpos_mod
         use precision_mod, only : WP
+        use MY_ALLOC_MOD, only : my_alloc
         implicit none
       contains
 ! ======================================================================================================================
@@ -41,6 +42,7 @@
 !||    min_dist_grnod_to_xyzpos   ../starter/source/model/transformation/min_distance_grnod_to_xyzpos.F90
 !||--- called by ------------------------------------------------------
 !||    lectrans                   ../starter/source/model/transformation/lectrans.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
         subroutine min_dist_grnod_to_xyzpos(nodes , n_nodes, xyzpos,xyzflag, x     , &
@@ -49,6 +51,7 @@
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use precision_mod, only : WP
+          use my_dealloc_mod, only : my_dealloc
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -82,7 +85,7 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
           ! local coordinates of group nodes
-          allocate(xn(3, n_nodes))
+          call my_alloc(xn, 3, n_nodes, "xn")
           !xn(:,:) = 0.0_WP
 
           ! Initialize min and max coordinates
@@ -232,7 +235,7 @@
             end do
           end if
 
-          if(allocated(xn)) deallocate(xn)
+          if(allocated(xn)) call my_dealloc(xn)
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine min_dist_grnod_to_xyzpos
       end module min_dist_grnod_to_xyzpos_mod

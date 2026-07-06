@@ -24,6 +24,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    split_ebcs           ../starter/source/boundary_conditions/ebcs/split_ebcs.F
 !||--- called by ------------------------------------------------------
 !||    ddsplit              ../starter/source/restart/ddsplit/ddsplit.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    front_mod            ../starter/share/modules1/front_mod.F
 !||    hm_option_read_mod   ../starter/share/modules1/hm_option_read_mod.F
@@ -61,6 +62,7 @@ C-----------------------------------------------
         USE ALE_EBCS_MOD
         USE EBCS_MOD
         USE HM_OPTION_READ_MOD
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -103,10 +105,10 @@ C-----------------------------------------------
                 ! --------------
                 ! allocation of global element id array : its size is overestimated
                 IF(.NOT.ALLOCATED(EBCS_TAB_LOC_2%tab(I)%poly%global_ielem)) THEN
-                    ALLOCATE( EBCS_TAB_LOC_2%tab(I)%poly%global_ielem(NSEG) )
+      call my_alloc(EBCS_TAB_LOC_2%tab(I)%poly%global_ielem, NSEG, "EBCS_TAB_LOC_2%tab(I)%poly%global_ielem")
                 ENDIF
                 ! --------------
-                ALLOCATE( LIST_NODE(NSEG,4) )
+                call my_alloc(LIST_NODE, NSEG, 4, "LIST_NODE")
                 LOCAL_SEG = 0 
                 ! --------------
                 ! loop over the element of the surface
@@ -121,9 +123,9 @@ C-----------------------------------------------
                         DO IJK = 1,4
                             LIST_NODE(LOCAL_SEG,IJK) = IGRSURF(SURF_ID)%NODES(J,IJK)
                         ENDDO
-                        EBCS_TAB_LOC_2%tab(I)%poly%iseg(LOCAL_SEG) = SIGN(EBCS_TAB%tab(EBCS_ID)%poly%iseg(J),GLOBAL_INDEX)
+      EBCS_TAB_LOC_2%tab(I)%poly%iseg(LOCAL_SEG) = SIGN(EBCS_TAB%tab(EBCS_ID)%poly%iseg(J),GLOBAL_INDEX)
 
-                        EBCS_TAB_LOC_2%tab(I)%poly%ielem(LOCAL_SEG) = LOCAL_ELEMENT_ID(EBCS_TAB%tab(EBCS_ID)%poly%ielem(J))
+      EBCS_TAB_LOC_2%tab(I)%poly%ielem(LOCAL_SEG) = LOCAL_ELEMENT_ID(EBCS_TAB%tab(EBCS_ID)%poly%ielem(J))
                         EBCS_TAB_LOC_2%tab(I)%poly%itype(LOCAL_SEG) = EBCS_TAB%tab(EBCS_ID)%poly%itype(J)
 
                         EBCS_TAB_LOC_2%tab(I)%poly%global_ielem(LOCAL_SEG) = EBCS_TAB%tab(EBCS_ID)%poly%ielem(J)
@@ -131,10 +133,11 @@ C-----------------------------------------------
                     ! --------------
                 ENDDO
                 ! --------------
-                ALLOCATE( LIST_NODE_2(LOCAL_SEG,4) )
+                call my_alloc(LIST_NODE_2, LOCAL_SEG, 4, "LIST_NODE_2")
                 LIST_NODE_2(1:LOCAL_SEG,1:4) = LIST_NODE(1:LOCAL_SEG,1:4)
                 CALL EBCS_TAB_LOC_2%tab(I)%poly%set_nodes_elems(LOCAL_SEG, NUMNOD, LIST_NODE_2) ! Faces <--> nodes
-                DEALLOCATE( LIST_NODE,LIST_NODE_2 )
+                CALL MY_DEALLOC(LIST_NODE)
+                CALL MY_DEALLOC(LIST_NODE_2)
             ENDIF
         ENDDO
         ! ---------------------------

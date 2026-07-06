@@ -24,6 +24,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    xfem_crack_init   ../starter/source/elements/xfem/xfem_crack_init.F
 !||--- called by ------------------------------------------------------
 !||    lectur            ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE XFEM_CRACK_INIT(
@@ -34,6 +35,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE XFEM2DEF_MOD
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -139,8 +141,8 @@ C-------------------------------
 C       CRACK Shells Post treatments
 C-------------------------------
         SHCOUNT = CRKSHELL(ILEV)%CRKNUMSHELL
-        ALLOCATE (CRKSHELL(ILEV)%PHANTOML(SHCOUNT))
-        ALLOCATE (CRKSHELL(ILEV)%ELTYPE(SHCOUNT))
+        call my_alloc(CRKSHELL(ILEV)%PHANTOML, SHCOUNT, "CRKSHELL(ILEV)%PHANTOML")
+        call my_alloc(CRKSHELL(ILEV)%ELTYPE, SHCOUNT, "CRKSHELL(ILEV)%ELTYPE")
 C
         SHCOUNT=0
         DO I=1, NUMELC
@@ -166,7 +168,7 @@ C     Global shell crack numbers (by level)
 C-------------------------------
       NCOUNT = 0
       DO ILEV=1,NLEVMAX
-        ALLOCATE(CRKSHELL(ILEV)%PHANTOMG(CRKSHELL(ILEV)%CRKNUMSHELL))
+        call my_alloc(CRKSHELL(ILEV)%PHANTOMG, CRKSHELL(ILEV)%CRKNUMSHELL, "CRKSHELL(ILEV)%PHANTOMG")
 C
         DO I=1,CRKSHELL(ILEV)%CRKNUMSHELL
           NCOUNT=NCOUNT+1
@@ -192,8 +194,8 @@ C-------------------------------
 C
       NCOUNTG = 0
       DO ILEV=1,NLEVMAX
-        ALLOCATE(CRKSHELL(ILEV)%XNODEG(4,CRKSHELL(ILEV)%CRKNUMSHELL))
-        ALLOCATE(CRKSHELL(ILEV)%XNODEL(4,CRKSHELL(ILEV)%CRKNUMSHELL))
+        call my_alloc(CRKSHELL(ILEV)%XNODEG, 4, CRKSHELL(ILEV)%CRKNUMSHELL, "CRKSHELL(ILEV)%XNODEG")
+        call my_alloc(CRKSHELL(ILEV)%XNODEL, 4, CRKSHELL(ILEV)%CRKNUMSHELL, "CRKSHELL(ILEV)%XNODEL")
 C
         NCOUNT = 0
         DO I=1,CRKSHELL(ILEV)%CRKNUMSHELL

@@ -32,18 +32,18 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       END MODULE MOD_SPTRI
 
 !||====================================================================
-!||    sptri         ../starter/source/elements/sph/sptri.F
+!||    sptri          ../starter/source/elements/sph/sptri.F
 !||--- called by ------------------------------------------------------
-!||    lectur        ../starter/source/starter/lectur.F
-!||    spinih        ../starter/source/elements/sph/spinih.F
+!||    lectur         ../starter/source/starter/lectur.F
+!||    spinih         ../starter/source/elements/sph/spinih.F
 !||--- calls      -----------------------------------------------------
-!||    ancmsg        ../starter/source/output/message/message.F
-!||    arret         ../starter/source/system/arret.F
-!||    spbuc31       ../starter/source/elements/sph/spbuc31.F
-!||    spclasv       ../starter/source/elements/sph/spclasv.F
+!||    ancmsg         ../starter/source/output/message/message.F
+!||    arret          ../starter/source/system/arret.F
+!||    spbuc31        ../starter/source/elements/sph/spbuc31.F
+!||    spclasv        ../starter/source/elements/sph/spclasv.F
 !||--- uses       -----------------------------------------------------
-!||    message_mod   ../starter/share/message_module/message_mod.F
-!||    mod_sptri     ../starter/source/elements/sph/sptri.F
+!||    message_mod    ../starter/share/message_module/message_mod.F
+!||    mod_sptri      ../starter/source/elements/sph/sptri.F
 !||====================================================================
       SUBROUTINE SPTRI(KXSP,IXSP,NOD2SP,X,SPBUF,
      .                 LPRTSPH,LONFSPH,IPARTSP,SZ_INTP_DIST,MAX_INTP_DIST_PART,
@@ -51,6 +51,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE MOD_SPTRI
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -82,7 +83,7 @@ C-----------------------------------------------
 C-----------------------------------------------
       NVOIS = 0
 C-----------------------------------------------      
-      ALLOCATE(WREDUCE(NUMSPH),STAT=IERROR)
+      call my_alloc(WREDUCE, NUMSPH, "WREDUCE", stat=IERROR)
       IF(IERROR/=0) THEN
         CALL ANCMSG(MSGID=19,MSGTYPE=MSGERROR,ANMODE=ANINFO,
      .              C1='(SPH)')
@@ -178,7 +179,7 @@ C      CALL MY_BARRIER
 C     /---------------/
       IF(MYSPATRUE<SPATRUE)SPATRUE=MYSPATRUE
       ELSE     
-        DEALLOCATE(WREDUCE)       
+        CALL MY_DEALLOC(WREDUCE)
       ENDIF
 
       RETURN

@@ -22,15 +22,17 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    w_bufel    ../starter/source/restart/ddsplit/w_bufel.F
+!||    w_bufel        ../starter/source/restart/ddsplit/w_bufel.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit    ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit        ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_BUFEL(IPARG,PROC,LBUFEL_L,ELBUF,LEN_AM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -51,7 +53,7 @@ C-----------------------------------------------
       my_real,
      .    DIMENSION(:),ALLOCATABLE :: ELBUF_L
 
-      ALLOCATE(ELBUF_L(LBUFEL_L))
+      call my_alloc(ELBUF_L, LBUFEL_L, "ELBUF_L")
 C
       LB_L = 0
       DO NG=1,NGROUP
@@ -73,7 +75,7 @@ C
       CALL WRITE_DB(ELBUF_L,LBUFEL_L)
       LEN_AM = LEN_AM + LBUFEL_L
 
-      DEALLOCATE(ELBUF_L)
+      CALL MY_DEALLOC(ELBUF_L)
 C
       RETURN
       END

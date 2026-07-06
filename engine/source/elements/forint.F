@@ -76,6 +76,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    initbuf_mod             ../engine/share/resol/initbuf.F
 !||    mat_elem_mod            ../common_source/modules/mat_elem/mat_elem_mod.F90
 !||    message_mod             ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod            ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod          ../common_source/tools/memory/my_dealloc.F90
 !||    nlocal_reg_mod          ../common_source/modules/nlocal_reg_mod.F
 !||    output_mod              ../common_source/modules/output/output_mod.F90
 !||    preload_axial_mod       ../engine/source/elements/spring/preload_axial.F90
@@ -123,7 +125,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      Z    SBUFMAT   ,SNPC      ,STF        ,NODADT    ,DTFAC1,
      .    DTMIN1    ,IDTMIN    ,IOUT       ,ISTDO     ,IDTMINS,DTFACS,NSVOIS,
      *    IRESP     ,MAXFUNC   ,USERL_AVAIL,GLOB_THERM,IMON_MAT,DTMINS,SANIN,
-     *    NGRTH     ,NELEM     ,SFEM )
+     *    NGRTH     ,NELEM     ,SFEM      ,FLG_SPR_DT )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -151,6 +153,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -210,6 +214,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: IDTMINS
       INTEGER, INTENT(IN) :: NGRTH
       INTEGER, INTENT(IN) :: NELEM
+      INTEGER, INTENT(INOUT) :: FLG_SPR_DT
       my_real, INTENT(IN) :: DTMINS
       my_real, INTENT(IN) :: DTFACS
       my_real
@@ -265,9 +270,13 @@ C-----------------------------------------------
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       integer :: fake_size = 0
 C======================================================================|
-       ALLOCATE(FX(MVSIZ,64),FY(MVSIZ,64),FZ(MVSIZ,64),STAT=IERROR)
-       ALLOCATE(MX(MVSIZ,4),MY(MVSIZ,4),MZ(MVSIZ,4),STAT=IERROR)
-       ALLOCATE(JFAC(MVSIZ,729)) ! for solid 8z
+       call my_alloc(FX, MVSIZ, 64, "FX", stat=IERROR)
+       call my_alloc(FY, MVSIZ, 64, "FY", stat=IERROR)
+       call my_alloc(FZ, MVSIZ, 64, "FZ", stat=IERROR)
+       call my_alloc(MX, MVSIZ, 4, "MX", stat=IERROR)
+       call my_alloc(MY, MVSIZ, 4, "MY", stat=IERROR)
+       call my_alloc(MZ, MVSIZ, 4, "MZ", stat=IERROR)
+       call my_alloc(JFAC, MVSIZ, 729, "JFAC") ! for solid 8z
        SBID=1
 !
        IF(IERROR/=0)THEN
@@ -1431,7 +1440,8 @@ c
      F   DMELRT(NF1),          FLAG_SLIPRING_UPDATE, FLAG_RETRACTOR_UPDATE,H3D_DATA,
      G   JSMS,                 IGRE,                 NFT,                  PRELOAD1   ,
      H   STF_F,                STF,                  SANIN,                IRESP,
-     I   SNPC ,                mat_elem,             NGRTH,                NELEM)
+     I   SNPC ,                mat_elem,             NGRTH,                NELEM,
+     J   FLG_SPR_DT)
          ELSE
           CALL RFORC3(PYTHON,
      1   ELBUF_TAB(NG),       JFT,                 JLT,                 NEL,
@@ -1451,7 +1461,7 @@ c
      F   ITASK,               H3D_DATA,            JSMS,                NFT,
      G   IAD,                 IGRE,                PRELOAD1 ,           STF_F ,
      H   STF,                 SANIN,               IRESP,               IMPL_S,
-     I   IDYNA,               SNPC)
+     I   IDYNA,               SNPC,                FLG_SPR_DT)
              
          ENDIF
 C
@@ -1570,7 +1580,13 @@ C             ROTATION IF COROTA SYSTEM
   250   CONTINUE
       END DO
 C
-      DEALLOCATE(FX,FY,FZ,MX,MY,MZ,JFAC)
+      call my_dealloc(FX)
+      call my_dealloc(FY)
+      call my_dealloc(FZ)
+      call my_dealloc(MX)
+      call my_dealloc(MY)
+      call my_dealloc(MZ)
+      call my_dealloc(JFAC)
 
 C-----------
       RETURN

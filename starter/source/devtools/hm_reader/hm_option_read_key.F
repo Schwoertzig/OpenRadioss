@@ -69,7 +69,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_preread_sphio                  ../starter/source/loads/sph/hm_preread_sphio.F
 !||    hm_rbodies_add_main_node          ../starter/source/devtools/hm_reader/hm_rbodies_add_main_node.F90
 !||    hm_read_activ                     ../starter/source/tools/activ/hm_read_activ.F
-!||    hm_read_adinertia                 ../starter/source/tools/adinertia/hm_read_adinertia.F90
 !||    hm_read_admas                     ../starter/source/tools/admas/hm_read_admas.F
 !||    hm_read_ale_grid                  ../starter/source/general_controls/ale_grid/hm_read_ale_grid.F
 !||    hm_read_ale_link                  ../starter/source/constraints/ale/hm_read_ale_link_vel.F
@@ -191,6 +190,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    hm_read_visc                      ../starter/source/materials/visc/hm_read_visc.F
 !||    hm_read_window_user               ../starter/source/tools/userwi/hm_read_window_user.F
 !||    hm_read_xref                      ../starter/source/loads/reference_state/xref/hm_read_xref.F
+!||    hm_s_ale                          ../starter/source/devtools/hm_reader/hm_s_ale.F90
 !||    hm_set                            ../starter/source/model/sets/hm_set.F
 !||    hm_setfxrbyon                     ../starter/source/constraints/fxbody/hm_setfxrbyon.F
 !||    hm_sz_r2r                         ../starter/source/coupling/rad2rad/routines_r2r.F

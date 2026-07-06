@@ -71,6 +71,7 @@
 !||    radiossviper_sendmass                    ../engine/source/coupling/viper/viper_interface_mod.F90
 !||--- uses       -----------------------------------------------------
 !||    connectivity_mod                         ../common_source/modules/connectivity.F90
+!||    my_alloc_mod                             ../common_source/tools/memory/my_alloc.F90
 !||    nodal_arrays_mod                         ../common_source/modules/nodal_arrays.F90
 !||====================================================================
         subroutine viper_coupling_initialize(VIPER, NODES, ELEMENT,   NUMNOD,&
@@ -84,6 +85,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
           type(viper_coupling_), intent(inout) :: VIPER
           type(nodal_arrays_), intent(in) :: NODES
           TYPE(connectivity_), INTENT(in) :: ELEMENT
@@ -132,8 +134,8 @@
           ! (confirmed that NUMELS8,NUMELS10,NUMELS16,NUMELS20 are not in the array)
           ioffset_3shell = ioffset_4shell+NUMELC+NUMELT+NUMELP+NUMELR ! The (assumed) index offset for 3-shells
           WRITE(ISTDO,"(a,I18)") "Radioss2Viper: the total number of elements used by Viper: ",iNUMELEv_TOTAL
-          ALLOCATE(VIPER%ITABM1(NUMNOD))
-          ALLOCATE(VIPER%IXEM1(iNUMELEv_TOTAL))
+          call my_alloc(VIPER%ITABM1, NUMNOD, "VIPER%ITABM1")
+          call my_alloc(VIPER%IXEM1, iNUMELEv_TOTAL, "VIPER%IXEM1")
 
 !         Initialize node ordering & send nodal masses to Viper
 !         Based upon the ordering of the element numbers in the 0000.out & from our experimentation,
@@ -178,11 +180,17 @@
 !||    radiossviper_inittab        ../engine/source/coupling/viper/viper_interface_mod.F90
 !||--- called by ------------------------------------------------------
 !||    viper_coupling_initialize   ../engine/source/coupling/viper/viper_interface_mod.F90
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod                ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod              ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine RadiossViper_InitTab(numnod,itab,itabm1,ncol,ioffset)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           integer, intent(in)  :: numnod,itab(numnod),ncol,ioffset
           integer, intent(out) :: itabm1(numnod)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -198,7 +206,7 @@
           if (iverbose) print*, "Radioss2Viper: InitTab: entering with ncol = ",ncol," and N = ",numnod
 
           ! copy data to a 1D array to (hopefully) minimise cache misses
-          allocate(itab1D(numnod))
+          call my_alloc(itab1D, numnod, "itab1D")
           do i = 1,numnod
             itab1D(i) = itab(i*ncol)
           end do
@@ -213,7 +221,7 @@
           if (iverbose) print*, "Radioss2Viper: InitTab: IDs in the range ",idmin,idmax
 
           ! allocate array & initialise to illegal index
-          allocate(itabtmp(idmax))
+          call my_alloc(itabtmp, idmax, "itabtmp")
           do i = 1,idmax
             itabtmp(i) = -1
           end do
@@ -232,8 +240,8 @@
             itabm1(i) = itabtmp(j) + ioffset ! fill in the correct entry using the correct offset value
             j = j + 1                        ! advance to next entry
           end do
-          deallocate(itabtmp)
-          deallocate(itab1D)
+          call my_dealloc(itabtmp)
+          call my_dealloc(itab1D)
 
           print*, "Radioss2Viper: InitTab: exiting with ncol = ",ncol," and N = ",numnod
 
@@ -314,11 +322,16 @@
 !||--- called by ------------------------------------------------------
 !||    viper_coupling_initialize   ../engine/source/coupling/viper/viper_interface_mod.F90
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod                ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod              ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine RadiossViper_SendMass(numnod,MS,itabm1)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           integer, intent(in) :: numnod,itabm1(numnod)
           real(kind=WP), intent(in) :: MS(numnod)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -329,7 +342,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          allocate(MSviper(numnod))
+          call my_alloc(MSviper, numnod, "MSviper")
           if (iverbose) print*, "Radioss2Viper: SendMass: entering with numnod = ",numnod
 !         make new arrays where the elements are in the correct order
           do i = 1,numnod
@@ -337,7 +350,7 @@
           end do
           call SPMD_SEND(MSviper,numnod,  1, 9930, MPI_COMM_WORLD)
           if (iverbose) print*, "Radioss2Viper: SendMass: exiting"
-          deallocate(MSviper)
+          call my_dealloc(MSviper)
         end subroutine RadiossViper_SendMass
 ! ----------------------------------------------------------------------------------------------------------------------
 ! This will send the initial erosion status to Viper; this is required to inform Viper of void elements that need to be excluded calculations
@@ -407,6 +420,9 @@
 !||--- called by ------------------------------------------------------
 !||    resol                  ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine RadiossViper_SendXVE( &
           numnod, numele_radioss, numele_viper, nparg, ngroup, &
@@ -414,6 +430,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           integer, intent(in)    :: numnod,numele_radioss,numele_viper,nparg,ngroup
           integer, intent(in)    :: itabm1(numnod),ixem1(numele_viper),iparg(nparg,ngroup)
           integer, intent(inout) :: numonIO,numrigidIO
@@ -429,8 +447,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          allocate(Xviper(3*numnod))
-          allocate(Vviper(3*numnod))
+          call my_alloc(Xviper, 3*numnod, "Xviper")
+          call my_alloc(Vviper, 3*numnod, "Vviper")
 
           if (iverbose) print*, "Radioss2Viper: Entering SendXVE "
 !         make temporary position & velocity arrays where the elements are in the correct order for Viper
@@ -489,8 +507,8 @@
           end if
           numonIO    = non
           numrigidIO = nrigid
-          deallocate(Xviper)
-          deallocate(Vviper)
+          call my_dealloc(Xviper)
+          call my_dealloc(Vviper)
         end subroutine RadiossViper_SendXVE
 ! ----------------------------------------------------------------------------------------------------------------------
 ! This will receive the FORCES on the nodes from Viper
@@ -501,11 +519,16 @@
 !||--- called by ------------------------------------------------------
 !||    resol                               ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
+!||    my_alloc_mod                        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                      ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine RadiossViper_ReceiveAccelerations(numnod,A,Fext,itabm1)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           integer, intent(in)    :: numnod,itabm1(numnod)
           real(kind=WP), intent(inout) :: A(3,numnod),Fext(3,numnod)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -516,7 +539,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          allocate(Aviper(3*numnod))
+          call my_alloc(Aviper, 3*numnod, "Aviper")
           if (iverbose) print*, "Radioss2Viper: ReceiveAccelerations: ", numnod
           call SPMD_RECV(Aviper, 3*numnod, 1, 9910, MPI_COMM_WORLD)
           do i = 1,numnod
@@ -528,7 +551,7 @@
             Fext(2,itabm1(i)) = Fext(2,itabm1(i)) + Aviper(3*i-1)
             Fext(3,itabm1(i)) = Fext(3,itabm1(i)) + Aviper(3*i  )
           end do
-          deallocate(Aviper)
+          call my_dealloc(Aviper)
         end subroutine RadiossViper_ReceiveAccelerations
 ! ----------------------------------------------------------------------------------------------------------------------
 ! This will pass Viper's timestep to OpenRadioss, compare the two, select the shortest;

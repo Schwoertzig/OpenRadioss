@@ -54,6 +54,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inter_sorting_mod            ../engine/share/modules/inter_sorting_mod.F
 !||    message_mod                  ../engine/share/message_module/message_mod.F
 !||    multi_fvm_mod                ../common_source/modules/ale/multi_fvm_mod.F90
+!||    my_alloc_mod                 ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod               ../common_source/tools/memory/my_dealloc.F90
 !||    timer_mod                    ../engine/source/system/timer_mod.F90
 !||    tri7box                      ../engine/share/modules/tri7box.F
 !||====================================================================
@@ -80,6 +82,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 #include "spmd.inc"
@@ -217,10 +221,10 @@ C Barrier in all cases for bminma [and cur_max_max]
 C
       IF(ITASK==0)THEN
         IF(.NOT. ALLOCATED(INTBUF_TAB%CAND_A)) THEN
-          ALLOCATE(INTBUF_TAB%CAND_A(NSNROLD+NSN+3))   
+          call my_alloc(INTBUF_TAB%CAND_A, NSNROLD+NSN+3, "INTBUF_TAB%CAND_A")
         ELSEIF(SIZE(INTBUF_TAB%CAND_A)<NSNROLD+NSN+3) THEN
-          DEALLOCATE(INTBUF_TAB%CAND_A)
-          ALLOCATE(INTBUF_TAB%CAND_A(NSN+NSNROLD+3))
+          call my_dealloc(INTBUF_TAB%CAND_A)
+          call my_alloc(INTBUF_TAB%CAND_A, NSN+NSNROLD+3, "INTBUF_TAB%CAND_A")
         ENDIF
       ENDIF
 
@@ -447,8 +451,8 @@ C      ENDIF
 
  50   CALL MY_BARRIER
       IF(ITASK==0) THEN
-        IF(ALLOCATED( LIST_REMOTE_S_NODE ) ) DEALLOCATE( LIST_REMOTE_S_NODE )
-        ALLOCATE( LIST_REMOTE_S_NODE(NSNR) )
+        IF(ALLOCATED( LIST_REMOTE_S_NODE ) ) call my_dealloc(LIST_REMOTE_S_NODE)
+        call my_alloc(LIST_REMOTE_S_NODE, NSNR, "LIST_REMOTE_S_NODE")
         REMOTE_S_NODE = 0
       ENDIF
       CALL MY_BARRIER
@@ -597,7 +601,7 @@ C
       END IF
 
       IF(ITASK==0) THEN
-        IF(ALLOCATED( LIST_REMOTE_S_NODE ) ) DEALLOCATE( LIST_REMOTE_S_NODE )
+        IF(ALLOCATED( LIST_REMOTE_S_NODE ) ) call my_dealloc(LIST_REMOTE_S_NODE)
       ENDIF
       CALL MY_BARRIER
 C

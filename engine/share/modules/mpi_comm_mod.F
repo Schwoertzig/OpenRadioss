@@ -56,8 +56,10 @@ C where send and received are not done in the same routine
 !||    allocate_comm_struct   ../engine/share/modules/mpi_comm_mod.F
 !||--- called by ------------------------------------------------------
 !||    i25main_slid           ../engine/source/interfaces/int25/i25main_slid.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    mpi_commod             ../engine/share/modules/mpi_comm_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
       SUBROUTINE ALLOCATE_COMM_STRUCT(OBJECT,S1,S2)
         USE MPI_COMMOD
@@ -65,33 +67,37 @@ C where send and received are not done in the same routine
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
         TYPE(MPI_COMM_STRUCT) :: OBJECT
         INTEGER, INTENT(IN) :: S1,S2
-        ALLOCATE(OBJECT%SEND_RQ(S1,S2)) 
-        ALLOCATE(OBJECT%RECV_RQ(S1,S2)) 
-        ALLOCATE(OBJECT%TAG    (S1,S2))
-        ALLOCATE(OBJECT%SIZ    (S1,S2))     
+        call my_alloc(OBJECT%SEND_RQ, S1, S2, "OBJECT%SEND_RQ")
+        call my_alloc(OBJECT%RECV_RQ, S1, S2, "OBJECT%RECV_RQ")
+        call my_alloc(OBJECT%TAG, S1, S2, "OBJECT%TAG")
+        call my_alloc(OBJECT%SIZ, S1, S2, "OBJECT%SIZ")
       END SUBROUTINE
 !||====================================================================
 !||    deallocate_comm_struct   ../engine/share/modules/mpi_comm_mod.F
 !||--- called by ------------------------------------------------------
 !||    i25main_slid             ../engine/source/interfaces/int25/i25main_slid.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    mpi_commod               ../engine/share/modules/mpi_comm_mod.F
+!||    my_dealloc_mod           ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE DEALLOCATE_COMM_STRUCT(OBJECT,S1,S2)
        USE MPI_COMMOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
         TYPE(MPI_COMM_STRUCT) :: OBJECT
         INTEGER, INTENT(IN) :: S1,S2
-        DEALLOCATE(OBJECT%SEND_RQ) 
-        DEALLOCATE(OBJECT%RECV_RQ) 
-        DEALLOCATE(OBJECT%TAG    )
-        DEALLOCATE(OBJECT%SIZ    )     
+        call my_dealloc(OBJECT%SEND_RQ)
+        call my_dealloc(OBJECT%RECV_RQ)
+        call my_dealloc(OBJECT%TAG)
+        call my_dealloc(OBJECT%SIZ)
       END SUBROUTINE
 
 

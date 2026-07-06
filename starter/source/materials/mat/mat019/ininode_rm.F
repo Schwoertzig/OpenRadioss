@@ -21,9 +21,11 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    ininode_rm   ../starter/source/materials/mat/mat019/ininode_rm.F
+!||    ininode_rm     ../starter/source/materials/mat/mat019/ininode_rm.F
 !||--- called by ------------------------------------------------------
-!||    initia       ../starter/source/elements/initia/initia.F
+!||    initia         ../starter/source/elements/initia/initia.F
+!||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE ININODE_RM(CONNEC,IRIG_NODE,IRBY,SLN,NRB,NRSLN,
      .                      STIFN,STIFR, RMSTIFN, RMSTIFR,NUMEL,
@@ -35,6 +37,7 @@ C    SLN     second node number by rigid material
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   A n a l y s e   M o d u l e
@@ -60,7 +63,7 @@ C     REAL
 C
 C  construction of rigid materials
 C
-      ALLOCATE (IRN(NUMNOD))  
+      call my_alloc(IRN, NUMNOD, "IRN")
       IRN = 0
       NR = 0
       NRSLN =0
@@ -73,7 +76,9 @@ C
 C     
 C  allocation of work array
 C 
-      ALLOCATE (INDX(NR),INDX0(NR),ITAG(NUMNOD))
+      call my_alloc(INDX, NR, "ININODE_RM/INDX")
+      call my_alloc(INDX0, NR, "INDX0")
+      call my_alloc(ITAG, NUMNOD, "ITAG")
       ALLOCATE (INDXE(NER),INDXE0(NER),ITAGE(NER)) 
 C initialisation      
       ITAG = 0
@@ -241,7 +246,10 @@ C
          NRSLN = NRSLN + II
       ENDDO
 C          
-       DEALLOCATE(ITAG,IRN,INDX,INDX0)
+       CALL MY_DEALLOC(ITAG)
+       CALL MY_DEALLOC(IRN)
+       CALL MY_DEALLOC(INDX)
+       CALL MY_DEALLOC(INDX0)
        DEALLOCATE(INDXE,INDXE0,ITAGE)
       RETURN
       END

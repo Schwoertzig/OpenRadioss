@@ -28,7 +28,7 @@
 !||    inter_prepare_sort           ../engine/source/interfaces/generic/inter_prepare_sort.F
 !||====================================================================
       module voxel_dimensions_mod
-      implicit none
+        implicit none
       contains
 !||====================================================================
 !||    compute_voxel_dimensions   ../engine/source/interfaces/intsort/voxel_dimensions.F90
@@ -39,6 +39,7 @@
 !||    constant_mod               ../common_source/modules/constant_mod.F
 !||    inter_struct_mod           ../engine/share/modules/inter_struct_mod.F
 !||    my_alloc_mod               ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod             ../common_source/tools/memory/my_dealloc.F90
 !||    precision_mod              ../common_source/modules/precision_mod.F90
 !||====================================================================
         subroutine compute_voxel_dimensions(nrtm,nmn, inter_struct)
@@ -52,6 +53,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_dealloc_mod, only : my_dealloc
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
@@ -126,9 +128,9 @@
 
 !$OMP SINGLE
           if(nrtm > 0) then
-            if(allocated(inter_struct%voxel) .and. inter_struct%voxel_size < res8) deallocate(inter_struct%voxel)
+            if(allocated(inter_struct%voxel) .and. inter_struct%voxel_size < res8) call my_dealloc(inter_struct%voxel)
             if(.not.allocated(inter_struct%voxel)) then
-              call my_alloc(inter_struct%voxel,res8)
+              call my_alloc(inter_struct%voxel, res8, "inter_struct%voxel")
               inter_struct%voxel_size = res8
             end if
             do i=1,inter_struct%voxel_size

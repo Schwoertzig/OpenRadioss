@@ -22,15 +22,18 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
 !||====================================================================
-!||    w_rnloc    ../starter/source/restart/ddsplit/w_rnloc.F
+!||    w_rnloc          ../starter/source/restart/ddsplit/w_rnloc.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit    ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_RNLOC(RTAB,NODGLOB,NUMNOD_L,LEN_AM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -45,7 +48,7 @@ C-----------------------------------------------
       my_real, DIMENSION(:), ALLOCATABLE :: RTMP
 C-----------------------------------------------
 !     allocate 1d array
-      ALLOCATE( RTMP(NUMNOD_L) )
+      call my_alloc(RTMP, NUMNOD_L, "RTMP")
 ! --------------------------------
 C
       DO I = 1, NUMNOD_L
@@ -57,7 +60,7 @@ C
 C
 ! --------------------------------
 !     deallocate 1d array
-      DEALLOCATE( RTMP )
+      call my_dealloc(RTMP)
 ! --------------------------------
       RETURN
       END

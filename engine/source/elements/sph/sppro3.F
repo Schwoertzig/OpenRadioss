@@ -21,13 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    sppro3     ../engine/source/elements/sph/sppro3.F
+!||    sppro3           ../engine/source/elements/sph/sppro3.F
 !||--- called by ------------------------------------------------------
-!||    sptrivox   ../engine/source/elements/sph/sptrivox.F
+!||    sptrivox         ../engine/source/elements/sph/sptrivox.F
 !||--- calls      -----------------------------------------------------
-!||    myqsort    ../common_source/tools/sort/myqsort.F
+!||    myqsort          ../common_source/tools/sort/myqsort.F
 !||--- uses       -----------------------------------------------------
-!||    sphbox     ../engine/share/modules/sphbox.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    sphbox           ../engine/share/modules/sphbox.F
 !||====================================================================
       SUBROUTINE SPPRO3(IL    ,KXSP ,IXSP ,NOD2SP,JVOIS,
      .                  JSTOR,JPERM ,DVOIS,IREDUCE,KREDUCE,
@@ -39,6 +41,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
@@ -141,7 +145,7 @@ C Choice of cells to keep such that distance < DK to avoid parallelization probl
                     ENDDO
                     NVOIS=MIN(NVOIS,KVOISPH)
                 ELSE    
-                    ALLOCATE(DSTOR(KXSPR(IL-NUMSPH)))
+                    call my_alloc(DSTOR, KXSPR(IL-NUMSPH), "DSTOR")
                     DO K=1,KXSPR(IL-NUMSPH)
                         JSTOR(K)=JVOIS(K)
                         DSTOR(K)=DVOIS(K)
@@ -154,7 +158,7 @@ C Choice of cells to keep such that distance < DK to avoid parallelization probl
                             DVOIS(NVOIS)=DSTOR(K)
                               END IF
                           END DO
-                    DEALLOCATE(DSTOR)
+                    call my_dealloc(DSTOR)
                     NVOIS=MIN(NVOIS,KVOISPH)
                 ENDIF
             ELSE

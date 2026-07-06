@@ -21,15 +21,18 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    w_reloc2   ../starter/source/restart/ddsplit/w_reloc2.F
+!||    w_reloc2         ../starter/source/restart/ddsplit/w_reloc2.F
 !||--- called by ------------------------------------------------------
-!||    ddsplit    ../starter/source/restart/ddsplit/ddsplit.F
+!||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE W_RELOC2(RTAB,NDIM,CEP,P,NUMEL,NUMEL_L,LEN_AM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -44,7 +47,7 @@ C-----------------------------------------------
       my_real, DIMENSION(:,:), ALLOCATABLE :: RTMP
 C-----------------------------------------------
 !     allocate 2d array
-      ALLOCATE( RTMP(NDIM,NUMEL_L) )
+      call my_alloc(RTMP, NDIM, NUMEL_L, "RTMP")
 ! --------------------------------------
 C
       EL = 0
@@ -62,7 +65,7 @@ C
 C
 ! --------------------------------------
 !     deallocate 2d array
-      DEALLOCATE( RTMP )
+      call my_dealloc(RTMP)
 ! --------------------------------------
       RETURN
       END

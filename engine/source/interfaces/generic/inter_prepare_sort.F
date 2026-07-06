@@ -45,6 +45,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    inter_component_bound_mod     ../engine/source/interfaces/generic/inter_component_bound.F90
 !||    inter_sorting_mod             ../engine/share/modules/inter_sorting_mod.F
 !||    inter_struct_mod              ../engine/share/modules/inter_struct_mod.F
+!||    my_alloc_mod                  ../common_source/tools/memory/my_alloc.F90
 !||    spmd_exchange_component_mod   ../engine/source/mpi/interfaces/spmd_exch_component.F90
 !||    tri7box                       ../engine/share/modules/tri7box.F
 !||    voxel_dimensions_mod          ../engine/source/interfaces/intsort/voxel_dimensions.F90
@@ -87,6 +88,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -187,7 +189,7 @@ C-----------------------------------------------
         ! allocation & initialization of coarse_grid
         IF(ITASK==0) THEN
           IF(.NOT.ALLOCATED(LOCAL_COARSE_GRID)) THEN
-            ALLOCATE(LOCAL_COARSE_GRID(NB_BOX_COARSE_GRID**3+1))
+            call my_alloc(LOCAL_COARSE_GRID, NB_BOX_COARSE_GRID**3+1, "LOCAL_COARSE_GRID")
           ENDIF            
           LOCAL_COARSE_GRID(1:NB_BOX_COARSE_GRID**3+1) = 0
         ENDIF

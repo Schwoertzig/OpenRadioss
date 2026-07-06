@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    strs_txt50        ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
 !||    my_alloc_mod      ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod    ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE STAT_N_BCS(ICODE,NUMNOD,ITAB,ITABG,LENG,
      .   NODGLOB,ISKEW,NODTAG)
@@ -39,6 +40,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -63,9 +65,9 @@ C-----------------------------------------------
       CHARACTER TRA*3,ROT*3
       CHARACTER*100 LINE
 C-----------------------------------------------
-      CALL MY_ALLOC(ICODEG,LENG)
-      CALL MY_ALLOC(ISKEWG,LENG)
-      CALL MY_ALLOC(NODTAGLOB,LENG)
+      call my_alloc(ICODEG, LENG, "ICODEG")
+      call my_alloc(ISKEWG, LENG, "ISKEWG")
+      call my_alloc(NODTAGLOB, LENG, "NODTAGLOB")
 C
       IF (NSPMD > 1) THEN
         CALL SPMD_ISTAT_GATH(ICODE,NODGLOB,ICODEG)
@@ -217,9 +219,9 @@ C
       ENDIF
 
 C
-      DEALLOCATE(ICODEG)
-      DEALLOCATE(ISKEWG)
-      DEALLOCATE(NODTAGLOB)
+      call my_dealloc(ICODEG)
+      call my_dealloc(ISKEWG)
+      call my_dealloc(NODTAGLOB)
  
       RETURN
       END

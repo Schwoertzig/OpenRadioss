@@ -37,6 +37,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    multi_fvm_mod                ../common_source/modules/ale/multi_fvm_mod.F90
 !||    multimat_param_mod           ../common_source/modules/multimat_param_mod.F90
 !||    my_alloc_mod                 ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod               ../common_source/tools/memory/my_dealloc.F90
 !||    schlieren_mod                ../engine/share/modules/schlieren_mod.F
 !||====================================================================
       SUBROUTINE DFUNC0(ELBUF_TAB, FUNC             ,IFUNC     ,IPARG   ,
@@ -62,6 +63,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -114,7 +116,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
-      CALL MY_ALLOC(WA,NBF)
+      call my_alloc(WA, NBF, "WA")
       NN1 = 1
 
       !-------------------------------------------------------!
@@ -599,7 +601,7 @@ C-----------------------------------------------
           CALL SPMD_R4GET_PARTN(1,NBF,NBPART,IADG,WA,BUF)
       ENDIF
 c-----------
-      IF(ALLOCATED(WA_L))DEALLOCATE(WA_L)
-      IF(ALLOCATED(WA))DEALLOCATE(WA)
+      IF(ALLOCATED(WA_L)) call my_dealloc(WA_L)
+      IF(ALLOCATED(WA)) call my_dealloc(WA)
       RETURN
       END

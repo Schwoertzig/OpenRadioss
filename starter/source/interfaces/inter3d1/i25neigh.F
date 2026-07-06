@@ -51,6 +51,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -120,9 +121,9 @@ C-----------------------------------------------
       DATA KPERM1/1,3,5,7/
       DATA KPERM2/2,4,6,8/
 C-----------------------------------------------
-      CALL MY_ALLOC(ITAG,NUMNOD)
-      CALL MY_ALLOC(NTAG,4*NRTM)
-      CALL MY_ALLOC(ROOT,4*NRTM)
+      CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
+      CALL MY_ALLOC(NTAG,4*NRTM,"NTAG")
+      CALL MY_ALLOC(ROOT,4*NRTM,"ROOT")
 C
       DO I=1,NRTM
         MSEGLO(I)=I      
@@ -157,9 +158,17 @@ C-----------max number of connected segment per node
        NMAX=MAX(NMAX,ITAG(I))
        ITAG(I)=0
       ENDDO
-      ALLOCATE(MVOI(NMAX+10),EIDNOD(NMAX,NUMNOD))
+      call my_alloc(MLOC, NUMNOD, "MLOC", stat=stat)
+      MLOC(1:NUMNOD)=0
+      DO I=1,NMN
+         N       = MSR(I)
+         MLOC(N) = I
+      END DO
+
+      call my_alloc(MVOI, NMAX+10, "MVOI")
+      call my_alloc(EIDNOD, NMAX, NMN, "EIDNOD")
       MVOI(1:NMAX+10)=0
-      EIDNOD(1:NMAX,1:NUMNOD)=0
+      EIDNOD(1:NMAX,1:NMN)=0
 C------------ini- E_ids of each node
       DO I=1,NRTM
         IF(IELEM_M(2,I) == 0) THEN
@@ -167,12 +176,12 @@ C------------ini- E_ids of each node
           DO J=1,3
             M=IRECT(J,I)
             ITAG(M)=ITAG(M)+1
-            EIDNOD(ITAG(M),M)=I
+            EIDNOD(ITAG(M),MLOC(M))=I
           END DO
           IF (IRECT(4,I)/=IRECT(3,I)) THEN
             M= IRECT(4,I)
             ITAG(M)=ITAG(M)+1
-            EIDNOD(ITAG(M),M)=I
+            EIDNOD(ITAG(M),MLOC(M))=I
           END IF
         ENDIF
       END DO
@@ -186,7 +195,7 @@ C------------MVOISIN-(seg number) ---
 C
       NRTM_S = 0
       IF(IDEL_SOLID > 0) THEN 
-        ALLOCATE(ITAG_S(NRTM))
+        call my_alloc(ITAG_S, NRTM, "ITAG_S")
         ITAG_S(1:NRTM)=0 
       ENDIF 
       DO I=1,NRTM
@@ -196,7 +205,7 @@ C
 C----seg 1-2------
           I1 =IRECT(1,I)
           I2 =IRECT(2,I)
-          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
+          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),MVOISIN,
      1                    N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
      2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE   )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
@@ -204,7 +213,7 @@ C----seg 1-2------
 C----seg 2-3------
           I1 =IRECT(2,I)
           I2 =IRECT(3,I)
-          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
+          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),MVOISIN,
      1                    N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
      2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE    )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
@@ -212,7 +221,7 @@ C----seg 2-3------
 C----seg 3-4------
           I1 =IRECT(3,I)
           I2 =IRECT(4,I)
-          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
+          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),MVOISIN,
      1                  N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
      2                  X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE    )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
@@ -220,7 +229,7 @@ C----seg 3-4------
 C----seg 1-4------
           I1 =IRECT(4,I)
           I2 =IRECT(1,I)
-          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),MVOISIN,
+          CALL I25NEIGH_SEG_EN(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),MVOISIN,
      1                    N_EI,MVOI ,I   ,I1 ,I2 ,IRECT,
      2                    X  ,MVOISIN(1,I),NRTM,MSEGTYP,IRR,DNE    )
           IF (IRR >0) CALL I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
@@ -252,7 +261,8 @@ C--------------------------------------------
         END DO
       END DO !I=1,NRTM
 C--------------------------------------------
-      DEALLOCATE(MVOI,EIDNOD)
+      CALL MY_DEALLOC(MVOI)
+      CALL MY_DEALLOC(EIDNOD)
 C--------------------------------------------
 C------------------------------------------------------
 C        Solid erosion : 
@@ -286,16 +296,16 @@ C
          NMAX=MAX(NMAX,ITAG(I))
          ITAG(I)=0
         ENDDO
-        ALLOCATE(EIDNOD(NMAX,NUMNOD))
-        EIDNOD(1:NMAX,1:NUMNOD)=0
-        ALLOCATE(MVOI(NMAX+10))
+        call my_alloc(EIDNOD, NMAX, NMN, "EIDNOD")
+        EIDNOD(1:NMAX,1:NMN)=0
+        call my_alloc(MVOI, NMAX+10, "MVOI")
         MVOI(1:NMAX+10)=0
 C
         IF(NMAX >0.AND.NRTM_S > 0) THEN
-          ALLOCATE(MNEIGH_SOLID(NMAX,4,NRTM_S))
+          CALL my_alloc(MNEIGH_SOLID, NMAX, 4, NRTM_S, "MNEIGH_SOLID")
           MNEIGH_SOLID(1:NMAX,1:4,1:NRTM_S) = 0
         ELSE
-          ALLOCATE(MNEIGH_SOLID(0,0,0))
+          call my_alloc(MNEIGH_SOLID,1,1,1,"MNEIGH_SOLID")
         ENDIF
     
         DO I=1,NRTM
@@ -304,12 +314,12 @@ C
             DO J=1,3
               M=IRECT(J,I)
               ITAG(M)=ITAG(M)+1
-              EIDNOD(ITAG(M),M)=I
+              EIDNOD(ITAG(M),MLOC(M))=I
             END DO
             IF (IRECT(4,I)/=IRECT(3,I)) THEN
               M= IRECT(4,I)
               ITAG(M)=ITAG(M)+1
-              EIDNOD(ITAG(M),M)=I
+              EIDNOD(ITAG(M),MLOC(M))=I
             END IF
           ENDIF
         END DO
@@ -323,14 +333,14 @@ C
 C----seg 1-2------
             I1 =IRECT(1,I)
             I2 =IRECT(2,I)
-            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
+            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)         
             MNEIGH_SOLID(1:N_EI,1,IS) = MVOI(1:N_EI)
             NE0 =N_EI
 C----seg 2-3------
             I1 =IRECT(2,I)
             I2 =IRECT(3,I)
-            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
+            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)
             DN_EI = N_EI - NE0  
             MNEIGH_SOLID(1:DN_EI,2,IS) = MVOI(NE0+1:N_EI)
@@ -338,7 +348,7 @@ C----seg 2-3------
 C----seg 3-4------
             I1 =IRECT(3,I)
             I2 =IRECT(4,I)
-            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
+            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)
             DN_EI = N_EI - NE0
             MNEIGH_SOLID(1:DN_EI,3,IS) = MVOI(NE0+1:N_EI)
@@ -346,7 +356,7 @@ C----seg 3-4------
 C----seg 1-4------
             I1 =IRECT(4,I)
             I2 =IRECT(1,I)
-            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,I1),ITAG(I2),EIDNOD(1,I2),N_EI,MVOI,I,
+            CALL I25NEIGH_SEG_E(ITAG(I1),EIDNOD(1,MLOC(I1)),ITAG(I2),EIDNOD(1,MLOC(I2)),N_EI,MVOI,I,
      .                          I1,I2,IRECT,NRTM,MSEGTYP ,MVOISIN)
             DN_EI = N_EI - NE0      
             MNEIGH_SOLID(1:DN_EI,4,IS) = MVOI(NE0+1:N_EI)
@@ -355,10 +365,12 @@ C
           ENDIF      
         ENDDO
 
-        DEALLOCATE(MVOI,EIDNOD)
+        CALL MY_DEALLOC(MVOI)
+        CALL MY_DEALLOC(EIDNOD)
 
       ENDIF
-      DEALLOCATE(ITAG)
+      CALL MY_DEALLOC(ITAG)
+      CALL MY_DEALLOC(MLOC)
 
 C--------------------------------------------
 
@@ -474,7 +486,9 @@ c                END IF ! IF(MJ/=0.AND.MJ/=MI)THEN
 C
       END DO
 C
-      IF(IDEl_SOLID > 0) DEALLOCATE(MNEIGH_SOLID,ITAG_S)
+!      IF(IDEl_SOLID > 0) DEALLOCATE(MNEIGH_SOLID,ITAG_S)
+       IF(allocated(ITAG_S)) call my_dealloc(ITAG_S)
+       IF(allocated(MNEIGH_SOLID)) call my_dealloc(MNEIGH_SOLID)
 C
       DO I=1,NVERTX
         J=I
@@ -555,7 +569,8 @@ C     Reset ADSKYN
         ADSKYN(N+1) = ADSKYN(N)+NTAG(N)
       END DO
 C      
-      DEALLOCATE(NTAG,ROOT)
+      CALL MY_DEALLOC(NTAG)
+      CALL MY_DEALLOC(ROOT)
 C
       NRTM0=NRTM-NRTM_SH
 C
@@ -584,21 +599,21 @@ C      14: first node of right seg
 C      15: second node right seg
 
 C-----------------------------------------------------------------------
-      ALLOCATE(LEDGE_TMP1(NLEDGE,4*NRTM))
+      call my_alloc(LEDGE_TMP1, NLEDGE, 4*NRTM, "LEDGE_TMP1")
       IF(NEDGE_L >0) THEN
-         ALLOCATE(LEDGE_TMP3(2,NEDGE_L))
+         call my_alloc(LEDGE_TMP3, 2, NEDGE_L, "LEDGE_TMP3")
          LEDGE_TMP3(1:2,1:NEDGE_L) =LEDGE(5:6,1:NEDGE_L)
          LEDGE(5:6,1:NEDGE_L) = 0
          IF(ILEV==2) THEN
-           ALLOCATE(EBINFLG_TMP(NEDGE_L))
+           call my_alloc(EBINFLG_TMP, NEDGE_L, "EBINFLG_TMP")
             EBINFLG_TMP(1:NEDGE_L) =EBINFLG(1:NEDGE_L)
          ENDIF
          IF(NISUB > 0) THEN
-           ALLOCATE(ADDSUBE_TMP(NEDGE_L+1))
+           call my_alloc(ADDSUBE_TMP, NEDGE_L+1, "ADDSUBE_TMP")
            ADDSUBE_TMP(1:NEDGE_L+1) =ADDSUBE(1:NEDGE_L+1)
-           ALLOCATE(LISUBE_TMP(NISUBE))
+           call my_alloc(LISUBE_TMP, NISUBE, "LISUBE_TMP")
            LISUBE_TMP(1:NISUBE) =LISUBE(1:NISUBE)
-           ALLOCATE(INFLG_SUBE_TMP(NISUBE))
+           call my_alloc(INFLG_SUBE_TMP, NISUBE, "INFLG_SUBE_TMP")
            INFLG_SUBE_TMP(1:NISUBE) =INFLG_SUBE(1:NISUBE) 
          ENDIF
       ENDIF
@@ -718,7 +733,9 @@ C                 edge                            free edge
 C           It is considered as it is not a real problem
 C
 C-----------------------------------------------------------------------
-      ALLOCATE(CLEF(4,NEDGE),LEDGE_TMP2(NLEDGE,NEDGE),INDEX(2*NEDGE))
+      call my_alloc(CLEF, 4, NEDGE, "CLEF")
+      call my_alloc(LEDGE_TMP2, NLEDGE, NEDGE, "LEDGE_TMP2")
+      call my_alloc(INDEX, 2*NEDGE, "INDEX")
       DO I=1,NEDGE
 
        I1 = LEDGE_TMP1(5,I)
@@ -907,7 +924,10 @@ C
 
       END DO
 C
-      DEALLOCATE(CLEF,INDEX,LEDGE_TMP1,LEDGE_TMP2)
+      CALL MY_DEALLOC(CLEF)
+      CALL MY_DEALLOC(INDEX)
+      CALL MY_DEALLOC(LEDGE_TMP1)
+      CALL MY_DEALLOC(LEDGE_TMP2)
 
 C-----1D element edges -----
 
@@ -917,7 +937,9 @@ C-----1D element edges -----
          NEDGE = NEDGE+NEDGE_L
       ENDIF
 
-      ALLOCATE(IIXYZ(NEDGE),LEDGE_TMP(NLEDGE,NEDGE),INDEX2(2*NEDGE))
+      call my_alloc(IIXYZ, NEDGE, "IIXYZ")
+      call my_alloc(LEDGE_TMP, NLEDGE, NEDGE, "LEDGE_TMP")
+      call my_alloc(INDEX2, 2*NEDGE, "INDEX2")
        LEDGE_TMP(1:NLEDGE,1:NEDGE)=LEDGE(1:NLEDGE,1:NEDGE)
       DO I=1,NEDGE
         N1 = LEDGE(5,I)
@@ -968,14 +990,16 @@ C-----------------------------------------
 C
       IF(NEDGE/=0.AND.NISUB/=0.AND.NEDGE /=NEDGE_L)THEN
 
-        ALLOCATE (MLOC(NUMNOD),KAD(MAX(NMN,NEDGE)),STAT=stat)
+        call my_alloc(MLOC, NUMNOD, "MLOC", stat=stat)
+        call my_alloc(KAD, MAX(NMN,NEDGE), "KAD", stat=stat)
         MLOC(1:NUMNOD)=0
         DO I=1,NMN
           N       = MSR(I)
           MLOC(N) = I
         END DO
 
-        ALLOCATE(ADDSUBN_TMP(NMN+1), ADDSUBN(NMN+1))
+        call my_alloc(ADDSUBN_TMP, NMN+1, "ADDSUBN_TMP")
+        call my_alloc(ADDSUBN, NMN+1, "ADDSUBN")
 C-----------------------------------------
 C       Calculation of ADDSUBN, LISUBN, INFLG_SUBN for the main nodes
 C-----------------------------------------
@@ -998,7 +1022,8 @@ C
         ADDSUBN_TMP(1+NMN)=CUR
 C
         NISUBN=ADDSUBN_TMP(1+NMN)-1
-        ALLOCATE (LISUBN(NISUBN),INFLG_SUBN(NISUBN),STAT=stat)
+        call my_alloc(LISUBN, NISUBN, "LISUBN", stat=stat)
+        call my_alloc(INFLG_SUBN, NISUBN, "INFLG_SUBN", stat=stat)
         INFLG_SUBN(1:NISUBN)=0
 C
 C       Use Kad (1: NMN) to fill Lisubn, inflg_subn
@@ -1024,7 +1049,7 @@ C-----------------------------------------
         DO N=1,NMN
           MAXADD=MAX(MAXADD,ADDSUBN_TMP(N+1)-ADDSUBN_TMP(N))
         END DO
-        ALLOCATE(IXSUB(2*MAXADD),STAT=stat)
+        call my_alloc(IXSUB, 2*MAXADD, "IXSUB", stat=stat)
 C
         DO N=1,NMN
           KAD(N)=ADDSUBN_TMP(N)
@@ -1182,8 +1207,16 @@ C       Use Kad (1: Nedge) to fill Lisube, inflg_sube
           ENDIF
         END DO
 
-        DEALLOCATE (MLOC,KAD,ADDSUBN_TMP,ADDSUBN,LISUBN,INFLG_SUBN,IXSUB)
-        IF(NISUB > 0.AND.NEDGE_L > 0) DEALLOCATE (ADDSUBE_TMP,INFLG_SUBE_TMP,LISUBE_TMP)
+        CALL MY_DEALLOC(MLOC)
+        CALL MY_DEALLOC(KAD)
+        CALL MY_DEALLOC(LISUBN)
+        CALL MY_DEALLOC(INFLG_SUBN)
+        CALL MY_DEALLOC(IXSUB)
+        call my_dealloc(ADDSUBN_TMP)
+        call my_dealloc(ADDSUBN)
+        IF(NISUB > 0.AND.NEDGE_L > 0) CALL MY_DEALLOC(ADDSUBE_TMP)
+        IF(NISUB > 0.AND.NEDGE_L > 0) CALL MY_DEALLOC(INFLG_SUBE_TMP)
+        IF(NISUB > 0.AND.NEDGE_L > 0) CALL MY_DEALLOC(LISUBE_TMP)
 
 C-------------------------------------
         IF(IPRI>=6) THEN
@@ -1232,7 +1265,9 @@ C
              LL = LL +1
            ENDDO
         ENDDO
-        IF(NISUB > 0.AND.NEDGE_L > 0) DEALLOCATE (ADDSUBE_TMP,INFLG_SUBE_TMP,LISUBE_TMP)
+        IF(NISUB > 0.AND.NEDGE_L > 0) CALL MY_DEALLOC(ADDSUBE_TMP)
+        IF(NISUB > 0.AND.NEDGE_L > 0) CALL MY_DEALLOC(INFLG_SUBE_TMP)
+        IF(NISUB > 0.AND.NEDGE_L > 0) CALL MY_DEALLOC(LISUBE_TMP)
  
 C-------------------------------------
         IF(IPRI>=6) THEN
@@ -1252,11 +1287,11 @@ C-------------------------------------
           END DO
         END IF
       END IF ! IF(NEDGE/=0.AND.NISUB/=0)THEN
-      IF(ALLOCATED(IIXYZ))DEALLOCATE(IIXYZ)
-      IF(ALLOCATED(INDEX2))DEALLOCATE(INDEX2)
-      IF(ALLOCATED(LEDGE_TMP))DEALLOCATE(LEDGE_TMP)
-      IF(ALLOCATED(LEDGE_TMP3))DEALLOCATE(LEDGE_TMP3)
-      IF(ALLOCATED(EBINFLG_TMP))DEALLOCATE(EBINFLG_TMP)
+      IF(ALLOCATED(IIXYZ))CALL MY_DEALLOC(IIXYZ)
+      IF(ALLOCATED(INDEX2))CALL MY_DEALLOC(INDEX2)
+      IF(ALLOCATED(LEDGE_TMP))CALL MY_DEALLOC(LEDGE_TMP)
+      IF(ALLOCATED(LEDGE_TMP3))CALL MY_DEALLOC(LEDGE_TMP3)
+      IF(ALLOCATED(EBINFLG_TMP))CALL MY_DEALLOC(EBINFLG_TMP)
 C-------------------------------------
  1000 FORMAT(    /1X,'   STRUCTURE OF SUB-INTERFACES OUTPUT TO TH'/
      .            1X,'   ----------------------------------------'// )
@@ -1272,6 +1307,7 @@ C-------------------------------------
 !||    i25ini_gap_n   ../starter/source/interfaces/inter3d1/i25neigh.F
 !||--- called by ------------------------------------------------------
 !||    inint3         ../starter/source/interfaces/inter3d1/inint3.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE I25INI_GAP_N(
@@ -1281,6 +1317,7 @@ C-------------------------------------
      4 MSR   ,GAPN_M  ,GAPMAX_M ,GAPSCALE,IGEO  ,
      5 MSEGTYP,GAPMSAV,ITHK25,IGAP,THK_M   ,THK_M_SCALE)
       use element_mod , only :nixs,nixc,nixtg,nixt,nixp
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1314,7 +1351,7 @@ C-----------------------------------------------
       my_real, DIMENSION(:), ALLOCATABLE :: WA
 C init 
 C
-       ALLOCATE(WA(NUMNOD))
+       call my_alloc(WA, NUMNOD, "WA")
        DO I=1,NUMNOD
         WA(I)=ZERO
        END DO
@@ -1421,7 +1458,7 @@ C
           GAPMSAV(I) = GAP_M(I)
         ENDDO
       ENDIF
-      DEALLOCATE(WA)
+      CALL MY_DEALLOC(WA)
 C        
       RETURN
       END

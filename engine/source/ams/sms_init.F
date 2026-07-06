@@ -192,13 +192,14 @@ C-----------------------------------------------
       RETURN
       END
 !||====================================================================
-!||    sms_ini_kad    ../engine/source/ams/sms_init.F
+!||    sms_ini_kad      ../engine/source/ams/sms_init.F
 !||--- called by ------------------------------------------------------
-!||    resol          ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    element_mod    ../common_source/modules/elements/element_mod.F90
-!||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_KAD(
      1  IXS     ,IXQ      ,IXC     ,IXT     ,IXP       ,
@@ -217,6 +218,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -261,8 +263,8 @@ C-----------------------------------------------
       DATA IPERM2/2,3,1,4,4,4/
       DATA IPENTA6/1,2,3,5,6,7/
 C-----------------------------------------------
-      CALL MY_ALLOC(NAD_SMS,NUMNOD)
-      CALL MY_ALLOC(IWORK,NUMNOD)
+      call my_alloc(NAD_SMS, NUMNOD, "NAD_SMS")
+      call my_alloc(IWORK, NUMNOD, "IWORK")
 C-----------------------------------------------
       DO I=1,NUMNOD
         NAD_SMS(I)=0
@@ -537,17 +539,18 @@ C
         KAD_SMS(I+1)=KAD_SMS(I)+NAD_SMS(I)
       END DO
 C-----------------------------------------------
-      DEALLOCATE(NAD_SMS)
-      DEALLOCATE(IWORK)
+      call my_dealloc(NAD_SMS)
+      call my_dealloc(IWORK)
 
 
       RETURN
       END
 !||====================================================================
-!||    nodnx_sms_ini   ../engine/source/ams/sms_init.F
+!||    nodnx_sms_ini    ../engine/source/ams/sms_init.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    my_alloc_mod    ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE NODNX_SMS_INI(
      1 NUMNOD  ,NUMEL ,NIX ,MIX ,LIX ,
@@ -559,6 +562,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -573,7 +577,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
-      CALL MY_ALLOC(TAG,NUMNOD)
+      call my_alloc(TAG, NUMNOD, "TAG")
 C-----------------------------------------------
  
       DO J=1,NUMEL
@@ -594,20 +598,21 @@ C-----------------------------------------------
         ENDDO                                    
       ENDDO                                      
 
-      DEALLOCATE(TAG)
+      call my_dealloc(TAG)
       RETURN
       END
 !||====================================================================
-!||    sms_ini_kdi     ../engine/source/ams/sms_init.F
+!||    sms_ini_kdi      ../engine/source/ams/sms_init.F
 !||--- called by ------------------------------------------------------
-!||    resol           ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    startimeg       ../engine/source/system/timer.F
-!||    stoptimeg       ../engine/source/system/timer.F
+!||    startimeg        ../engine/source/system/timer.F
+!||    stoptimeg        ../engine/source/system/timer.F
 !||--- uses       -----------------------------------------------------
-!||    element_mod     ../common_source/modules/elements/element_mod.F90
-!||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
-!||    my_alloc_mod    ../common_source/tools/memory/my_alloc.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    intbufdef_mod    ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_KDI(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
@@ -630,6 +635,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -685,9 +691,9 @@ C-----------------------------------------------
       DATA IPERM2/2,3,1,4,4,4/
       DATA IPENTA6/1,2,3,5,6,7/
 C-----------------------------------------------
-      CALL MY_ALLOC(TAGA,NUMNOD)
-      CALL MY_ALLOC(NAD_SMS,NUMNOD)
-      CALL MY_ALLOC(TAGK,NUMNOD)
+      call my_alloc(TAGA, NUMNOD, "TAGA")
+      call my_alloc(NAD_SMS, NUMNOD, "NAD_SMS")
+      call my_alloc(TAGK, NUMNOD, "TAGK")
 C-----------------------------------------------
 C
 C     Built jdi_sms, jads_sms, etc.
@@ -1031,21 +1037,22 @@ C
 C
       NNZ_SMS = IAD_SMS(NUMNOD+1)
 C
-      DEALLOCATE(TAGA)
-      DEALLOCATE(NAD_SMS)
-      DEALLOCATE(TAGK)
+      call my_dealloc(TAGA)
+      call my_dealloc(NAD_SMS)
+      call my_dealloc(TAGK)
       RETURN
       END
 !||====================================================================
-!||    sms_ini_jad_1   ../engine/source/ams/sms_init.F
+!||    sms_ini_jad_1    ../engine/source/ams/sms_init.F
 !||--- called by ------------------------------------------------------
-!||    resol           ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    my_orders       ../common_source/tools/sort/my_orders.c
+!||    my_orders        ../common_source/tools/sort/my_orders.c
 !||--- uses       -----------------------------------------------------
-!||    element_mod     ../common_source/modules/elements/element_mod.F90
-!||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
-!||    my_alloc_mod    ../common_source/tools/memory/my_alloc.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    intbufdef_mod    ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_JAD_1(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
@@ -1068,6 +1075,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -1116,11 +1124,11 @@ C-----------------------------------------------
       INTEGER,DIMENSION(:),ALLOCATABLE :: INDEX1
       INTEGER,DIMENSION(:),ALLOCATABLE :: INDEX2
 C-------------------------------------------------------------------------
-      CALL MY_ALLOC(NAD_SMS,NUMNOD)
-      CALL MY_ALLOC(TAGK,NUMNOD)
-      CALL MY_ALLOC(ITRI,NUMNOD)
-      CALL MY_ALLOC(INDEX1,2*NUMNOD)
-      CALL MY_ALLOC(INDEX2,NUMNOD)
+      call my_alloc(NAD_SMS, NUMNOD, "NAD_SMS")
+      call my_alloc(TAGK, NUMNOD, "TAGK")
+      call my_alloc(ITRI, NUMNOD, "ITRI")
+      call my_alloc(INDEX1, 2*NUMNOD, "INDEX1")
+      call my_alloc(INDEX2, NUMNOD, "INDEX2")
 C-------------------------------------------------------------------------
 C     PREPARE KOMPACTION OF ELEMENTARY MATRIX
 C     Built Idi_sms and Pointers Kad_sms to Jad_sms 
@@ -1378,24 +1386,25 @@ C reconstruit JAD_SMS
         JAD_SMS(I+1)=JAD_SMS(I)+NODNX_SMS(I)
       END DO
 C-----------------------------------------------
-      DEALLOCATE(NAD_SMS)
-      DEALLOCATE(TAGK)
-      DEALLOCATE(ITRI)
-      DEALLOCATE(INDEX1)
-      DEALLOCATE(INDEX2)
+      call my_dealloc(NAD_SMS)
+      call my_dealloc(TAGK)
+      call my_dealloc(ITRI)
+      call my_dealloc(INDEX1)
+      call my_dealloc(INDEX2)
       RETURN
       END
 !||====================================================================
-!||    sms_ini_jad_2   ../engine/source/ams/sms_init.F
+!||    sms_ini_jad_2    ../engine/source/ams/sms_init.F
 !||--- called by ------------------------------------------------------
-!||    resol           ../engine/source/engine/resol.F
+!||    resol            ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    element_mod     ../common_source/modules/elements/element_mod.F90
-!||    intbufdef_mod   ../common_source/modules/interfaces/intbufdef_mod.F90
-!||    intstamp_mod    ../engine/share/modules/intstamp_mod.F
-!||    message_mod     ../engine/share/message_module/message_mod.F
-!||    my_alloc_mod    ../common_source/tools/memory/my_alloc.F90
+!||    element_mod      ../common_source/modules/elements/element_mod.F90
+!||    intbufdef_mod    ../common_source/modules/interfaces/intbufdef_mod.F90
+!||    intstamp_mod     ../engine/share/modules/intstamp_mod.F
+!||    message_mod      ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_JAD_2(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
@@ -1422,6 +1431,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -1474,7 +1484,7 @@ C-----------------------------------------------
       INTEGER IK
       INTEGER,DIMENSION(:),ALLOCATABLE :: NAD_SMS
 C-------------------------------------------------------------------------
-      CALL MY_ALLOC(NAD_SMS,NUMNOD)
+      call my_alloc(NAD_SMS, NUMNOD, "NAD_SMS")
 C-------------------------------------------------------------------------
 C     PREPARE KOMPACTION OF ELEMENTARY MATRIX
 C     KJ = KAD_SMS(I),KAD_SMS(I+1)-1 => PK_SMS(KJ) = rang de KDI_SMS(KJ) dans JDI_SMS(I),JDI_SMS(I+1)-1
@@ -1702,7 +1712,7 @@ C reconstruit JAD_SMS
         JAD_SMS(I+1)=JAD_SMS(I)+NODNX_SMS(I)
       END DO
 C-----------------------------------------------
-      DEALLOCATE(NAD_SMS)
+      call my_dealloc(NAD_SMS)
       RETURN
       END
 !||====================================================================
@@ -1720,6 +1730,7 @@ C-----------------------------------------------
 !||    intstamp_mod         ../engine/share/modules/intstamp_mod.F
 !||    message_mod          ../engine/share/message_module/message_mod.F
 !||    my_alloc_mod         ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod       ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_JAD_3(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
@@ -1745,6 +1756,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -1795,8 +1807,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE :: NAD_SMS
       INTEGER, DIMENSION(:), ALLOCATABLE :: NAD_SMS_0
 C-------------------------------------------------------------------------
-      CALL MY_ALLOC(NAD_SMS,NUMNOD)
-      CALL MY_ALLOC(NAD_SMS_0,NUMNOD)
+      call my_alloc(NAD_SMS, NUMNOD, "NAD_SMS")
+      call my_alloc(NAD_SMS_0, NUMNOD, "NAD_SMS_0")
 C-------------------------------------------------------------------------
 C     PREPARE KOMPACTION OF ELEMENTARY MATRIX
 C     KJ = KAD_SMS(I),KAD_SMS(I+1)-1 => PK_SMS(KJ) = rang de KDI_SMS(KJ) dans JDI_SMS(I),JDI_SMS(I+1)-1
@@ -2166,8 +2178,8 @@ C
         CALL ARRET(2)
       ENDIF
 C-----------------------------------------------
-      DEALLOCATE(NAD_SMS)
-      DEALLOCATE(NAD_SMS_0)
+      call my_dealloc(NAD_SMS)
+      call my_dealloc(NAD_SMS_0)
 
       RETURN
       END
@@ -2182,6 +2194,7 @@ C-----------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod        ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    my_alloc_mod         ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod       ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_KIN_1(
      1  NODNX_SMS ,INDX1_SMS ,ILINK     ,RLINK    ,NNLINK    ,
@@ -2197,6 +2210,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2230,8 +2244,8 @@ C-----------------------------------------------
       INTEGER,DIMENSION(:),ALLOCATABLE :: NOD2ADD
       INTEGER,DIMENSION(:),ALLOCATABLE :: TAG
 C-----------------------------------------------
-      CALL MY_ALLOC(NOD2ADD,NUMNOD)
-      CALL MY_ALLOC(TAG,NUMNOD)
+      call my_alloc(NOD2ADD, NUMNOD, "NOD2ADD")
+      call my_alloc(TAG, NUMNOD, "TAG")
 C-----------------------------------------------
 C
       NOD2ADD(1:NUMNOD)=0
@@ -2456,8 +2470,8 @@ C for sms_fixvel, etc
         END DO
       END IF
 C-----------------------------------------------
-      DEALLOCATE(NOD2ADD)
-      DEALLOCATE(TAG)
+      call my_dealloc(NOD2ADD)
+      call my_dealloc(TAG)
 C-----------------------------------------------
       RETURN
       END
@@ -2569,6 +2583,7 @@ C-----------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    intbufdef_mod     ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    my_alloc_mod      ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod    ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE SMS_INI_INT(
      1  IPARI    ,INTBUF_TAB     ,IAD_ELEM   ,FR_ELEM  ,INTLIST,
@@ -2581,6 +2596,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2603,7 +2619,7 @@ C-----------------------------------------------
      .        NLINS, NLINM, II, SIZE, LENR
       INTEGER,DIMENSION(:), ALLOCATABLE :: TAG
 C-----------------------------------------------
-      CALL MY_ALLOC(TAG,NUMNOD)
+      call my_alloc(TAG, NUMNOD, "TAG")
 C-----------------------------------------------
 C supprime nds d'interf type 2 des interfs a penalty
 C /DT/AMS or /DT/INTER/AMS
@@ -2721,7 +2737,7 @@ C
            END IF
       END DO  
 C-----------------------------------------------
-      DEALLOCATE(TAG)
+      call my_dealloc(TAG)
       RETURN
       END
 !||====================================================================

@@ -29,6 +29,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    arret                  ../engine/source/system/arret.F
 !||--- uses       -----------------------------------------------------
 !||    message_mod            ../engine/share/message_module/message_mod.F
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
 !||    sensor_mod             ../common_source/modules/sensor_mod.F90
 !||    stack_mod              ../engine/share/modules/stack_mod.F
 !||====================================================================
@@ -42,6 +43,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -73,7 +75,7 @@ C-------------------------------------------
       NPTR= 1
       NPTT_PLY = 0
       IF (MCHECK == 0) THEN
-        ALLOCATE (SENSORS%ANIM(SENSORS%NANIM))
+        call my_alloc(SENSORS%ANIM, SENSORS%NANIM, "SENSORS%ANIM")
         SENSORS%ANIM(:) = 0
       END IF
 

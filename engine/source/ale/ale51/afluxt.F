@@ -45,6 +45,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    element_mod                   ../common_source/modules/elements/element_mod.F90
 !||    initbuf_mod                   ../engine/share/resol/initbuf.F
 !||    multimat_param_mod            ../common_source/modules/multimat_param_mod.F90
+!||    my_alloc_mod                  ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod                ../common_source/tools/memory/my_dealloc.F90
 !||    precision_mod                 ../common_source/modules/precision_mod.F90
 !||    segvar_mod                    ../engine/share/modules/segvar_mod.F
 !||    spmd_exch_n_neighbor_mod      ../engine/source/mpi/ale/spmd_exch_n_neighbor.F90
@@ -77,6 +79,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -140,7 +144,7 @@ C-----------------------------------------------
       end if
       s_flux_vois = n_entity0 + n_neighbor
       if(itask==0) then
-        allocate(flux_vois_mat(s_flux_vois,nv46,trimat))
+        call my_alloc(flux_vois_mat, s_flux_vois, nv46, trimat, "flux_vois_mat")
       end if
 C--------------------
       CALL MY_BARRIER
@@ -378,7 +382,7 @@ C--------------------
 C--------------------
 
       IF(ITASK == 0)THEN
-        DEALLOCATE(flux_vois_mat)
+        call my_dealloc(flux_vois_mat)
       END IF
 C-----------------------------------------------
       RETURN

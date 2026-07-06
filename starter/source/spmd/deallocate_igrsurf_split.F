@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    deallocate_igrsurf_split   ../starter/source/spmd/deallocate_igrsurf_split.F
 !||--- called by ------------------------------------------------------
 !||    lectur                     ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
 !||    monvol_struct_mod          ../starter/share/modules1/monvol_struct_mod.F
 !||====================================================================
@@ -45,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -81,14 +83,14 @@ C-----------------------------------------------------
                 DO PROC=1,NSPMD
                         !       several MONVOL can refer to the same surface ID
                         IF(IGRSURF_PROC(IS,PROC)%NSEG>0.AND.ALLOCATED(IGRSURF_PROC(IS,PROC)%ELTYP) ) THEN
-                                DEALLOCATE( IGRSURF_PROC(IS,PROC)%ELTYP ) 
-                                DEALLOCATE( IGRSURF_PROC(IS,PROC)%ELEM ) 
+                                call my_dealloc(IGRSURF_PROC(IS,PROC)%ELTYP)
+                                call my_dealloc(IGRSURF_PROC(IS,PROC)%ELEM)
                         ENDIF
                 ENDDO
                 K1 = K1 + NIMV
                 ! --------------------
                 ! deallocation of NUMBER_TRI_PER_PROC :
-                 DEALLOCATE( T_MONVOL(NV)%NUMBER_TRI_PER_PROC )
+                 call my_dealloc(T_MONVOL(NV)%NUMBER_TRI_PER_PROC)
                 ! --------------------
         ENDDO   
         ! --------------------------------------  
@@ -98,9 +100,9 @@ C-----------------------------------------------------
         ! Surface 
         DO IS=1,NSURF
             DO PROC=1,NSPMD
-                IF(ALLOCATED( IGRSURF_PROC(IS,PROC)%LOCAL_SEG )) DEALLOCATE( IGRSURF_PROC(IS,PROC)%LOCAL_SEG )
-                IF(ALLOCATED( IGRSURF_PROC(IS,PROC)%ELTYP ))DEALLOCATE( IGRSURF_PROC(IS,PROC)%ELTYP ) 
-                IF(ALLOCATED( IGRSURF_PROC(IS,PROC)%ELEM ))DEALLOCATE( IGRSURF_PROC(IS,PROC)%ELEM ) 
+                IF(ALLOCATED( IGRSURF_PROC(IS,PROC)%LOCAL_SEG )) call my_dealloc(IGRSURF_PROC(IS,PROC)%LOCAL_SEG)
+                IF(ALLOCATED( IGRSURF_PROC(IS,PROC)%ELTYP )) call my_dealloc(IGRSURF_PROC(IS,PROC)%ELTYP)
+                IF(ALLOCATED( IGRSURF_PROC(IS,PROC)%ELEM )) call my_dealloc(IGRSURF_PROC(IS,PROC)%ELEM)
             ENDDO
         ENDDO
         ! --------------------------------------

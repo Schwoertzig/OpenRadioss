@@ -28,6 +28,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    c_h3d_create_rbe2_impi   ../engine/source/output/h3d/h3d_build_cpp/c_h3d_create_rbe2.cpp
 !||    spmd_glob_isum9          ../engine/source/mpi/interfaces/spmd_th.F
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod             ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod           ../common_source/tools/memory/my_dealloc.F90
 !||    spmd_comm_world_mod      ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
       SUBROUTINE H3D_CREATE_RBE2_IMPI(LRBE2, IRBE2,NODGLOB,WEIGHT,NERBE2Y,
@@ -36,6 +38,8 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
         USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -99,7 +103,8 @@ C sending the size array to processor 0
 
       IF (ISPMD == 0) THEN
 C Procement reception of sizes
-        ALLOCATE(P0RECRBE2(MAX(1,NRBE2G),NSPMD)) !size 1 to avoid zero size allocation (argument of mpi_recv)
+        call my_alloc(P0RECRBE2, MAX(1,NRBE2G), NSPMD, "P0RECRBE2")
+! size 1 to avoid zero size allocation (argument of mpi_recv)
         DO I=1,NRBE2G
            P0RECRBE2(I,1) = SZLOCRBE2(I)
         ENDDO
@@ -125,7 +130,7 @@ C --------------------------------------------------------------
 C ------------------------
 C Procs other than pro 0
 C ------------------------
-         ALLOCATE(SENDBUF(SBUFSIZ))
+         call my_alloc(SENDBUF, SBUFSIZ, "SENDBUF")
          SNRBE2 = 0
          DO I=1,NRBE2
            NSN = IRBE2(5,I)
@@ -143,7 +148,7 @@ C ------------------------
            CALL  MPI_SEND(SENDBUF,SNRBE2,MPI_INTEGER,IT_SPMD(1),MSGTYP,
      *                  SPMD_COMM_WORLD,IERROR)
          ENDIF
-         DEALLOCATE(SENDBUF)
+         call my_dealloc(SENDBUF)
 
 C sending secondary nodes
         MAINNODS = 0
@@ -178,8 +183,8 @@ C PROC 0
 C --------------------------------------------------------------------
 C p0rbe2buf receive array (receive array = lrbe2 global)
 C IADRBE2 Pointers to P0RBE2BUF Global
-         ALLOCATE(IADRBE2(NRBE2G+1))
-         ALLOCATE(P0RBE2BUF(NERBE2Y))
+         call my_alloc(IADRBE2, NRBE2G+1, "IADRBE2")
+         call my_alloc(P0RBE2BUF, NERBE2Y, "P0RBE2BUF")
 
 C preparation IADRBE2
          IADRBE2(1)=0
@@ -222,7 +227,7 @@ C size of the receive buffer
            ENDDO
 
            IF (SIZRBE2 > 0) THEN
-             ALLOCATE(RECBUF(SIZRBE2))
+             call my_alloc(RECBUF, SIZRBE2, "RECBUF")
              MSGTYP = MSGOFF2 
              CALL MPI_RECV(RECBUF,SIZRBE2,MPI_INTEGER,IT_SPMD(P),MSGTYP,
      *                   SPMD_COMM_WORLD,STATUS,IERROR)
@@ -236,7 +241,7 @@ C size of the receive buffer
                ENDDO
                PGLOBRBE2(I) = PGLOBRBE2(I) + P0RECRBE2(I,P)
              ENDDO
-             DEALLOCATE(RECBUF)
+             call my_dealloc(RECBUF)
            ENDIF
          ENDDO
 C  receiving main nodes

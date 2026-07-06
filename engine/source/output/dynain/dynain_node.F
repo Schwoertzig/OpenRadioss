@@ -28,6 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    spmd_dstat_vgath   ../engine/source/mpi/output/spmd_stat.F
 !||    strs_txt50         ../engine/source/output/sta/sta_txt.F
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod       ../common_source/tools/memory/my_alloc.F90
 !||    state_mod          ../common_source/modules/state_mod.F
 !||====================================================================
       SUBROUTINE DYNAIN_NODE(X   ,NUMNOD  ,ITAB  ,ITABG  ,LENG  ,
@@ -39,6 +40,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -68,8 +70,8 @@ C-----------------------------------------------
 C-----------------------
 C    Allocation Tabs
 C-----------------------
-        ALLOCATE(NODTAGLOB(LENG),STAT=IERR)
-        ALLOCATE(VGLOB(3,LENG),STAT=IERR)
+        call my_alloc(NODTAGLOB, LENG, "NODTAGLOB", stat=IERR)
+        call my_alloc(VGLOB, 3, LENG, "VGLOB", stat=IERR)
         CALL SPMD_DSTAT_VGATH(X,NODGLOB,WEIGHT,VGLOB,NODTAG,
      .                        NODTAGLOB)
         IF (ISPMD/=0) RETURN

@@ -30,6 +30,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    write_i_c              ../common_source/tools/input_output/write_routines.c
 !||    write_mat_table        ../engine/source/materials/tools/write_mat_table.F
 !||--- uses       -----------------------------------------------------
+!||    my_alloc_mod           ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod         ../common_source/tools/memory/my_dealloc.F90
 !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
 !||    visc_param_mod         ../common_source/modules/mat_elem/visc_param_mod.F90
 !||====================================================================
@@ -42,6 +44,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -55,7 +59,7 @@ C-----------------------------------------------
       INTEGER ,DIMENSION(:) ,ALLOCATABLE :: IBUF
 C=======================================================================
       NFIX = 6
-      ALLOCATE (IBUF(NFIX + 1))
+      call my_alloc(IBUF, NFIX + 1, "IBUF")
 c
       IAD = 1
       IBUF(IAD) = NFIX
@@ -75,7 +79,7 @@ c
       IAD = IAD+1
 c
       CALL WRITE_I_C(IBUF,NFIX+1)
-      DEALLOCATE(IBUF)
+      call my_dealloc(IBUF)
       
 c     write viscosity model title
 

@@ -21,21 +21,23 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    i25trivox_edg   ../engine/source/interfaces/intsort/i25trivox_edg.F
+!||    i25trivox_edg    ../engine/source/interfaces/intsort/i25trivox_edg.F
 !||--- called by ------------------------------------------------------
-!||    i25buce_edg     ../engine/source/interfaces/intsort/i25buce_edg.F
+!||    i25buce_edg      ../engine/source/interfaces/intsort/i25buce_edg.F
 !||--- calls      -----------------------------------------------------
-!||    i25sto_e2s      ../engine/source/interfaces/intsort/i25sto_e2s.F
-!||    i25sto_edg      ../engine/source/interfaces/intsort/i25sto_edg.F
-!||    int_checksum    ../engine/share/modules/debug_mod.F
-!||    ireallocate     ../engine/share/modules/realloc_mod.F
-!||    my_barrier      ../engine/source/system/machine.F
+!||    i25sto_e2s       ../engine/source/interfaces/intsort/i25sto_e2s.F
+!||    i25sto_edg       ../engine/source/interfaces/intsort/i25sto_edg.F
+!||    int_checksum     ../engine/share/modules/debug_mod.F
+!||    ireallocate      ../engine/share/modules/realloc_mod.F
+!||    my_barrier       ../engine/source/system/machine.F
 !||--- uses       -----------------------------------------------------
-!||    debug_mod       ../engine/share/modules/debug_mod.F
-!||    realloc_mod     ../engine/share/modules/realloc_mod.F
-!||    tri11           ../engine/share/modules/tri11_mod.F
-!||    tri25ebox       ../engine/share/modules/tri25ebox.F
-!||    tri7box         ../engine/share/modules/tri7box.F
+!||    debug_mod        ../engine/share/modules/debug_mod.F
+!||    my_alloc_mod     ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod   ../common_source/tools/memory/my_dealloc.F90
+!||    realloc_mod      ../engine/share/modules/realloc_mod.F
+!||    tri11            ../engine/share/modules/tri11_mod.F
+!||    tri25ebox        ../engine/share/modules/tri25ebox.F
+!||    tri7box          ../engine/share/modules/tri7box.F
 !||====================================================================
       SUBROUTINE I25TRIVOX_EDG(
      1      I_MEM   ,VMAXDT  ,INACTI ,IRECT   ,
@@ -68,6 +70,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 C-----------------------------------------------
@@ -159,7 +163,7 @@ C
       DRAD2 =ZERO
 
       IF(FLAGREMNODE==2) THEN
-        ALLOCATE(TAGREMLINE(NEDGE))
+        call my_alloc(TAGREMLINE, NEDGE, "TAGREMLINE")
         TAGREMLINE(1:NEDGE) = 0
       ENDIF
 
@@ -182,8 +186,11 @@ C
       MAX_ADD = MAX(1,4*(NEDGE+NEDGE_REMOTE))
       IF(ITASK==0)THEN
         ALLOCATE(LCHAIN_ELEM(1:MAX_ADD))
+! TODO: non-default lower bound, convert manually
         ALLOCATE(LCHAIN_NEXT(1:MAX_ADD))
+! TODO: non-default lower bound, convert manually
         ALLOCATE(LCHAIN_LAST(1:MAX_ADD))
+! TODO: non-default lower bound, convert manually
       END IF
 
 C     Barrier to wait init voxel and allocation
@@ -401,6 +408,7 @@ C Barrier to wait task0 treatment
 C
 !  Attention: allocation en NTHREADS x (NEDGE+NEDGE_REMOTE)
       ALLOCATE(TAGEDG(1:NEDGE+NEDGE_REMOTE))
+! TODO: non-default lower bound, convert manually
       TAGEDG(1:NEDGE+NEDGE_REMOTE)=0
 C=======================================================================
 C     Sorting vs main shell edges
@@ -999,13 +1007,13 @@ C Barrier to avoid reinitialization before end of sorting
           END DO
         END DO
         !CHAINED LIST DEALLOCATION
-        DEALLOCATE(LCHAIN_NEXT)
-        DEALLOCATE(LCHAIN_ELEM)
-        DEALLOCATE(LCHAIN_LAST)
-        IF(FLAGREMNODE==2) DEALLOCATE(TAGREMLINE)
+        call my_dealloc(LCHAIN_NEXT)
+        call my_dealloc(LCHAIN_ELEM)
+        call my_dealloc(LCHAIN_LAST)
+        IF(FLAGREMNODE==2) call my_dealloc(TAGREMLINE)
       ENDIF
 
-      DEALLOCATE(TAGEDG) 
+      call my_dealloc(TAGEDG)
 
 C=======================================================================
 

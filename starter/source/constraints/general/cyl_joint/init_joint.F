@@ -21,11 +21,12 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !||====================================================================
-!||    init_joint   ../starter/source/constraints/general/cyl_joint/init_joint.F
+!||    init_joint     ../starter/source/constraints/general/cyl_joint/init_joint.F
 !||--- called by ------------------------------------------------------
-!||    lectur       ../starter/source/starter/lectur.F
+!||    lectur         ../starter/source/starter/lectur.F
+!||--- calls      -----------------------------------------------------
 !||--- uses       -----------------------------------------------------
-!||    joint_mod    ../starter/share/modules1/joint_mod.F
+!||    joint_mod      ../starter/share/modules1/joint_mod.F
 !||====================================================================
         SUBROUTINE INIT_JOINT(NJOINT)
 !$COMMENT
@@ -39,6 +40,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE JOINT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -64,7 +66,7 @@ C=======================================================================
             CYL_JOIN(I)%PROC_MAIN = -1        !   proc main
             CYL_JOIN(I)%NUMBER_PROC = 0         !   number of proc 
             CYL_JOIN(I)%NB_SECONDARY_NODE = 0   !   number of secondary node
-            ALLOCATE( CYL_JOIN(I)%NB_NODE(NSPMD) )
+            call my_alloc(CYL_JOIN(I)%NB_NODE, NSPMD, "CYL_JOIN(I)%NB_NODE")
             CYL_JOIN(I)%NB_NODE(1:NSPMD) = 0    !   number of node per proc
         ENDDO
 

@@ -32,6 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    array_mod                  ../common_source/modules/array_mod.F
 !||    intbufdef_mod              ../common_source/modules/interfaces/intbufdef_mod.F90
 !||    multi_fvm_mod              ../common_source/modules/ale/multi_fvm_mod.F90
+!||    my_alloc_mod               ../common_source/tools/memory/my_alloc.F90
 !||    spmd_comm_world_mod        ../engine/source/mpi/spmd_comm_world.F90
 !||    tri7box                    ../engine/share/modules/tri7box.F
 !||====================================================================
@@ -56,6 +57,7 @@ C-----------------------------------------------
         USE TRI7BOX
         USE MULTI_FVM_MOD
         USE ALE_CONNECTIVITY_MOD
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -145,8 +147,8 @@ C-----------------------------------------------
 
         ADRESS_SEND(NSPMD+1) = BUFFER_SEND_SIZE + 1
         ADRESS_RCV(NSPMD+1) = BUFFER_RCV_SIZE + 1
-        ALLOCATE( BUFFER_SEND(BUFFER_SEND_SIZE) )
-        ALLOCATE( BUFFER_RCV(BUFFER_RCV_SIZE) )
+        call my_alloc(BUFFER_SEND, BUFFER_SEND_SIZE, "BUFFER_SEND")
+        call my_alloc(BUFFER_RCV, BUFFER_RCV_SIZE, "BUFFER_RCV")
         ! ---------------------------
 
         ! ---------------------------
@@ -239,8 +241,8 @@ C-----------------------------------------------
         ENDDO
         ! ---------------------------
 
-        DEALLOCATE( BUFFER_SEND )
-        DEALLOCATE( BUFFER_RCV )
+        call my_dealloc(BUFFER_SEND)
+        call my_dealloc(BUFFER_RCV)
 
 !   --------------------------------------------------------------------
 #endif

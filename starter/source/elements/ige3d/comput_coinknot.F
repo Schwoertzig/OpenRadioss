@@ -25,6 +25,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- called by ------------------------------------------------------
 !||    prerafig3d        ../starter/source/elements/ige3d/prerafig3d.F
 !||--- calls      -----------------------------------------------------
+!||--- uses       -----------------------------------------------------
 !||====================================================================
       SUBROUTINE COMPUT_COINKNOT(IEL ,IXIG3D,KXIG3D ,MESHIGE,PTANG1 ,PTANG2 ,IDDIR,
      .                           IDTANG1,IDTANG2,NELDIR,NELTANG1,NELTANG2,DIR,
@@ -40,6 +41,7 @@ C----------------------------------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -169,8 +171,8 @@ C----------------------------------------------------------------------
       L_TAB_NEWEL = 0
       L_TABWORKEL = 0
 
-      ALLOCATE(TABWORKEL(L_TABWORK))
-      ALLOCATE(TABWORKELTRI(L_TABWORK)) 
+      call my_alloc(TABWORKEL, L_TABWORK, "TABWORKEL")
+      call my_alloc(TABWORKELTRI, L_TABWORK, "TABWORKELTRI")
       TABWORKELTRI(:) = 0
       TABWORKEL(:) = EP06
       COIN_TMP(:,:) = 0 
@@ -705,14 +707,14 @@ C----------------------------------------------------------------------
 C     processing of the elements of the defined contour and those inside
 C----------------------------------------------------------------------
 
-      ALLOCATE(INDEX(2*L_TABWORK))
+      call my_alloc(INDEX, 2*L_TABWORK, "INDEX")
       CALL MY_ORDERS(0, WORK, TABWORKEL, INDEX, L_TABWORK , 1)
 
       DO I=1,L_TABWORK
         TABWORKELTRI(I)=TABWORKEL(INDEX(I))
       ENDDO
 
-      DEALLOCATE(INDEX)
+      CALL MY_DEALLOC(INDEX)
 
       IF(FLAG==0) THEN
         DO I=1,L_TABWORK
@@ -830,7 +832,7 @@ c
         ENDDO
       ENDIF
 
-      DEALLOCATE(TABWORKEL)
+      CALL MY_DEALLOC(TABWORKEL)
 
 C----------------------------------------------------------------------
 C   additional processing for the middle elements, not bordering the segments
@@ -1003,7 +1005,7 @@ C----------------------------------------------------------------------
         ENDDO
       ENDDO
 
-      DEALLOCATE(TABWORKELTRI)
+      CALL MY_DEALLOC(TABWORKELTRI)
 
       RETURN
       END

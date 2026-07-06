@@ -33,6 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    elbufdef_mod        ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||    element_mod         ../common_source/modules/elements/element_mod.F90
 !||    my_alloc_mod        ../common_source/tools/memory/my_alloc.F90
+!||    my_dealloc_mod      ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
       SUBROUTINE STAT_C_EPSPF(ELBUF_TAB,IPARG ,IPM ,IGEO ,IXC ,
      2                        IXTG  ,WA,WAP0 ,IPARTC, IPARTTG,
@@ -47,6 +48,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_dealloc_mod, only : my_dealloc
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -92,8 +94,9 @@ c
 C=======================================================================
 C     4-NODE SHELLS
 C-----------------------------------------------
-      CALL MY_ALLOC(PTWA,MAX(STAT_NUMELC ,STAT_NUMELTG))
+      call my_alloc(PTWA, MAX(STAT_NUMELC ,STAT_NUMELTG), "PTWA")
       ALLOCATE(PTWA_P0(0:MAX(1,STAT_NUMELC_G,STAT_NUMELTG_G)))
+! TODO: non-default lower bound, convert manually
 C-----------------------------------------------
       JJ = 0
       IF (STAT_NUMELC == 0) GOTO 200
@@ -550,8 +553,8 @@ C
         ENDDO  !  DO N=1,STAT_NUMELTG_G      
       ENDIF  !  IF(ISPMD == 0.AND.LEN>0)
 c-----------
-      DEALLOCATE(PTWA)
-      DEALLOCATE(PTWA_P0)
+      call my_dealloc(PTWA)
+      call my_dealloc(PTWA_P0)
 c-----------
 C
       RETURN
