@@ -7,6 +7,7 @@
 #include "compute_lambdas3D.h"
 #include "solver_for_graphblas.h"
 #include "update_clipped.h"
+#include "macro_check_gb_call.h"
 # define M_PI           3.14159265358979323846
 
 Polygon2D* grid = NULL;
@@ -258,17 +259,21 @@ void smooth_vel_clipped_fortran_(my_real_c* vec_move_clippedx, my_real_c* vec_mo
     my_real_c eps;
     GrB_Matrix smoothing_op, id;
     unsigned long nb_pts = clipped->vertices->size;
-    GrB_Index ind_vector[2] = {1, nb_pts};
+    //GrB_Index ind_vector[2] = {0, nb_pts-1};
+    GrB_Info infogrb;
+    GrB_Index i;
     
     eps = 0.001 / ((*min_pos_Se)*(*min_pos_Se));
     GrB_Matrix_new(&smoothing_op, GrB_FP64, nb_pts, nb_pts);
     GrB_Matrix_new(&id, GrB_FP64, nb_pts, nb_pts);
 
     //smoothing_op = Id + eps*dt*(edges*edges')
-    GrB_mxm(smoothing_op, GrB_NULL, GrB_NULL, GrB_PLUS_TIMES_SEMIRING_FP64, *(clipped->edges), *(clipped->edges), GrB_DESC_T1);
-    GrB_assign(id, GrB_NULL, GrB_NULL, 1.0, ind_vector, GxB_RANGE, ind_vector, GxB_RANGE, GrB_NULL);
-    GrB_apply(smoothing_op, GrB_NULL, GrB_NULL, GrB_TIMES_FP64, eps*(*dt), smoothing_op, GrB_NULL);
-    GrB_eWiseAdd(smoothing_op, GrB_NULL, GrB_NULL, GrB_PLUS_FP64, id, smoothing_op, GrB_NULL);
+    CHECK_GB_CALL(infogrb, GrB_mxm(smoothing_op, GrB_NULL, GrB_NULL, GrB_PLUS_TIMES_SEMIRING_FP64, *(clipped->edges), *(clipped->edges), GrB_DESC_T1));
+    for(i=0; i<nb_pts; i++){
+        CHECK_GB_CALL(infogrb, GrB_Matrix_setElement(id, 1.0, i, i))
+    }
+    CHECK_GB_CALL(infogrb, GrB_apply(smoothing_op, GrB_NULL, GrB_NULL, GrB_TIMES_FP64, eps*(*dt), smoothing_op, GrB_NULL))
+    CHECK_GB_CALL(infogrb, GrB_eWiseAdd(smoothing_op, GrB_NULL, GrB_NULL, GrB_PLUS_FP64, id, smoothing_op, GrB_NULL))
 
     solver_for_graphblas_FP_sym(smoothing_op, vec_move_clippedx);
     solver_for_graphblas_FP_sym(smoothing_op, vec_move_clippedy);
