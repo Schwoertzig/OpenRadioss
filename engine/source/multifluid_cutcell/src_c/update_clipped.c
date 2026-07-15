@@ -422,7 +422,8 @@ static void fuse_points(Polygon2D *p, int64_t ind_e0_fused, int64_t ind_e1_fused
     uint64_t ind_pt_del, ind_pt1, ind_pt2;
     int8_t val;
 
-    nb_pts = p->vertices->size;
+    //nb_pts = p->vertices->size;
+    GrB_Matrix_ncols(&nb_pts, *(p->edges));
     infogrb = GrB_Vector_new(&ej, GrB_INT8, nb_pts);
     infogrb = GrB_Vector_new(&extr_vals_ej, GrB_INT8, nb_pts);
     infogrb = GrB_Vector_new(&inds_pts_edge0, GrB_UINT64, nb_pts);
@@ -1504,21 +1505,16 @@ void update_solid(Polygon2D **solid, Polyhedron3D** solid3D, const my_real_c* ve
             }
         }
 
-        GrB_set  (*(solid_new->edges), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        GrB_wait (*(solid_new->edges), GrB_MATERIALIZE);
-        GxB_print(*(solid_new->edges), GxB_COMPLETE);
-        GrB_set  (*(solid_new->faces), GrB_COLMAJOR, GrB_STORAGE_ORIENTATION_HINT) ;
-        GrB_wait (*(solid_new->faces), GrB_MATERIALIZE);
-        GxB_print(*(solid_new->faces), GxB_COMPLETE);
         if (size_faces_to_split>0)
             create_new_faces_split(solid_new, faces_to_split, size_faces_to_split, &solid_new);
         if (size_faces_to_fuse>0)
             fuse_faces(solid_new, faces_to_fuse, size_faces_to_fuse, &solid_new);
+
+        clean_Polygon2D(solid_new, &solid_new);
         detect_pts_to_delete(solid_new, dt, vec_move_solidx, vec_move_solidy, minimal_length, minimal_angle, &list_del_pts, &list_changed_edges);
         if (list_del_pts->nrows < solid_new->vertices->size){
             solid_new->vertices->size = list_del_pts->nrows;
         }
-        //clean_Polygon2D(solid_new, &solid_new);
 
         //solid and solid_tnp1 will now be modified to be the faces of the polyhedron at tn and tn+dt
         //First: backpropagate the intersection point on the face at tn.
