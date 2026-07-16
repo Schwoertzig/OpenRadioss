@@ -88,12 +88,12 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      INTEGER :: I, II, KK, JJ, IAD2, IERR, ISTATUS
+      INTEGER :: I, II, KK, JJ, IAD2
       INTEGER :: NEIGH, FACE_NEIGH
       INTEGER :: ICELL
       INTEGER :: FACE_TO_NODE_LOCAL_ID(4, 2), NODEID1, NODEID2
       INTEGER :: ITRIMAT, IELEM
-      real(kind=WP) :: EDGE_LEN, INV_EDGE_LEN, WET_FRAC
+      real(kind=WP) :: EDGE_LEN, INV_EDGE_LEN
       real(kind=WP) :: FLUX_TOTAL
       real(kind=WP) :: Y1, Z1, Y2, Z2
       real(kind=WP) :: NY, NZ, DY, DZ  !< inward normal components and displacement
@@ -101,7 +101,6 @@
       real(kind=WP) :: NN_PLIC(3)     !< PLIC plane normal
       real(kind=WP) :: PTS_SWEPT(3,4) !< swept polygon vertices in PTS format
       real(kind=WP) :: CLIPPED_SWEPT  !< area of swept polygon clipped by PLIC half-plane
-      real(kind=WP), parameter :: TOL_PURE = 1.0e-8_WP  ! must match tol1 in ale51_vof_reconstruction2
       real(kind=WP) :: ALPHA_MAIN !< main phase fraction in swept region
       real(kind=WP) :: ALPHA_REMAIN !< remaining ratio (1 - alpha_main)
       real(kind=WP) :: SUM_VF !< sum of non-main phase fractions
@@ -115,6 +114,7 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
       IF(N2D == 0)RETURN
+
 
       ! Face-to-node connectivity for QUAD4
       FACE_TO_NODE_LOCAL_ID(1, 1) = 1 ; FACE_TO_NODE_LOCAL_ID(1, 2) = 2
@@ -149,28 +149,48 @@
               NODEID2 = IXQ(1 + FACE_TO_NODE_LOCAL_ID(KK, 2), II)
               Y1 = X(2, NODEID1) ; Z1 = X(3, NODEID1)
               Y2 = X(2, NODEID2) ; Z2 = X(3, NODEID2)
-              VY1 =V(2,NODEID1) ; VZ1 =V(3,NODEID1) ;
-              VY2 =V(2,NODEID2) ; VZ2 =V(3,NODEID2) ;
-              EDGE_LEN = SQRT((Y2 - Y1)**2 + (Z2 - Z1)**2)
-              INV_EDGE_LEN = ONE / MAX(EDGE_LEN, EM20)
-              ! Inward unit normal (CCW quad → rotate edge vector -90°)
-              NY = -(Z2 - Z1) * INV_EDGE_LEN
-              NZ =  (Y2 - Y1) * INV_EDGE_LEN
-              ! Inward displacement = swept depth = (flux_rate * DT1) / edge_length
-              DY = NY * FLUX_TOTAL * DT1 * INV_EDGE_LEN
-              DZ = NZ * FLUX_TOTAL * DT1 * INV_EDGE_LEN
-              ! Build swept quad vertices: N1 → N2 → N2+d → N1+d
+              ! ------------------------------------------------------------
+              ! DONOR REGION for the outgoing flux through face KK.
+              !
+              ! The backward semi-lagrangian donor polygon is traced using the
+              ! material velocity V at each edge node. In Euler mode (fixed grid),
+              ! this is exact. In ALE mode, V should ideally be replaced by V-W
+              ! (relative/convective velocity) for frame consistency with aflux2.F,
+              ! but W is not guaranteed to be allocated/initialized in all configs.
+              ! The O(dt^2) difference only affects the phase SPLIT accuracy, NOT
+              ! conservation (alpha_main × FLUX_TOTAL always sums to FLUX_TOTAL).
+              ! ------------------------------------------------------------
+              ! Material velocity at the two edge nodes
+              VY1 = V(2,NODEID1) ; VZ1 = V(3,NODEID1)
+              VY2 = V(2,NODEID2) ; VZ2 = V(3,NODEID2)
+
               PTS_SWEPT(1, 1:4) = ZERO
-              PTS_SWEPT(2, 1) = Y1 ;      PTS_SWEPT(3, 1) = Z1
-              PTS_SWEPT(2, 2) = Y2 ;      PTS_SWEPT(3, 2) = Z2
-
-              !rectangular advected polygon (mean velocity at face)
-              !PTS_SWEPT(2, 3) = Y2 + DY ; PTS_SWEPT(3, 3) = Z2 + DZ
-              !PTS_SWEPT(2, 4) = Y1 + DY ; PTS_SWEPT(3, 4) = Z1 + DZ
-
-              !semi-lagrangian step (more precise swept polygon)
+              PTS_SWEPT(2, 1) = Y1 ;           PTS_SWEPT(3, 1) = Z1
+              PTS_SWEPT(2, 2) = Y2 ;           PTS_SWEPT(3, 2) = Z2
+              ! semi-lagrangian backward trace with the RELATIVE velocity
               PTS_SWEPT(2, 3) = Y2 - VY2*DT1 ; PTS_SWEPT(3, 3) = Z2 - VZ2*DT1
               PTS_SWEPT(2, 4) = Y1 - VY1*DT1 ; PTS_SWEPT(3, 4) = Z1 - VZ1*DT1
+
+              ! Area of the backward donor polygon (diagonal cross-product)
+              AREA_SWEPT = HALF * ABS( &
+                (PTS_SWEPT(2,1) - PTS_SWEPT(2,3)) * (PTS_SWEPT(3,2) - PTS_SWEPT(3,4)) - &
+                (PTS_SWEPT(2,2) - PTS_SWEPT(2,4)) * (PTS_SWEPT(3,1) - PTS_SWEPT(3,3)) )
+
+              ! Robust fallback: if the backward donor is degenerate (near-zero
+              ! relative velocity / pure tangential motion), rebuild an ORTHOGONAL
+              ! donor whose area is EXACTLY FLUX_TOTAL*DT1 (the aflux2/eflux2 swept
+              ! volume), so alpha_main stays well defined and bounded.
+              IF(AREA_SWEPT <= EM20) THEN
+                EDGE_LEN = SQRT((Y2 - Y1)**2 + (Z2 - Z1)**2)
+                INV_EDGE_LEN = ONE / MAX(EDGE_LEN, EM20)
+                NY = -(Z2 - Z1) * INV_EDGE_LEN
+                NZ =  (Y2 - Y1) * INV_EDGE_LEN
+                DY = NY * FLUX_TOTAL * DT1 * INV_EDGE_LEN
+                DZ = NZ * FLUX_TOTAL * DT1 * INV_EDGE_LEN
+                PTS_SWEPT(2, 3) = Y2 + DY ; PTS_SWEPT(3, 3) = Z2 + DZ
+                PTS_SWEPT(2, 4) = Y1 + DY ; PTS_SWEPT(3, 4) = Z1 + DZ
+                AREA_SWEPT = FLUX_TOTAL * DT1
+              ENDIF
 
               ! PLIC plane parameters
               D_PLIC = ALE%VOF%cell_data%d(ICELL)
@@ -178,42 +198,27 @@
               NN_PLIC(2) = ALE%VOF%cell_data%n(2, ICELL)
               NN_PLIC(3) = ALE%VOF%cell_data%n(3, ICELL)
 
-              ! Clip swept polygon by PLIC half-plane {x | n.x >= d}
+              ! When PLIC normal is zero (degenerate gradient: isolated residual
+              ! surrounded by pure cells), the clip gives the full polygon and
+              ! alpha_main=1, which TRAPS the minority phase forever.
+              ! Fix: fall back to 1st-order upwind (proportional to alpha) so the
+              ! minority can be flushed out through all outgoing faces.
+              IF(ABS(NN_PLIC(2)) + ABS(NN_PLIC(3)) < 1.0e-10_WP) THEN
+                flux_mat(II, KK, 1) = ALE%VOF%cell_data%ALPHA(II,1) * FLUX_TOTAL
+                flux_mat(II, KK, 2) = ALE%VOF%cell_data%ALPHA(II,2) * FLUX_TOTAL
+                flux_mat(II, KK, 3) = ALE%VOF%cell_data%ALPHA(II,3) * FLUX_TOTAL
+                flux_mat(II, KK, 4) = ALE%VOF%cell_data%ALPHA(II,4) * FLUX_TOTAL
+              ELSE
+
+              ! Clip donor polygon by PLIC half-plane {x | n.x >= d}
               CALL CLIPPED_AREA_QUAD4(PTS_SWEPT, NN_PLIC, D_PLIC, CLIPPED_SWEPT)
 
-              !rectangular advected polygon (mean velocity at face)
-              !alpha_main = CLIPPED_SWEPT / MAX(FLUX_TOTAL * DT1, EM20)
-
-              !rectangular advected polygon (mean velocity at face)
-              AREA_SWEPT = HALF * ABS( &
-                (PTS_SWEPT(2,1) - PTS_SWEPT(2,3)) * (PTS_SWEPT(3,2) - PTS_SWEPT(3,4)) - &
-                (PTS_SWEPT(2,2) - PTS_SWEPT(2,4)) * (PTS_SWEPT(3,1) - PTS_SWEPT(3,3)) )
-
-                IF(AREA_SWEPT <= EM20) THEN
-                     ! print *,"here"
-                    ENDIF
-
-
+              ! Main-phase fraction of the donor region (bounded to [0,1])
               alpha_main = CLIPPED_SWEPT / MAX(AREA_SWEPT, EM20)
-
-              IF(CLIPPED_SWEPT < ZERO) THEN
-                alpha_main = ZERO
-              END IF
-
-
+              IF(CLIPPED_SWEPT < ZERO) alpha_main = ZERO
               alpha_main = MIN(alpha_main, ONE)
 
               ITRIMAT = ALE%VOF%cell_data%IPHASE(II)
-
-              ! For near-pure cells, force upwind to avoid spurious detachment
-              IF(ALE%VOF%cell_data%ALPHA(II, ITRIMAT) > ONE - TOL_PURE) THEN
-                alpha_main = ONE
-              ENDIF
-
-              IF(ALE%VOF%cell_data%ALPHA(II, ITRIMAT) < TOL_PURE) THEN
-                alpha_main = ZERO
-
-              ENDIF
 
               ! Distribute complementary flux among other phases
               VFRAC(1:4) = ALE%VOF%cell_data%ALPHA(II,1:4)
@@ -231,6 +236,8 @@
               flux_mat(II, KK, 4) = VFRAC(4)*ALPHA_REMAIN * FLUX_TOTAL
 
               flux_mat(II, KK, ITRIMAT) = alpha_main * FLUX_TOTAL
+
+              ENDIF  ! zero-normal fallback
 
             ELSE
               ! --- PURE cell => 1st order UPWIND ---

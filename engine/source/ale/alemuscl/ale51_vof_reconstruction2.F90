@@ -192,9 +192,16 @@
 
 
      ! --- IDENTIFY MIXED CELLS & SET ALPHA AT FACES
-     ! A tolerance is introduced, otherwise random PLIC interface => spurious / cell detachment.
+     ! Tolerance for mixed/pure classification:
+     ! Cells with minority phase fraction below tol1 are treated as "effectively pure"
+     ! and use 1st-order upwind in the advection (proportional to alpha).
+     ! This prevents PLIC from trapping thin residual layers with unreliable gradients.
+     ! Only genuinely mixed cells (tol1 < alpha_minority < 1-tol1) get PLIC treatment.
+     ! A value of 1e-2 (1%) balances interface sharpness vs robustness:
+     !  - Interface cells (alpha ~0.1-0.9): PLIC → sharp interface ✓
+     !  - Trailing residuals (alpha <0.01): upwind → flushed out ✓
      num_mixed_cells = 0
-     tol1=1.0e-8_WP
+     tol1=1.0e-2_WP
      tol2=ONE - tol1
      ALE%VOF%cell_data%mixed_cell_id(1:NUMELQ+NUMELS) = 0
       DO IE=1,NUMELQ+NUMELS
