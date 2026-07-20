@@ -94,7 +94,7 @@ module multicutcell_solver_mod
 
 !! \brief Compute cell occupancies for each phase in grid.
   subroutine multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt, &
-                                          rho, vely, velz, p, gamma, nb_edges_clipped)
+                                          rho, vely, velz, p, gamma, nb_edges_clipped, wave_type)
     use polygon_cutcell_mod
     use grid2D_struct_multicutcell_mod
     use riemann_solver_mod
@@ -112,6 +112,7 @@ module multicutcell_solver_mod
     real(kind=wp), dimension(:,:), intent(in) :: p
     real(kind=wp), dimension(:), intent(in) :: gamma
     integer(kind=8), intent(in) :: nb_edges_clipped
+    integer, intent(in) :: wave_type
     ! IN/OUTPUT argument
     type(grid2D_struct_multicutcell), dimension(:, :), intent(inout) :: grid
 
@@ -194,7 +195,7 @@ module multicutcell_solver_mod
                                         rho(i,1), rho(i,2), &
                                         vely(i,1), vely(i,2), &
                                         velz(i,1), velz(i,2), &
-                                        p(i,1), p(i,2), 2, &
+                                        p(i,1), p(i,2), wave_type, &
                                         ny, nz, &
                                         us, vsL, vsR, ps)
             mean_area(k) = mean_area(k) + norm
@@ -437,6 +438,7 @@ module multicutcell_solver_mod
     integer(kind=2) :: odd_k
     integer(kind=8), dimension(:), allocatable :: id_pt_cell
     real(kind=wp) :: minimal_length, maximal_length, minimal_angle, largest_speed_wave
+    integer :: wave_type = 2 !1 for rarefaction, 2 for contact, 3 for shock waves
 
     if (N2D < 0) then
       print *, "Error: no 2D?"
@@ -482,7 +484,7 @@ module multicutcell_solver_mod
     call compute_all_id_pt_cell(NUMELQ, NUMELTG, IXQ, IXTG, X, grid, nb_pts_clipped, id_pt_cell)
     call compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell, &
                                 normalVecy, normalVecz, &
-                                vec_move_clippedy, vec_move_clippedz)
+                                vec_move_clippedy, vec_move_clippedz, wave_type)
   
     call smooth_vel_clipped_fortran(vec_move_clippedy, vec_move_clippedz, min_pos_Se, dt)
     call update_clipped_fortran(vec_move_clippedy, vec_move_clippedz, dt, new_nb_edges, &
@@ -492,7 +494,7 @@ module multicutcell_solver_mod
     call print_clipped_fortran(i_print)
   
     call multicutcell_compute_lambdas(NUMELQ, NUMELTG, NUMNOD, IXQ, IXTG, X, grid, dt,&
-                                        rho, vely, velz, p, gamma, nb_edge_clipped) 
+                                        rho, vely, velz, p, gamma, nb_edge_clipped, wave_type) 
     !TODO exchange lambdas between procs on neighbouring cells
     call fuse_cells(NUMELQ, NUMELTG, ALE_CONNECT, grid, threshold, target_cells, cell_type) 
 
@@ -1136,7 +1138,7 @@ module multicutcell_solver_mod
     !! Compute the advection velocity field for each point of the polygonal interface.
     subroutine compute_vec_move_clipped(gamma, rho, vely, velz, p, nb_pts_clipped, id_pt_cell,&
                                       normalVecy, normalVecz, &
-                                      vec_move_clippedy, vec_move_clippedz)
+                                      vec_move_clippedy, vec_move_clippedz, wave_type)
       use polygon_cutcell_mod
       use riemann_solver_mod
 
@@ -1152,6 +1154,7 @@ module multicutcell_solver_mod
       real(kind=wp), dimension(:)         :: normalVecz
       real(kind=wp), dimension(:)         :: vec_move_clippedy
       real(kind=wp), dimension(:)         :: vec_move_clippedz
+      integer, intent(in) :: wave_type
 
       integer(kind=8) :: eL, eR, k, i
       type(Point2D) :: pt
@@ -1175,7 +1178,7 @@ module multicutcell_solver_mod
           velzR = velz(i, 2)
           pR = p(i, 2)
 
-          call solve_riemann_problem(gamma(1), gamma(2), rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, 2, &
+          call solve_riemann_problem(gamma(1), gamma(2), rhoL, rhoR, velyL, velyR, velzL, velzR, pL, pR, wave_type, &
                                       normalVecy(k), normalVecz(k), &
                                       us, vsL, vsR, ps)
         

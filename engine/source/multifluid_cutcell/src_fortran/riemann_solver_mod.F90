@@ -8,10 +8,10 @@ contains
     real(kind=wp) :: fl
     if (p_star > pL) then
       ! Left shock
-      fl = 2 * aL / sqrt(2 * gamma * (gamma - 1)) * (1 - p_star / pL) / sqrt(1 + (gamma + 1) / (gamma - 1) * p_star / pL) !Leveque (14.52)
+      fl = 2 * (aL / sqrt(2 * gamma * (gamma - 1))) * ((1 - p_star / pL) / sqrt(1 + ((gamma + 1) / (gamma - 1)) * (p_star / pL))) !Leveque (14.52)
     else
       ! Left rarefaction
-      fl = 2 * aL / (gamma - 1) * (1 - (p_star / pL)**((gamma - 1) / (2 * gamma))) !Leveque (14.51)
+      fl = 2 * (aL / (gamma - 1)) * (1 - (p_star / pL)**((gamma - 1) / (2 * gamma))) !Leveque (14.51)
     end if
   end function
 
@@ -36,10 +36,10 @@ contains
     real(kind=wp) ::  fr
     if (p_star > pR) then
       ! Right shock
-      fr = 2 * aR / sqrt(2 * gamma * (gamma - 1)) * (1 - p_star / pR) / sqrt(1 + (gamma + 1) / (gamma - 1) * p_star / pR) !Leveque (14.55)
+      fr = 2 * (aR / sqrt(2 * gamma * (gamma - 1))) * ((1 - p_star / pR) / sqrt(1 + ((gamma + 1) / (gamma - 1)) * (p_star / pR))) !Leveque (14.55)
     else
       ! Right rarefaction
-      fr = 2 * aR / (gamma - 1) * (1 - (p_star / pR)**((gamma - 1) / (2 * gamma))) !Leveque (14.54)
+      fr = 2 * (aR / (gamma - 1)) * ((1 - (p_star / pR)**((gamma - 1) / (2 * gamma)))) !Leveque (14.54)
     end if
   end function fr
 
