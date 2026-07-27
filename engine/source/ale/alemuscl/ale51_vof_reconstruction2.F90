@@ -201,7 +201,7 @@
      !  - Interface cells (alpha ~0.1-0.9): PLIC → sharp interface ✓
      !  - Trailing residuals (alpha <0.01): upwind → flushed out ✓
      num_mixed_cells = 0
-     tol1=1.0e-2_WP
+     tol1=1.0e-4_WP
      tol2=ONE - tol1
      ALE%VOF%cell_data%mixed_cell_id(1:NUMELQ+NUMELS) = 0
       DO IE=1,NUMELQ+NUMELS
@@ -223,6 +223,10 @@
                 ALPHAJJ = ALE%VOF%cell_data%ALPHA(IV,ITRIMAT)
               ELSE
                 ALPHAJJ = SEGVAR%PHASE_ALPHA( ITRIMAT,-IV)
+                ! Clean numerical dust from boundary: prevent ghost alpha
+                ! from biasing the PLIC gradient toward the boundary
+                IF(ALPHAJJ < tol1) ALPHAJJ = ZERO
+                IF(ALPHAJJ > tol2) ALPHAJJ = ONE
               ENDIF
               ALPHA = HALF*(ALPHAII + ALPHAJJ)
               ALE%VOF%cell_data%ALPHA_F(JJ, num_mixed_cells) = ALPHA

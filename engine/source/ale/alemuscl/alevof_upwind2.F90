@@ -47,9 +47,9 @@
        MODULE ALEVOF_UPWIND2_MOD
          IMPLICIT NONE
        CONTAINS
-       SUBROUTINE ALEVOF_UPWIND2(flux_mat,flux_save, ALE_CONNECT, X,V, IXQ, flux_vois_mat, &
+       SUBROUTINE ALEVOF_UPWIND2(flux_mat,flux_save, ALE_CONNECT, X,V,W, IXQ, flux_vois_mat, &
            NV46, trimat, SEGVAR,s_flux,s_flux_vois, &
-           NUMELQ,NUMNOD,NSEGFLU,NEL,NFT,DT1,N2D)
+           NUMELQ,NUMNOD,NSEGFLU,NEL,NFT,DT1,N2D,JALE)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@
       INTEGER, INTENT(IN) :: NV46
       real(kind=WP), dimension(s_flux,nv46), intent(in) :: flux_save
       real(kind=WP), dimension(s_flux,NV46,trimat), INTENT(INOUT) :: flux_mat
-      real(kind=WP), INTENT(IN) :: X(3, NUMNOD), V(3,NUMNOD)
+      real(kind=WP), INTENT(IN) :: X(3, NUMNOD), V(3,NUMNOD), W(3,NUMNOD)
       INTEGER, INTENT(IN) :: IXQ(NIXQ, NUMELQ)
       real(kind=WP), INTENT(INOUT) :: flux_vois_mat(s_flux_vois, NV46,trimat)
       real(kind=WP), INTENT(IN) :: DT1 !< time step
@@ -85,6 +85,8 @@
       INTEGER,INTENT(IN) :: NEL
       INTEGER,INTENT(IN) :: NFT
       INTEGER,INTENT(IN) :: N2D !1:axisymmetric, 2:planar
+      INTEGER,INTENT(IN) :: JALE
+
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local Variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -106,8 +108,11 @@
       real(kind=WP) :: SUM_VF !< sum of non-main phase fractions
       real(kind=WP) :: VFRAC(4)
       real(kind=WP) :: VOL_AVAILABLE   !< available volume of a phase in the cell
-      real(kind=WP) :: VOL_OUTGOING    !< total outgoing volume of a phase (sum over faces)
-      real(kind=WP) :: LIMITER         !< reduction factor to enforce conservation
+      real(kind=WP) :: DEFICIT         !< flux deficit on a face after limiting
+      real(kind=WP) :: CAPACITY(4)     !< remaining outgoing capacity per phase
+      real(kind=WP) :: SUM_CAPACITY    !< sum of capacities for redistribution
+      real(kind=WP) :: VOL_OUT_PHASE(4) !< total outgoing volume per phase (for limiter)
+      real(kind=WP) :: LIMITER_PHASE(4) !< per-phase limiter values
       real(kind=WP) :: VY1,VY2,VZ1,VZ2
       real(kind=WP) :: AREA_SWEPT
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -161,8 +166,13 @@
               ! conservation (alpha_main × FLUX_TOTAL always sums to FLUX_TOTAL).
               ! ------------------------------------------------------------
               ! Material velocity at the two edge nodes
-              VY1 = V(2,NODEID1) ; VZ1 = V(3,NODEID1)
-              VY2 = V(2,NODEID2) ; VZ2 = V(3,NODEID2)
+              IF(JALE == 0)THEN
+                VY1 = V(2,NODEID1)              ; VZ1 = V(3,NODEID1)
+                VY2 = V(2,NODEID2)              ; VZ2 = V(3,NODEID2)
+              ELSE
+                VY1 = V(2,NODEID1)-W(2,NODEID1) ; VZ1 = V(3,NODEID1)-W(3,NODEID1)
+                VY2 = V(2,NODEID2)-W(2,NODEID2) ; VZ2 = V(3,NODEID2)-W(3,NODEID2)
+              END IF
 
               PTS_SWEPT(1, 1:4) = ZERO
               PTS_SWEPT(2, 1) = Y1 ;           PTS_SWEPT(3, 1) = Z1
@@ -276,46 +286,97 @@
       ENDDO  ! I
 
       ! -----------------------------------------------
-      ! FLUX LIMITER: ensure outgoing volume per phase ≤ available volume
+      ! FLUX LIMITER with partition-preserving redistribution
+      ! -----------------------------------------------
+      ! Step 1: Compute per-phase limiters (boundedness: no phase can export
+      !         more volume than it contains in the cell)
+      ! Step 2: Apply limiters and redistribute deficit to other phases
+      !         proportionally to their remaining capacity, so that
+      !         sum(flux_mat(II,KK,1:trimat)) = flux_save(II,KK) is preserved.
       ! -----------------------------------------------
       DO I = 1, NEL
         II = I + NFT
+
+        ! --- Step 1: Compute per-phase limiter values ---
         DO JJ = 1, trimat
-          ! Compute total outgoing volume for phase JJ
-          VOL_OUTGOING = ZERO
+          VOL_OUT_PHASE(JJ) = ZERO
           DO KK = 1, NV46
             IF(flux_mat(II, KK, JJ) > ZERO) THEN
-              VOL_OUTGOING = VOL_OUTGOING + flux_mat(II, KK, JJ) * DT1
+              VOL_OUT_PHASE(JJ) = VOL_OUT_PHASE(JJ) + flux_mat(II, KK, JJ) * DT1
             ENDIF
           ENDDO
-          IF(VOL_OUTGOING > EM20) THEN
-            ! Available volume of phase JJ in cell II
+          IF(VOL_OUT_PHASE(JJ) > EM20) THEN
             VOL_AVAILABLE = ALE%VOF%cell_data%ALPHA(II, JJ) * ALE%VOF%cell_data%VOL(II)
-            IF(VOL_OUTGOING > VOL_AVAILABLE) THEN
-              ! Reduce all outgoing fluxes of this phase proportionally
-              LIMITER = VOL_AVAILABLE / VOL_OUTGOING
-              DO KK = 1, NV46
-                IF(flux_mat(II, KK, JJ) > ZERO) THEN
-                  flux_mat(II, KK, JJ) = flux_mat(II, KK, JJ) * LIMITER
-                ENDIF
-              ENDDO
-              ! Update neighbor fluxes accordingly
-              IAD2 = ALE_CONNECT%ee_connect%iad_connect(II)
-              DO KK = 1, NV46
-                IF(flux_mat(II, KK, JJ) > ZERO) THEN
-                  NEIGH = ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1)
-                  IF(NEIGH > 0 .AND. NEIGH <= NUMELQ) THEN
-                    FACE_NEIGH = ALE_CONNECT%ee_connect%IFACE2(IAD2 + KK - 1)
-                    IF(FACE_NEIGH > 0) THEN
-                      flux_mat(NEIGH, FACE_NEIGH, JJ) = -flux_mat(II, KK, JJ)
-                    ENDIF
-                  ENDIF
+            IF(VOL_OUT_PHASE(JJ) > VOL_AVAILABLE) THEN
+              LIMITER_PHASE(JJ) = VOL_AVAILABLE / VOL_OUT_PHASE(JJ)
+            ELSE
+              LIMITER_PHASE(JJ) = ONE
+            ENDIF
+          ELSE
+            LIMITER_PHASE(JJ) = ONE
+          ENDIF
+        ENDDO
+
+        ! --- Step 2: Apply limiters and redistribute deficit per face ---
+        DO KK = 1, NV46
+          IF(flux_save(II, KK) <= ZERO) CYCLE  ! only outgoing faces
+
+          ! Apply per-phase limiters
+          DEFICIT = ZERO
+          DO JJ = 1, trimat
+            IF(flux_mat(II, KK, JJ) > ZERO .AND. LIMITER_PHASE(JJ) < ONE) THEN
+              DEFICIT = DEFICIT + flux_mat(II, KK, JJ) * (ONE - LIMITER_PHASE(JJ))
+              flux_mat(II, KK, JJ) = flux_mat(II, KK, JJ) * LIMITER_PHASE(JJ)
+            ENDIF
+          ENDDO
+
+          ! Redistribute deficit to phases that have remaining capacity
+          IF(DEFICIT > EM20) THEN
+            ! Capacity = how much more each non-saturated phase could still export
+            SUM_CAPACITY = ZERO
+            DO JJ = 1, trimat
+              IF(LIMITER_PHASE(JJ) >= ONE .AND. flux_mat(II, KK, JJ) > ZERO) THEN
+                ! This phase was not limited: redistribute proportionally to its flux share
+                CAPACITY(JJ) = flux_mat(II, KK, JJ)
+                SUM_CAPACITY = SUM_CAPACITY + CAPACITY(JJ)
+              ELSE
+                CAPACITY(JJ) = ZERO
+              ENDIF
+            ENDDO
+            IF(SUM_CAPACITY > EM20) THEN
+              ! Redistribute proportionally to existing flux share
+              DO JJ = 1, trimat
+                IF(CAPACITY(JJ) > ZERO) THEN
+                  flux_mat(II, KK, JJ) = flux_mat(II, KK, JJ) + &
+                    DEFICIT * CAPACITY(JJ) / SUM_CAPACITY
                 ENDIF
               ENDDO
             ENDIF
+            ! Note: if no capacity available (all phases saturated), the deficit
+            ! is lost and partition is slightly violated. This is the edge case
+            ! where ALL phases simultaneously exhaust their volume — extremely rare.
+          ENDIF
+        ENDDO  ! KK
+
+        ! --- Step 3: Update neighbor fluxes ---
+        IAD2 = ALE_CONNECT%ee_connect%iad_connect(II)
+        DO KK = 1, NV46
+          IF(flux_save(II, KK) <= ZERO) CYCLE
+          NEIGH = ALE_CONNECT%ee_connect%connected(IAD2 + KK - 1)
+          IF(NEIGH > 0 .AND. NEIGH <= NUMELQ) THEN
+            FACE_NEIGH = ALE_CONNECT%ee_connect%IFACE2(IAD2 + KK - 1)
+            IF(FACE_NEIGH > 0) THEN
+              DO JJ = 1, trimat
+                flux_mat(NEIGH, FACE_NEIGH, JJ) = -flux_mat(II, KK, JJ)
+              ENDDO
+            ENDIF
+          ELSE IF(NEIGH > NUMELQ) THEN
+            DO JJ = 1, trimat
+              flux_vois_mat(II, KK, JJ) = flux_mat(II, KK, JJ)
+            ENDDO
           ENDIF
         ENDDO
-      ENDDO
+      ENDDO  ! I
 
       ! -----------------------------------------------
       ! INCOMING FLUXES BY EBCS (boundary conditions)
